@@ -1,0 +1,791 @@
+/* ===============================================================
+   DESIGN TOKENS — change a value here, it applies site-wide.
+   =============================================================== */
+:root {
+  --ground:   #cbb9a4;   /* the warm tone behind the sheet  */
+  --sheet:    #f5f1e8;   /* the cream sheet itself          */
+  --surface:  #ece6da;   /* cards inside the sheet          */
+  --ink:      #1f1c18;   /* headlines                       */
+  --body:     #6a6157;   /* body copy                       */
+  --accent:   #c05a2a;   /* terracotta                      */
+  --rule:     #ddd4c4;
+
+  --serif: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --sans:  "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  --measure:  40rem;     /* max line length for prose       */
+  --wide:     80rem;     /* max width of the sheet          */
+  --radius:   22px;      /* sheet + big panels              */
+  --radius-s: 12px;      /* cards                           */
+  --logo-w:   3.9rem;    /* every logo mark is set to this width */
+  --logo-col: 5.4rem;    /* the column, sized for the widest wordmark      */
+  --section:  5.5rem;    /* space between sections          */
+  --pad:      clamp(1.25rem, 3.2vw, 2.75rem);  /* sheet padding */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ground:  #17130f;
+    --sheet:   #201b16;
+    --surface: #2a241d;
+    --ink:     #f2ece2;
+    --body:    #a89c8c;
+    --accent:  #e08b52;
+    --rule:    #362e25;
+  }
+}
+
+/* =============================================================== */
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: clamp(0rem, 1.4vw, 1.1rem);
+  background:
+    radial-gradient(100% 75% at 82% 8%,
+      color-mix(in srgb, var(--accent) 22%, transparent) 0%,
+      transparent 58%),
+    linear-gradient(152deg, #3f342b 0%, #33291f 46%, #241d17 100%);
+  background-attachment: fixed;
+  color: var(--body);
+  font: 400 1.0625rem/1.75 var(--sans);
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.sheet {
+  position: relative;
+  z-index: 1;
+  max-width: var(--wide);
+  margin: clamp(0.9rem, 2.2vw, 1.75rem) auto 0;
+  padding: clamp(1.5rem, 4vw, 2.25rem) var(--pad) clamp(3rem, 6vw, 4.5rem);
+  background: var(--sheet);
+  border-radius: var(--radius);
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* ---------- Nav ------------------------------------------------ */
+
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  padding-bottom: clamp(2.5rem, 7vw, 5rem);
+}
+
+.wordmark {
+  font: 600 1.05rem/1 var(--sans);
+  letter-spacing: 0.16em;
+  color: var(--ink);
+}
+.wordmark span { font-weight: 400; color: var(--body); }
+
+nav ul {
+  display: flex;
+  gap: clamp(1.25rem, 3vw, 2.25rem);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.94rem;
+}
+nav ul a {
+  color: var(--body);
+  padding-bottom: 2px;
+  border-bottom: 1px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+nav ul a:hover { color: var(--ink); border-bottom-color: var(--accent); }
+
+/* ---------- Eyebrow / section labels --------------------------- */
+
+.eyebrow, .section-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--body);
+  margin: 0 0 1.5rem;
+}
+
+.dash {
+  display: block;
+  width: 2rem;
+  height: 1px;
+  background: var(--accent);
+  flex: none;
+}
+
+.section-label { margin-top: var(--section); margin-bottom: 2rem; }
+
+/* ---------- Hero ----------------------------------------------- */
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: center;
+}
+
+h1 {
+  font: 300 clamp(2.9rem, 7.2vw, 5.1rem)/1.02 var(--serif);
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  margin: 0 0 1.5rem;
+}
+h1 em {
+  font-style: italic;
+  font-weight: 400;
+}
+
+.lede {
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  max-width: 30rem;
+  margin: 0 0 2rem;
+}
+
+.actions { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.9rem 1.6rem;
+  background: var(--ink);
+  color: var(--sheet);
+  border-radius: 999px;
+  font-size: 0.94rem;
+  font-weight: 500;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn span { transition: transform 0.15s ease; }
+.btn:hover span { transform: translateX(3px); }
+
+.btn-plain {
+  font-size: 0.94rem;
+  color: var(--body);
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 2px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.btn-plain:hover { color: var(--ink); border-bottom-color: var(--accent); }
+
+/* ---------- Hero panel ----------------------------------------- */
+
+.hero-panel {
+  aspect-ratio: 4 / 4.6;
+  border-radius: var(--radius);
+
+  background:
+    radial-gradient(120% 90% at 78% 12%,
+      color-mix(in srgb, var(--accent) 20%, transparent) 0%,
+      transparent 62%),
+    linear-gradient(152deg,
+      color-mix(in srgb, var(--ink) 9%, var(--surface)) 0%,
+      var(--surface) 55%,
+      color-mix(in srgb, var(--accent) 12%, var(--surface)) 100%);
+  background-size: cover;
+  background-position: center;
+}
+
+.item {
+  padding: 1.6rem clamp(1.25rem, 3vw, 2rem);
+  margin-bottom: 0.75rem;
+  background: var(--surface);
+  border-radius: var(--radius-s);
+  transition: transform 0.18s ease;
+}
+.item:hover { transform: translateY(-2px); }
+
+/* An empty placeholder box. Delete this class from an <article> once you
+   put real content in it. */
+.item--empty {
+  min-height: 9rem;
+  display: grid;
+  place-items: center;
+}
+.item--empty:hover { transform: none; }
+
+.placeholder-label {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--body) 72%, transparent);
+}
+
+.item h3 {
+  font: 400 clamp(1.45rem, 2.6vw, 1.85rem)/1.2 var(--serif);
+  letter-spacing: -0.008em;
+  color: var(--ink);
+  margin: 0 0 0.45rem;
+  max-width: 32rem;
+}
+
+.meta {
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--body) 80%, transparent);
+  margin: 0 0 0.9rem;
+}
+
+.item p:last-child { margin: 0; max-width: var(--measure); }
+
+/* ---------- Work / education rows ------------------------------ */
+
+/* Two columns side by side once there is room; stacked below that.
+   Both column headings sit at the same height because each is the first
+   child of its own column. */
+#background {
+  display: grid;
+  grid-template-columns: 1fr;
+  column-gap: clamp(2rem, 4vw, 3.5rem);
+}
+
+@media (min-width: 62rem) {
+  #background { grid-template-columns: 1fr 1fr; }
+  /* Narrower columns need a smaller logo gutter. */
+  #background { --logo-w: 3.1rem; --logo-col: 4.3rem; }
+}
+
+.roles {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+
+.roles li {
+  display: grid;
+  grid-template-columns: var(--logo-col) 1fr auto;
+  align-items: start;
+  gap: 1.1rem;
+  padding: 0.95rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+.roles li:last-child { border-bottom: 0; }
+
+/* Logo marks sit bare on the page — no tile, no border. That only works
+   because every file is trimmed to its artwork with a transparent
+   background; a logo with a solid background needs a tile to look right.
+
+   Every mark is set to the SAME WIDTH and lets its height fall where the
+   artwork's own proportions put it, so the column reads as one tidy stack
+   instead of a jumble of sizes. */
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: var(--logo-w);
+  margin-top: 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--body);
+}
+
+.logo img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Çelik Motor is an extremely wide wordmark (about 8:1). At the shared width
+   it renders ~7px tall and turns to mush, so it gets extra width to reach the
+   same cap height as the other wordmark. Optical size beats measured width. */
+.logo--wide { width: calc(var(--logo-w) * 1.32); }   /* Çelik Motor */
+
+/* Per-logo optical adjustments. A mark's file size is not its visual weight:
+   a dense round mark reads bigger than an airy wordmark at the same width. */
+.logo--sm { width: calc(var(--logo-w) * 0.82); }   /* Dugun.com */
+.logo--lg { width: calc(var(--logo-w) * 1.35); }   /* RUB       */
+.logo--md { width: calc(var(--logo-w) * 1.22); }   /* Kavak     */
+
+/* Education rows still use initials; give them a light tile so they do not
+   float unanchored next to the real marks. */
+.logo:not(.logo--img) {
+  justify-content: center;
+  width: var(--logo-w);
+  height: 2rem;
+  border-radius: 7px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+}
+
+.role { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+.role strong {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--ink);
+  letter-spacing: -0.005em;
+}
+.role-sub { font-size: 0.875rem; color: var(--body); }
+
+/* The one-or-two sentence description under a role. */
+.role-note {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--body);
+  margin-top: 0.4rem;
+}
+
+.years {
+  padding-top: 0.2rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.05em;
+  color: var(--body);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ---------- Closing / contact ---------------------------------- */
+
+.closing {
+  font: 300 clamp(1.9rem, 4.5vw, 3rem)/1.12 var(--serif);
+  letter-spacing: -0.012em;
+  color: var(--ink);
+  margin: 0 0 1.75rem;
+  max-width: 24ch;
+}
+.closing em { font-style: italic; }
+
+/* Contact icon buttons */
+
+.contact-icons {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.icon-link {
+  display: grid;
+  place-items: center;
+  width: 2.875rem;
+  height: 2.875rem;
+  flex: none;
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  color: var(--ink);
+  background: transparent;
+  transition: background 0.18s ease, color 0.18s ease,
+              border-color 0.18s ease, transform 0.18s ease;
+}
+.icon-link svg { width: 1.2rem; height: 1.2rem; display: block; }
+
+.icon-link:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--sheet);
+  transform: translateY(-2px);
+}
+
+/* The address in plain text next to the icons, so it can be copied without
+   clicking. Delete this rule and its <a> in index.html to go icons-only. */
+.contact-address {
+  margin-left: 0.35rem;
+  font-size: 0.95rem;
+  color: var(--body);
+  border-bottom: 1px solid transparent;
+  padding-bottom: 2px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.contact-address:hover { color: var(--ink); border-bottom-color: var(--accent); }
+
+
+.fineprint {
+  font-size: 0.8rem;
+  color: color-mix(in srgb, var(--body) 75%, transparent);
+  margin: 3.5rem 0 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule);
+}
+
+/* ---------- Narrow screens ------------------------------------- */
+
+@media (max-width: 54rem) {
+  .hero { grid-template-columns: 1fr; }
+  .hero-panel { aspect-ratio: 5 / 3.4; }
+}
+
+@media (max-width: 34rem) {
+  nav ul { gap: 1.1rem; font-size: 0.88rem; }
+  .roles li { grid-template-columns: var(--logo-col) 1fr; gap: 0.7rem 0.8rem; }
+  .roles .years { grid-column: 2; font-size: 0.78rem; }
+  .logo { font-size: 0.6rem; }
+  .panel-card { width: 100%; }
+  .actions { gap: 1.1rem; }
+}
+
+@media (prefers-color-scheme: dark) {
+  /* Black wordmarks would vanish on a dark ground, so flip them. */
+  .logo-mono { filter: invert(1) brightness(1.6); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+/* ===============================================================
+   CASE STUDY PAGES  (/tinkering/*)
+   =============================================================== */
+
+/* Two columns: the write-up on the left, a sample of the output on the right.
+   Stacks below 62rem, same breakpoint as Work/Education on the homepage. */
+.case {
+  max-width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(2rem, 4vw, 3.5rem);
+  align-items: start;
+}
+
+@media (min-width: 62rem) {
+  .case { grid-template-columns: minmax(0, 1fr) 27rem; }
+  /* The sample stays in view while the write-up scrolls past it. */
+  .case-aside { position: sticky; top: 2rem; }
+}
+
+.case-body { max-width: 40rem; }
+
+.aside-label {
+  font-size: 0.72rem;
+  font-weight: 620;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 0.75rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.case-body h1 {
+  margin-top: 0;
+  font: 300 clamp(2.2rem, 5vw, 3.2rem)/1.06 var(--serif);
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  margin: 0 0 1rem;
+}
+
+.case-lede {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: var(--body);
+  margin: 0 0 1rem;
+}
+
+.case-body h2 {
+  font-size: 0.72rem;
+  font-weight: 620;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 3rem 0 1rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.case-body > p {
+  color: var(--body);
+  font-size: 0.97rem;
+  line-height: 1.75;
+  margin: 0 0 1.05rem;
+}
+
+/* The opening line stays a little larger than the rest. */
+.case-body > .case-lede { font-size: 1.05rem; }
+
+.case-body ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--body);
+}
+.case-body li { margin-bottom: 0.65rem; line-height: 1.7; font-size: 0.97rem; }
+.case-body li strong { color: var(--ink); font-weight: 600; }
+
+.case-note { font-size: 0.8rem; color: var(--body); margin: 0.85rem 0 0; }
+.case-back { grid-column: 1 / -1; margin: 3.5rem 0 0; font-size: 0.95rem; }
+.case-back a { color: var(--accent); }
+
+/* Work items that link to a case study. */
+.item h3 .item-link { color: var(--ink); }
+.item h3 .item-link:hover { color: var(--accent); }
+.item-more {
+  color: var(--accent);
+  white-space: nowrap;
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.item-more:hover { border-bottom-color: var(--accent); }
+
+
+/* ===============================================================
+   SAMPLE EMAIL
+   Deliberately NOT in the site palette. This is a picture of a real
+   piece of software, so it keeps a mail client's own look: white
+   ground, system UI type, its own red. It should read as an artifact
+   dropped onto the page, not as another section of the page.
+   =============================================================== */
+
+.mail {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.16), 0 2px 6px rgba(0, 0, 0, 0.08);
+  font: 400 13px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        Helvetica, Arial, sans-serif;
+  color: #202124;
+}
+
+/* Window chrome, so it reads as an application. */
+.mail-chrome {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 9px 12px;
+  background: #f1f1f2;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+.mail-chrome i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #dcdcdd;
+}
+.mail-chrome i:nth-child(1) { background: #ff5f57; }
+.mail-chrome i:nth-child(2) { background: #febc2e; }
+.mail-chrome i:nth-child(3) { background: #28c840; }
+
+.mail-head {
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid #ebebeb;
+}
+.mail-subject {
+  margin: 0 0 3px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #202124;
+  letter-spacing: -0.005em;
+}
+.mail-meta {
+  margin: 0;
+  font-size: 12px;
+  color: #5f6368;
+}
+
+.mail-body { padding: 14px 18px 16px; }
+
+.mail-sec {
+  margin: 16px 0 6px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #80868b;
+}
+.mail-sec:first-child { margin-top: 0; }
+
+.mail-list { list-style: none; margin: 0; padding: 0; }
+
+.mail-list li {
+  position: relative;
+  padding-left: 24px;
+  margin-bottom: 7px;
+  color: #3c4043;
+}
+
+/* Unticked checkbox, drawn rather than a real input. */
+.mail-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 2px;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid #bdc1c6;
+  border-radius: 3px;
+  background: #fff;
+}
+
+.mail-list li.is-urgent::before { border-color: #d93025; background: #d93025; }
+.mail-list li.is-urgent::after {
+  content: "!";
+  position: absolute;
+  left: 0;
+  top: 2px;
+  width: 14px;
+  height: 14px;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+}
+.mail-list li.is-urgent { color: #202124; }
+.mail-list li.is-urgent strong { color: #d93025; font-weight: 600; }
+
+/* A suggestion rather than a deadline: a filled dot instead of a checkbox. */
+.mail-list li.is-new::before {
+  border-color: #1a73e8;
+  background: #1a73e8;
+  border-radius: 50%;
+}
+.mail-list li.is-new::after {
+  content: "";
+  position: absolute;
+  left: 4.5px;
+  top: 6.5px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #fff;
+}
+.mail-list li.is-new { color: #202124; }
+
+.mail-foot {
+  margin: 18px 0 0;
+  padding-top: 11px;
+  border-top: 1px solid #ebebeb;
+  font-size: 11px;
+  color: #9aa0a6;
+}
+
+
+/* ---------------------------------------------------------------
+   SOURCE FLOW
+   Four live surfaces -> the agent -> the email. Drawn in the site's
+   own palette: this is the explanation of the system, not a picture
+   of it, so unlike the mail window it belongs to the page.
+   --------------------------------------------------------------- */
+
+.sources-note {
+  margin: 0 0 0.7rem;
+  font-size: 0.78rem;
+  color: var(--body);
+}
+
+.sources {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.src {
+  margin: 0;
+  padding: 0.6rem;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+}
+
+.src-thumb {
+  display: grid;
+  place-items: center;
+  height: 58px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+}
+.src-thumb img { width: 100%; height: 100%; object-fit: cover; object-position: top left; display: block; }
+.src-thumb svg { width: 50px; height: 50px; }
+
+/* Two logos sharing one tile. */
+.logo-pair { display: flex; align-items: center; gap: 10px; }
+.logo-pair svg { width: 46px; height: 46px; }
+
+/* Neutral glyph for a tile with no artwork yet. */
+.glyph-list rect, .glyph-list line {
+  fill: none;
+  stroke: var(--body);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+
+.src figcaption {
+  display: block;
+  margin-top: 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.src figcaption span {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--body);
+}
+
+/* A quiet pulse: these surfaces are changing, not a fixed list. */
+.live {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-right: 5px;
+  vertical-align: middle;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: live-pulse 2.4s ease-in-out infinite;
+}
+@keyframes live-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+/* Logos drawn as SVG rather than downscaled bitmaps, so they stay sharp at
+   30px and carry their own brand colours regardless of the page theme. */
+.logo-gcal text {
+  font: 700 14px/1 var(--sans);
+  text-anchor: middle;
+}
+.logo-events .ev-mon {
+  fill: #fff;
+  font: 700 7px/1 var(--sans);
+  letter-spacing: 0.08em;
+  text-anchor: middle;
+}
+.logo-events .ev-day {
+  fill: #1c1c1e;
+  font: 400 19px/1 var(--sans);
+  text-anchor: middle;
+}
+
+.join { display: block; width: 100%; height: auto; overflow: visible; }
+.join--top { margin: 0.1rem 0 -0.1rem; }
+.join--bottom { margin: -0.1rem 0 0.1rem; }
+.join-line path {
+  fill: none;
+  stroke: color-mix(in srgb, var(--accent) 55%, transparent);
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.join-arrow { fill: var(--accent); }
+
+/* The step that makes this more than a concatenated list. */
+.agent {
+  padding: 0.85rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+}
+.agent-title {
+  margin: 0 0 0.2rem;
+  font-size: 0.8rem;
+  font-weight: 620;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+.agent-sub {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--body);
+}

@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Personal AI Assistant — Simay Demiral</title>
+  <meta name="description" content="A scheduled agent that reads four sources every morning and emails me one checklist.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="icon" href="data:,">
+</head>
+<body>
+<div class="sheet">
+
+  <nav>
+    <ul>
+      <li><a href="/">&larr; Back</a></li>
+    </ul>
+  </nav>
+
+  <article class="case">
+    <div class="case-body">
+    <h1>Personal AI Assistant</h1>
+    <p class="case-lede">
+      One email every morning with everything I need to act on that day.
+    </p>
+
+    <p>
+      I built a personal AI assistant to pull together the things I was constantly
+      checking in different places: coursework and deadlines in Canvas, meetings in
+      my calendar, applications and coffee chats in my own tracker artifact, and
+      career and social events in a separate website.
+    </p>
+
+    <h2>The problem</h2>
+    <p>
+      Important dates were scattered across four different places. I had deadlines
+      in Canvas, interviews and meetings in my calendar, application deadlines and
+      networking follow-ups in my tracker, and career events in a text file.
+    </p>
+    <p>
+      I kept missing things despite having reminders everywhere. The problem wasn't
+      a lack of reminders. It was that no single place gave me the full picture.
+    </p>
+
+    <h2>What I built</h2>
+    <p>
+      I set up a scheduled job that runs every morning at 7:30 and pulls information
+      from all four sources into one email. The brief is organized into six sections,
+      so I can quickly see what is due, who I need to follow up with, and which
+      applications or events need attention.
+    </p>
+    <p>
+      Coursework comes through the Canvas API, meetings come from my calendar, and
+      applications and outreach come from my own tracker. The email is sent through
+      SMTP using credentials scoped specifically to the project.
+    </p>
+
+    <h2>What I learned along the way</h2>
+    <p>
+      The first version worked, but using it every day exposed a lot of edge cases.
+    </p>
+    <p>
+      Some calendar invitations were duplicated in the coursework section, so I added
+      filtering to keep only actual meetings in the calendar section.
+    </p>
+    <p>
+      The assistant also kept reminding me about assignments I had already submitted.
+      I changed it to check submission status, so completed work disappears while
+      overdue work continues to show up until it's done.
+    </p>
+    <p>
+      The bigger realization was that none of these sources sit still. Assignments
+      appear and get submitted, applications open and close, and new events are
+      posted every week. A static to-do list would have gone stale within days.
+    </p>
+    <p>
+      So the assistant re-reads everything each morning and compares it to what it
+      saw yesterday. It notices coursework that was added overnight, drops what I
+      have already handed in, and when something new shows up that looks relevant —
+      an event worth going to, an application that just opened — it surfaces it and
+      tells me to take a look. That judgment is the part that makes it an assistant
+      rather than a list.
+    </p>
+
+    <h2>Stack</h2>
+    <p class="case-note">
+      Python, Canvas REST API, Google Calendar API, SMTP, a scheduled task, and
+      Claude Code for all of it.
+    </p>
+
+    </div>
+
+    <aside class="case-aside">
+      <p class="aside-label">What it looks like</p>
+      <!-- The four sources. Drop a real logo into public/sources/ and point the
+           <img> at it; a tile with no image shows a drawn glyph instead. -->
+      <p class="sources-note">Four surfaces that change every day.</p>
+
+      <div class="sources">
+
+        <figure class="src">
+          <span class="src-thumb"><img src="/sources/tracker.png" alt=""></span>
+          <figcaption><i class="live" aria-hidden="true"></i>Tracker<span>outreach &amp; applications</span></figcaption>
+        </figure>
+
+        <figure class="src">
+          <span class="src-thumb">
+            <span class="logo-pair">
+              <svg viewBox="0 0 48 48" class="logo-gcal" aria-hidden="true">
+                <rect x="4" y="4" width="40" height="40" rx="4" fill="#1967d2"/>
+                <path d="M4 34h40v6a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z" fill="#34a853"/>
+                <path d="M34 4h6a4 4 0 0 1 4 4v6H34z" fill="#4285f4"/>
+                <path d="M34 34h10v6a4 4 0 0 1-4 4H34z" fill="#ea4335"/>
+                <rect x="34" y="14" width="10" height="20" fill="#fbbc04"/>
+                <rect x="12" y="12" width="24" height="24" fill="#fff"/>
+                <text x="24" y="31" fill="#4285f4">31</text>
+              </svg>
+              <svg viewBox="0 0 48 48" class="logo-events" aria-hidden="true">
+                <rect x="6" y="7" width="36" height="34" rx="7" fill="#fff" stroke="rgba(0,0,0,.14)"/>
+                <path d="M6 14a7 7 0 0 1 7-7h22a7 7 0 0 1 7 7v3H6z" fill="#ff3b30"/>
+                <text class="ev-mon" x="24" y="15">SEP</text>
+                <text class="ev-day" x="24" y="35">17</text>
+              </svg>
+            </span>
+          </span>
+          <figcaption><i class="live" aria-hidden="true"></i>Calendar<span>meetings</span></figcaption>
+        </figure>
+
+        <figure class="src">
+          <span class="src-thumb">
+            <svg viewBox="0 0 48 48" class="logo-canvas" aria-hidden="true">
+              <g fill="#e72429">
+                <rect x="22.4" y="3.2" width="3.2" height="7.2" rx="1.6" transform="rotate(0 24 24)"/>
+                <rect x="22.4" y="3.2" width="3.2" height="7.2" rx="1.6" transform="rotate(30 24 24)"/>
+                <rect x="22.4" y="3.2" width="3.2" height="7.2" rx="1.6" transform="rotate(60 24 24)"/>
+                <rect x="22.4" y="3.2" width="3.2" height="7.2" rx="1.6" transform="rotate(90 24 24)"/>
+                <rect x="22.4" y="3.2" width="3.2" height="7.2" rx="1.6" transform="rotate(120 24 24)"/>
+                <rect x="22.4" y="3.2" width="3.2" height="7.2" rx="1.6" transform="rotate(150 24 24)"/>
+                <rect x="22.4" y="3.2" width="3.2" height="7.2" rx="1.6" transform="rotate(180 24 24)"/>
+                <rect x="22.4" y="3.2" width="3.2" height="7.2" rx="1.6" transform="rotate(210 24 24)"/>
+                <rect x="22.4" y="3.2" width="3.2" height="7.2" rx="1.6" transform="rotate(240 24 24)"/>
+                <rect x="22.4" y="3.2" width="3.2" height="7.2" rx="1.6" transform="rotate(270 24 24)"/>
+                <rect x="22.4" y="3.2" width="3.2" height="7.2" rx="1.6" transform="rotate(300 24 24)"/>
+                <rect x="22.4" y="3.2" width="3.2" height="7.2" rx="1.6" transform="rotate(330 24 24)"/>
+                <circle cx="24" cy="24" r="6.2"/>
+              </g>
+            </svg>
+          </span>
+          <figcaption><i class="live" aria-hidden="true"></i>Canvas<span>coursework</span></figcaption>
+        </figure>
+
+        <figure class="src">
+          <span class="src-thumb">
+            <img src="/sources/events.png" alt="">
+          </span>
+          <figcaption><i class="live" aria-hidden="true"></i>Events<span>career &amp; social</span></figcaption>
+        </figure>
+
+      </div>
+
+      <svg class="join join--top" viewBox="0 0 420 40" aria-hidden="true">
+        <g class="join-line">
+          <path d="M105 0 V18"/>
+          <path d="M315 0 V18"/>
+          <path d="M105 18 H315"/>
+          <path d="M210 18 V32"/>
+        </g>
+        <path class="join-arrow" d="M210 40 l-6 -11 h12 Z"/>
+      </svg>
+
+      <div class="agent">
+        <p class="agent-title">Agent runs at 07:30</p>
+        <p class="agent-sub">
+          Reads the current state of all four, checks newly added assignments
+          and potentially interesting events, works out what actually needs
+          attention today, and writes the email.
+        </p>
+      </div>
+
+      <svg class="join join--bottom" viewBox="0 0 420 34" aria-hidden="true">
+        <g class="join-line"><path d="M210 0 V26"/></g>
+        <path class="join-arrow" d="M210 34 l-6 -11 h12 Z"/>
+      </svg>
+
+      <div class="mail">
+        <div class="mail-chrome"><i></i><i></i><i></i></div>
+
+        <div class="mail-head">
+          <p class="mail-subject">Your Thursday brief &middot; 21 Sep</p>
+          <p class="mail-meta">Personal AI Assistant &nbsp;·&nbsp; to me &nbsp;·&nbsp; 07:30</p>
+        </div>
+
+        <div class="mail-body">
+          <p class="mail-sec">Exams &amp; midterms</p>
+          <ul class="mail-list">
+            <li>Data &amp; Decisions midterm — Tuesday, 6 days</li>
+          </ul>
+
+          <p class="mail-sec">On your calendar</p>
+          <ul class="mail-list">
+            <li>09:00 &nbsp;Coffee chat — A. Rivera, product lead</li>
+            <li>16:30 &nbsp;Group meeting — accounting deck</li>
+          </ul>
+
+          <p class="mail-sec">Due</p>
+          <ul class="mail-list">
+            <li class="is-urgent">Problem set 3 — <strong>due today</strong></li>
+            <li>Reflection memo — due Friday</li>
+          </ul>
+
+          <p class="mail-sec">Applications closing</p>
+          <ul class="mail-list">
+            <li>Summer PM internship — closes Friday</li>
+          </ul>
+
+          <p class="mail-sec">Outreach</p>
+          <ul class="mail-list">
+            <li>Follow up with 3 contacts past their date</li>
+          </ul>
+
+          <p class="mail-sec">Career events</p>
+          <ul class="mail-list">
+            <li>Tech industry panel — Monday 17:00</li>
+          </ul>
+
+          <p class="mail-sec">Worth a look</p>
+          <ul class="mail-list">
+            <li class="is-new">New this week: SF Tech Week — AI Demo Night, Thursday 18:00 — check it out</li>
+          </ul>
+
+          <p class="mail-foot">Sent every weekday at 07:30</p>
+        </div>
+      </div>
+
+    </aside>
+
+    <p class="case-back"><a href="/">&larr; Back to the homepage</a></p>
+  </article>
+
+</div>
+</body>
+</html>

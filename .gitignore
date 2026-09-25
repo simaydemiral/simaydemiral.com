@@ -1,0 +1,8 @@
+.wrangler/
+node_modules/
+.DS_Store
+
+# Private — never commit
+NOTES.local.md
+PERSONAL_SITE_PLAYBOOK.md
+Picture1.png
