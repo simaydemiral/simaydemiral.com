@@ -933,18 +933,16 @@ h1 em {
 
 .item--illustrated {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 17rem;
+  grid-template-columns: minmax(0, 1fr) 20rem;
   gap: clamp(1.25rem, 3vw, 2.25rem);
   align-items: center;
 }
 
 .plate {
   display: block;
-  align-self: stretch;
-  border-radius: var(--radius-s);
-  background: color-mix(in srgb, var(--ink) 4%, var(--sheet));
-  border: 1px solid var(--rule);
-  overflow: hidden;
+  align-self: center;
+  background: none;
+  border: 0;
 }
 
 @media (max-width: 42rem) {
@@ -959,78 +957,80 @@ h1 em {
   object-fit: contain;
 }
 
-/* Linework. One ink — terracotta — with three weights: the assistant and
-   its output heaviest, the sources lighter, the details lightest. Drawn as
-   vector so it keeps the palette and works on the dark page too. */
+/* Two inks, not one: the objects are drawn in the page's dark ink, and
+   everything that represents the assistant or the signal moving through it
+   is terracotta. A third, lighter tone carries the small details. */
 
-.ink { --stroke: var(--accent); }
+.ink {
+  --line:   color-mix(in srgb, var(--ink) 72%, transparent);
+  --faint:  color-mix(in srgb, var(--ink) 38%, transparent);
+  --signal: var(--accent);
+}
 
 .src-card rect,
 .src-card path:not(.thin):not(.tick-s) {
   fill: none;
-  stroke: var(--stroke);
+  stroke: var(--line);
   stroke-width: 1.6;
   stroke-linejoin: round;
   stroke-linecap: round;
 }
 .src-card .thin {
   fill: none;
-  stroke: var(--stroke);
-  stroke-width: 1.1;
+  stroke: var(--faint);
+  stroke-width: 1.2;
   stroke-linecap: round;
   stroke-linejoin: round;
-  opacity: .75;
 }
-.src-card rect.thin { fill: none; }
+.dot { fill: var(--faint); }
+.tick-s { fill: none; stroke: var(--signal); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 
-.dot { fill: var(--stroke); opacity: .6; }
-.tick-s { fill: none; stroke: var(--stroke); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-
-.pull path {
+/* Signal paths */
+.trace path {
   fill: none;
-  stroke: var(--stroke);
-  stroke-width: 1.3;
+  stroke: var(--signal);
+  stroke-width: 1.5;
   stroke-linecap: round;
-  opacity: .7;
+  stroke-linejoin: round;
 }
-.arrow { fill: var(--stroke); }
+.joint circle { fill: var(--signal); }
+.arrow { fill: var(--signal); }
 
-/* The assistant reads heaviest — it is the subject. */
+/* The assistant: dark shell, terracotta face. */
 .bot rect, .bot path, .bot circle {
   fill: none;
-  stroke: var(--stroke);
+  stroke: var(--line);
   stroke-width: 2;
   stroke-linejoin: round;
   stroke-linecap: round;
 }
-.bot-head, .bot-body { fill: color-mix(in srgb, var(--sheet) 82%, transparent); }
-.bot-visor { fill: color-mix(in srgb, var(--accent) 13%, transparent); stroke-width: 1.6; }
-.bot-eye { stroke-width: 2.2; }
-.bot-bulb { fill: color-mix(in srgb, var(--accent) 22%, transparent); }
-.bot-ant { stroke-width: 1.8; }
+.bot-head, .bot-body { fill: color-mix(in srgb, var(--sheet) 70%, transparent); }
+.bot-visor {
+  fill: color-mix(in srgb, var(--accent) 16%, transparent);
+  stroke: var(--signal);
+  stroke-width: 1.6;
+}
+.bot-eye { stroke: var(--signal); stroke-width: 2.2; }
+.bot-bulb { fill: color-mix(in srgb, var(--accent) 35%, transparent); stroke: var(--signal); }
+.bot-ant { stroke: var(--signal); stroke-width: 1.8; }
+.bot .dot { fill: var(--signal); }
 
 .shine path {
   fill: none;
-  stroke: var(--stroke);
+  stroke: var(--signal);
   stroke-width: 1.6;
   stroke-linecap: round;
-  opacity: .8;
 }
 
-.out-back {
-  fill: color-mix(in srgb, var(--sheet) 70%, transparent);
-  stroke: var(--stroke);
-  stroke-width: 1.3;
-  opacity: .6;
-}
+.out-back { fill: none; stroke: var(--faint); stroke-width: 1.4; }
 .out-face {
-  fill: color-mix(in srgb, var(--sheet) 88%, transparent);
-  stroke: var(--stroke);
+  fill: color-mix(in srgb, var(--sheet) 70%, transparent);
+  stroke: var(--line);
   stroke-width: 2;
   stroke-linejoin: round;
 }
-.out-rows .box { fill: none; stroke: var(--stroke); stroke-width: 1.4; }
-.out-rows .thin { fill: none; stroke: var(--stroke); stroke-width: 1.3; stroke-linecap: round; opacity: .75; }
+.out-rows .box { fill: none; stroke: var(--line); stroke-width: 1.5; }
+.out-rows .thin { fill: none; stroke: var(--faint); stroke-width: 1.3; stroke-linecap: round; }
 
 /* A slight lift on hover, like turning a page toward you. */
 .item--illustrated:hover .bot-bulb { transform-origin: 158px 67px; transform: scale(1.35); }

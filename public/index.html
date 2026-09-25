@@ -138,13 +138,18 @@
             </g>
           </g>
 
-          <!-- drawn in -->
-          <g class="pull">
-            <path d="M68 22  C104 22 112 62 124 94"/>
-            <path d="M68 66  C100 68 110 88 120 104"/>
-            <path d="M68 110 C100 110 110 112 120 114"/>
-            <path d="M68 154 C100 152 110 140 120 126"/>
-            <path d="M68 198 C104 198 114 158 124 134"/>
+          <!-- drawn in: right-angle routing, like traces on a board -->
+          <g class="trace">
+            <path d="M68 22 H84 a6 6 0 0 1 6 6 V102 a6 6 0 0 0 6 6 H122"/>
+            <path d="M68 66 H84 a6 6 0 0 1 6 6 V102 a6 6 0 0 0 6 6 H122"/>
+            <path d="M68 110 H96 a6 6 0 0 1 6 6 V108"/>
+            <path d="M68 154 H84 a6 6 0 0 0 6 -6 V120 a6 6 0 0 1 6 -6 H122"/>
+            <path d="M68 198 H84 a6 6 0 0 0 6 -6 V120 a6 6 0 0 1 6 -6 H122"/>
+          </g>
+          <g class="joint">
+            <circle cx="90" cy="102" r="2.2"/>
+            <circle cx="90" cy="120" r="2.2"/>
+            <circle cx="102" cy="114" r="2.2"/>
           </g>
 
           <!-- the assistant -->
@@ -159,7 +164,7 @@
             <circle class="dot" cx="158" cy="142" r="3"/>
           </g>
 
-          <g class="pull"><path d="M200 114h16"/></g>
+          <g class="trace"><path d="M200 114 H218"/></g>
           <path class="arrow" d="M228 114l-12-5.5v11z"/>
 
           <!-- what it produces -->
