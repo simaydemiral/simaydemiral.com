@@ -1089,6 +1089,9 @@ h1 em {
 }
 
 .logo-tracker rect:first-child { fill: var(--accent); }
+
+/* The delivery step: same chip, no count, since nothing is being counted. */
+.chip--out { grid-template-columns: 2.5rem 1fr; }
 .gcal-num { font: 700 14px/1 var(--sans); text-anchor: middle; }
 
 /* ---------- connectors ---------- */
