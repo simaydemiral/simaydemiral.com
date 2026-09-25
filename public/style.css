@@ -194,6 +194,10 @@ h1 em {
 .hero-panel {
   aspect-ratio: 4 / 4.6;
   border-radius: var(--radius);
+  display: grid;
+  place-items: center;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  overflow: hidden;
 
   background:
     radial-gradient(120% 90% at 78% 12%,
@@ -1177,4 +1181,53 @@ h1 em {
 
 @media (prefers-reduced-motion: reduce) {
   .pl-dash path { animation: none; }
+}
+
+/* ---------------------------------------------------------------
+   HERO NETWORK
+   An abstract graph: nodes breathing, a few edges firing in sequence.
+   Generated once and written into the markup, so there is no runtime
+   JavaScript — the motion is pure CSS and stops under reduced-motion.
+   --------------------------------------------------------------- */
+
+.net {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.net-edge line {
+  stroke: color-mix(in srgb, var(--ink) 20%, transparent);
+  stroke-width: 1;
+}
+
+/* A short dash travels the length of the edge. */
+.net-fire line {
+  stroke: var(--accent);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-dasharray: 18 320;
+  stroke-dashoffset: 338;
+  animation: net-run 4.4s linear infinite;
+  animation-delay: var(--d, 0s);
+}
+@keyframes net-run { to { stroke-dashoffset: 0; } }
+
+.net-node circle {
+  fill: var(--sheet);
+  stroke: color-mix(in srgb, var(--ink) 42%, transparent);
+  stroke-width: 1.4;
+  animation: net-breathe 4.4s ease-in-out infinite;
+  animation-delay: var(--d, 0s);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes net-breathe {
+  0%, 100% { transform: scale(1);    stroke: color-mix(in srgb, var(--ink) 42%, transparent); }
+  50%      { transform: scale(1.18); stroke: var(--accent); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .net-fire { display: none; }
+  .net-node circle { animation: none; }
 }
