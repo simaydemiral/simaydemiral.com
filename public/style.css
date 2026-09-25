@@ -442,6 +442,18 @@ h1 em {
 
 .case { max-width: 100%; }
 
+@media (min-width: 66rem) {
+  .case {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 27rem;
+    gap: clamp(2rem, 4vw, 3.5rem);
+    align-items: start;
+  }
+  .case-back { grid-column: 1 / -1; }
+  /* The flow stays in view while the write-up scrolls past it. */
+  .pipeline { position: sticky; top: 2rem; margin-top: 0; }
+}
+
 .case-body { max-width: 42rem; }
 
 .aside-label {
@@ -997,16 +1009,11 @@ h1 em {
 
 .sources-note { margin: 0 0 1.5rem; font-size: 0.85rem; color: var(--body); }
 
-.pipe {
-  display: grid;
-  grid-template-columns: minmax(0, 17rem) 3.5rem minmax(0, 17rem) 3.5rem minmax(0, 24rem);
-  align-items: center;
-  gap: 0;
-}
+.pipe { display: block; }
 
 /* ---------- source chips ---------- */
 
-.pipe-col { display: flex; flex-direction: column; gap: 0.55rem; }
+.pipe-col { display: flex; flex-direction: column; gap: 0.5rem; }
 
 .chip {
   display: grid;
@@ -1023,11 +1030,14 @@ h1 em {
 .chip-mark svg { width: 26px; height: 26px; }
 .chip-mark img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; }
 .chip-mark--pair { gap: 3px; }
-.chip-mark--pair svg { width: 19px; height: 19px; }
+.chip-mark--pair svg,
+.chip-mark--pair img { width: 18px; height: 18px; }
+.chip-mark--pair img { border-radius: 4px; object-fit: contain; }
 
 .chip-text { display: flex; flex-direction: column; min-width: 0; }
 .chip-text b { font-size: 0.85rem; font-weight: 600; color: var(--ink); }
 .chip-text span { font-size: 0.7rem; color: var(--body); }
+.chip-text em { font-style: normal; color: var(--accent); }
 
 .chip-count {
   font-size: 0.95rem;
@@ -1044,7 +1054,9 @@ h1 em {
 /* Sized to the chip column so the curves are not stretched by the row
    height, which the email panel drives. */
 .pipe-link { width: 100%; }
-.pipe-svg { display: block; width: 100%; height: 285px; overflow: visible; }
+.pipe-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.pipe-svg--fan { margin: 0.5rem 0 0.35rem; }
+.pipe-svg--drop { margin: 0.35rem 0; }
 
 .pl-dash path {
   fill: none;
@@ -1106,38 +1118,6 @@ h1 em {
 }
 
 /* ---------- narrow screens: back to a vertical stack ---------- */
-
-@media (max-width: 66rem) {
-  .pipe { grid-template-columns: minmax(0, 1fr); gap: 0; }
-
-  /* A rotated four-way converge is unreadable at this size, so the connector
-     becomes a plain dashed arrow pointing down the stack. */
-  .pipe-link {
-    position: relative;
-    width: 100%;
-    height: 2.6rem;
-    margin: 0.6rem 0;
-  }
-  .pipe-svg { display: none; }
-  .pipe-link::before {
-    content: "";
-    position: absolute;
-    left: 50%;
-    top: 0;
-    bottom: 9px;
-    border-left: 1.5px dashed color-mix(in srgb, var(--accent) 60%, transparent);
-  }
-  .pipe-link::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    bottom: 0;
-    transform: translateX(-50%);
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 8px solid var(--accent);
-  }
-}
 
 @media (prefers-reduced-motion: reduce) {
   .pl-dash path { animation: none; }
