@@ -994,6 +994,7 @@ h1 em {
   stroke-linejoin: round;
 }
 .joint circle { fill: var(--signal); }
+.tip path { fill: var(--signal); opacity: .85; }
 .arrow { fill: var(--signal); }
 
 /* The assistant: dark shell, terracotta face. */
@@ -1033,7 +1034,7 @@ h1 em {
 .out-rows .thin { fill: none; stroke: var(--faint); stroke-width: 1.3; stroke-linecap: round; }
 
 /* A slight lift on hover, like turning a page toward you. */
-.item--illustrated:hover .bot-bulb { transform-origin: 158px 67px; transform: scale(1.35); }
+.item--illustrated:hover .bot-bulb { transform-origin: 187px 47px; transform: scale(1.4); }
 .bot-bulb { transition: transform 0.3s ease; }
 
 

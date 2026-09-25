@@ -130,34 +130,46 @@
             </g>
           </g>
 
-          <!-- long horizontal runs, squared corners -->
+          <!-- Each stub is drawn once, the shared trunk once, so nothing is
+               painted twice. Small tips along the way show direction. -->
           <g class="trace">
-            <path d="M48 18  H100 a6 6 0 0 1 6 6  V84 a6 6 0 0 0 6 6  H156"/>
-            <path d="M48 51  H100 a6 6 0 0 1 6 6  V84 a6 6 0 0 0 6 6  H156"/>
-            <path d="M48 84  H156"/>
-            <path d="M48 117 H100 a6 6 0 0 0 6 -6 V96 a6 6 0 0 1 6 -6 H156"/>
-            <path d="M48 150 H100 a6 6 0 0 0 6 -6 V96 a6 6 0 0 1 6 -6 H156"/>
+            <path d="M48 18  H100 a6 6 0 0 1 6 6"/>
+            <path d="M48 51  H100 a6 6 0 0 1 6 6"/>
+            <path d="M48 84  H106"/>
+            <path d="M48 117 H100 a6 6 0 0 0 6 -6"/>
+            <path d="M48 150 H100 a6 6 0 0 0 6 -6"/>
+            <path d="M106 24 V144"/>
+            <path d="M106 84 H156"/>
           </g>
-          <g class="joint">
-            <circle cx="106" cy="84" r="2"/>
-            <circle cx="106" cy="96" r="2"/>
-            <circle cx="112" cy="90" r="2"/>
+
+          <g class="tip">
+            <path d="M80 18  l-6 -3.2v6.4z"/>
+            <path d="M80 51  l-6 -3.2v6.4z"/>
+            <path d="M80 84  l-6 -3.2v6.4z"/>
+            <path d="M80 117 l-6 -3.2v6.4z"/>
+            <path d="M80 150 l-6 -3.2v6.4z"/>
+            <path d="M106 60 l-3.2 -6h6.4z"/>
+            <path d="M106 112 l-3.2 6h6.4z"/>
+            <path d="M136 84 l-6 -3.2v6.4z"/>
           </g>
+
+          <g class="joint"><circle cx="106" cy="84" r="2.2"/></g>
 
           <!-- the assistant, smaller -->
           <g class="bot">
-            <path class="bot-ant" d="M187 64v-7"/>
-            <circle class="bot-bulb" cx="187" cy="53" r="3.6"/>
-            <rect class="bot-head" x="162" y="64" width="50" height="38" rx="13"/>
-            <rect class="bot-visor" x="170" y="73" width="34" height="20" rx="9"/>
-            <path class="bot-eye" d="M179 82a3.2 3.2 0 0 1 5.6 0M189 82a3.2 3.2 0 0 1 5.6 0"/>
-            <path class="bot-ear" d="M158 77h-4v11h4M216 77h4v11h-4"/>
-            <path class="bot-body" d="M169 104h36a9 9 0 0 1 9 9v6a5 5 0 0 1-5 5h-44a5 5 0 0 1-5-5v-6a9 9 0 0 1 9-9z"/>
-            <circle class="dot" cx="187" cy="114" r="2.4"/>
+            <path class="bot-ant" d="M187 58v-7"/>
+            <circle class="bot-bulb" cx="187" cy="47" r="3.6"/>
+            <rect class="bot-head" x="162" y="58" width="50" height="38" rx="13"/>
+            <rect class="bot-visor" x="170" y="67" width="34" height="20" rx="9"/>
+            <path class="bot-eye" d="M179 76a3.2 3.2 0 0 1 5.6 0M189 76a3.2 3.2 0 0 1 5.6 0"/>
+            <path class="bot-ear" d="M158 71h-4v11h4M216 71h4v11h-4"/>
+            <path class="bot-body" d="M169 98h36a9 9 0 0 1 9 9v6a5 5 0 0 1-5 5h-44a5 5 0 0 1-5-5v-6a9 9 0 0 1 9-9z"/>
+            <circle class="dot" cx="187" cy="108" r="2.4"/>
           </g>
 
-          <g class="trace"><path d="M220 90 H278"/></g>
-          <path class="arrow" d="M290 90l-12-5v10z"/>
+          <g class="trace"><path d="M220 84 H278"/></g>
+          <g class="tip"><path d="M252 84 l-6 -3.2v6.4z"/></g>
+          <path class="arrow" d="M292 84l-13-5.5v11z"/>
 
           <!-- what it produces -->
           <g class="shine">
