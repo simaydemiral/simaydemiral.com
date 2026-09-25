@@ -86,104 +86,94 @@
       <!-- Drawn by hand in SVG. Four distinct source icons — a calendar, an
            assignment, a contact, an event — gathered into one checked list. -->
       <a class="plate" href="/tinkering/personal-ai-assistant" aria-hidden="true" tabindex="-1">
-        <svg viewBox="0 0 300 236" class="ink">
-          <defs>
-            <filter id="grain" x="0" y="0" width="100%" height="100%">
-              <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="4" result="n"/>
-              <feColorMatrix in="n" type="saturate" values="0"/>
-              <feComponentTransfer><feFuncA type="linear" slope="0.07"/></feComponentTransfer>
-            </filter>
-          </defs>
+        <svg viewBox="0 0 400 180" class="ink">
 
           <!-- the five things it reads -->
           <g class="src-card">
             <!-- mail -->
-            <g transform="rotate(-3 36 22)">
-              <rect x="8" y="6" width="56" height="32" rx="4"/>
-              <path class="thin" d="M15 14h21v16H15z"/>
-              <path class="thin" d="M15 14l10.5 7.5L36 14"/>
-              <path class="thin" d="M42 16h14M42 22h10M42 28h14"/>
+            <g transform="translate(0,5)">
+              <rect x="2" y="0" width="46" height="26" rx="3.5"/>
+              <path class="thin" d="M8 6h17v13H8z"/>
+              <path class="thin" d="M8 6l8.5 6L25 6"/>
+              <path class="thin" d="M30 9h12M30 14h8M30 19h12"/>
             </g>
             <!-- calendar -->
-            <g transform="rotate(2 36 66)">
-              <rect x="8" y="50" width="56" height="32" rx="4"/>
-              <path d="M8 59h56"/>
-              <path class="thin" d="M20 46v7M36 46v7M52 46v7"/>
-              <circle class="dot" cx="20" cy="68" r="2.2"/>
-              <circle class="dot" cx="34" cy="68" r="2.2"/>
-              <circle class="dot" cx="48" cy="68" r="2.2"/>
-              <circle class="dot" cx="27" cy="76" r="2.2"/>
-              <circle class="dot" cx="41" cy="76" r="2.2"/>
+            <g transform="translate(0,38)">
+              <rect x="2" y="0" width="46" height="26" rx="3.5"/>
+              <path d="M2 8h46"/>
+              <circle class="dot" cx="12" cy="15" r="1.9"/>
+              <circle class="dot" cx="23" cy="15" r="1.9"/>
+              <circle class="dot" cx="34" cy="15" r="1.9"/>
+              <circle class="dot" cx="17" cy="21" r="1.9"/>
+              <circle class="dot" cx="28" cy="21" r="1.9"/>
             </g>
             <!-- classes -->
-            <g transform="rotate(-2 36 110)">
-              <rect x="8" y="94" width="56" height="32" rx="4"/>
-              <path class="thin" d="M36 104c-4-3-9-3-13-2v15c4-1 9-1 13 2 4-3 9-3 13-2v-15c-4-1-9-1-13 2z"/>
-              <path class="thin" d="M36 104v15"/>
-              <path class="thin" d="M54 108h6M54 116h4"/>
+            <g transform="translate(0,71)">
+              <rect x="2" y="0" width="46" height="26" rx="3.5"/>
+              <path class="thin" d="M22 8c-3-2.2-7-2.2-10-1.4v12c3-.8 7-.8 10 1.4 3-2.2 7-2.2 10-1.4v-12c-3-.8-7-.8-10 1.4z"/>
+              <path class="thin" d="M22 8v12"/>
+              <path class="thin" d="M36 11h7M36 17h5"/>
             </g>
             <!-- tracker -->
-            <g transform="rotate(2 36 154)">
-              <rect x="8" y="138" width="56" height="32" rx="4"/>
-              <rect class="thin" x="15" y="145" width="6.5" height="6.5" rx="1.6"/>
-              <rect class="thin" x="15" y="156" width="6.5" height="6.5" rx="1.6"/>
-              <path class="thin" d="M27 148h29M27 159h21"/>
-              <path class="tick-s" d="M16.3 148.2l1.6 1.6 2.8-3.1"/>
+            <g transform="translate(0,104)">
+              <rect x="2" y="0" width="46" height="26" rx="3.5"/>
+              <rect class="thin" x="8" y="6" width="5.5" height="5.5" rx="1.4"/>
+              <rect class="thin" x="8" y="15" width="5.5" height="5.5" rx="1.4"/>
+              <path class="thin" d="M18 9h24M18 18h17"/>
+              <path class="tick-s" d="M9.1 8.9l1.4 1.4 2.4-2.7"/>
             </g>
             <!-- events -->
-            <g transform="rotate(3 36 198)">
-              <rect x="8" y="182" width="56" height="32" rx="4"/>
-              <path class="thin" d="M23 188l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4-3.9-3.8 5.4-.8z"/>
-              <path class="thin" d="M38 192h18M38 200h12"/>
+            <g transform="translate(0,137)">
+              <rect x="2" y="0" width="46" height="26" rx="3.5"/>
+              <path class="thin" d="M14 5l2 4.1 4.5.7-3.3 3.2.8 4.5-4-2.1-4 2.1.8-4.5L7.5 9.8l4.5-.7z"/>
+              <path class="thin" d="M26 10h16M26 17h11"/>
             </g>
           </g>
 
-          <!-- drawn in: right-angle routing, like traces on a board -->
+          <!-- long horizontal runs, squared corners -->
           <g class="trace">
-            <path d="M68 22 H84 a6 6 0 0 1 6 6 V102 a6 6 0 0 0 6 6 H122"/>
-            <path d="M68 66 H84 a6 6 0 0 1 6 6 V102 a6 6 0 0 0 6 6 H122"/>
-            <path d="M68 110 H96 a6 6 0 0 1 6 6 V108"/>
-            <path d="M68 154 H84 a6 6 0 0 0 6 -6 V120 a6 6 0 0 1 6 -6 H122"/>
-            <path d="M68 198 H84 a6 6 0 0 0 6 -6 V120 a6 6 0 0 1 6 -6 H122"/>
+            <path d="M48 18  H100 a6 6 0 0 1 6 6  V84 a6 6 0 0 0 6 6  H156"/>
+            <path d="M48 51  H100 a6 6 0 0 1 6 6  V84 a6 6 0 0 0 6 6  H156"/>
+            <path d="M48 84  H156"/>
+            <path d="M48 117 H100 a6 6 0 0 0 6 -6 V96 a6 6 0 0 1 6 -6 H156"/>
+            <path d="M48 150 H100 a6 6 0 0 0 6 -6 V96 a6 6 0 0 1 6 -6 H156"/>
           </g>
           <g class="joint">
-            <circle cx="90" cy="102" r="2.2"/>
-            <circle cx="90" cy="120" r="2.2"/>
-            <circle cx="102" cy="114" r="2.2"/>
+            <circle cx="106" cy="84" r="2"/>
+            <circle cx="106" cy="96" r="2"/>
+            <circle cx="112" cy="90" r="2"/>
           </g>
 
-          <!-- the assistant -->
+          <!-- the assistant, smaller -->
           <g class="bot">
-            <path class="bot-ant" d="M158 80v-9"/>
-            <circle class="bot-bulb" cx="158" cy="67" r="4.5"/>
-            <rect class="bot-head" x="128" y="80" width="60" height="48" rx="17"/>
-            <rect class="bot-visor" x="137" y="91" width="42" height="26" rx="12"/>
-            <path class="bot-eye" d="M148 102a4 4 0 0 1 7 0M163 102a4 4 0 0 1 7 0"/>
-            <path class="bot-ear" d="M124 96h-5v14h5M192 96h5v14h-5"/>
-            <path class="bot-body" d="M136 130h44a10 10 0 0 1 10 10v8a6 6 0 0 1-6 6h-52a6 6 0 0 1-6-6v-8a10 10 0 0 1 10-10z"/>
-            <circle class="dot" cx="158" cy="142" r="3"/>
+            <path class="bot-ant" d="M187 64v-7"/>
+            <circle class="bot-bulb" cx="187" cy="53" r="3.6"/>
+            <rect class="bot-head" x="162" y="64" width="50" height="38" rx="13"/>
+            <rect class="bot-visor" x="170" y="73" width="34" height="20" rx="9"/>
+            <path class="bot-eye" d="M179 82a3.2 3.2 0 0 1 5.6 0M189 82a3.2 3.2 0 0 1 5.6 0"/>
+            <path class="bot-ear" d="M158 77h-4v11h4M216 77h4v11h-4"/>
+            <path class="bot-body" d="M169 104h36a9 9 0 0 1 9 9v6a5 5 0 0 1-5 5h-44a5 5 0 0 1-5-5v-6a9 9 0 0 1 9-9z"/>
+            <circle class="dot" cx="187" cy="114" r="2.4"/>
           </g>
 
-          <g class="trace"><path d="M200 114 H218"/></g>
-          <path class="arrow" d="M228 114l-12-5.5v11z"/>
+          <g class="trace"><path d="M220 90 H278"/></g>
+          <path class="arrow" d="M290 90l-12-5v10z"/>
 
           <!-- what it produces -->
           <g class="shine">
-            <path d="M262 58v-11M232 68l-6-9M292 68l6-9M226 160l-7 8M298 160l7 8"/>
+            <path d="M340 38v-10M310 46l-6-8M372 46l6-8M306 138l-7 7M376 138l7 7"/>
           </g>
-          <rect class="out-back" x="246" y="74" width="46" height="84" rx="5"/>
-          <rect class="out-face" x="236" y="68" width="56" height="88" rx="5"/>
+          <rect class="out-back" x="310" y="52" width="72" height="76" rx="4"/>
+          <rect class="out-face" x="300" y="46" width="80" height="80" rx="4"/>
           <g class="out-rows">
-            <rect class="box" x="244" y="80"  width="9" height="9" rx="2"/>
-            <rect class="box" x="244" y="98"  width="9" height="9" rx="2"/>
-            <rect class="box" x="244" y="116" width="9" height="9" rx="2"/>
-            <rect class="box" x="244" y="134" width="9" height="9" rx="2"/>
-            <path class="thin" d="M259 85h26M259 103h20M259 121h24M259 139h17"/>
-            <path class="tick-s" d="M245.4 84.4l1.8 1.8 3-3.4"/>
-            <path class="tick-s" d="M245.4 102.4l1.8 1.8 3-3.4"/>
+            <rect class="box" x="308" y="56" width="8" height="8" rx="1.8"/>
+            <rect class="box" x="308" y="72" width="8" height="8" rx="1.8"/>
+            <rect class="box" x="308" y="88" width="8" height="8" rx="1.8"/>
+            <rect class="box" x="308" y="104" width="8" height="8" rx="1.8"/>
+            <path class="thin" d="M322 60h48M322 76h36M322 92h44M322 108h30"/>
+            <path class="tick-s" d="M309.2 60.2l1.5 1.5 2.6-2.9"/>
+            <path class="tick-s" d="M309.2 76.2l1.5 1.5 2.6-2.9"/>
           </g>
-
-          <rect width="300" height="236" filter="url(#grain)" opacity=".65"/>
         </svg>
       </a>
     </article>
