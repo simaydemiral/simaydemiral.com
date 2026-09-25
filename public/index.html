@@ -71,7 +71,67 @@
   <main id="work">
     <p class="section-label"><span class="dash"></span>Selected work</p>
 
-    <article class="item">
+    <article class="item item--illustrated">
+
+      <!-- Drawn by hand in SVG: scattered sources on the left, gathered through
+           the middle, one clean list on the right. -->
+      <a class="plate" href="/tinkering/personal-ai-assistant" aria-hidden="true" tabindex="-1">
+        <svg viewBox="0 0 640 190" class="ink">
+          <defs>
+            <filter id="grain" x="0" y="0" width="100%" height="100%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" result="n"/>
+              <feColorMatrix in="n" type="saturate" values="0"/>
+              <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+            </filter>
+          </defs>
+
+          <!-- scattered inputs -->
+          <g class="ink-line">
+            <rect x="48"  y="26"  width="72" height="48" rx="3" transform="rotate(-7 84 50)"/>
+            <path d="M58 40h50M58 50h36M58 60h44" transform="rotate(-7 84 50)"/>
+
+            <rect x="34"  y="76"  width="72" height="48" rx="3" transform="rotate(4 70 100)"/>
+            <path d="M44 90h50M44 100h30M44 110h44" transform="rotate(4 70 100)"/>
+
+            <rect x="56"  y="124" width="72" height="48" rx="3" transform="rotate(-3 92 148)"/>
+            <path d="M66 138h50M66 148h40M66 158h28" transform="rotate(-3 92 148)"/>
+          </g>
+
+          <!-- gathered through the middle -->
+          <g class="ink-flow">
+            <path d="M130 50  C230 48 256 84 300 94"/>
+            <path d="M114 100 C214 100 262 94 300 96"/>
+            <path d="M136 148 C232 148 264 110 300 98"/>
+          </g>
+
+          <g class="ink-node">
+            <circle cx="314" cy="96" r="16"/>
+            <path class="ink-spark" d="M314 85v22M303 96h22M306 88l16 16M322 88l-16 16"/>
+          </g>
+
+          <g class="ink-flow"><path d="M330 96 C368 96 378 96 398 96"/></g>
+          <path class="ink-arrow" d="M414 96l-13-6v12z"/>
+
+          <!-- one clean list -->
+          <g class="ink-line ink-out">
+            <rect x="428" y="36" width="168" height="120" rx="6"/>
+            <path d="M428 58h168"/>
+            <path d="M444 48h46"/>
+          </g>
+          <g class="ink-check">
+            <rect x="446" y="74"  width="11" height="11" rx="2.5"/>
+            <rect x="446" y="100" width="11" height="11" rx="2.5"/>
+            <rect x="446" y="126" width="11" height="11" rx="2.5"/>
+          </g>
+          <g class="ink-line">
+            <path d="M468 80h108M468 106h84M468 132h98"/>
+          </g>
+          <path class="ink-tick" d="M448 79l3 3 5.5-6.5"/>
+
+          <rect width="640" height="190" filter="url(#grain)" opacity=".5"/>
+        </svg>
+      </a>
+
       <h3><a class="item-link" href="/tinkering/personal-ai-assistant">Personal AI Assistant</a></h3>
       <p class="meta">Scheduled job &middot; Canvas + Calendar + SMTP &middot; 2026</p>
       <p>

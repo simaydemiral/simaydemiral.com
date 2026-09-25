@@ -789,3 +789,67 @@ h1 em {
   line-height: 1.5;
   color: var(--body);
 }
+
+/* ---------------------------------------------------------------
+   WORK CARD ILLUSTRATION
+   Hand-drawn in SVG rather than a bitmap: it inherits the palette,
+   flips correctly in dark mode, stays sharp on any screen, and adds
+   no image weight.
+   --------------------------------------------------------------- */
+
+.item--illustrated { padding: 0; overflow: hidden; }
+.item--illustrated > :not(.plate) { padding-inline: clamp(1.25rem, 3vw, 2rem); }
+.item--illustrated > h3 { padding-top: 1.4rem; }
+.item--illustrated > p:last-child { padding-bottom: 1.6rem; }
+
+.plate {
+  display: block;
+  background: color-mix(in srgb, var(--ink) 4%, var(--sheet));
+  border-bottom: 1px solid var(--rule);
+}
+
+.ink {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Linework */
+.ink-line, .ink-out, .ink-check, .ink-node circle {
+  fill: none;
+  stroke: color-mix(in srgb, var(--ink) 62%, transparent);
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* The output list sits a little heavier — it is the thing produced. */
+.ink-out { stroke: color-mix(in srgb, var(--ink) 80%, transparent); stroke-width: 1.6; }
+
+/* Flow lines, lighter than the objects they connect. */
+.ink-flow path {
+  fill: none;
+  stroke: color-mix(in srgb, var(--accent) 60%, transparent);
+  stroke-width: 1.3;
+  stroke-linecap: round;
+}
+
+.ink-node circle { stroke: var(--accent); stroke-width: 1.5; }
+.ink-spark {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.1;
+  stroke-linecap: round;
+  opacity: 0.75;
+}
+
+.ink-arrow { fill: var(--accent); }
+.ink-tick { fill: none; stroke: var(--accent); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+/* A slight lift on hover, like turning a page toward you. */
+.item--illustrated:hover .ink-node { transform-origin: 314px 96px; transform: scale(1.06); }
+.ink-node { transition: transform 0.25s ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ink-node { transition: none; }
+}
