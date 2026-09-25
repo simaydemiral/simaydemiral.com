@@ -440,23 +440,9 @@ h1 em {
    CASE STUDY PAGES  (/tinkering/*)
    =============================================================== */
 
-/* Two columns: the write-up on the left, a sample of the output on the right.
-   Stacks below 62rem, same breakpoint as Work/Education on the homepage. */
-.case {
-  max-width: 100%;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: clamp(2rem, 4vw, 3.5rem);
-  align-items: start;
-}
+.case { max-width: 100%; }
 
-@media (min-width: 62rem) {
-  .case { grid-template-columns: minmax(0, 1fr) 27rem; }
-  /* The sample stays in view while the write-up scrolls past it. */
-  .case-aside { position: sticky; top: 2rem; }
-}
-
-.case-body { max-width: 40rem; }
+.case-body { max-width: 42rem; }
 
 .aside-label {
   font-size: 0.72rem;
@@ -514,7 +500,7 @@ h1 em {
 .case-body li strong { color: var(--ink); font-weight: 600; }
 
 .case-note { font-size: 0.8rem; color: var(--body); margin: 0.85rem 0 0; }
-.case-back { grid-column: 1 / -1; margin: 3.5rem 0 0; font-size: 0.95rem; }
+.case-back { margin: 3.5rem 0 0; font-size: 0.95rem; }
 .case-back a { color: var(--accent); }
 
 /* Work items that link to a case study. */
@@ -526,6 +512,139 @@ h1 em {
   border-bottom: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
 }
 .item-more:hover { border-bottom-color: var(--accent); }
+
+
+/* ===============================================================
+   SAMPLE EMAIL
+   Deliberately NOT in the site palette. This is a picture of a real
+   piece of software, so it keeps a mail client's own look: white
+   ground, system UI type, its own red. It should read as an artifact
+   dropped onto the page, not as another section of the page.
+   =============================================================== */
+
+.mail {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.16), 0 2px 6px rgba(0, 0, 0, 0.08);
+  font: 400 13px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        Helvetica, Arial, sans-serif;
+  color: #202124;
+}
+
+/* Window chrome, so it reads as an application. */
+.mail-chrome {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 9px 12px;
+  background: #f1f1f2;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+.mail-chrome i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #dcdcdd;
+}
+.mail-chrome i:nth-child(1) { background: #ff5f57; }
+.mail-chrome i:nth-child(2) { background: #febc2e; }
+.mail-chrome i:nth-child(3) { background: #28c840; }
+
+.mail-head {
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid #ebebeb;
+}
+.mail-subject {
+  margin: 0 0 3px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #202124;
+  letter-spacing: -0.005em;
+}
+.mail-meta {
+  margin: 0;
+  font-size: 12px;
+  color: #5f6368;
+}
+
+.mail-body { padding: 14px 18px 16px; }
+
+.mail-sec {
+  margin: 16px 0 6px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #80868b;
+}
+.mail-sec:first-child { margin-top: 0; }
+
+.mail-list { list-style: none; margin: 0; padding: 0; }
+
+.mail-list li {
+  position: relative;
+  padding-left: 24px;
+  margin-bottom: 7px;
+  color: #3c4043;
+}
+
+/* Unticked checkbox, drawn rather than a real input. */
+.mail-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 2px;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid #bdc1c6;
+  border-radius: 3px;
+  background: #fff;
+}
+
+.mail-list li.is-urgent::before { border-color: #d93025; background: #d93025; }
+.mail-list li.is-urgent::after {
+  content: "!";
+  position: absolute;
+  left: 0;
+  top: 2px;
+  width: 14px;
+  height: 14px;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+}
+.mail-list li.is-urgent { color: #202124; }
+.mail-list li.is-urgent strong { color: #d93025; font-weight: 600; }
+
+/* A suggestion rather than a deadline: a filled dot instead of a checkbox. */
+.mail-list li.is-new::before {
+  border-color: #1a73e8;
+  background: #1a73e8;
+  border-radius: 50%;
+}
+.mail-list li.is-new::after {
+  content: "";
+  position: absolute;
+  left: 4.5px;
+  top: 6.5px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #fff;
+}
+.mail-list li.is-new { color: #202124; }
+
+.mail-foot {
+  margin: 18px 0 0;
+  padding-top: 11px;
+  border-top: 1px solid #ebebeb;
+  font-size: 11px;
+  color: #9aa0a6;
+}
 
 
 /* ===============================================================
@@ -852,4 +971,160 @@ h1 em {
 
 @media (prefers-reduced-motion: reduce) {
   .ink-node { transition: none; }
+}
+
+/* ---------------------------------------------------------------
+   PIPELINE
+   Four live surfaces -> the agent -> the email, read left to right.
+   Full width so the flow has room to be a pipeline rather than a stack.
+   --------------------------------------------------------------- */
+
+.pipeline { margin-top: 4rem; }
+
+.sources-note { margin: 0 0 1.5rem; font-size: 0.85rem; color: var(--body); }
+
+.pipe {
+  display: grid;
+  grid-template-columns: minmax(0, 17rem) 3.5rem minmax(0, 17rem) 3.5rem minmax(0, 24rem);
+  align-items: center;
+  gap: 0;
+}
+
+/* ---------- source chips ---------- */
+
+.pipe-col { display: flex; flex-direction: column; gap: 0.55rem; }
+
+.chip {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr auto;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.6rem 0.8rem;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+}
+
+.chip-mark { display: flex; align-items: center; justify-content: center; }
+.chip-mark svg { width: 26px; height: 26px; }
+.chip-mark img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; }
+.chip-mark--pair { gap: 3px; }
+.chip-mark--pair svg { width: 19px; height: 19px; }
+
+.chip-text { display: flex; flex-direction: column; min-width: 0; }
+.chip-text b { font-size: 0.85rem; font-weight: 600; color: var(--ink); }
+.chip-text span { font-size: 0.7rem; color: var(--body); }
+
+.chip-count {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.logo-tracker rect:first-child { fill: var(--accent); }
+.gcal-num { font: 700 14px/1 var(--sans); text-anchor: middle; }
+
+/* ---------- connectors ---------- */
+
+/* Sized to the chip column so the curves are not stretched by the row
+   height, which the email panel drives. */
+.pipe-link { width: 100%; }
+.pipe-svg { display: block; width: 100%; height: 285px; overflow: visible; }
+
+.pl-dash path {
+  fill: none;
+  stroke: color-mix(in srgb, var(--accent) 60%, transparent);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-dasharray: 4 7;
+  animation: pipe-flow 1.6s linear infinite;
+}
+@keyframes pipe-flow { to { stroke-dashoffset: -11; } }
+
+.pl-head { fill: var(--accent); }
+
+/* ---------- the agent ---------- */
+
+.pipe-agent {
+  padding: 1.1rem 1.2rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 42%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+}
+.agent-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 620;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+.agent-sub { margin: 0; font-size: 0.8rem; line-height: 1.55; color: var(--body); }
+
+.verbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  list-style: none;
+  margin: 0.9rem 0 0;
+  padding: 0;
+}
+.verbs li {
+  padding: 0.2rem 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent);
+  border-radius: 999px;
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  color: var(--accent);
+}
+
+/* ---------- output ---------- */
+
+.pipe-out-count {
+  margin: 0 0 0.6rem;
+  font-size: 0.82rem;
+  color: var(--body);
+}
+.pipe-out-count b {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+/* ---------- narrow screens: back to a vertical stack ---------- */
+
+@media (max-width: 66rem) {
+  .pipe { grid-template-columns: minmax(0, 1fr); gap: 0; }
+
+  /* A rotated four-way converge is unreadable at this size, so the connector
+     becomes a plain dashed arrow pointing down the stack. */
+  .pipe-link {
+    position: relative;
+    width: 100%;
+    height: 2.6rem;
+    margin: 0.6rem 0;
+  }
+  .pipe-svg { display: none; }
+  .pipe-link::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 9px;
+    border-left: 1.5px dashed color-mix(in srgb, var(--accent) 60%, transparent);
+  }
+  .pipe-link::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 8px solid var(--accent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pl-dash path { animation: none; }
 }
