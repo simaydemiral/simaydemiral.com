@@ -73,65 +73,7 @@
 
     <article class="item item--illustrated">
 
-      <!-- Drawn by hand in SVG: scattered sources on the left, gathered through
-           the middle, one clean list on the right. -->
-      <a class="plate" href="/tinkering/personal-ai-assistant" aria-hidden="true" tabindex="-1">
-        <svg viewBox="0 0 640 190" class="ink">
-          <defs>
-            <filter id="grain" x="0" y="0" width="100%" height="100%">
-              <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" result="n"/>
-              <feColorMatrix in="n" type="saturate" values="0"/>
-              <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
-            </filter>
-          </defs>
-
-          <!-- scattered inputs -->
-          <g class="ink-line">
-            <rect x="48"  y="26"  width="72" height="48" rx="3" transform="rotate(-7 84 50)"/>
-            <path d="M58 40h50M58 50h36M58 60h44" transform="rotate(-7 84 50)"/>
-
-            <rect x="34"  y="76"  width="72" height="48" rx="3" transform="rotate(4 70 100)"/>
-            <path d="M44 90h50M44 100h30M44 110h44" transform="rotate(4 70 100)"/>
-
-            <rect x="56"  y="124" width="72" height="48" rx="3" transform="rotate(-3 92 148)"/>
-            <path d="M66 138h50M66 148h40M66 158h28" transform="rotate(-3 92 148)"/>
-          </g>
-
-          <!-- gathered through the middle -->
-          <g class="ink-flow">
-            <path d="M130 50  C230 48 256 84 300 94"/>
-            <path d="M114 100 C214 100 262 94 300 96"/>
-            <path d="M136 148 C232 148 264 110 300 98"/>
-          </g>
-
-          <g class="ink-node">
-            <circle cx="314" cy="96" r="16"/>
-            <path class="ink-spark" d="M314 85v22M303 96h22M306 88l16 16M322 88l-16 16"/>
-          </g>
-
-          <g class="ink-flow"><path d="M330 96 C368 96 378 96 398 96"/></g>
-          <path class="ink-arrow" d="M414 96l-13-6v12z"/>
-
-          <!-- one clean list -->
-          <g class="ink-line ink-out">
-            <rect x="428" y="36" width="168" height="120" rx="6"/>
-            <path d="M428 58h168"/>
-            <path d="M444 48h46"/>
-          </g>
-          <g class="ink-check">
-            <rect x="446" y="74"  width="11" height="11" rx="2.5"/>
-            <rect x="446" y="100" width="11" height="11" rx="2.5"/>
-            <rect x="446" y="126" width="11" height="11" rx="2.5"/>
-          </g>
-          <g class="ink-line">
-            <path d="M468 80h108M468 106h84M468 132h98"/>
-          </g>
-          <path class="ink-tick" d="M448 79l3 3 5.5-6.5"/>
-
-          <rect width="640" height="190" filter="url(#grain)" opacity=".5"/>
-        </svg>
-      </a>
-
+      <div class="item-body">
       <h3><a class="item-link" href="/tinkering/personal-ai-assistant">Personal AI Assistant</a></h3>
       <p class="meta">Scheduled job &middot; Canvas + Calendar + SMTP &middot; 2026</p>
       <p>
@@ -139,6 +81,83 @@
         from Canvas, my calendar, my tracker and my events file.
         <a class="item-more" href="/tinkering/personal-ai-assistant">Read the case study &rarr;</a>
       </p>
+      </div>
+
+      <!-- Drawn by hand in SVG. Four distinct source icons — a calendar, an
+           assignment, a contact, an event — gathered into one checked list. -->
+      <a class="plate" href="/tinkering/personal-ai-assistant" aria-hidden="true" tabindex="-1">
+        <svg viewBox="0 0 270 196" class="ink">
+          <defs>
+            <filter id="grain" x="0" y="0" width="100%" height="100%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" result="n"/>
+              <feColorMatrix in="n" type="saturate" values="0"/>
+              <feComponentTransfer><feFuncA type="linear" slope="0.05"/></feComponentTransfer>
+            </filter>
+          </defs>
+
+          <g class="ink-line">
+            <!-- calendar -->
+            <g transform="translate(10,14) rotate(-4 20 17)">
+              <rect x="0" y="5" width="40" height="30" rx="3"/>
+              <path d="M0 14h40M11 1v8M29 1v8"/>
+              <path d="M8 22h5M18 22h5M28 22h5M8 29h5M18 29h5"/>
+            </g>
+
+            <!-- assignment -->
+            <g transform="translate(6,58) rotate(3 20 17)">
+              <path d="M2 2h22l12 12v22a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V5a3 3 0 0 1 3-3z"/>
+              <path d="M24 2v12h12"/>
+              <path d="M9 24h20M9 31h13"/>
+            </g>
+
+            <!-- contact -->
+            <g transform="translate(12,102) rotate(-3 20 17)">
+              <rect x="0" y="3" width="40" height="32" rx="3"/>
+              <circle cx="13" cy="15" r="5"/>
+              <path d="M5 29c1.6-5 14.4-5 16 0"/>
+              <path d="M25 13h10M25 21h8"/>
+            </g>
+
+            <!-- event -->
+            <g transform="translate(8,146) rotate(4 20 17)">
+              <path d="M3 6h34a3 3 0 0 1 3 3v6a5 5 0 0 0 0 10v6a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3v-6a5 5 0 0 0 0-10V9a3 3 0 0 1 3-3z"/>
+              <path d="M20 8v4M20 17v4M20 26v4"/>
+            </g>
+          </g>
+
+          <g class="ink-flow">
+            <path d="M52 32  C92 30 108 78 128 92"/>
+            <path d="M48 76  C90 76 110 88 128 94"/>
+            <path d="M54 120 C94 120 112 104 128 98"/>
+            <path d="M50 164 C96 164 114 114 128 100"/>
+          </g>
+
+          <g class="ink-node">
+            <circle cx="140" cy="96" r="13"/>
+            <path class="ink-spark" d="M140 87v18M131 96h18M134 90l12 12M146 90l-12 12"/>
+          </g>
+
+          <g class="ink-flow"><path d="M154 96h24"/></g>
+          <path class="ink-arrow" d="M190 96l-11-5v10z"/>
+
+          <g class="ink-line ink-out">
+            <rect x="198" y="52" width="64" height="88" rx="5"/>
+            <path d="M198 70h64"/>
+            <path d="M208 61h26"/>
+          </g>
+          <g class="ink-check">
+            <rect x="208" y="82"  width="9" height="9" rx="2"/>
+            <rect x="208" y="102" width="9" height="9" rx="2"/>
+            <rect x="208" y="122" width="9" height="9" rx="2"/>
+          </g>
+          <g class="ink-line">
+            <path d="M224 87h30M224 107h22M224 127h27"/>
+          </g>
+          <path class="ink-tick" d="M209.5 86.5l2.5 2.5 4-5"/>
+
+          <rect width="270" height="196" filter="url(#grain)" opacity=".5"/>
+        </svg>
+      </a>
     </article>
 
     <article class="item item--empty">

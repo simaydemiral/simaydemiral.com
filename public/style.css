@@ -916,21 +916,35 @@ h1 em {
    no image weight.
    --------------------------------------------------------------- */
 
-.item--illustrated { padding: 0; overflow: hidden; }
-.item--illustrated > :not(.plate) { padding-inline: clamp(1.25rem, 3vw, 2rem); }
-.item--illustrated > h3 { padding-top: 1.4rem; }
-.item--illustrated > p:last-child { padding-bottom: 1.6rem; }
+/* Text on the left, drawing on the right; stacks on narrow screens. */
+.item-body > :first-child { margin-top: 0; }
+
+.item--illustrated {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 15rem;
+  gap: clamp(1.25rem, 3vw, 2.25rem);
+  align-items: center;
+}
 
 .plate {
   display: block;
+  align-self: stretch;
+  border-radius: var(--radius-s);
   background: color-mix(in srgb, var(--ink) 4%, var(--sheet));
-  border-bottom: 1px solid var(--rule);
+  border: 1px solid var(--rule);
+  overflow: hidden;
+}
+
+@media (max-width: 42rem) {
+  .item--illustrated { grid-template-columns: 1fr; }
+  .item--illustrated .plate { order: -1; }
 }
 
 .ink {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: contain;
 }
 
 /* Linework */
@@ -966,7 +980,7 @@ h1 em {
 .ink-tick { fill: none; stroke: var(--accent); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 
 /* A slight lift on hover, like turning a page toward you. */
-.item--illustrated:hover .ink-node { transform-origin: 314px 96px; transform: scale(1.06); }
+.item--illustrated:hover .ink-node { transform-origin: 140px 96px; transform: scale(1.08); }
 .ink-node { transition: transform 0.25s ease; }
 
 @media (prefers-reduced-motion: reduce) {
