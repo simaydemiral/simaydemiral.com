@@ -129,8 +129,8 @@ nav ul a:hover { color: var(--ink); border-bottom-color: var(--accent); }
 
 .portrait {
   display: block;
-  width: 5.5rem;
-  height: 5.5rem;
+  width: 7.25rem;
+  height: 7.25rem;
   border-radius: 50%;
   object-fit: cover;
   margin: 0 0 1.75rem;
