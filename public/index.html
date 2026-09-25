@@ -86,78 +86,99 @@
       <!-- Drawn by hand in SVG. Four distinct source icons — a calendar, an
            assignment, a contact, an event — gathered into one checked list. -->
       <a class="plate" href="/tinkering/personal-ai-assistant" aria-hidden="true" tabindex="-1">
-        <svg viewBox="0 0 280 200" class="ink">
+        <svg viewBox="0 0 300 236" class="ink">
           <defs>
             <filter id="grain" x="0" y="0" width="100%" height="100%">
               <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="4" result="n"/>
               <feColorMatrix in="n" type="saturate" values="0"/>
-              <feComponentTransfer><feFuncA type="linear" slope="0.085"/></feComponentTransfer>
+              <feComponentTransfer><feFuncA type="linear" slope="0.07"/></feComponentTransfer>
             </filter>
-            <clipPath id="sunClip"><rect x="56" y="14" width="168" height="74"/></clipPath>
           </defs>
 
-          <!-- sun, low and rising: the 07:30 of it -->
-          <g class="ray">
-            <path d="M140 26v-14M104 34l-6-12M176 34l6-12M78 56l-12-7M202 56l12-7"/>
-          </g>
-          <g clip-path="url(#sunClip)">
-            <circle class="sun" cx="140" cy="88" r="34"/>
-            <g class="hatch-fine">
-              <path d="M110 74h60M112 66h56M116 58h48M122 50h36M130 42h20"/>
+          <!-- the five things it reads -->
+          <g class="src-card">
+            <!-- mail -->
+            <g transform="rotate(-3 36 22)">
+              <rect x="8" y="6" width="56" height="32" rx="4"/>
+              <path class="thin" d="M15 14h21v16H15z"/>
+              <path class="thin" d="M15 14l10.5 7.5L36 14"/>
+              <path class="thin" d="M42 16h14M42 22h10M42 28h14"/>
             </g>
-          </g>
-          <path class="horizon" d="M40 88h200"/>
-
-          <!-- the one thing it produces -->
-          <g class="card">
-            <path class="card-face" d="M96 76h88a6 6 0 0 1 6 6v72a6 6 0 0 1-6 6H96a6 6 0 0 1-6-6V82a6 6 0 0 1 6-6z"/>
-            <path class="card-rule" d="M90 96h100"/>
-            <path class="card-title" d="M102 87h34"/>
-          </g>
-          <g class="tick-box">
-            <rect x="102" y="108" width="10" height="10" rx="2.5"/>
-            <rect x="102" y="126" width="10" height="10" rx="2.5"/>
-            <rect x="102" y="144" width="10" height="10" rx="2.5"/>
-          </g>
-          <path class="tick" d="M103.5 112.5l3 3 5-6"/>
-          <g class="card-line">
-            <path d="M120 113h58M120 131h44M120 149h52"/>
-          </g>
-
-          <!-- shadow under the card, hatched by hand -->
-          <g class="hatch-shadow">
-            <path d="M86 168h108M92 173h96M100 178h80M112 183h56"/>
-          </g>
-
-          <!-- the scattered things it read, receding behind -->
-          <g class="paper">
-            <g transform="rotate(-16 44 112)">
-              <path d="M26 96h32a3 3 0 0 1 3 3v30a3 3 0 0 1-3 3H26a3 3 0 0 1-3-3V99a3 3 0 0 1 3-3z"/>
-              <path class="thin" d="M30 106h22M30 113h14M30 120h19"/>
+            <!-- calendar -->
+            <g transform="rotate(2 36 66)">
+              <rect x="8" y="50" width="56" height="32" rx="4"/>
+              <path d="M8 59h56"/>
+              <path class="thin" d="M20 46v7M36 46v7M52 46v7"/>
+              <circle class="dot" cx="20" cy="68" r="2.2"/>
+              <circle class="dot" cx="34" cy="68" r="2.2"/>
+              <circle class="dot" cx="48" cy="68" r="2.2"/>
+              <circle class="dot" cx="27" cy="76" r="2.2"/>
+              <circle class="dot" cx="41" cy="76" r="2.2"/>
             </g>
-            <g transform="rotate(11 46 152)" opacity=".8">
-              <path d="M30 138h28a3 3 0 0 1 3 3v24a3 3 0 0 1-3 3H30a3 3 0 0 1-3-3v-24a3 3 0 0 1 3-3z"/>
-              <path class="thin" d="M34 147h18M34 154h11"/>
+            <!-- classes -->
+            <g transform="rotate(-2 36 110)">
+              <rect x="8" y="94" width="56" height="32" rx="4"/>
+              <path class="thin" d="M36 104c-4-3-9-3-13-2v15c4-1 9-1 13 2 4-3 9-3 13-2v-15c-4-1-9-1-13 2z"/>
+              <path class="thin" d="M36 104v15"/>
+              <path class="thin" d="M54 108h6M54 116h4"/>
             </g>
-            <g transform="rotate(14 236 114)">
-              <path d="M218 98h32a3 3 0 0 1 3 3v30a3 3 0 0 1-3 3h-32a3 3 0 0 1-3-3v-30a3 3 0 0 1 3-3z"/>
-              <path class="thin" d="M222 108h22M222 115h15M222 122h19"/>
+            <!-- tracker -->
+            <g transform="rotate(2 36 154)">
+              <rect x="8" y="138" width="56" height="32" rx="4"/>
+              <rect class="thin" x="15" y="145" width="6.5" height="6.5" rx="1.6"/>
+              <rect class="thin" x="15" y="156" width="6.5" height="6.5" rx="1.6"/>
+              <path class="thin" d="M27 148h29M27 159h21"/>
+              <path class="tick-s" d="M16.3 148.2l1.6 1.6 2.8-3.1"/>
             </g>
-            <g transform="rotate(-9 234 154)" opacity=".8">
-              <path d="M218 140h28a3 3 0 0 1 3 3v24a3 3 0 0 1-3 3h-28a3 3 0 0 1-3-3v-24a3 3 0 0 1 3-3z"/>
-              <path class="thin" d="M222 149h18M222 156h10"/>
+            <!-- events -->
+            <g transform="rotate(3 36 198)">
+              <rect x="8" y="182" width="56" height="32" rx="4"/>
+              <path class="thin" d="M23 188l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4-3.9-3.8 5.4-.8z"/>
+              <path class="thin" d="M38 192h18M38 200h12"/>
             </g>
           </g>
 
-          <!-- drawn inward -->
+          <!-- drawn in -->
           <g class="pull">
-            <path d="M64 108c14 4 20 10 24 16"/>
-            <path d="M66 150c12-2 18-6 22-12"/>
-            <path d="M214 110c-14 4-20 10-24 16"/>
-            <path d="M212 152c-12-2-18-6-22-12"/>
+            <path d="M68 22  C104 22 112 62 124 94"/>
+            <path d="M68 66  C100 68 110 88 120 104"/>
+            <path d="M68 110 C100 110 110 112 120 114"/>
+            <path d="M68 154 C100 152 110 140 120 126"/>
+            <path d="M68 198 C104 198 114 158 124 134"/>
           </g>
 
-          <rect width="280" height="200" filter="url(#grain)" opacity=".7"/>
+          <!-- the assistant -->
+          <g class="bot">
+            <path class="bot-ant" d="M158 80v-9"/>
+            <circle class="bot-bulb" cx="158" cy="67" r="4.5"/>
+            <rect class="bot-head" x="128" y="80" width="60" height="48" rx="17"/>
+            <rect class="bot-visor" x="137" y="91" width="42" height="26" rx="12"/>
+            <path class="bot-eye" d="M148 102a4 4 0 0 1 7 0M163 102a4 4 0 0 1 7 0"/>
+            <path class="bot-ear" d="M124 96h-5v14h5M192 96h5v14h-5"/>
+            <path class="bot-body" d="M136 130h44a10 10 0 0 1 10 10v8a6 6 0 0 1-6 6h-52a6 6 0 0 1-6-6v-8a10 10 0 0 1 10-10z"/>
+            <circle class="dot" cx="158" cy="142" r="3"/>
+          </g>
+
+          <g class="pull"><path d="M200 114h16"/></g>
+          <path class="arrow" d="M228 114l-12-5.5v11z"/>
+
+          <!-- what it produces -->
+          <g class="shine">
+            <path d="M262 58v-11M232 68l-6-9M292 68l6-9M226 160l-7 8M298 160l7 8"/>
+          </g>
+          <rect class="out-back" x="246" y="74" width="46" height="84" rx="5"/>
+          <rect class="out-face" x="236" y="68" width="56" height="88" rx="5"/>
+          <g class="out-rows">
+            <rect class="box" x="244" y="80"  width="9" height="9" rx="2"/>
+            <rect class="box" x="244" y="98"  width="9" height="9" rx="2"/>
+            <rect class="box" x="244" y="116" width="9" height="9" rx="2"/>
+            <rect class="box" x="244" y="134" width="9" height="9" rx="2"/>
+            <path class="thin" d="M259 85h26M259 103h20M259 121h24M259 139h17"/>
+            <path class="tick-s" d="M245.4 84.4l1.8 1.8 3-3.4"/>
+            <path class="tick-s" d="M245.4 102.4l1.8 1.8 3-3.4"/>
+          </g>
+
+          <rect width="300" height="236" filter="url(#grain)" opacity=".65"/>
         </svg>
       </a>
     </article>

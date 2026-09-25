@@ -933,7 +933,7 @@ h1 em {
 
 .item--illustrated {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 15rem;
+  grid-template-columns: minmax(0, 1fr) 17rem;
   gap: clamp(1.25rem, 3vw, 2.25rem);
   align-items: center;
 }
@@ -959,74 +959,86 @@ h1 em {
   object-fit: contain;
 }
 
-/* Linework. Three deliberate weights — the produced card heaviest, the
-   scattered inputs lighter, the hatching lightest — so the drawing has
-   depth instead of reading as a flat icon set. */
+/* Linework. One ink — terracotta — with three weights: the assistant and
+   its output heaviest, the sources lighter, the details lightest. Drawn as
+   vector so it keeps the palette and works on the dark page too. */
 
-.sun { fill: color-mix(in srgb, var(--accent) 14%, transparent); stroke: var(--accent); stroke-width: 1.4; }
-.ray { fill: none; stroke: var(--accent); stroke-width: 1.5; stroke-linecap: round; opacity: .85; }
-.hatch-fine { fill: none; stroke: var(--accent); stroke-width: .9; stroke-linecap: round; opacity: .5; }
-.horizon { fill: none; stroke: color-mix(in srgb, var(--ink) 30%, transparent); stroke-width: 1; }
+.ink { --stroke: var(--accent); }
 
-.card-face {
-  fill: var(--sheet);
-  stroke: color-mix(in srgb, var(--ink) 85%, transparent);
-  stroke-width: 2;
+.src-card rect,
+.src-card path:not(.thin):not(.tick-s) {
+  fill: none;
+  stroke: var(--stroke);
+  stroke-width: 1.6;
   stroke-linejoin: round;
-}
-.card-rule, .card-title {
-  fill: none;
-  stroke: color-mix(in srgb, var(--ink) 85%, transparent);
-  stroke-width: 2;
   stroke-linecap: round;
 }
-.card-line path {
+.src-card .thin {
   fill: none;
-  stroke: color-mix(in srgb, var(--ink) 45%, transparent);
-  stroke-width: 1.4;
-  stroke-linecap: round;
-}
-.tick-box rect {
-  fill: none;
-  stroke: color-mix(in srgb, var(--ink) 55%, transparent);
-  stroke-width: 1.4;
-}
-.tick { fill: none; stroke: var(--accent); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-
-.hatch-shadow path {
-  fill: none;
-  stroke: color-mix(in srgb, var(--ink) 22%, transparent);
+  stroke: var(--stroke);
   stroke-width: 1.1;
   stroke-linecap: round;
-}
-
-.paper g path {
-  fill: var(--sheet);
-  stroke: color-mix(in srgb, var(--ink) 48%, transparent);
-  stroke-width: 1.3;
   stroke-linejoin: round;
+  opacity: .75;
 }
-.paper .thin {
-  fill: none;
-  stroke: color-mix(in srgb, var(--ink) 34%, transparent);
-  stroke-width: 1;
-}
+.src-card rect.thin { fill: none; }
+
+.dot { fill: var(--stroke); opacity: .6; }
+.tick-s { fill: none; stroke: var(--stroke); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 
 .pull path {
   fill: none;
-  stroke: color-mix(in srgb, var(--accent) 55%, transparent);
-  stroke-width: 1.2;
+  stroke: var(--stroke);
+  stroke-width: 1.3;
   stroke-linecap: round;
-  stroke-dasharray: 3 4;
+  opacity: .7;
+}
+.arrow { fill: var(--stroke); }
+
+/* The assistant reads heaviest — it is the subject. */
+.bot rect, .bot path, .bot circle {
+  fill: none;
+  stroke: var(--stroke);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.bot-head, .bot-body { fill: color-mix(in srgb, var(--sheet) 82%, transparent); }
+.bot-visor { fill: color-mix(in srgb, var(--accent) 13%, transparent); stroke-width: 1.6; }
+.bot-eye { stroke-width: 2.2; }
+.bot-bulb { fill: color-mix(in srgb, var(--accent) 22%, transparent); }
+.bot-ant { stroke-width: 1.8; }
+
+.shine path {
+  fill: none;
+  stroke: var(--stroke);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  opacity: .8;
 }
 
+.out-back {
+  fill: color-mix(in srgb, var(--sheet) 70%, transparent);
+  stroke: var(--stroke);
+  stroke-width: 1.3;
+  opacity: .6;
+}
+.out-face {
+  fill: color-mix(in srgb, var(--sheet) 88%, transparent);
+  stroke: var(--stroke);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+.out-rows .box { fill: none; stroke: var(--stroke); stroke-width: 1.4; }
+.out-rows .thin { fill: none; stroke: var(--stroke); stroke-width: 1.3; stroke-linecap: round; opacity: .75; }
+
 /* A slight lift on hover, like turning a page toward you. */
-.item--illustrated:hover .sun { transform-origin: 140px 88px; transform: scale(1.05); }
-.sun { transition: transform 0.3s ease; }
+.item--illustrated:hover .bot-bulb { transform-origin: 158px 67px; transform: scale(1.35); }
+.bot-bulb { transition: transform 0.3s ease; }
 
 
 @media (prefers-reduced-motion: reduce) {
-  .sun { transition: none; }
+  .bot-bulb { transition: none; }
 }
 
 /* ---------------------------------------------------------------
