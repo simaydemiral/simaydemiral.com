@@ -525,7 +525,12 @@ h1 em {
   padding-left: 1.1rem;
   color: var(--body);
 }
-.case-body li { margin-bottom: 0.65rem; line-height: 1.7; font-size: 0.87rem; }
+.case-body li { margin-bottom: 0.3rem; line-height: 1.6; font-size: 0.87rem; }
+.case-body li:last-child { margin-bottom: 0; }
+
+/* A line that introduces a list belongs to it, so it sits close. */
+.case-body > p:has(+ ul) { margin-bottom: 0.45rem; }
+.case-body > ul + p { margin-top: 1.05rem; }
 .case-body li strong { color: var(--ink); font-weight: 600; }
 /* Each paragraph opens with its own one-line headline. */
 .case-body > p strong { color: var(--ink); font-weight: 600; }
