@@ -87,6 +87,10 @@ button{font:inherit;cursor:pointer}
 /* ---- meters ---- */
 .meters{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
 .meter{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--radius);padding:12px 14px}
+.meter.go{cursor:pointer;transition:border-color .15s,background .15s}
+.meter.go:hover,.meter.go:focus-visible{border-color:var(--brand);background:var(--sunken)}
+.meter.go .meter-l:after{content:" \2192";color:var(--brand);opacity:0;transition:opacity .15s}
+.meter.go:hover .meter-l:after,.meter.go:focus-visible .meter-l:after{opacity:1}
 .meter-n{font:600 22px/1.1 var(--f-mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .meter-l{font-size:11.5px;color:var(--muted);margin-top:4px;letter-spacing:.01em;text-transform:none}
 .meter.is-stop .meter-n{color:var(--stop)} .meter.is-go .meter-n{color:var(--go)}
@@ -1101,7 +1105,8 @@ function renderMonth(){
     + meter(med ? (total>med?"+":"") + pct(total-med, med) + "%" : "—",
             med ? "Vs your median" : "No history yet", med && total>med*1.15 ? "is-stop" : "")
     + meter(pendSum ? money(pendSum) : "$0", "Pending", pendSum ? "is-stop" : "")
-    + meter(uncAmt ? money(uncAmt) : "$0", "Uncategorised", uncAmt > total*0.15 ? "is-stop" : "");
+    + meter(uncAmt ? money(uncAmt) : "$0", "Uncategorised",
+            uncAmt > total*0.15 ? "is-stop" : "", unc.length ? "unc" : "");
 
   /* summary */
   var cats = byCat(list, "day");
@@ -1180,8 +1185,9 @@ function renderMonth(){
 
 function CAT_LABEL_OF(row){ return row[0]; }
 
-function meter(n, l, cls){
-  return '<div class="meter '+cls+'"><div class="meter-n">'+esc(n)+'</div>'
+function meter(n, l, cls, goTo){
+  var g = goTo ? ' go" tabindex="0" role="button" data-goto="'+esc(goTo)+'"' : '"';
+  return '<div class="meter '+cls+g+'><div class="meter-n">'+esc(n)+'</div>'
        + '<div class="meter-l">'+esc(l)+'</div></div>';
 }
 
@@ -1462,6 +1468,11 @@ function multiFilter(id, label, onChange){
     var n = m.values();
     return !n.length || !!m.sel[v];
   };
+  m.set = function(vals){
+    m.sel = {};
+    for(var i=0;i<vals.length;i++) m.sel[vals[i]] = 1;
+    m.draw();
+  };
   m.setOptions = function(opts){
     m.opts = opts;
     var keep = {}, i;                 /* drop selections that no longer exist */
@@ -1608,6 +1619,27 @@ $("tabs").addEventListener("click", function(e){
   if(b.getAttribute("data-tab")==="subs") renderSubs();
   if(b.getAttribute("data-tab")==="merch") renderMerch();
   if(b.getAttribute("data-tab")==="files") renderFiles();
+});
+
+/* The uncategorised figure is only useful if you can act on it, so the tile
+   is a shortcut: it opens the month's uncategorised rows, ready to retag. */
+function openUncategorised(){
+  document.querySelector('.tab[data-tab="txns"]').click();
+  $("q").value = "";
+  $("fMonth").value = curMonth;
+  MCat.set(["uncategorized"]);
+  MAcct.set([]);
+  renderTxns();
+  $("p-txns").scrollIntoView({ behavior:"smooth", block:"start" });
+}
+$("meters").addEventListener("click", function(e){
+  var m = e.target.closest ? e.target.closest("[data-goto]") : null;
+  if(m && m.getAttribute("data-goto") === "unc") openUncategorised();
+});
+$("meters").addEventListener("keydown", function(e){
+  if(e.key !== "Enter" && e.key !== " ") return;
+  var m = e.target.closest ? e.target.closest("[data-goto]") : null;
+  if(m && m.getAttribute("data-goto") === "unc"){ e.preventDefault(); openUncategorised(); }
 });
 
 $("month").addEventListener("change", function(){ curMonth = this.value; renderMonth(); });
