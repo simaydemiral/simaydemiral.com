@@ -464,8 +464,11 @@ h1 em {
     align-items: start;
   }
   .case-back { grid-column: 1 / -1; }
-  /* The flow stays in view while the write-up scrolls past it. */
+  /* The flow stays in view while the write-up scrolls past it — unless the
+     column carries a screenshot too, in which case pinning it would park its
+     bottom permanently off-screen. */
   .pipeline { position: sticky; top: 2rem; margin-top: 0; }
+  .pipeline-tall { position: static; }
 }
 
 .case-body { max-width: 42rem; }
@@ -1290,6 +1293,7 @@ h1 em {
 .shot {
   margin: 2.25rem 0 2.75rem;
 }
+.pipeline .shot { margin: 1.5rem 0 0; }
 .shot img {
   display: block;
   width: 100%;
