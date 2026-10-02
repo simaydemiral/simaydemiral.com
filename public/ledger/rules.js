@@ -85,7 +85,7 @@ var RULES = [
   { t: 1, c: "groceries", re: /\bTRADER JOE/ },
   { t: 1, c: "groceries", re: /\b(WHOLE ?FOODS|WHOLEFDS|\bWFM\b)/ },
   { t: 1, c: "groceries", re: /\b(SAFEWAY|VONS|PAVILIONS|ANDRONICO)\b/ },
-  { t: 1, c: "groceries", re: /\b(BERKELEY BOWL|SHATTUCK MARKET|KATHMANDU MARKET)\b/ },
+  { t: 1, c: "groceries", re: /\b(BERKELEY BOWL|BI-?RITE|SHATTUCK MARKET|KATHMANDU MARKET|MONTEREY MARKET)\b/ },
   { t: 1, c: "groceries", re: /\b(KROGER|RALPHS|ALBERTSONS?|PUBLIX|WEGMANS|MEIJER|SPROUTS|ALDI|LIDL)\b/ },
   { t: 1, c: "groceries", re: /\b(COSTCO|SAMS ?CLUB|BJS WHOLESALE)\b/ },
   { t: 1, c: "groceries", re: /\b(INSTACART|AMAZON FRESH|SHIPT)\b/ },
@@ -128,7 +128,7 @@ var RULES = [
   /* ---- utilities ---- */
   { t: 1, c: "utilities", re: /\b(COMCAST|XFINITY|SPECTRUM|CENTURYLINK|GOOGLE FIBER|SONIC NET)\b/ },
   { t: 1, c: "utilities", re: /\b(MINT MOBILE|AT ?&? ?T|VERIZON|T-?MOBILE|GOOGLE FI|VISIBLE)\b/ },
-  { t: 1, c: "utilities", re: /\b(PG ?&? ?E|PGANDE|PACIFIC GAS|EDISON|EBMUD|RECOLOGY|WASTE MANAGEMENT)\b/ },
+  { t: 1, c: "utilities", re: /\b(PG ?&? ?E|PG AND E|PGANDE|PACIFIC GAS|EDISON|EBMUD|RECOLOGY|WASTE MANAGEMENT)\b/ },
   { t: 1, c: "utilities", re: /\b(WASH LAUNDRY|PAYRANGE|LAUNDRY)\b/ },
   { t: 3, c: "utilities", re: /\b(UTILITY|UTILITIES|ELECTRIC CO|WATER DEPT)\b/ },
 

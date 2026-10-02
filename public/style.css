@@ -1281,3 +1281,33 @@ h1 em {
   .star line { animation: none; stroke-dashoffset: 0; opacity: .9; }
   .star-core { animation: none; opacity: .9; }
 }
+
+/* ---------------------------------------------------------------
+   SCREENSHOT FIGURE  —  two files, one for each theme. The site
+   has an explicit [data-theme] override as well as the OS
+   preference, so both have to be handled; only one is ever shown.
+   --------------------------------------------------------------- */
+.shot {
+  margin: 2.25rem 0 2.75rem;
+}
+.shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-s);
+}
+.shot .shot-dark { display: none; }
+.shot figcaption {
+  margin-top: 0.75rem;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--body);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .shot .shot-light { display: none; }
+  :root:not([data-theme="light"]) .shot .shot-dark  { display: block; }
+}
+:root[data-theme="dark"] .shot .shot-light { display: none; }
+:root[data-theme="dark"] .shot .shot-dark  { display: block; }

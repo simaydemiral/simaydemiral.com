@@ -534,7 +534,7 @@ function normMerchant(raw){
   /* processor prefixes */
   var pre = new RegExp("^(?:"+PROCESSOR_PREFIXES.join("|").replace(/\./g,"\\.")+")\\s*\\*+\\s*","");
   s = s.replace(pre,"");
-  if(!/^(UBER|APPLE|AMEX|SHELL|TARGET|CVS)\b/.test(s))
+  if(!/^(UBER|LYFT|APPLE|AMEX|SHELL|TARGET|CVS|IKEA|HULU|EBAY|NIKE|ALDI|ZARA|LIME|AVIS|DELL)\b/.test(s))
     s = s.replace(/^[A-Z]{2,4}\s?\*+\s?(?=[A-Z0-9])/,"");
   s = s.replace(/^AMZN\s+MKTPL?A?C?E?(\s+[A-Z]{2})?\b/,"AMAZON")
        .replace(/^AMAZON\s+(MKTPL?A?C?E?|RETA|PRIME)\*?\s*/,"AMAZON ")
@@ -876,7 +876,7 @@ function renderMonth(){
     lines.push(pct(uncAmt,total)+"% of the month ("+esc(money(uncAmt))
       +") is still uncategorised — tagging a few merchants on the Transactions tab would fix most of it.");
   if(hist.length && hist.length < 3)
-    lines.push('<span class="note">With only '+hist.length+' month(s) of history these are first impressions, not patterns.</span>');
+    lines.push('<span class="note">With '+(hist.length+1)+' months of data these are first impressions, not patterns.</span>');
 
   $("summary").innerHTML = "<ul><li>" + lines.join("</li><li>") + "</li></ul>";
 
