@@ -527,6 +527,8 @@ h1 em {
 }
 .case-body li { margin-bottom: 0.65rem; line-height: 1.7; font-size: 0.87rem; }
 .case-body li strong { color: var(--ink); font-weight: 600; }
+/* Each paragraph opens with its own one-line headline. */
+.case-body > p strong { color: var(--ink); font-weight: 600; }
 
 .case-note { font-size: 0.8rem; color: var(--body); margin: 0.85rem 0 0; }
 .case-back { margin: 3.5rem 0 0; font-size: 0.9rem; }

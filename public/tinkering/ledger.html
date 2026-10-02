@@ -95,43 +95,32 @@
 
     <h2>What I learned along the way</h2>
     <p>
-      Every bank writes a different file. One of mine had four summary lines and
-      a blank row before the real header, a running balance column sitting next
-      to the amount, and a first row with no amount at all. Picking the wrong
-      column silently inverts the whole dashboard, so the parser works out the
-      columns by looking at the values rather than trusting the headings, and it
-      refuses to import anything it is unsure about.
+      <strong>Bank files are messy, so the parser can’t blindly trust the
+      headers.</strong> One file had four summary lines, a blank row before the
+      real header, and a running balance next to the amount. The parser now
+      identifies columns based on the values and refuses to import anything it’s
+      unsure about.
     </p>
     <p>
-      I load a credit card, a current account and savings, and those accounts pay
-      each other constantly. The first version counted that as spending — paying
-      the card from savings looked like $2,871 of purchases. Nothing in the
-      totals looked wrong, which is why it survived so long. Transfers between
-      your own accounts are now recognized and left out of every figure, so
-      loading three files does not count the same dollar three times.
+      <strong>Good categorization starts with getting the merchant name
+      right.</strong> Banks turn merchants into strings like <em>AMZN Mktp
+      US*2X4RT1</em>, so the parser strips the noise to recover a recognizable
+      merchant name. But it has to be careful not to strip too much —
+      <em>FRONTIER AI</em>, for example, is actually Frontier Airlines.
     </p>
     <p>
-      Categorizing is really a naming problem. Banks write <em>AMZN Mktp
-      US*2X4RT1</em>, so the first job is stripping the processor prefixes, store
-      numbers, phone numbers and city codes to get back to a name a person would
-      recognize. Strip too hard and the brand goes with it: <em>FRONTIER AI</em>
-      — which is Frontier Airlines — was very nearly filed under software.
+      <strong>The key design decision was to recompute categories instead of
+      storing them on each transaction.</strong> Merchant names and categories
+      are recalculated from the rules and my corrections every time the page
+      loads, so fixing one merchant updates my entire history and future imports.
+      Only the raw rows, corrections, and pending list are saved.
     </p>
     <p>
-      The decision that made the rest work is that a transaction never stores its
-      own category. Both the merchant name and the category are recomputed every
-      time the page loads, from the rules plus your corrections. So fixing one
-      merchant fixes it across your whole history and every future import, and
-      improving the parser reaches transactions imported months ago. Only three
-      things are actually saved: the raw rows, your corrections, and your pending
-      list.
-    </p>
-    <p>
-      The last fix was the fixed commitments (e.g., rent, tuition). They are real
-      spending, but they are so much larger than everything else that leaving
-      them in made the chart say "you spent a lot on rent" every single month.
-      They now get their own line, so the headline number is the part you can
-      actually do something about.
+      <strong>A dashboard is only useful if it shows meaningful insights you can
+      act on.</strong> Separating fixed commitments like rent and tuition from
+      day-to-day spending made the numbers much more meaningful. The goal isn’t
+      to show me that I spent $2,150 on rent — I already know that. It’s to
+      surface the spending patterns I can actually change.
     </p>
 
     <h2>Stack</h2>
