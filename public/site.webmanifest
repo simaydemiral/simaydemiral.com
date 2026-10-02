@@ -1,0 +1,11 @@
+{
+  "name": "Simay Demiral",
+  "short_name": "Simay",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "theme_color": "#171210",
+  "background_color": "#171210",
+  "display": "standalone"
+}
