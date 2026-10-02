@@ -887,8 +887,9 @@ function renderMonth(){
   if(fixedCats.length){
     for(i=0;i<fixedCats.length;i++) fixedCats[i][2] = pct(fixedCats[i][1], allIn);
     catsHtml += '<p class="note" style="margin:14px 0 8px;padding-top:12px;'
-      + 'border-top:1px solid var(--line-soft)">Fixed commitments, scaled against the '
-      + 'whole month</p>' + bars(fixedCats, allIn, "fixedbar");
+      + 'border-top:1px solid var(--line-soft)">Fixed commitments, as a share of '
+      + 'your ' + esc(money0(allIn)) + ' total for the month — the rest is the '
+      + 'day-to-day above</p>' + bars(fixedCats, allIn, "fixedbar");
   }
   $("cats").innerHTML = catsHtml;
 
