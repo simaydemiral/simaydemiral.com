@@ -4,15 +4,15 @@
 var CATEGORIES = [
   "groceries", "restaurants", "transport", "travel", "housing", "utilities",
   "home", "health", "education", "entertainment", "shopping",
-  "fees", "income", "rewards", "transfers", "uncategorized"
+  "cash", "fees", "income", "rewards", "transfers", "uncategorized"
 ];
 
 var CAT_LABEL = {
   groceries: "Groceries", restaurants: "Restaurants", transport: "Transport",
   travel: "Travel", housing: "Housing", utilities: "Utilities", home: "Home",
   health: "Health", education: "Education", entertainment: "Entertainment",
-  shopping: "Shopping", fees: "Fees", income: "Income", rewards: "Rewards",
-  transfers: "Transfers", uncategorized: "Uncategorised"
+  shopping: "Shopping", cash: "Cash", fees: "Fees", income: "Income",
+  rewards: "Rewards", transfers: "Transfers", uncategorized: "Uncategorised"
 };
 
 /* Not spending. Excluded from every total, chart and comparison. */
@@ -53,7 +53,7 @@ var RULES = [
   { t: 2, c: "transfers", re: /\bWIRE TRANSFER\b/ },   /* the FEE rule is tier 1, so it wins */
   { t: 1, c: "transfers", re: /\bTRANSFER (TO|FROM)\b/ },
   { t: 1, c: "transfers", re: /\b(SCHWAB|FIDELITY|VANGUARD|ROBINHOOD|COINBASE|BETTERMENT|WEALTHFRONT)\b/ },
-  { t: 1, c: "transfers", re: /\b(ATM .*(DEPOSIT|WITHDRWL|WITHDRAWAL)|BKOFAMERICA ATM|BKOFAMERICA BC)\b/ },
+  { t: 1, c: "cash", re: /\b(ATM|BKOFAMERICA BC|CASH WITHDRWL|CASH WITHDRAWAL)\b/ },
 
   /* ---- income ---- */
   { t: 1, c: "income", re: /\b(PAYROLL|DIRECT DEP|DIR DEP|SALARY|WAGES|PAYCHECK)\b/ },

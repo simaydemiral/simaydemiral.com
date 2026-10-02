@@ -1093,8 +1093,10 @@ function renderMonth(){
     .map(function(m){ return spendOf(V.filter(function(t){ return t.month===m; }), "day"); });
   var med = median(hist);
 
+  /* Cash put back in is money returning, not a refund, so it nets off the
+     cash figure without pretending a shop gave you money. */
   var refunds = 0;
-  for(i=0;i<list.length;i++) refunds += list[i].refund;
+  for(i=0;i<list.length;i++) if(list[i].cat !== "cash") refunds += list[i].refund;
   var pendSum = 0;
   for(i=0;i<db.pending.length;i++) pendSum += Math.abs(db.pending[i].amt);
 
@@ -1140,6 +1142,15 @@ function renderMonth(){
   }
   var big = list.filter(function(t){ return t.spend > 0 && !FIXED[t.cat]; })
                 .sort(function(a,b){ return b.spend-a.spend; })[0];
+  /* Cash is the one line the statement cannot itemise, so say so rather than
+     letting it sit among the categories as though it were a shop. */
+  var cashOut = 0, cashIn = 0;
+  for(i=0;i<list.length;i++) if(list[i].cat === "cash"){ cashOut += list[i].spend; cashIn += list[i].refund; }
+  if(cashOut - cashIn > 0)
+    lines.push("You took <b>"+esc(money(cashOut - cashIn))+"</b> out as cash"
+      + (cashIn > 0 ? " (after putting " + esc(money(cashIn)) + " back in)" : "")
+      + ". Where that went, the statement cannot say.");
+
   if(big) lines.push("Your single largest charge was <b>"+esc(money(big.spend))
     +"</b> at <b>"+esc(big.merch)+"</b> on "+esc(big.date)+".");
   if(refunds > 0)
