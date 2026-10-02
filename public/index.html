@@ -174,114 +174,14 @@
       </p>
       </div>
 
-      <!-- Drawn by hand in SVG. Four distinct source icons — a calendar, an
-           assignment, a contact, an event — gathered into one checked list. -->
       <a class="plate" href="/tinkering/personal-ai-assistant" aria-hidden="true" tabindex="-1">
-        <svg viewBox="0 0 400 180" class="ink">
-
-          <!-- the five things it reads -->
-          <g class="src-card">
-            <!-- mail -->
-            <g transform="translate(0,5)">
-              <rect x="2" y="0" width="46" height="26" rx="3.5"/>
-              <path class="thin" d="M8 6h17v13H8z"/>
-              <path class="thin" d="M8 6l8.5 6L25 6"/>
-              <path class="thin" d="M30 9h12M30 14h8M30 19h12"/>
-            </g>
-            <!-- calendar -->
-            <g transform="translate(0,38)">
-              <rect x="2" y="0" width="46" height="26" rx="3.5"/>
-              <path d="M2 8h46"/>
-              <circle class="dot" cx="12" cy="15" r="1.9"/>
-              <circle class="dot" cx="23" cy="15" r="1.9"/>
-              <circle class="dot" cx="34" cy="15" r="1.9"/>
-              <circle class="dot" cx="17" cy="21" r="1.9"/>
-              <circle class="dot" cx="28" cy="21" r="1.9"/>
-            </g>
-            <!-- classes -->
-            <g transform="translate(0,71)">
-              <rect x="2" y="0" width="46" height="26" rx="3.5"/>
-              <path class="thin" d="M22 8c-3-2.2-7-2.2-10-1.4v12c3-.8 7-.8 10 1.4 3-2.2 7-2.2 10-1.4v-12c-3-.8-7-.8-10 1.4z"/>
-              <path class="thin" d="M22 8v12"/>
-              <path class="thin" d="M36 11h7M36 17h5"/>
-            </g>
-            <!-- tracker -->
-            <g transform="translate(0,104)">
-              <rect x="2" y="0" width="46" height="26" rx="3.5"/>
-              <rect class="thin" x="8" y="6" width="5.5" height="5.5" rx="1.4"/>
-              <rect class="thin" x="8" y="15" width="5.5" height="5.5" rx="1.4"/>
-              <path class="thin" d="M18 9h24M18 18h17"/>
-              <path class="tick-s" d="M9.1 8.9l1.4 1.4 2.4-2.7"/>
-            </g>
-            <!-- events -->
-            <g transform="translate(0,137)">
-              <rect x="2" y="0" width="46" height="26" rx="3.5"/>
-              <path class="thin" d="M14 5l2 4.1 4.5.7-3.3 3.2.8 4.5-4-2.1-4 2.1.8-4.5L7.5 9.8l4.5-.7z"/>
-              <path class="thin" d="M26 10h16M26 17h11"/>
-            </g>
-          </g>
-
-          <!-- Each stub is drawn once, the shared trunk once, so nothing is
-               painted twice. Small tips along the way show direction. -->
-          <g class="trace">
-            <path d="M48 18  H100 a6 6 0 0 1 6 6"/>
-            <path d="M48 51  H100 a6 6 0 0 1 6 6"/>
-            <path d="M48 84  H106"/>
-            <path d="M48 117 H100 a6 6 0 0 0 6 -6"/>
-            <path d="M48 150 H100 a6 6 0 0 0 6 -6"/>
-            <path d="M106 24 V144"/>
-            <path d="M106 84 H156"/>
-          </g>
-
-          <g class="tip">
-            <path d="M80 18  l-6 -3.2v6.4z"/>
-            <path d="M80 51  l-6 -3.2v6.4z"/>
-            <path d="M80 84  l-6 -3.2v6.4z"/>
-            <path d="M80 117 l-6 -3.2v6.4z"/>
-            <path d="M80 150 l-6 -3.2v6.4z"/>
-            <path d="M106 60 l-3.2 -6h6.4z"/>
-            <path d="M106 112 l-3.2 6h6.4z"/>
-            <path d="M136 84 l-6 -3.2v6.4z"/>
-          </g>
-
-          <g class="joint"><circle cx="106" cy="84" r="2.2"/></g>
-
-          <!-- the assistant, smaller -->
-          <g class="bot">
-            <path class="bot-ant" d="M187 58v-7"/>
-            <circle class="bot-bulb" cx="187" cy="47" r="3.6"/>
-            <rect class="bot-head" x="162" y="58" width="50" height="38" rx="13"/>
-            <rect class="bot-visor" x="170" y="67" width="34" height="20" rx="9"/>
-            <path class="bot-eye" d="M179 76a3.2 3.2 0 0 1 5.6 0M189 76a3.2 3.2 0 0 1 5.6 0"/>
-            <path class="bot-ear" d="M158 71h-4v11h4M216 71h4v11h-4"/>
-            <path class="bot-body" d="M169 98h36a9 9 0 0 1 9 9v6a5 5 0 0 1-5 5h-44a5 5 0 0 1-5-5v-6a9 9 0 0 1 9-9z"/>
-            <circle class="dot" cx="187" cy="108" r="2.4"/>
-          </g>
-
-          <g class="trace"><path d="M220 84 H278"/></g>
-          <g class="tip"><path d="M252 84 l-6 -3.2v6.4z"/></g>
-          <path class="arrow" d="M292 84l-13-5.5v11z"/>
-
-          <!-- what it produces -->
-          <g class="shine">
-            <path d="M340 38v-10M310 46l-6-8M372 46l6-8M306 138l-7 7M376 138l7 7"/>
-          </g>
-          <rect class="out-back" x="310" y="52" width="72" height="76" rx="4"/>
-          <rect class="out-face" x="300" y="46" width="80" height="80" rx="4"/>
-          <g class="out-rows">
-            <rect class="box" x="308" y="56" width="8" height="8" rx="1.8"/>
-            <rect class="box" x="308" y="72" width="8" height="8" rx="1.8"/>
-            <rect class="box" x="308" y="88" width="8" height="8" rx="1.8"/>
-            <rect class="box" x="308" y="104" width="8" height="8" rx="1.8"/>
-            <path class="thin" d="M322 60h48M322 76h36M322 92h44M322 108h30"/>
-            <path class="tick-s" d="M309.2 60.2l1.5 1.5 2.6-2.9"/>
-            <path class="tick-s" d="M309.2 76.2l1.5 1.5 2.6-2.9"/>
-          </g>
-        </svg>
+        <span class="plate-art" style="--art:url('/img/assistant.webp');--art-ratio:1838/609"></span>
       </a>
     </article>
 
-    <article class="item">
+    <article class="item item--illustrated">
+
+      <div class="item-body">
       <h3><a class="item-link" href="/tinkering/ledger">Ledger</a></h3>
       <p class="meta">Client-side web app &middot; CSV parsing &middot; 2026</p>
       <p>
@@ -290,6 +190,11 @@
         never leaves your computer.
         <a class="item-more" href="/tinkering/ledger">Read the case study &rarr;</a>
       </p>
+      </div>
+
+      <a class="plate" href="/tinkering/ledger" aria-hidden="true" tabindex="-1">
+        <span class="plate-art" style="--art:url('/img/ledger.webp');--art-ratio:1943/461"></span>
+      </a>
     </article>
 
     <article class="item item--empty">
