@@ -66,29 +66,35 @@
 
     <h2>What I built</h2>
     <p>
-      A single page that does everything locally. You drop a CSV (your bank
-      statements) on it; the browser reads the file, works out which columns are
+      <strong>Everything runs in the browser.</strong> You drop a CSV — your bank
+      statements — on the page. It reads the file, works out which columns are
       which, cleans up the merchant names, sorts transactions into categories and
-      draws the charts.
+      draws the charts. There is no backend and no account.
     </p>
     <p>
-      The rules get some merchants wrong, so <strong>every category is
-      editable</strong>. Change one and it applies to that merchant everywhere —
-      your whole history and every import after it, not just the row you clicked.
-      You can tag refunds, log a pending charge before it clears and have it
-      matched to the real transaction when it arrives, and search the history by
-      merchant.
+      <strong>Every category is editable.</strong> The rules get some merchants
+      wrong. Change one and it applies to that merchant everywhere — your whole
+      history and every import after it, not just the row you clicked.
     </p>
     <p>
-      Two things it works out on its own. Anything billed on a steady cadence —
-      same merchant, similar amount, three times or more — gets collected on a
-      Subscriptions tab, with what you pay, when it is next due and what it has
-      cost you so far. And when the same merchant charges the same amount twice
-      within a few days, the month flags it, with a floor on the amount so two
-      coffees in one afternoon do not count.
+      <strong>Refunds and pending charges are tracked too.</strong> You can tag a
+      refund so it nets off properly, and log a pending charge before it clears;
+      when the real transaction arrives, the two are matched. The whole history is
+      searchable by merchant.
     </p>
     <p>
-      It makes <strong>no network requests at all</strong> — no fonts, no
+      <strong>Subscriptions get their own tab.</strong> Anything billed on a
+      steady cadence — same merchant, similar amount, three times or more — is
+      collected there, with what you pay, when it is next due and what it has cost
+      you so far.
+    </p>
+    <p>
+      <strong>Double charges get flagged.</strong> When the same merchant charges
+      the same amount twice within a few days, the month flags it. There is a
+      floor on the amount, so two coffees in one afternoon do not count.
+    </p>
+    <p>
+      <strong>It makes no network requests at all.</strong> No fonts, no
       analytics, no CDN. You can open the network tab while you use it and watch
       it stay empty.
     </p>
