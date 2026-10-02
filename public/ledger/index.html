@@ -126,6 +126,8 @@ select.cat.unc{border-color:var(--warn);color:var(--warn)}
 .chip.c-stop{color:var(--stop);background:var(--stop-wash);border-color:transparent}
 
 .note{font-size:12.5px;color:var(--muted)}
+.flagcard{border-color:var(--warn);margin-bottom:14px}
+.flagcard h3{color:var(--warn)}
 
 /* ---- trend chart ---- */
 .chart-ctl{display:flex;gap:8px;flex-wrap:wrap;margin:-2px 0 14px}
@@ -201,6 +203,7 @@ input[type=search]{min-width:200px}
       <button class="tab" role="tab" aria-selected="true" data-tab="month">This month</button>
       <button class="tab" role="tab" aria-selected="false" data-tab="txns">Transactions <span class="tab-n" id="nTx">0</span></button>
       <button class="tab" role="tab" aria-selected="false" data-tab="pend">Pending &amp; refunds <span class="tab-n" id="nPe">0</span></button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="subs">Subscriptions <span class="tab-n" id="nSu">0</span></button>
       <button class="tab" role="tab" aria-selected="false" data-tab="merch">Merchants <span class="tab-n" id="nMe">0</span></button>
       <button class="tab" role="tab" aria-selected="false" data-tab="files">Files <span class="tab-n" id="nFi">0</span></button>
     </nav>
@@ -210,6 +213,7 @@ input[type=search]{min-width:200px}
         <label class="note">Month</label>
         <select class="f" id="month"></select>
       </div>
+      <div id="dups"></div>
       <div class="grid2">
         <div class="card summary" id="cSummary"><h3>Summary</h3><div id="summary"></div></div>
         <div class="card" id="cCats"><h3>Where it went</h3><div id="cats"></div></div>
@@ -264,6 +268,10 @@ input[type=search]{min-width:200px}
           <div id="refunds"></div>
         </div>
       </div>
+    </section>
+
+    <section id="p-subs" hidden>
+      <div class="card"><h3>Recurring charges <span class="note" style="font-weight:400;text-transform:none;letter-spacing:0">three or more on a steady cadence</span></h3><div id="subs"></div></div>
     </section>
 
     <section id="p-merch" hidden>
@@ -1105,6 +1113,7 @@ function renderMonth(){
   $("cats").innerHTML = catsHtml;
 
   renderTrend();
+  renderDups(list);
 
   /* top merchants this month */
   var mm = {}, k;
@@ -1199,6 +1208,150 @@ function renderPend(){
   $("refunds").innerHTML = rh;
 }
 
+/* ============================================================
+   RECURRING CHARGES
+   Three occurrences is the minimum that can show a rhythm; two is a
+   coincidence. Amounts have to be close as well as the spacing — a shop
+   you happen to visit every month is not a subscription.
+   ============================================================ */
+var CADENCE = [
+  ["Weekly",        7,   6,   8],
+  ["Fortnightly",  14,  12,  16],
+  ["Monthly",      30,  26,  35],
+  ["Quarterly",    91,  85,  97],
+  ["Yearly",      365, 350, 380]
+];
+
+function recurring(){
+  var m = {}, i, k;
+  for(i=0;i<V.length;i++){
+    var t = V[i];
+    if(NOT_SPEND[t.cat] || t.amt >= 0) continue;
+    (m[t.key] = m[t.key] || []).push(t);
+  }
+  var out = [], newest = V.length ? dayNum(V[0].date) : 0;
+  for(k in m){
+    var ts = m[k].slice().sort(function(a,b){ return dayNum(a.date) - dayNum(b.date); });
+    if(ts.length < 3) continue;
+
+    var gaps = [], amts = [];
+    for(i=1;i<ts.length;i++) gaps.push(dayNum(ts[i].date) - dayNum(ts[i-1].date));
+    for(i=0;i<ts.length;i++) amts.push(-ts[i].amt);
+    var a = median(amts), g = median(gaps);
+    if(!a) continue;
+
+    var steady = 0;
+    for(i=0;i<amts.length;i++)
+      if(Math.abs(amts[i] - a) <= Math.max(1, a * 0.25)) steady++;
+    if(steady < ts.length - 1) continue;
+
+    var cad = null;
+    for(i=0;i<CADENCE.length;i++)
+      if(g >= CADENCE[i][2] && g <= CADENCE[i][3]) cad = CADENCE[i];
+    if(!cad) continue;
+
+    /* the median gap can land on a cadence by accident, so most of the
+       individual gaps have to agree with it too */
+    var onBeat = 0;
+    for(i=0;i<gaps.length;i++)
+      if(Math.abs(gaps[i] - cad[1]) <= Math.max(3, cad[1] * 0.3)) onBeat++;
+    if(onBeat < Math.ceil(gaps.length * 0.7)) continue;
+
+    var last = ts[ts.length-1], lastN = dayNum(last.date), total = 0;
+    for(i=0;i<amts.length;i++) total += amts[i];
+    out.push({ key:k, merch:last.merch, cat:last.cat, n:ts.length, amt:a, cad:cad[0],
+               last:last.date, next:isoOf(lastN + cad[1]), total:total,
+               live:(newest - lastN) <= cad[1] * 1.6,
+               yearly:a * (365 / cad[1]) });
+  }
+  out.sort(function(x,y){ return (y.live - x.live) || (y.yearly - x.yearly); });
+  return out;
+}
+
+/* Paying twice looks exactly like paying once, twice — so the test is a
+   same-merchant, same-amount pair a few days apart. The floor matters:
+   two $4 coffees in a day is a Tuesday, not a billing error. */
+function dupFloor(cat){
+  return (cat === "restaurants" || cat === "transport" || cat === "groceries") ? 20 : 5;
+}
+function duplicates(list){
+  var byKey = {}, out = [], i, j, k;
+  for(i=0;i<list.length;i++){
+    var t = list[i];
+    if(NOT_SPEND[t.cat] || t.amt >= 0) continue;
+    (byKey[t.key] = byKey[t.key] || []).push(t);
+  }
+  for(k in byKey){
+    var ts = byKey[k];
+    for(i=0;i<ts.length;i++) for(j=i+1;j<ts.length;j++){
+      var a = ts[i], b = ts[j];
+      if(Math.abs(a.amt - b.amt) > 0.009) continue;
+      if(Math.abs(dayNum(a.date) - dayNum(b.date)) > 3) continue;
+      if(-a.amt < dupFloor(a.cat)) continue;
+      out.push({ merch:a.merch, amt:-a.amt, acct:a.acct === b.acct ? a.acct : "",
+                 d1:a.date < b.date ? a.date : b.date,
+                 d2:a.date < b.date ? b.date : a.date });
+    }
+  }
+  out.sort(function(x,y){ return y.amt - x.amt; });
+  return out;
+}
+
+function renderDups(list){
+  var d = duplicates(list), i;
+  if(!d.length){ $("dups").innerHTML = ""; return; }
+  var h = '<div class="card flagcard"><h3>Possible double charges</h3>'
+        + '<p class="note" style="margin:-4px 0 10px">Same merchant, same amount, within '
+        + 'three days. Worth a look &mdash; some of these will be genuine.</p>'
+        + '<table><tbody>';
+  for(i=0;i<d.length;i++)
+    h += '<tr><td class="t-merch">'+esc(d[i].merch)+'</td>'
+       + '<td class="t-date">'+(d[i].d1 === d[i].d2
+             ? 'twice on ' + esc(d[i].d1)
+             : esc(d[i].d1) + ' and ' + esc(d[i].d2))+'</td>'
+       + '<td class="t-acct">'+esc(d[i].acct)+'</td>'
+       + '<td class="t-amt">'+esc(money(d[i].amt))+' each</td></tr>';
+  $("dups").innerHTML = h + '</tbody></table></div>';
+}
+
+function renderSubs(){
+  var rows = recurring(), i;
+  $("nSu").textContent = rows.length;
+  if(!rows.length){
+    $("subs").innerHTML = '<p class="empty">Nothing recurring yet &mdash; this needs at '
+      + 'least three charges from one merchant on a steady cadence.</p>';
+    return;
+  }
+  /* rent is genuinely recurring, but a yearly figure led by it says nothing
+     about the subscriptions you could actually cancel. */
+  var live = 0, perYear = 0, perYearFree = 0;
+  for(i=0;i<rows.length;i++) if(rows[i].live){
+    live++; perYear += rows[i].yearly;
+    if(!FIXED[rows[i].cat]) perYearFree += rows[i].yearly;
+  }
+  var h = '<p class="note" style="margin:-4px 0 12px">' + live + ' active, '
+        + (rows.length - live) + ' lapsed &mdash; about ' + money0(perYear) + ' a year'
+        + (perYearFree < perYear
+            ? ', or ' + money0(perYearFree) + ' once the fixed commitments are set aside'
+            : '')
+        + '.</p>'
+        + '<table><thead><tr><th>Merchant</th><th>Every</th><th class="t-amt">Amount</th>'
+        + '<th>Seen</th><th>Last</th><th>Next</th><th class="t-amt">Paid so far</th>'
+        + '</tr></thead><tbody>';
+  for(i=0;i<rows.length;i++){
+    var r = rows[i];
+    h += '<tr><td class="t-merch">' + esc(r.merch)
+      + (r.live ? '' : ' <span class="chip">lapsed</span>') + '</td>'
+      + '<td class="t-acct">' + esc(r.cad) + '</td>'
+      + '<td class="t-amt">' + esc(money(r.amt)) + '</td>'
+      + '<td class="t-acct">' + r.n + '&times;</td>'
+      + '<td class="t-date">' + esc(r.last) + '</td>'
+      + '<td class="t-date">' + (r.live ? esc(r.next) : '&mdash;') + '</td>'
+      + '<td class="t-amt">' + esc(money(r.total)) + '</td></tr>';
+  }
+  $("subs").innerHTML = h + '</tbody></table>';
+}
+
 function renderMerch(){
   var m = {}, i, k;
   for(i=0;i<V.length;i++){
@@ -1267,6 +1420,7 @@ function render(){
   fillSelect($("fMonth"), ms.map(function(m){ return [m, monthName(m)]; }), "All months");
 
   renderMonth();
+  renderSubs();
   if(!$("p-txns").hidden) renderTxns();
   if(!$("p-pend").hidden) renderPend();
   if(!$("p-merch").hidden) renderMerch();
@@ -1321,11 +1475,12 @@ $("tabs").addEventListener("click", function(e){
   if(!b) return;
   var all = document.querySelectorAll(".tab");
   for(var i=0;i<all.length;i++) all[i].setAttribute("aria-selected", String(all[i]===b));
-  ["month","txns","pend","merch","files"].forEach(function(k){
+  ["month","txns","pend","subs","merch","files"].forEach(function(k){
     $("p-"+k).hidden = (k !== b.getAttribute("data-tab"));
   });
   if(b.getAttribute("data-tab")==="txns") renderTxns();
   if(b.getAttribute("data-tab")==="pend") renderPend();
+  if(b.getAttribute("data-tab")==="subs") renderSubs();
   if(b.getAttribute("data-tab")==="merch") renderMerch();
   if(b.getAttribute("data-tab")==="files") renderFiles();
 });
