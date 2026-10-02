@@ -149,6 +149,10 @@ select.cat.unc{border-color:var(--warn);color:var(--warn)}
 .chip.c-stop{color:var(--stop);background:var(--stop-wash);border-color:transparent}
 
 .note{font-size:12.5px;color:var(--muted)}
+.receipt{background:var(--surface);border:1px solid var(--brand);border-radius:var(--radius);
+  padding:14px 18px;margin-bottom:14px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.receipt b{color:var(--ink)}
+.receipt p{margin:0;font-size:13.5px;color:var(--muted);flex:1;min-width:260px;line-height:1.55}
 .flagcard{border-color:var(--warn);margin-bottom:14px}
 .flagcard h3{color:var(--warn)}
 
@@ -296,6 +300,9 @@ input[type=search]{min-width:200px}
   </div>
 
   <div id="app" hidden>
+
+    <div id="receipt"></div>
+
 
     <div class="meters" id="meters"></div>
 
@@ -1732,20 +1739,52 @@ function render(){
 /* ============================================================
    WIRING
    ============================================================ */
+/* What an import actually did. A silent jump to the dashboard hides the one
+   thing worth acting on: the merchants the rules have never seen before. */
+function showReceipt(added, dupes, files){
+  var seen = {}, n = 0, worth = 0, i;
+  for(i=0;i<V.length;i++) if(V[i].cat === "uncategorized"){
+    worth += Math.abs(V[i].amt);
+    if(!seen[V[i].key]){ seen[V[i].key] = 1; n++; }
+  }
+  var h = '<div class="receipt"><p><b>' + added + '</b> transaction'
+        + (added === 1 ? "" : "s") + ' added from ' + files + ' file'
+        + (files === 1 ? "" : "s")
+        + (dupes ? ', <b>' + dupes + '</b> already had' : '') + '. ';
+  if(n) h += 'There ' + (n === 1 ? 'is <b>1</b> merchant' : 'are <b>' + n + '</b> merchants')
+           + ' I do not recognise, worth ' + money0(worth)
+           + '. Tagging one teaches it for good.</p>'
+           + '<button class="btn" id="rcGo">Tag them</button>';
+  else h += 'Every merchant was recognised.</p>';
+  $("receipt").innerHTML = h + '<button class="btn-q" id="rcHide">Dismiss</button></div>';
+}
+
+$("receipt").addEventListener("click", function(e){
+  if(e.target.id === "rcHide"){ $("receipt").innerHTML = ""; return; }
+  if(e.target.id === "rcGo"){
+    $("receipt").innerHTML = "";
+    goTxns({ cats:["uncategorized"] });     /* every month, not just this one */
+  }
+});
+
 function readFiles(fileList){
   var pending = fileList.length, reports = [];
+  var nAdded = 0, nDupes = 0, nFiles = fileList.length;
   if(!pending) return;
   for(var i=0;i<fileList.length;i++){
     (function(f){
       var r = new FileReader();
       r.onload = function(){
         var res = importFile(f.name, String(r.result));
+        if(res.ok){ nAdded += res.added; nDupes += res.dupes; }
         reports.push(res.ok
           ? f.name + ": " + res.added + " new"
             + (res.dupes ? ", " + res.dupes + " already had" : "")
             + (res.cleared ? ", " + res.cleared + " pending cleared" : "")
           : f.name + ": " + res.why);
-        if(--pending === 0){ render(); toast(reports.join(" · ")); }
+        if(--pending === 0){
+          render(); showReceipt(nAdded, nDupes, nFiles); toast(reports.join(" · "));
+        }
       };
       r.onerror = function(){
         reports.push(f.name + ": could not read that file");
