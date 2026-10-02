@@ -177,6 +177,22 @@ select.cat.unc{border-color:var(--warn);color:var(--warn)}
 input[type=search],select.f{font:inherit;font-size:13px;padding:6px 9px;border:1px solid var(--line);
   border-radius:8px;background:var(--surface);color:var(--ink)}
 input[type=search]{min-width:200px}
+
+/* ---- multi-select filter ---- */
+.multi{position:relative}
+.multi-btn{font:inherit;font-size:13px;padding:6px 9px;border:1px solid var(--line);
+  border-radius:8px;background:var(--surface);color:var(--ink);text-align:left;
+  min-width:150px;display:flex;align-items:center;gap:8px;justify-content:space-between}
+.multi-btn:after{content:"\25BE";color:var(--faint);font-size:11px}
+.multi.on .multi-btn{border-color:var(--brand)}
+.multi-menu{position:absolute;z-index:40;top:calc(100% + 4px);left:0;min-width:190px;
+  max-height:280px;overflow:auto;background:var(--surface);border:1px solid var(--line);
+  border-radius:10px;padding:6px;box-shadow:0 12px 30px rgba(0,0,0,.28)}
+.multi-menu label{display:flex;align-items:center;gap:8px;padding:5px 7px;border-radius:6px;
+  font-size:13px;cursor:pointer;white-space:nowrap}
+.multi-menu label:hover{background:var(--sunken)}
+.multi-menu input{accent-color:var(--brand);margin:0}
+.multi-all{border-bottom:1px solid var(--line-soft);margin-bottom:4px;padding-bottom:4px}
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);
   color:var(--ground);padding:9px 16px;border-radius:999px;font-size:13px;opacity:0;
   pointer-events:none;transition:opacity .2s;z-index:50}
@@ -270,8 +286,8 @@ input[type=search]{min-width:200px}
     <section id="p-txns" hidden>
       <div class="filters">
         <input type="search" id="q" placeholder="Search merchant…">
-        <select class="f" id="fCat"><option value="">All categories</option></select>
-        <select class="f" id="fAcct"><option value="">All accounts</option></select>
+        <div class="multi" id="fCat"></div>
+        <div class="multi" id="fAcct"></div>
         <select class="f" id="fMonth"><option value="">All months</option></select>
         <button class="btn-q" id="exp">Export CSV</button>
       </div>
@@ -1177,11 +1193,10 @@ function catSelect(cat, id){
 }
 
 function renderTxns(){
-  var q = $("q").value.toLowerCase().trim(),
-      fc = $("fCat").value, fa = $("fAcct").value, fm = $("fMonth").value;
+  var q = $("q").value.toLowerCase().trim(), fm = $("fMonth").value;
   var list = V.filter(function(t){
-    if(fc && t.cat !== fc) return false;
-    if(fa && t.acct !== fa) return false;
+    if(!MCat.has(t.cat)) return false;
+    if(!MAcct.has(t.acct)) return false;
     if(fm && t.month !== fm) return false;
     if(q && t.merch.toLowerCase().indexOf(q) < 0 && t.desc.toLowerCase().indexOf(q) < 0) return false;
     return true;
@@ -1428,6 +1443,82 @@ function renderFiles(){
     + 'with no amount. Re-importing the same file adds nothing.</p>';
 }
 
+/* ------------------------------------------------------------
+   A filter you can tick more than one box in. Native <select
+   multiple> needs a modifier key nobody remembers, so this is a
+   button and a panel of checkboxes. Empty set means "all", which
+   keeps the common case one click away.
+   ------------------------------------------------------------ */
+function multiFilter(id, label, onChange){
+  var el = $(id);
+  var m = { el:el, label:label, opts:[], sel:{}, onChange:onChange };
+
+  m.values = function(){
+    var out = [], k;
+    for(k in m.sel) if(m.sel[k]) out.push(k);
+    return out;
+  };
+  m.has = function(v){
+    var n = m.values();
+    return !n.length || !!m.sel[v];
+  };
+  m.setOptions = function(opts){
+    m.opts = opts;
+    var keep = {}, i;                 /* drop selections that no longer exist */
+    for(i=0;i<opts.length;i++) if(m.sel[opts[i][0]]) keep[opts[i][0]] = 1;
+    m.sel = keep;
+    m.draw();
+  };
+  m.caption = function(){
+    var n = m.values();
+    if(!n.length) return label;
+    if(n.length === 1){
+      for(var i=0;i<m.opts.length;i++) if(m.opts[i][0] === n[0]) return m.opts[i][1];
+      return n[0];
+    }
+    return n.length + " selected";
+  };
+  m.draw = function(){
+    var open = el.classList.contains("on");
+    var h = '<button type="button" class="multi-btn">' + esc(m.caption()) + '</button>';
+    if(open){
+      h += '<div class="multi-menu"><label class="multi-all"><input type="checkbox" data-all="1"'
+         + (m.values().length ? '' : ' checked') + '> ' + esc(label) + '</label>';
+      for(var i=0;i<m.opts.length;i++)
+        h += '<label><input type="checkbox" value="' + esc(m.opts[i][0]) + '"'
+           + (m.sel[m.opts[i][0]] ? ' checked' : '') + '> ' + esc(m.opts[i][1]) + '</label>';
+      h += '</div>';
+    }
+    el.innerHTML = h;
+  };
+
+  el.addEventListener("click", function(e){
+    if(e.target.closest(".multi-btn")){
+      el.classList.toggle("on"); m.draw(); return;
+    }
+  });
+  el.addEventListener("change", function(e){
+    var c = e.target;
+    if(c.getAttribute("data-all")) m.sel = {};
+    else if(c.checked) m.sel[c.value] = 1;
+    else delete m.sel[c.value];
+    m.draw(); m.onChange();
+  });
+
+  m.draw();
+  return m;
+}
+
+/* Clicking anywhere else closes an open panel. The test is the event's own
+   path rather than contains(), because by the time this runs the panel has
+   redrawn and the element that was clicked is no longer in the document. */
+document.addEventListener("click", function(e){
+  var path = e.composedPath ? e.composedPath() : [e.target];
+  var open = document.querySelectorAll(".multi.on"), i;
+  for(i=0;i<open.length;i++)
+    if(path.indexOf(open[i]) < 0){ open[i].classList.remove("on"); open[i].__m.draw(); }
+});
+
 function fillSelect(el, vals, label){
   var cur = el.value;
   el.innerHTML = '<option value="">'+esc(label)+'</option>'
@@ -1449,8 +1540,8 @@ function render(){
   var accts = {}, i;
   for(i=0;i<V.length;i++) accts[V[i].acct] = 1;
   var al = []; for(var a in accts) al.push([a,a]);
-  fillSelect($("fAcct"), al, "All accounts");
-  fillSelect($("fCat"), CATEGORIES.map(function(c){ return [c, CAT_LABEL[c]||c]; }), "All categories");
+  MCat.setOptions(CATEGORIES.map(function(c){ return [c, CAT_LABEL[c]||c]; }));
+  MAcct.setOptions(al);
   fillSelect($("fMonth"), ms.map(function(m){ return [m, monthName(m)]; }), "All months");
 
   renderMonth();
@@ -1533,7 +1624,11 @@ $("tSpan").addEventListener("click", function(e){
   trendDays[trendGrain] = +b.getAttribute("data-days");
   renderTrend();
 });
-["q","fCat","fAcct","fMonth"].forEach(function(id){
+var MCat  = multiFilter("fCat",  "All categories", function(){ renderTxns(); });
+var MAcct = multiFilter("fAcct", "All accounts",   function(){ renderTxns(); });
+$("fCat").__m = MCat; $("fAcct").__m = MAcct;
+
+["q","fMonth"].forEach(function(id){
   $(id).addEventListener("input", renderTxns);
   $(id).addEventListener("change", renderTxns);
 });
