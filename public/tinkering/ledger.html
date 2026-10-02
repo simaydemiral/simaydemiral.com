@@ -29,10 +29,10 @@
     </p>
 
     <p>
-      Every budgeting app I looked at wanted my bank login. That is the part I
-      was not willing to give, and it is also the part that is hardest to
-      justify: a tool that reads a CSV does not need a password to my account,
-      and it does not need a server either.
+      My bank's app shows me every transaction and not much else. It cannot tell
+      me what I spend on restaurants in a month, it will not let me fix a
+      category it got wrong, and it has no idea when the same charge comes
+      through twice. Ledger is the dashboard I wanted instead.
     </p>
 
     <div class="actions" style="margin:2rem 0">
@@ -42,13 +42,22 @@
 
     <h2>The problem</h2>
     <p>
-      I could see every transaction and still not answer a simple question: what
-      do I actually spend on restaurants in a month? The bank shows a list. A
-      list is not an answer.
+      I can already see my spending in two banking apps. What I cannot do is ask
+      them anything. How much went to restaurants this month, and is that more
+      than usual? Which refunds am I still waiting on? Did I pay that bill twice?
+      Where did the money go to a name I half remember?
     </p>
     <p>
-      The honest obstacle was not effort, it was trust. Linking a bank account to
-      a third party to find out how much I spend on groceries is a bad trade.
+      The things I wanted were ordinary. Put a merchant in the right category
+      myself and have it stay there. Search the history by name. Keep track of
+      refunds instead of watching them disappear into a net figure. See this
+      month against the last six. Get told when something is out of line. None of
+      that is in the banking apps, and what is there is buried.
+    </p>
+    <p>
+      Apps exist that do all of this, and they want my bank login. That is a lot
+      to hand over to find out how much I spend on groceries, which is why I
+      ended up building instead of subscribing.
     </p>
 
     <h2>What I built</h2>
@@ -59,6 +68,14 @@
       There is no backend, no account, and no upload.
     </p>
     <p>
+      The rules get some merchants wrong, so <strong>every category is
+      editable</strong>. Change one and it applies to that merchant everywhere —
+      your whole history and every import after it, not just the row you clicked.
+      You can tag refunds, log a pending charge before it clears and have it
+      matched to the real transaction when it arrives, and search the history by
+      merchant.
+    </p>
+    <p>
       It makes <strong>no network requests at all</strong> — no fonts, no
       analytics, no CDN. You can open the network tab while you use it and watch
       it stay empty. That is checkable, which is the only kind of privacy claim
@@ -67,27 +84,27 @@
 
     <h2>What I learned along the way</h2>
     <p>
-      Reading the CSV was the easy part. Every bank writes a different file: one
-      had four summary lines and a blank row before the real header, a running
-      balance column sitting next to the amount, and a first row whose amount was
-      empty. Picking the wrong column silently inverts the whole dashboard, so
-      the parser identifies columns by sampling the values rather than trusting
-      the headings, and it refuses to import anything it is unsure about.
+      Every bank writes a different file. One of mine had four summary lines and
+      a blank row before the real header, a running balance column sitting next
+      to the amount, and a first row with no amount at all. Picking the wrong
+      column silently inverts the whole dashboard, so the parser works out the
+      columns by looking at the values rather than trusting the headings, and it
+      refuses to import anything it is unsure about.
     </p>
     <p>
-      The bug that mattered most was quieter. I was counting money moved between
-      my own accounts as spending — paying my credit card from savings looked
-      like $2,871 of purchases. Nothing in the totals looked obviously wrong,
-      which is exactly why it survived. Internal transfers are now identified and
-      excluded from every figure.
+      I load a credit card, a current account and savings, and those accounts pay
+      each other constantly. The first version counted that as spending — paying
+      the card from savings looked like $2,871 of purchases. Nothing in the
+      totals looked wrong, which is why it survived so long. Transfers between
+      your own accounts are now recognised and left out of every figure, so
+      loading three files does not count the same dollar three times.
     </p>
     <p>
-      Categorising merchants turned out to be a naming problem. Banks write
-      <em>SQ *BLUE BOTTLE COFFE</em> and <em>AMZN Mktp US*2X4RT1</em>, so the
-      first job is stripping the processor prefixes, store numbers, phone numbers
-      and city codes to get back to a name a human would recognise. My first
-      version stripped too hard: <em>UBER *PENDING</em> lost its brand and became
-      "Pendi", and <em>FRONTIER AI</em> — which is Frontier Airlines — was very
+      Categorising is really a naming problem. Banks write <em>SQ *BLUE BOTTLE
+      COFFE</em> and <em>AMZN Mktp US*2X4RT1</em>, so the first job is stripping
+      the processor prefixes, store numbers, phone numbers and city codes to get
+      back to a name a person would recognise. Strip too hard and the brand goes
+      with it: <em>FRONTIER AI</em> — which is Frontier Airlines — was very
       nearly filed under software.
     </p>
     <p>
@@ -100,10 +117,15 @@
       list.
     </p>
     <p>
-      Rent and tuition were the last problem. They are real spending but they
-      dwarf everything else, and leaving them in meant the chart said "you spent
-      a lot on rent" every single month. They are now reported separately, so the
-      headline figure is the part you can do something about.
+      The last fix was the fixed commitments — rent, tuition. They are real
+      spending, but they are so much larger than everything else that leaving
+      them in made the chart say "you spent a lot on rent" every single month.
+      They now get their own line, so the headline number is the part you can
+      actually do something about.
+    </p>
+    <p>
+      Spotting duplicate charges and forgotten subscriptions is the next piece,
+      and it is not in there yet.
     </p>
 
     <h2>Stack</h2>
