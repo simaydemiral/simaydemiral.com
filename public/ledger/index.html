@@ -140,6 +140,11 @@ tbody tr:hover{background:var(--sunken)}
 select.cat{font:inherit;font-size:12.5px;padding:3px 5px;border:1px solid var(--line);
   border-radius:6px;background:var(--surface);color:var(--ink-2);max-width:140px}
 select.cat.unc{border-color:var(--warn);color:var(--warn)}
+/* The popup's highlight follows accent-color in Chrome; the option colours
+   are honoured where the browser draws the list itself. */
+select{accent-color:var(--brand)}
+select.cat option{color:var(--ink);background:var(--surface)}
+select.cat option[value="__new"]{color:var(--brand);font-weight:600}
 
 /* ---- chips ---- */
 .chip{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11.5px;font-weight:600;
@@ -277,23 +282,19 @@ input[type=search]{min-width:200px}
     <details class="howto">
       <summary>Don&rsquo;t have a CSV yet? Here is where to find it</summary>
       <p>
-        Sign in on a desktop browser, search for &ldquo;bank statements&rdquo; on
-        your bank's website and find an export link above the list of
-        transactions &mdash; pick the Excel or CSV format and the months you want.
+        Sign in to your bank on a desktop browser and look for an export link
+        above your transactions &mdash; pick Excel or CSV and the months you want.
       </p>
       <p>
         Bank of America keeps them under
         <a href="https://secure.bankofamerica.com/statements-documents/home/"
            target="_blank" rel="noopener noreferrer">Statements &amp; Documents</a>.
-        If that link lands you on a sign-in page, sign in first, then come back
-        and click it again &mdash; it will take you straight there.
+        If that shows a sign-in page, sign in and click it again.
       </p>
       <p>
-        Download generously: re-importing a month you already have changes
-        nothing, so overlapping date ranges are safe. Load every account &mdash;
-        card, checking, savings &mdash; and money moved between them is recognised
-        for what it is, an internal transfer or a card payment, rather than
-        counted as spending.
+        Download generously: re-importing a month changes nothing, so overlapping
+        ranges are safe. Load every account &mdash; money moved between them is
+        recognised as an internal transfer, not spending.
       </p>
     </details>
 
