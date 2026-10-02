@@ -951,10 +951,14 @@ h1 em {
 /* Text on the left, drawing on the right; stacks on narrow screens. */
 .item--illustrated {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 20rem;
+  grid-template-columns: minmax(0, 1fr) 13rem;
   gap: clamp(1.25rem, 3vw, 2.25rem);
   align-items: center;
 }
+
+/* On an illustrated card the grid column already sets the line length,
+   so the site-wide prose measure would only cap it a second time. */
+.item--illustrated .item-body p:last-child { max-width: none; }
 
 .plate {
   display: block;
