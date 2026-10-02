@@ -75,7 +75,7 @@ button{font:inherit;cursor:pointer}
 #drop details[open] summary::before{transform:rotate(90deg)}
 #drop .howto p{margin:10px 0 0;font-size:12.5px;line-height:1.6}
 #drop .howto a{color:var(--brand)}
-#file{display:none}
+#file,#bakfile{display:none}
 
 /* ---- cards ---- */
 .card{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--radius);
@@ -215,6 +215,8 @@ input[type=search]{min-width:200px}
     </div>
     <div class="head-actions">
       <button class="btn-q" id="theme">Theme</button>
+      <button class="btn-q" id="backup">Back up</button>
+      <button class="btn-q" id="restore">Restore</button>
       <button class="btn-q" id="reset">Clear all data</button>
       <button class="btn" id="add" hidden>Add a statement</button>
     </div>
@@ -247,6 +249,7 @@ input[type=search]{min-width:200px}
     </details>
 
     <input type="file" id="file" accept=".csv,text/csv" multiple>
+    <input type="file" id="bakfile" accept=".json,application/json">
   </div>
 
   <div id="app" hidden>
@@ -1732,6 +1735,49 @@ $("exp").addEventListener("click", function(){
   a.download = "spending-export.csv";
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   toast("Exported " + V.length + " transactions.");
+});
+
+/* ------------------------------------------------------------
+   Backup and restore. Everything here lives in one browser and
+   nowhere else, so clearing site data would take months of
+   corrections with it. The file is written and read locally; it
+   never goes anywhere either.
+   ------------------------------------------------------------ */
+$("backup").addEventListener("click", function(){
+  var out = JSON.stringify(db);
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([out], {type:"application/json"}));
+  a.download = "ledger-backup-" + new Date().toISOString().slice(0,10) + ".json";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+  toast("Backed up " + db.txns.length + " transactions. Keep the file somewhere safe.");
+});
+
+$("restore").addEventListener("click", function(){ $("bakfile").click(); });
+
+$("bakfile").addEventListener("change", function(){
+  var f = this.files && this.files[0];
+  this.value = "";
+  if(!f) return;
+  var r = new FileReader();
+  r.onload = function(){
+    var d;
+    try{ d = JSON.parse(String(r.result)); }
+    catch(e){ toast("That file is not a Ledger backup."); return; }
+    if(!d || !d.txns || Object.prototype.toString.call(d.txns) !== "[object Array]"){
+      toast("That file is not a Ledger backup."); return;
+    }
+    if(db.txns.length && !confirm(
+        "Replace the " + db.txns.length + " transactions in this browser with the "
+        + d.txns.length + " in the backup?")) return;
+    db = { v:1, txns:d.txns, rules:d.rules||{}, files:d.files||[],
+           pending:d.pending||[], dupsOk:d.dupsOk||{} };
+    save();
+    curMonth = "";
+    render();
+    toast("Restored " + db.txns.length + " transactions.");
+  };
+  r.readAsText(f);
 });
 
 $("reset").addEventListener("click", function(){
