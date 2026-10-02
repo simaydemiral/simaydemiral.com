@@ -326,12 +326,12 @@ function median(a){
    STORE
    ============================================================ */
 var KEY = "spend.v1";
-var db = { v:1, txns:[], rules:{}, files:[], pending:[] };
+var db = { v:1, txns:[], rules:{}, files:[], pending:[], dupsOk:{} };
 
 function load(){
   try{
     var raw = localStorage.getItem(KEY);
-    if(raw){ var d = JSON.parse(raw); if(d && d.txns){ db = d; db.rules = db.rules||{}; db.files = db.files||[]; db.pending = db.pending||[]; } }
+    if(raw){ var d = JSON.parse(raw); if(d && d.txns){ db = d; db.rules = db.rules||{}; db.files = db.files||[]; db.pending = db.pending||[]; db.dupsOk = db.dupsOk||{}; } }
   }catch(e){ /* corrupt or blocked storage — start empty rather than break */ }
 }
 function save(){
@@ -1288,9 +1288,10 @@ function duplicates(list){
     for(i=0;i<ts.length;i++) for(j=i+1;j<ts.length;j++){
       var a = ts[i], b = ts[j];
       if(Math.abs(a.amt - b.amt) > 0.009) continue;
-      if(Math.abs(dayNum(a.date) - dayNum(b.date)) > 3) continue;
+      if(Math.abs(dayNum(a.date) - dayNum(b.date)) > 1) continue;
       if(-a.amt < dupFloor(a.cat)) continue;
-      out.push({ merch:a.merch, amt:-a.amt, acct:a.acct === b.acct ? a.acct : "",
+      out.push({ key: a.id < b.id ? a.id + "~" + b.id : b.id + "~" + a.id,
+                 merch:a.merch, amt:-a.amt, acct:a.acct === b.acct ? a.acct : "",
                  d1:a.date < b.date ? a.date : b.date,
                  d2:a.date < b.date ? b.date : a.date });
     }
@@ -1299,12 +1300,16 @@ function duplicates(list){
   return out;
 }
 
+/* The warning is the whole point, so it does not fade on its own: each
+   pair stays until you say you have looked at it. */
 function renderDups(list){
-  var d = duplicates(list), i;
+  var all = duplicates(list), d = [], i;
+  for(i=0;i<all.length;i++) if(!db.dupsOk[all[i].key]) d.push(all[i]);
   if(!d.length){ $("dups").innerHTML = ""; return; }
   var h = '<div class="card flagcard"><h3>Possible double charges</h3>'
-        + '<p class="note" style="margin:-4px 0 10px">Same merchant, same amount, within '
-        + 'three days. Worth a look &mdash; some of these will be genuine.</p>'
+        + '<p class="note" style="margin:-4px 0 10px">Same merchant, same amount, '
+        + 'a day apart or less. Some of these will be genuine &mdash; acknowledge one '
+        + 'and it will not come back.</p>'
         + '<table><tbody>';
   for(i=0;i<d.length;i++)
     h += '<tr><td class="t-merch">'+esc(d[i].merch)+'</td>'
@@ -1312,7 +1317,9 @@ function renderDups(list){
              ? 'twice on ' + esc(d[i].d1)
              : esc(d[i].d1) + ' and ' + esc(d[i].d2))+'</td>'
        + '<td class="t-acct">'+esc(d[i].acct)+'</td>'
-       + '<td class="t-amt">'+esc(money(d[i].amt))+' each</td></tr>';
+       + '<td class="t-amt">'+esc(money(d[i].amt))+' each</td>'
+       + '<td style="text-align:right"><button class="btn-q" data-dupok="'
+       + esc(d[i].key)+'">Acknowledge</button></td></tr>';
   $("dups").innerHTML = h + '</tbody></table></div>';
 }
 
@@ -1529,6 +1536,12 @@ $("pAdd").addEventListener("click", function(){
 });
 
 document.addEventListener("click", function(e){
+  var ok = e.target && e.target.getAttribute && e.target.getAttribute("data-dupok");
+  if(ok){
+    db.dupsOk[ok] = 1; save(); renderMonth();
+    toast("Acknowledged. That pair will not be flagged again.");
+    return;
+  }
   var id = e.target && e.target.getAttribute && e.target.getAttribute("data-pdel");
   if(!id) return;
   db.pending = db.pending.filter(function(p){ return p.id !== id; });
@@ -1553,7 +1566,7 @@ $("exp").addEventListener("click", function(){
 
 $("reset").addEventListener("click", function(){
   if(!confirm("Delete every transaction and rule stored in this browser?")) return;
-  db = { v:1, txns:[], rules:{}, files:[], pending:[] };
+  db = { v:1, txns:[], rules:{}, files:[], pending:[], dupsOk:{} };
   try{ localStorage.removeItem(KEY); }catch(e){}
   curMonth = "";
   render();
