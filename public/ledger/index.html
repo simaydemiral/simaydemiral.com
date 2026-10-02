@@ -1226,7 +1226,7 @@ function recurring(){
   var m = {}, i, k;
   for(i=0;i<V.length;i++){
     var t = V[i];
-    if(NOT_SPEND[t.cat] || t.amt >= 0) continue;
+    if(NOT_SPEND[t.cat] || FIXED[t.cat] || t.amt >= 0) continue;
     (m[t.key] = m[t.key] || []).push(t);
   }
   var out = [], newest = V.length ? dayNum(V[0].date) : 0;
@@ -1322,19 +1322,12 @@ function renderSubs(){
       + 'least three charges from one merchant on a steady cadence.</p>';
     return;
   }
-  /* rent is genuinely recurring, but a yearly figure led by it says nothing
-     about the subscriptions you could actually cancel. */
-  var live = 0, perYear = 0, perYearFree = 0;
-  for(i=0;i<rows.length;i++) if(rows[i].live){
-    live++; perYear += rows[i].yearly;
-    if(!FIXED[rows[i].cat]) perYearFree += rows[i].yearly;
-  }
+  var live = 0, perYear = 0;
+  for(i=0;i<rows.length;i++) if(rows[i].live){ live++; perYear += rows[i].yearly; }
   var h = '<p class="note" style="margin:-4px 0 12px">' + live + ' active, '
-        + (rows.length - live) + ' lapsed &mdash; about ' + money0(perYear) + ' a year'
-        + (perYearFree < perYear
-            ? ', or ' + money0(perYearFree) + ' once the fixed commitments are set aside'
-            : '')
-        + '.</p>'
+        + (rows.length - live) + ' lapsed &mdash; about ' + money0(perYear)
+        + ' a year. Rent and tuition are left out; they are on their own line '
+        + 'in the month view.</p>'
         + '<table><thead><tr><th>Merchant</th><th>Every</th><th class="t-amt">Amount</th>'
         + '<th>Seen</th><th>Last</th><th>Next</th><th class="t-amt">Paid so far</th>'
         + '</tr></thead><tbody>';
