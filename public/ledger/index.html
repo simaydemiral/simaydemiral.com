@@ -66,11 +66,12 @@ button{font:inherit;cursor:pointer}
 #drop p{margin:0;color:var(--muted);font-size:13.5px}
 #drop .privacy{margin-top:12px;font-size:12.5px;color:var(--go)}
 #drop .howto{margin-top:14px;text-align:left;max-width:52ch;margin-left:auto;margin-right:auto}
-#drop summary{cursor:pointer;font-size:12.5px;color:var(--muted);text-align:center;
-  list-style:none}
+#drop summary{cursor:pointer;font-size:13.5px;font-weight:600;color:var(--brand);
+  text-align:center;list-style:none;padding:4px 0}
 #drop summary::-webkit-details-marker{display:none}
-#drop summary:hover{color:var(--ink-2)}
-#drop summary::before{content:"\203A ";display:inline-block;transition:transform .15s}
+#drop summary:hover{text-decoration:underline}
+#drop summary::before{content:"\203A";display:inline-block;margin-right:7px;
+  transition:transform .15s}
 #drop details[open] summary::before{transform:rotate(90deg)}
 #drop .howto p{margin:10px 0 0;font-size:12.5px;line-height:1.6}
 #drop .howto a{color:var(--brand)}
@@ -205,7 +206,7 @@ input[type=search]{min-width:200px}
     <p class="privacy">Nothing leaves your computer. No upload, no account, no server.</p>
 
     <details class="howto">
-      <summary>Where do I get a CSV?</summary>
+      <summary>Don&rsquo;t have a CSV yet? Here is where to find it</summary>
       <p>
         Your bank's phone app probably only offers PDF statements. Sign in on a
         desktop browser instead, search for &ldquo;bank statements&rdquo; and find
