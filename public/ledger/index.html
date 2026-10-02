@@ -197,6 +197,24 @@ input[type=search]{min-width:200px}
 .multi-menu label:hover{background:var(--sunken)}
 .multi-menu input{accent-color:var(--brand);margin:0}
 .multi-all{border-bottom:1px solid var(--line-soft);margin-bottom:4px;padding-bottom:4px}
+
+/* ---- amount range ---- */
+.amt{display:flex;align-items:center;gap:10px;padding:0 2px}
+.amt-wrap{position:relative;width:160px;height:22px}
+.amt-track{position:absolute;top:9px;left:0;right:0;height:4px;border-radius:2px;
+  background:var(--sunken);border:1px solid var(--line-soft)}
+.amt-fill{position:absolute;top:9px;height:4px;border-radius:2px;background:var(--brand)}
+.amt-wrap input{position:absolute;top:0;left:0;width:100%;height:22px;margin:0;padding:0;
+  -webkit-appearance:none;appearance:none;background:transparent;pointer-events:none}
+.amt-wrap input:focus{outline:none}
+.amt-wrap input::-webkit-slider-runnable-track{height:22px;background:transparent;border:0}
+.amt-wrap input::-webkit-slider-thumb{-webkit-appearance:none;pointer-events:auto;
+  width:14px;height:14px;margin-top:4px;border-radius:50%;background:var(--surface);
+  border:2px solid var(--brand);cursor:ew-resize}
+.amt-wrap input::-moz-range-track{height:22px;background:transparent;border:0}
+.amt-wrap input::-moz-range-thumb{pointer-events:auto;width:14px;height:14px;border-radius:50%;
+  background:var(--surface);border:2px solid var(--brand);cursor:ew-resize}
+.amt-txt{font:500 12.5px/1 var(--f-mono);color:var(--muted);white-space:nowrap;min-width:116px}
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);
   color:var(--ground);padding:9px 16px;border-radius:999px;font-size:13px;opacity:0;
   pointer-events:none;transition:opacity .2s;z-index:50}
@@ -296,6 +314,15 @@ input[type=search]{min-width:200px}
         <div class="multi" id="fCat"></div>
         <div class="multi" id="fAcct"></div>
         <select class="f" id="fMonth"><option value="">All months</option></select>
+        <div class="amt">
+          <div class="amt-wrap">
+            <div class="amt-track"></div>
+            <div class="amt-fill" id="amtFill"></div>
+            <input type="range" id="amtLo" min="0" max="1000" value="0" aria-label="Smallest amount">
+            <input type="range" id="amtHi" min="0" max="1000" value="1000" aria-label="Largest amount">
+          </div>
+          <span class="amt-txt" id="amtTxt">Any amount</span>
+        </div>
         <button class="btn-q" id="exp">Export CSV</button>
       </div>
       <div class="card" style="padding:4px 10px"><div id="tbl"></div></div>
@@ -1214,9 +1241,11 @@ function catSelect(cat, id){
 
 function renderTxns(){
   var q = $("q").value.toLowerCase().trim(), fm = $("fMonth").value;
+  var aFull = amtFull(), aLo = amtAt(+$("amtLo").value), aHi = amtAt(+$("amtHi").value);
   var list = V.filter(function(t){
     if(!MCat.has(t.cat)) return false;
     if(!MAcct.has(t.acct)) return false;
+    if(!aFull){ var abs = Math.abs(t.amt); if(abs < aLo || abs > aHi) return false; }
     if(fm && t.month !== fm) return false;
     if(q && t.merch.toLowerCase().indexOf(q) < 0 && t.desc.toLowerCase().indexOf(q) < 0) return false;
     return true;
@@ -1544,6 +1573,32 @@ document.addEventListener("click", function(e){
     if(path.indexOf(open[i]) < 0){ open[i].classList.remove("on"); open[i].__m.draw(); }
 });
 
+/* ------------------------------------------------------------
+   Amount range. Most transactions are small and a few are enormous,
+   so a linear slider would spend nine tenths of its travel on
+   amounts you never have. The position is squared, which gives the
+   low end most of the track.
+   ------------------------------------------------------------ */
+var AMT = { max: 0 };
+function amtAt(pos){ return AMT.max * Math.pow(pos / 1000, 2); }
+function amtFull(){ return +$("amtLo").value === 0 && +$("amtHi").value === 1000; }
+
+function amtDraw(){
+  var lo = +$("amtLo").value, hi = +$("amtHi").value;
+  $("amtFill").style.left  = (lo / 10) + "%";
+  $("amtFill").style.width = ((hi - lo) / 10) + "%";
+  $("amtTxt").textContent = amtFull()
+    ? "Any amount"
+    : money0(amtAt(lo)) + " – " + (hi === 1000 ? "max" : money0(amtAt(hi)));
+}
+
+function amtInit(){
+  var m = 0, i;
+  for(i=0;i<V.length;i++){ var a = Math.abs(V[i].amt); if(a > m) m = a; }
+  AMT.max = m || 1;
+  amtDraw();
+}
+
 function fillSelect(el, vals, label){
   var cur = el.value;
   el.innerHTML = '<option value="">'+esc(label)+'</option>'
@@ -1567,6 +1622,7 @@ function render(){
   var al = []; for(var a in accts) al.push([a,a]);
   MCat.setOptions(CATEGORIES.map(function(c){ return [c, CAT_LABEL[c]||c]; }));
   MAcct.setOptions(al);
+  amtInit();
   fillSelect($("fMonth"), ms.map(function(m){ return [m, monthName(m)]; }), "All months");
 
   renderMonth();
@@ -1673,6 +1729,14 @@ $("tSpan").addEventListener("click", function(e){
 var MCat  = multiFilter("fCat",  "All categories", function(){ renderTxns(); });
 var MAcct = multiFilter("fAcct", "All accounts",   function(){ renderTxns(); });
 $("fCat").__m = MCat; $("fAcct").__m = MAcct;
+
+["amtLo","amtHi"].forEach(function(id){
+  $(id).addEventListener("input", function(){
+    var lo = +$("amtLo").value, hi = +$("amtHi").value;
+    if(lo > hi){ if(id === "amtLo") $("amtLo").value = hi; else $("amtHi").value = lo; }
+    amtDraw(); renderTxns();
+  });
+});
 
 ["q","fMonth"].forEach(function(id){
   $(id).addEventListener("input", renderTxns);
