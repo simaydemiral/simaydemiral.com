@@ -42,30 +42,30 @@
 
     <h2>The problem</h2>
     <p>
-      I can already see my spending in two banking apps. What I cannot do is ask
-      them anything. How much went to restaurants this month, and is that more
-      than usual? Which refunds am I still waiting on? Did I pay that bill twice?
-      Where did the money go to a name I half remember?
+      I can already see my spending in banking apps, but what I cannot do is ask
+      them anything like:
     </p>
+    <ul>
+      <li>How much went to outside eating this month, and is that more than usual?</li>
+      <li>Which refunds am I still waiting on?</li>
+      <li>Did I pay that bill twice?</li>
+      <li>Where did the money go to a name I half remember?</li>
+    </ul>
     <p>
       The things I wanted were ordinary. Put a merchant in the right category
       myself and have it stay there. Search the history by name. Keep track of
-      refunds instead of watching them disappear into a net figure. See this
-      month against the last six. Get told when something is out of line. None of
-      that is in the banking apps, and what is there is buried.
-    </p>
-    <p>
-      Apps exist that do all of this, and they want my bank login. That is a lot
-      to hand over to find out how much I spend on groceries, which is why I
-      ended up building instead of subscribing.
+      refunds. Compare this month's spending against past months. Get told when
+      something is out of line. There are apps that do all of this, but that is a
+      lot to hand over to find out how much I spend on groceries, which is why I
+      ended up building it myself.
     </p>
 
     <h2>What I built</h2>
     <p>
-      A single page that does everything locally. You drop a CSV on it; the
-      browser reads the file, works out which columns are which, cleans up the
-      merchant names, sorts transactions into categories and draws the charts.
-      There is no backend, no account, and no upload.
+      A single page that does everything locally. You drop a CSV (your bank
+      statements) on it; the browser reads the file, works out which columns are
+      which, cleans up the merchant names, sorts transactions into categories and
+      draws the charts.
     </p>
     <p>
       The rules get some merchants wrong, so <strong>every category is
@@ -78,8 +78,7 @@
     <p>
       It makes <strong>no network requests at all</strong> — no fonts, no
       analytics, no CDN. You can open the network tab while you use it and watch
-      it stay empty. That is checkable, which is the only kind of privacy claim
-      worth making.
+      it stay empty.
     </p>
 
     <h2>What I learned along the way</h2>
@@ -96,16 +95,15 @@
       each other constantly. The first version counted that as spending — paying
       the card from savings looked like $2,871 of purchases. Nothing in the
       totals looked wrong, which is why it survived so long. Transfers between
-      your own accounts are now recognised and left out of every figure, so
+      your own accounts are now recognized and left out of every figure, so
       loading three files does not count the same dollar three times.
     </p>
     <p>
-      Categorising is really a naming problem. Banks write <em>SQ *BLUE BOTTLE
-      COFFE</em> and <em>AMZN Mktp US*2X4RT1</em>, so the first job is stripping
-      the processor prefixes, store numbers, phone numbers and city codes to get
-      back to a name a person would recognise. Strip too hard and the brand goes
-      with it: <em>FRONTIER AI</em> — which is Frontier Airlines — was very
-      nearly filed under software.
+      Categorizing is really a naming problem. Banks write <em>AMZN Mktp
+      US*2X4RT1</em>, so the first job is stripping the processor prefixes, store
+      numbers, phone numbers and city codes to get back to a name a person would
+      recognize. Strip too hard and the brand goes with it: <em>FRONTIER AI</em>
+      — which is Frontier Airlines — was very nearly filed under software.
     </p>
     <p>
       The decision that made the rest work is that a transaction never stores its
@@ -117,15 +115,11 @@
       list.
     </p>
     <p>
-      The last fix was the fixed commitments — rent, tuition. They are real
+      The last fix was the fixed commitments (e.g., rent, tuition). They are real
       spending, but they are so much larger than everything else that leaving
       them in made the chart say "you spent a lot on rent" every single month.
       They now get their own line, so the headline number is the part you can
       actually do something about.
-    </p>
-    <p>
-      Spotting duplicate charges and forgotten subscriptions is the next piece,
-      and it is not in there yet.
     </p>
 
     <h2>Stack</h2>
