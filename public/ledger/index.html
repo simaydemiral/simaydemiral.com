@@ -448,12 +448,12 @@ function median(a){
    STORE
    ============================================================ */
 var KEY = "spend.v1";
-var db = { v:1, txns:[], rules:{}, files:[], pending:[], dupsOk:{} };
+var db = { v:1, txns:[], rules:{}, files:[], pending:[], dupsOk:{}, cats:[] };
 
 function load(){
   try{
     var raw = localStorage.getItem(KEY);
-    if(raw){ var d = JSON.parse(raw); if(d && d.txns){ db = d; db.rules = db.rules||{}; db.files = db.files||[]; db.pending = db.pending||[]; db.dupsOk = db.dupsOk||{}; } }
+    if(raw){ var d = JSON.parse(raw); if(d && d.txns){ db = d; db.rules = db.rules||{}; db.files = db.files||[]; db.pending = db.pending||[]; db.dupsOk = db.dupsOk||{}; db.cats = db.cats||[]; } }
   }catch(e){ /* corrupt or blocked storage — start empty rather than break */ }
 }
 function save(){
@@ -1000,7 +1000,7 @@ function byCat(list, mode){
     if(mode === "fixed" && !isFixed) continue;
     m[t.cat] = (m[t.cat]||0) + t.spend - t.refund;
   }
-  for(var k in m) if(m[k] > 0) out.push([CAT_LABEL[k]||k, m[k], 0, k]);
+  for(var k in m) if(m[k] > 0) out.push([labelOf(k), m[k], 0, k]);
   out.sort(function(a,b){ return b[1]-a[1]; });
   return out;
 }
@@ -1321,10 +1321,46 @@ function meter(n, l, cls, goTo){
        + '<div class="meter-l">'+esc(l)+'</div></div>';
 }
 
+/* ------------------------------------------------------------
+   Your own categories. The built-in list covers what most people
+   buy, but not what any one person buys a lot of, so it can be
+   added to. Custom ones live with your data, not in the rules.
+   ------------------------------------------------------------ */
+function catKeyOf(label){
+  return String(label).toLowerCase().replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "").slice(0, 32);
+}
+function allCategories(){
+  var out = CATEGORIES.slice(), i;
+  for(i=0;i<db.cats.length;i++)
+    if(out.indexOf(db.cats[i].k) < 0) out.push(db.cats[i].k);
+  return out;
+}
+function labelOf(key){
+  if(CAT_LABEL[key]) return CAT_LABEL[key];
+  for(var i=0;i<db.cats.length;i++) if(db.cats[i].k === key) return db.cats[i].label;
+  return key;
+}
+/* The uncategorised slot sorts last; everything else keeps its order. */
+function addCategory(label){
+  label = String(label || "").replace(/\s+/g, " ").trim();
+  if(!label) return "";
+  var k = catKeyOf(label);
+  if(!k){ toast("Give it a name with some letters in it."); return ""; }
+  if(CATEGORIES.indexOf(k) >= 0 || CAT_LABEL[k]){
+    toast("There is already a " + labelOf(k) + " category.");
+    return k;
+  }
+  for(var i=0;i<db.cats.length;i++) if(db.cats[i].k === k) return k;
+  db.cats.push({ k:k, label:label });
+  save();
+  return k;
+}
+
 function catSelect(cat, id){
-  var o = CATEGORIES.map(function(c){
-    return '<option value="'+c+'"'+(c===cat?' selected':'')+'>'+esc(CAT_LABEL[c]||c)+'</option>';
-  }).join("");
+  var o = allCategories().map(function(c){
+    return '<option value="'+c+'"'+(c===cat?' selected':'')+'>'+esc(labelOf(c))+'</option>';
+  }).join("") + '<option value="__new">+ New category\u2026</option>';
   return '<select class="cat'+(cat==="uncategorized"?' unc':'')+'" data-id="'+esc(id)+'">'+o+'</select>';
 }
 
@@ -1391,7 +1427,7 @@ function renderPend(){
     for(j=0;j<rows.length;j++)
       h += '<tr><td class="t-date">'+esc(rows[j].date)+'</td>'
          + '<td class="t-merch">'+esc(rows[j].merch)+'</td>'
-         + '<td class="t-acct">'+esc(CAT_LABEL[rows[j].cat]||rows[j].cat)+'</td>'
+         + '<td class="t-acct">'+esc(labelOf(rows[j].cat))+'</td>'
          + '<td class="t-amt pos">+'+esc(money(rows[j].refund))+'</td></tr>';
     return h + '</tbody></table><p class="note" style="margin-top:10px">'
          + rows.length + ' ' + noun + (rows.length === 1 ? "" : "s")
@@ -1721,7 +1757,7 @@ function render(){
   var accts = {}, i;
   for(i=0;i<V.length;i++) accts[V[i].acct] = 1;
   var al = []; for(var a in accts) al.push([a,a]);
-  MCat.setOptions(CATEGORIES.map(function(c){ return [c, CAT_LABEL[c]||c]; }));
+  MCat.setOptions(allCategories().map(function(c){ return [c, labelOf(c)]; }));
   MAcct.setOptions(al);
   amtInit();
   fillSelect($("fMonth"), ms.map(function(m){ return [m, monthName(m)]; }), "All months");
@@ -1898,16 +1934,25 @@ $("fCat").__m = MCat; $("fAcct").__m = MAcct;
 document.addEventListener("change", function(e){
   var s = e.target;
   if(!s.classList || !s.classList.contains("cat")) return;
-  var id = s.getAttribute("data-id"), key;
+  var id = s.getAttribute("data-id"), key, val = s.value;
+
+  /* The select was built before this category existed, so it has no option to
+     hold it — carry the value in a variable rather than back through the DOM. */
+  if(val === "__new"){
+    val = addCategory(window.prompt(
+      "Name your category \u2014 electronics, childcare, hobbies, whatever you spend on:", ""));
+    if(!val){ render(); return; }      /* cancelled: put the old value back */
+  }
+
   if(id.indexOf("key:") === 0) key = id.slice(4);
   else {
     for(var i=0;i<db.txns.length;i++) if(db.txns[i].id === id){ key = normMerchant(db.txns[i].desc); break; }
   }
   if(!key) return;
-  db.rules[key] = s.value;
+  db.rules[key] = val;
   save();
   render();
-  toast('"' + titleCase(key) + '" is now ' + (CAT_LABEL[s.value]||s.value) + ' — everywhere.');
+  toast('"' + titleCase(key) + '" is now ' + labelOf(val) + ' — everywhere.');
 });
 
 $("pAdd").addEventListener("click", function(){
@@ -1986,7 +2031,7 @@ $("bakfile").addEventListener("change", function(){
         "Replace the " + db.txns.length + " transactions in this browser with the "
         + d.txns.length + " in the backup?")) return;
     db = { v:1, txns:d.txns, rules:d.rules||{}, files:d.files||[],
-           pending:d.pending||[], dupsOk:d.dupsOk||{} };
+           pending:d.pending||[], dupsOk:d.dupsOk||{}, cats:d.cats||[] };
     save();
     curMonth = "";
     render();
@@ -1997,7 +2042,7 @@ $("bakfile").addEventListener("change", function(){
 
 $("reset").addEventListener("click", function(){
   if(!confirm("Delete every transaction and rule stored in this browser?")) return;
-  db = { v:1, txns:[], rules:{}, files:[], pending:[], dupsOk:{} };
+  db = { v:1, txns:[], rules:{}, files:[], pending:[], dupsOk:{}, cats:[] };
   try{ localStorage.removeItem(KEY); }catch(e){}
   curMonth = "";
   render();
