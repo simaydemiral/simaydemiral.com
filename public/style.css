@@ -49,7 +49,7 @@ body {
     linear-gradient(152deg, #3f342b 0%, #33291f 46%, #241d17 100%);
   background-attachment: fixed;
   color: var(--body);
-  font: 400 1.0625rem/1.75 var(--sans);
+  font: 400 1rem/1.75 var(--sans);
   -webkit-font-smoothing: antialiased;
   position: relative;
   overflow-x: hidden;
@@ -91,7 +91,7 @@ nav ul {
   list-style: none;
   margin: 0;
   padding: 0;
-  font-size: 0.94rem;
+  font-size: 0.9rem;
 }
 nav ul a {
   color: var(--body);
@@ -156,7 +156,7 @@ h1 em {
 }
 
 .lede {
-  font-size: 1.0625rem;
+  font-size: 1rem;
   line-height: 1.75;
   max-width: 30rem;
   margin: 0 0 2rem;
@@ -172,7 +172,7 @@ h1 em {
   background: var(--ink);
   color: var(--sheet);
   border-radius: 999px;
-  font-size: 0.94rem;
+  font-size: 0.9rem;
   font-weight: 500;
   transition: transform 0.15s ease, opacity 0.15s ease;
 }
@@ -181,7 +181,7 @@ h1 em {
 .btn:hover span { transform: translateX(3px); }
 
 .btn-plain {
-  font-size: 0.94rem;
+  font-size: 0.9rem;
   color: var(--body);
   border-bottom: 1px solid var(--rule);
   padding-bottom: 2px;
@@ -343,11 +343,11 @@ h1 em {
   color: var(--ink);
   letter-spacing: -0.005em;
 }
-.role-sub { font-size: 0.875rem; color: var(--body); }
+.role-sub { font-size: 0.84rem; color: var(--body); }
 
 /* The one-or-two sentence description under a role. */
 .role-note {
-  font-size: 0.875rem;
+  font-size: 0.84rem;
   line-height: 1.6;
   color: var(--body);
   margin-top: 0.4rem;
@@ -408,7 +408,7 @@ h1 em {
    clicking. Delete this rule and its <a> in index.html to go icons-only. */
 .contact-address {
   margin-left: 0.35rem;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: var(--body);
   border-bottom: 1px solid transparent;
   padding-bottom: 2px;
@@ -512,24 +512,24 @@ h1 em {
 
 .case-body > p {
   color: var(--body);
-  font-size: 0.97rem;
+  font-size: 0.92rem;
   line-height: 1.75;
   margin: 0 0 1.05rem;
 }
 
 /* The opening line stays a little larger than the rest. */
-.case-body > .case-lede { font-size: 1.05rem; }
+.case-body > .case-lede { font-size: 1rem; }
 
 .case-body ul {
   margin: 0;
   padding-left: 1.1rem;
   color: var(--body);
 }
-.case-body li { margin-bottom: 0.65rem; line-height: 1.7; font-size: 0.97rem; }
+.case-body li { margin-bottom: 0.65rem; line-height: 1.7; font-size: 0.92rem; }
 .case-body li strong { color: var(--ink); font-weight: 600; }
 
 .case-note { font-size: 0.8rem; color: var(--body); margin: 0.85rem 0 0; }
-.case-back { margin: 3.5rem 0 0; font-size: 0.95rem; }
+.case-back { margin: 3.5rem 0 0; font-size: 0.9rem; }
 .case-back a { color: var(--accent); }
 
 /* Work items that link to a case study. */
