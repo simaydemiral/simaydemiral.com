@@ -1230,10 +1230,18 @@ function renderMonth(){
 
   var cashOut = 0, cashIn = 0;
   for(i=0;i<list.length;i++) if(list[i].cat === "cash"){ cashOut += list[i].spend; cashIn += list[i].refund; }
-  if(cashOut - cashIn > 0)
-    add(money(cashOut - cashIn), "warn", "Taken as cash",
-        cashIn > 0 ? esc(money(cashIn)) + " put back &middot; where it went, the statement cannot say"
-                   : "Where it went, the statement cannot say");
+  /* Withdrawals and deposits are separate facts. Netting them is useful, but
+     calling a deposit "put back" would claim it is the same money, which the
+     statement cannot know. */
+  if(cashOut || cashIn){
+    var cashNet = cashOut - cashIn;
+    var cashSub = (cashOut && cashIn)
+      ? esc(money(cashOut)) + " out, " + esc(money(cashIn))
+        + " in &middot; a statement cannot itemise cash"
+      : "A statement cannot itemise cash";
+    if(cashNet > 0)      add(money(cashNet), "warn", "Taken as cash", cashSub);
+    else if(cashNet < 0) add("+" + money(-cashNet), "go", "Cash deposited", cashSub);
+  }
 
   var big = list.filter(function(t){ return t.spend > 0 && !FIXED[t.cat]; })
                 .sort(function(a,b){ return b.spend - a.spend; })[0];
