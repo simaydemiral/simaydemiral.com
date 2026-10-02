@@ -214,7 +214,7 @@ input[type=search]{min-width:200px}
 .amt-wrap input::-moz-range-track{height:22px;background:transparent;border:0}
 .amt-wrap input::-moz-range-thumb{pointer-events:auto;width:14px;height:14px;border-radius:50%;
   background:var(--surface);border:2px solid var(--brand);cursor:ew-resize}
-.amt-txt{font:500 12.5px/1 var(--f-mono);color:var(--muted);white-space:nowrap;min-width:116px}
+.amt-txt{font:500 12.5px/1 var(--f-mono);color:var(--muted);white-space:nowrap;min-width:172px}
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);
   color:var(--ground);padding:9px 16px;border-radius:999px;font-size:13px;opacity:0;
   pointer-events:none;transition:opacity .2s;z-index:50}
@@ -742,7 +742,33 @@ function normMerchant(raw){
   while(keep.length > 1 && /^[\d\-\/]+$/.test(keep[keep.length-1])) keep.pop();
   s = keep.join(" ").replace(/[\s\-\/]+$/,"").replace(/\s+/g," ").trim();
 
-  return s || String(raw||"").toUpperCase().trim();
+  return cashKey(s) || s || String(raw||"").toUpperCase().trim();
+}
+
+/* One display name per canonical cash key, so "BOFA CASH WITHDRAWAL"
+   reads as "BofA cash withdrawal" rather than title-cased mush. */
+var MERCH_LABEL = {};
+(function(){
+  var dirs = [["CASH WITHDRAWAL", "cash withdrawal"], ["CASH DEPOSIT", "cash deposit"]];
+  for(var i=0;i<CASH_BANKS.length;i++)
+    for(var j=0;j<dirs.length;j++)
+      MERCH_LABEL[(CASH_BANKS[i][1] + " " + dirs[j][0]).toUpperCase()] =
+        CASH_BANKS[i][1] + " " + dirs[j][1];
+  MERCH_LABEL["CASH WITHDRAWAL"] = "Cash withdrawal";
+  MERCH_LABEL["CASH DEPOSIT"]    = "Cash deposit";
+})();
+
+/* Returns the canonical key for a cash movement, or "" if this is an
+   ordinary purchase. The direction has to be there; the place or a
+   known bank has to be there too, so a shop called Deposit is safe. */
+function cashKey(s){
+  var out = CASH_OUT.test(s), inn = CASH_IN.test(s);
+  if(out === inn) return "";                 /* neither, or both — not a clear call */
+  var bank = "", i;
+  for(i=0;i<CASH_BANKS.length;i++)
+    if(CASH_BANKS[i][0].test(s)){ bank = CASH_BANKS[i][1]; break; }
+  if(!bank && !CASH_PLACE.test(s)) return "";
+  return ((bank ? bank + " " : "") + (out ? "CASH WITHDRAWAL" : "CASH DEPOSIT")).toUpperCase();
 }
 
 function titleCase(s){
@@ -867,7 +893,8 @@ function view(){
     var key = normMerchant(t.desc);          /* derived, never trusted from storage */
     var cat = categorize(key, t.amt);
     out.push({ id:t.id, date:t.date, month:t.date.slice(0,7), desc:t.desc, key:key,
-               merch:titleCase(key), amt:t.amt, acct:t.acct, cat:cat.c, why:cat.why,
+               merch:MERCH_LABEL[key] || titleCase(key),
+               amt:t.amt, acct:t.acct, cat:cat.c, why:cat.why,
                spend: NOT_SPEND[cat.c] ? 0 : (t.amt < 0 ? -t.amt : 0),
                refund: NOT_SPEND[cat.c] ? 0 : (t.amt > 0 ? t.amt : 0) });
   }
@@ -1587,15 +1614,18 @@ function amtDraw(){
   var lo = +$("amtLo").value, hi = +$("amtHi").value;
   $("amtFill").style.left  = (lo / 10) + "%";
   $("amtFill").style.width = ((hi - lo) / 10) + "%";
+  /* Always name the real figures. The top of the track is the largest single
+     amount in the data, so an impossible number here is a parsing problem
+     worth seeing rather than something hidden behind the word "max". */
   $("amtTxt").textContent = amtFull()
-    ? "Any amount"
-    : money0(amtAt(lo)) + " – " + (hi === 1000 ? "max" : money0(amtAt(hi)));
+    ? "Any amount · up to " + money0(AMT.max)
+    : money0(amtAt(lo)) + " – " + money0(amtAt(hi));
 }
 
 function amtInit(){
   var m = 0, i;
   for(i=0;i<V.length;i++){ var a = Math.abs(V[i].amt); if(a > m) m = a; }
-  AMT.max = m || 1;
+  AMT.max = Math.ceil(m) || 1;
   amtDraw();
 }
 

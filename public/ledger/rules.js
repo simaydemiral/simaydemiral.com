@@ -4,8 +4,8 @@
 var CATEGORIES = [
   "groceries", "restaurants", "transport", "travel", "housing", "utilities",
   "home", "health", "education", "entertainment", "shopping",
-  "subscriptions", "cash", "fees", "income", "rewards", "transfers",
-  "uncategorized"
+  "subscriptions", "cash", "fees", "income", "rewards", "external",
+  "transfers", "uncategorized"
 ];
 
 var CAT_LABEL = {
@@ -14,10 +14,13 @@ var CAT_LABEL = {
   health: "Health", education: "Education", entertainment: "Entertainment",
   shopping: "Shopping", subscriptions: "Subscriptions", cash: "Cash",
   fees: "Fees", income: "Income",
-  rewards: "Rewards", transfers: "Transfers", uncategorized: "Uncategorised"
+  rewards: "Rewards", external: "External transfers",
+  transfers: "Internal transfers", uncategorized: "Uncategorised"
 };
 
-/* Not spending. Excluded from every total, chart and comparison. */
+/* Not spending. Excluded from every total, chart and comparison. Only
+   movement between your own accounts belongs here: money sent to another
+   person has left, and counting it as a transfer would hide it. */
 var NOT_SPEND = { income: 1, rewards: 1, transfers: 1 };
 
 /* Large fixed commitments. Still spending, but they dwarf everything else and
@@ -49,13 +52,14 @@ var RULES = [
   { t: 1, c: "transfers", re: /\bONLINE BANKING TRANSFER\b/ },
   { t: 1, c: "transfers", re: /\bAGENT ASSISTED TRANSFER\b/ },
   { t: 1, c: "transfers", re: /\b(PAYMENT\s?-?\s?THANK YOU|AUTOPAY|CARD PAYMENT)\b/ },
-  { t: 1, c: "transfers", re: /\bZELLE\b/ },
-  { t: 1, c: "transfers", re: /\b(VENMO|CASH APP|CASHAPP)\b/ },
+  { t: 1, c: "external", re: /\bZELLE\b/ },
+  { t: 1, c: "external", re: /\b(VENMO|CASH APP|CASHAPP)\b/ },
+  { t: 1, c: "external", re: /\b(WISE|TRANSFERWISE|REMITLY|XOOM|WESTERN UNION|MONEYGRAM)\b/ },
   { t: 1, c: "transfers", re: /\b(WIRE TYPE|WIRE IN|WIRE OUT)\b/ },
   { t: 2, c: "transfers", re: /\bWIRE TRANSFER\b/ },   /* the FEE rule is tier 1, so it wins */
   { t: 1, c: "transfers", re: /\bTRANSFER (TO|FROM)\b/ },
   { t: 1, c: "transfers", re: /\b(SCHWAB|FIDELITY|VANGUARD|ROBINHOOD|COINBASE|BETTERMENT|WEALTHFRONT)\b/ },
-  { t: 1, c: "cash", re: /\b(ATM|BKOFAMERICA BC|CASH WITHDRWL|CASH WITHDRAWAL)\b/ },
+  { t: 1, c: "cash", re: /\b(ATM|CASH WITHDRAWAL|CASH DEPOSIT|CASH WITHDRWL)\b/ },
 
   /* ---- income ---- */
   { t: 1, c: "income", re: /\b(PAYROLL|DIRECT DEP|DIR DEP|SALARY|WAGES|PAYCHECK)\b/ },
@@ -196,3 +200,31 @@ var HEADER_SETS = {
   ref: ["reference number", "reference", "check", "check #", "check or slip #"],
   address: ["address", "city/state", "city", "state", "zip code", "country"]
 };
+
+/* ------------------------------------------------------------
+   Cash in and out of an account. Every bank words it differently
+   and abbreviates it differently — WITHDRWL, WTHDRWL, WITHDRAWAL —
+   and the branch address rides along, so the same event arrives as
+   a dozen different "merchants". These collapse it to one name per
+   bank per direction. Add a bank by adding a line.
+   ------------------------------------------------------------ */
+var CASH_BANKS = [
+  [/\b(BKOFAMERICA|BANK OF AMERICA|BOFA)\b/, "BofA"],
+  [/\bCHASE\b/,                              "Chase"],
+  [/\bWELLS ?FARGO\b/,                       "Wells Fargo"],
+  [/\b(CITIBANK|CITI)\b/,                    "Citi"],
+  [/\bCAPITAL ?ONE\b/,                       "Capital One"],
+  [/\b(US BANK|USBANK)\b/,                   "US Bank"],
+  [/\bPNC\b/,                                "PNC"],
+  [/\bTD BANK\b/,                            "TD Bank"],
+  [/\bALLY\b/,                               "Ally"],
+  [/\b(SCHWAB|CHARLES SCHWAB)\b/,            "Schwab"],
+  [/\bHSBC\b/,                               "HSBC"],
+  [/\bSANTANDER\b/,                          "Santander"],
+  [/\bCHIME\b/,                              "Chime"]
+];
+
+/* The marker that says this is cash moving, not a purchase. */
+var CASH_PLACE = /\b(ATM|BC|BANKING ?CENTER|BRANCH|TELLER)\b/;
+var CASH_OUT   = /\b(WITHDRWL|WTHDRWL|WDRWL|WITHDRAWL|WITHDRAWAL|WITHDRAW|WDL|CASH ?OUT)\b/;
+var CASH_IN    = /\b(DEPOSIT|DEPOSITS|DEP)\b/;
