@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ledger — Simay Demiral</title>
+  <meta name="description" content="A spending dashboard that reads your bank statement entirely in the browser. Nothing is uploaded.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="icon" href="data:,">
+</head>
+<body>
+<div class="sheet">
+
+  <nav>
+    <ul>
+      <li><a href="/">&larr; Back</a></li>
+    </ul>
+  </nav>
+
+  <article class="case">
+    <div class="case-body">
+    <h1>Ledger</h1>
+    <p class="case-lede">
+      Drop in a bank statement and see where the money actually went — without
+      the statement ever leaving your computer.
+    </p>
+
+    <p>
+      Every budgeting app I looked at wanted my bank login. That is the part I
+      was not willing to give, and it is also the part that is hardest to
+      justify: a tool that reads a CSV does not need a password to my account,
+      and it does not need a server either.
+    </p>
+
+    <div class="actions" style="margin:2rem 0">
+      <a class="btn" href="/ledger/">Try it with your own statement <span aria-hidden="true">&rarr;</span></a>
+      <span class="btn-plain" style="border:0;cursor:default">Your file stays in your browser</span>
+    </div>
+
+    <h2>The problem</h2>
+    <p>
+      I could see every transaction and still not answer a simple question: what
+      do I actually spend on restaurants in a month? The bank shows a list. A
+      list is not an answer.
+    </p>
+    <p>
+      The honest obstacle was not effort, it was trust. Linking a bank account to
+      a third party to find out how much I spend on groceries is a bad trade.
+    </p>
+
+    <h2>What I built</h2>
+    <p>
+      A single page that does everything locally. You drop a CSV on it; the
+      browser reads the file, works out which columns are which, cleans up the
+      merchant names, sorts transactions into categories and draws the charts.
+      There is no backend, no account, and no upload.
+    </p>
+    <p>
+      It makes <strong>no network requests at all</strong> — no fonts, no
+      analytics, no CDN. You can open the network tab while you use it and watch
+      it stay empty. That is checkable, which is the only kind of privacy claim
+      worth making.
+    </p>
+
+    <h2>What I learned along the way</h2>
+    <p>
+      Reading the CSV was the easy part. Every bank writes a different file: one
+      had four summary lines and a blank row before the real header, a running
+      balance column sitting next to the amount, and a first row whose amount was
+      empty. Picking the wrong column silently inverts the whole dashboard, so
+      the parser identifies columns by sampling the values rather than trusting
+      the headings, and it refuses to import anything it is unsure about.
+    </p>
+    <p>
+      The bug that mattered most was quieter. I was counting money moved between
+      my own accounts as spending — paying my credit card from savings looked
+      like $2,871 of purchases. Nothing in the totals looked obviously wrong,
+      which is exactly why it survived. Internal transfers are now identified and
+      excluded from every figure.
+    </p>
+    <p>
+      Categorising merchants turned out to be a naming problem. Banks write
+      <em>SQ *BLUE BOTTLE COFFE</em> and <em>AMZN Mktp US*2X4RT1</em>, so the
+      first job is stripping the processor prefixes, store numbers, phone numbers
+      and city codes to get back to a name a human would recognise. My first
+      version stripped too hard: <em>UBER *PENDING</em> lost its brand and became
+      "Pendi", and <em>FRONTIER AI</em> — which is Frontier Airlines — was very
+      nearly filed under software.
+    </p>
+    <p>
+      The decision that made the rest work is that a transaction never stores its
+      own category. Both the merchant name and the category are recomputed every
+      time the page loads, from the rules plus your corrections. So fixing one
+      merchant fixes it across your whole history and every future import, and
+      improving the parser reaches transactions imported months ago. Only three
+      things are actually saved: the raw rows, your corrections, and your pending
+      list.
+    </p>
+    <p>
+      Rent and tuition were the last problem. They are real spending but they
+      dwarf everything else, and leaving them in meant the chart said "you spent
+      a lot on rent" every single month. They are now reported separately, so the
+      headline figure is the part you can do something about.
+    </p>
+
+    <h2>Stack</h2>
+    <p class="case-note">
+      Plain HTML, CSS and JavaScript. No framework, no build step, no
+      dependencies, no server. Written with Claude Code.
+    </p>
+
+    </div>
+
+    <section class="pipeline">
+      <p class="aside-label">What it looks like</p>
+      <p class="sources-note">One CSV in, a month you can read out.</p>
+
+      <div class="pipe">
+
+        <div class="pipe-col">
+          <div class="chip">
+            <span class="chip-mark"><svg viewBox="0 0 48 48" aria-hidden="true">
+              <rect x="9" y="5" width="30" height="38" rx="4" fill="none" stroke="currentColor" stroke-width="2.4"/>
+              <line x1="15" y1="15" x2="33" y2="15" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+              <line x1="15" y1="23" x2="33" y2="23" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+              <line x1="15" y1="31" x2="26" y2="31" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+            </svg></span>
+            <span class="chip-text"><b>Your CSV</b><span>read in the browser</span></span>
+          </div>
+
+          <div class="chip">
+            <span class="chip-mark"><svg viewBox="0 0 48 48" aria-hidden="true">
+              <path d="M8 10h32l-12 14v14l-8 4V24z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
+            </svg></span>
+            <span class="chip-text"><b>Clean &amp; categorise</b><span>names, then rules</span></span>
+          </div>
+
+          <div class="chip">
+            <span class="chip-mark"><svg viewBox="0 0 48 48" aria-hidden="true">
+              <rect x="7" y="26" width="8" height="15" rx="2" fill="currentColor"/>
+              <rect x="20" y="16" width="8" height="25" rx="2" fill="currentColor"/>
+              <rect x="33" y="8"  width="8" height="33" rx="2" fill="currentColor"/>
+            </svg></span>
+            <span class="chip-text"><b>Charts &amp; summary</b><span>and what changed</span></span>
+          </div>
+        </div>
+
+        <div class="pipe-link"><svg class="pipe-svg pipe-svg--drop" viewBox="0 0 400 44" aria-hidden="true">
+          <g class="pl-dash"><path d="M200 0 V32"/></g>
+          <path class="pl-head" d="M200 44 l-8 -13 h16 Z"/>
+        </svg></div>
+
+        <div class="pipe-agent">
+          <p class="agent-title">Stays on your machine</p>
+          <p class="agent-sub">
+            There is no server to send anything to. Your transactions are held in
+            your own browser and nothing is transmitted — which you can verify
+            yourself in the network tab.
+          </p>
+          <ul class="verbs">
+            <li>no upload</li>
+            <li>no account</li>
+            <li>no network requests</li>
+            <li>works offline</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="case-note">
+        <a href="/ledger/">Open Ledger</a> — it starts empty, and whatever you load
+        is yours alone.
+      </p>
+    </section>
+
+    <p class="case-back"><a href="/">&larr; Back to the homepage</a></p>
+  </article>
+
+</div>
+</body>
+</html>
