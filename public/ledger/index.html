@@ -1038,7 +1038,7 @@ function renderMonth(){
 
   $("meters").innerHTML =
       meter(money(total), "Day-to-day in " + monthName(curMonth).split(" ")[0], "")
-    + meter(fixed ? money(fixed) : "$0", "Rent & tuition", "")
+    + meter(fixed ? money(fixed) : "$0", "Fixed commitments (e.g., rent, tuition fee)", "")
     + meter(refunds ? "+" + money(refunds) : "$0", "Refunded back", refunds ? "is-go" : "")
     + meter(med ? (total>med?"+":"") + pct(total-med, med) + "%" : "—",
             med ? "vs your median" : "no history yet", med && total>med*1.15 ? "is-stop" : "")
