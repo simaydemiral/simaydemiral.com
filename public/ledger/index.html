@@ -145,6 +145,19 @@ select.cat.unc{border-color:var(--warn);color:var(--warn)}
 .flagcard{border-color:var(--warn);margin-bottom:14px}
 .flagcard h3{color:var(--warn)}
 
+/* ---- insights ---- */
+.ins{display:grid;grid-template-columns:86px 1fr;gap:12px;align-items:baseline;
+  padding:11px 0;border-top:1px solid var(--line-soft)}
+.ins:first-child{border-top:0;padding-top:2px}
+.ins-v{font:600 17px/1.15 var(--f-mono);font-variant-numeric:tabular-nums;
+  letter-spacing:-.02em;color:var(--ink);text-align:right;white-space:nowrap}
+.ins-v.go{color:var(--go)} .ins-v.warn{color:var(--warn)} .ins-v.stop{color:var(--stop)}
+.ins-v.faint{color:var(--faint);font-size:15px}
+.ins-t b{display:block;font-size:13.5px;font-weight:600;color:var(--ink-2);line-height:1.35}
+.ins-t span{display:block;font-size:12px;color:var(--muted);line-height:1.5;margin-top:2px}
+.ins-foot{margin:12px 0 0;padding-top:10px;border-top:1px solid var(--line-soft);
+  font-size:11.5px;color:var(--faint)}
+
 /* ---- trend chart ---- */
 .chart-ctl{display:flex;gap:8px;flex-wrap:wrap;margin:-2px 0 14px}
 .seg{display:inline-flex;background:var(--sunken);border:1px solid var(--line-soft);
@@ -290,7 +303,7 @@ input[type=search]{min-width:200px}
       </div>
       <div id="dups"></div>
       <div class="grid2">
-        <div class="card summary" id="cSummary"><h3>Summary</h3><div id="summary"></div></div>
+        <div class="card summary" id="cSummary"><h3>Insights</h3><div id="summary"></div></div>
         <div class="card" id="cCats"><h3>Where it went</h3><div id="cats"></div></div>
       </div>
       <div class="grid2" style="margin-top:14px">
@@ -1169,58 +1182,67 @@ function renderMonth(){
 
   /* summary */
   var cats = byCat(list, "day");
-  var lines = [];
-  if(!hist.length){
-    lines.push("In <b>"+esc(monthName(curMonth))+"</b> your day-to-day spending was <b>"
-      +esc(money(total))+"</b> across "+list.length+" transactions. This is your first month of data, "
-      +"so there is nothing to compare it against yet.");
-  } else {
-    var dp = med ? Math.round((total-med)/med*100) : 0;
-    if(Math.abs(dp) < 8)
-      lines.push("In <b>"+esc(monthName(curMonth))+"</b> your day-to-day spending was <b>"
-        +esc(money(total))+"</b> — about your usual "+esc(money(med))+".");
-    else
-      lines.push("In <b>"+esc(monthName(curMonth))+"</b> your day-to-day spending was <b>"
-        +esc(money(total))+"</b> — "+Math.abs(dp)+"% "+(dp>0?"more":"less")
-        +" than your "+hist.length+"-month median of "+esc(money(med))+".");
+  /* Insights, not prose: a figure, what it is, and the detail underneath.
+     Each one earns its row or it is not shown at all. */
+  var ins = [], foot = "";
+  function add(v, tone, label, sub){
+    ins.push('<div class="ins"><div class="ins-v ' + tone + '">' + esc(v) + '</div>'
+      + '<div class="ins-t"><b>' + esc(label) + '</b>'
+      + (sub ? '<span>' + sub + '</span>' : '') + '</div></div>');
   }
+
+  var shortMonth = monthName(curMonth).split(" ")[0];
+
+  if(!hist.length){
+    add(money(total), "", "Spent in " + shortMonth,
+        list.length + " transactions &middot; first month, nothing to compare yet");
+  } else {
+    var dp = med ? Math.round((total - med) / med * 100) : 0;
+    var near = Math.abs(dp) < 8;
+    add((dp > 0 ? "+" : "") + dp + "%", near ? "" : (dp > 0 ? "warn" : "go"),
+        near ? "About your usual" : (dp > 0 ? "Above your usual" : "Below your usual"),
+        esc(money(total)) + " this month &middot; " + esc(money(med)) + " median of "
+        + hist.length + " months");
+  }
+
   if(fixed > 0){
     var fc = byCat(list, "fixed");
-    lines.push("Rent and tuition took another <b>"+esc(money(fixed))
-      + "</b> ("+fc.map(function(r){ return esc(CAT_LABEL_OF(r)) + " " + esc(money(r[1])); }).join(", ")
-      + "), so everything together was "+esc(money(allIn))
-      + ". Those are left out of the figures above and of the trend, because they would drown everything else.");
+    add(money(fixed), "faint", "Fixed commitments",
+        fc.map(function(r){ return esc(CAT_LABEL_OF(r)) + " " + esc(money(r[1])); }).join(" &middot; ")
+        + " &middot; kept out of the figures above");
   }
+
   if(cats.length >= 3){
-    lines.push("Your three largest categories were <b>"+esc(cats[0][0])+"</b> "+esc(money(cats[0][1]))
-      +", <b>"+esc(cats[1][0])+"</b> "+esc(money(cats[1][1]))
-      +" and <b>"+esc(cats[2][0])+"</b> "+esc(money(cats[2][1]))
-      +" — together "+pct(cats[0][1]+cats[1][1]+cats[2][1], total)+"% of your day-to-day spending.");
+    add(pct(cats[0][1] + cats[1][1] + cats[2][1], total) + "%", "", "In three categories",
+        cats.slice(0,3).map(function(c){ return esc(c[0]) + " " + esc(money(c[1])); }).join(" &middot; "));
   }
-  var big = list.filter(function(t){ return t.spend > 0 && !FIXED[t.cat]; })
-                .sort(function(a,b){ return b.spend-a.spend; })[0];
-  /* Cash is the one line the statement cannot itemise, so say so rather than
-     letting it sit among the categories as though it were a shop. */
+
   var cashOut = 0, cashIn = 0;
   for(i=0;i<list.length;i++) if(list[i].cat === "cash"){ cashOut += list[i].spend; cashIn += list[i].refund; }
   if(cashOut - cashIn > 0)
-    lines.push("You took <b>"+esc(money(cashOut - cashIn))+"</b> out as cash"
-      + (cashIn > 0 ? " (after putting " + esc(money(cashIn)) + " back in)" : "")
-      + ". Where that went, the statement cannot say.");
+    add(money(cashOut - cashIn), "warn", "Taken as cash",
+        cashIn > 0 ? esc(money(cashIn)) + " put back &middot; where it went, the statement cannot say"
+                   : "Where it went, the statement cannot say");
 
-  if(big) lines.push("Your single largest charge was <b>"+esc(money(big.spend))
-    +"</b> at <b>"+esc(big.merch)+"</b> on "+esc(big.date)+".");
+  var big = list.filter(function(t){ return t.spend > 0 && !FIXED[t.cat]; })
+                .sort(function(a,b){ return b.spend - a.spend; })[0];
+  if(big) add(money(big.spend), "", "Largest charge",
+              esc(big.merch) + " &middot; " + esc(big.date));
+
   if(refunds > 0)
-    lines.push("You were refunded <b>"+esc(money(refunds))+"</b> across "
-      + list.filter(function(t){ return t.refund > 0; }).length
-      + " credits — already netted off the figures above.");
-  if(uncAmt > total*0.1)
-    lines.push(pct(uncAmt,total)+"% of the month ("+esc(money(uncAmt))
-      +") is still uncategorised — tagging a few merchants on the Transactions tab would fix most of it.");
-  if(hist.length && hist.length < 3)
-    lines.push('<span class="note">With '+(hist.length+1)+' months of data these are first impressions, not patterns.</span>');
+    add("+" + money(refunds), "go", "Refunded",
+        list.filter(function(t){ return t.refund > 0; }).length
+        + " credits, already netted off");
 
-  $("summary").innerHTML = "<ul><li>" + lines.join("</li><li>") + "</li></ul>";
+  if(uncAmt > total * 0.1)
+    add(money(uncAmt), "stop", "Still uncategorised",
+        pct(uncAmt, total) + "% of the month &middot; tag a few merchants to fix it");
+
+  if(hist.length && hist.length < 3)
+    foot = '<p class="ins-foot">' + (hist.length + 1)
+         + ' months of data &mdash; first impressions, not patterns.</p>';
+
+  $("summary").innerHTML = ins.join("") + foot;
 
   /* category bars */
   for(i=0;i<cats.length;i++) cats[i][2] = pct(cats[i][1], total);
