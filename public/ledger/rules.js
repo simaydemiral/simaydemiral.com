@@ -4,14 +4,16 @@
 var CATEGORIES = [
   "groceries", "restaurants", "transport", "travel", "housing", "utilities",
   "home", "health", "education", "entertainment", "shopping",
-  "cash", "fees", "income", "rewards", "transfers", "uncategorized"
+  "subscriptions", "cash", "fees", "income", "rewards", "transfers",
+  "uncategorized"
 ];
 
 var CAT_LABEL = {
   groceries: "Groceries", restaurants: "Restaurants", transport: "Transport",
   travel: "Travel", housing: "Housing", utilities: "Utilities", home: "Home",
   health: "Health", education: "Education", entertainment: "Entertainment",
-  shopping: "Shopping", cash: "Cash", fees: "Fees", income: "Income",
+  shopping: "Shopping", subscriptions: "Subscriptions", cash: "Cash",
+  fees: "Fees", income: "Income",
   rewards: "Rewards", transfers: "Transfers", uncategorized: "Uncategorised"
 };
 
@@ -92,6 +94,7 @@ var RULES = [
   { t: 1, c: "groceries", re: /\b(99 RANCH|H ?MART|MITSUWA|GROCERY OUTLET)\b/ },
   /* tier 1 and listed before the restaurants DoorDash rule, so a grocery
      delivery is groceries rather than a restaurant */
+  { t: 1, c: "subscriptions", re: /\bDOORDASHDASHPASS|\bDASHPASS\b/ },
   { t: 1, c: "groceries", re: /\bDOORDASH (SAFEWAY|ANDRONICO|GROCERYOU|TRADER|WHOLEFOODS|7-ELEVEN)/ },
   { t: 3, c: "groceries", re: /\b(GROCERY|SUPERMARKET|PRODUCE|FARMERS MKT)\b/ },
 
