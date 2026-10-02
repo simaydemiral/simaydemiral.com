@@ -107,6 +107,10 @@ button{font:inherit;cursor:pointer}
 .track{height:9px;border-radius:5px;background:var(--sunken);overflow:hidden;border:1px solid var(--line-soft)}
 .fill{height:100%;background:var(--brand);border-radius:5px}
 .fill.fixedbar{background:var(--faint)}
+.frow.go{cursor:pointer;border-radius:7px;margin:0 -7px;padding:0 7px;
+  transition:background .14s}
+.frow.go:hover,.frow.go:focus-visible{background:var(--sunken);outline:none}
+.frow.go:hover .flabel,.frow.go:focus-visible .flabel{color:var(--brand)}
 .fnum{text-align:right;font:500 12.5px/1 var(--f-mono);font-variant-numeric:tabular-nums;color:var(--ink-2)}
 .fpct{color:var(--faint);font-size:11px;margin-left:5px}
 
@@ -942,7 +946,9 @@ function bars(rows, max, cls){
   var m = Math.max(1, max || biggest);
   return rows.map(function(r){
     var w = Math.round(r[1]/m*100);
-    return '<div class="frow"><div class="flabel" title="'+esc(r[0])+'">'+esc(r[0])+'</div>'
+    /* r[3] is what this bar stands for; with one the row becomes a way in. */
+    var go = r[3] ? ' go" tabindex="0" role="button" data-bar="'+esc(r[3])+'"' : '"';
+    return '<div class="frow'+go+'><div class="flabel" title="'+esc(r[0])+'">'+esc(r[0])+'</div>'
       + '<div class="track"><div class="fill '+(cls||"")+'" style="width:'+w+'%"></div></div>'
       + '<div class="fnum">'+money0(r[1])+(r[2]!=null?'<span class="fpct">'+r[2]+'%</span>':'')+'</div></div>';
   }).join("");
@@ -1182,6 +1188,11 @@ function renderMonth(){
 
   /* summary */
   var cats = byCat(list, "day");
+  /* The bars show the categories that came out positive after refunds, so the
+     percentages are of their sum. Against the net total they could pass 100%
+     in any month with big credits in it. */
+  var catSum = 0;
+  for(i=0;i<cats.length;i++) catSum += cats[i][1];
   /* Insights, not prose: a figure, what it is, and the detail underneath.
      Each one earns its row or it is not shown at all. */
   var ins = [], foot = "";
@@ -1213,7 +1224,7 @@ function renderMonth(){
   }
 
   if(cats.length >= 3){
-    add(pct(cats[0][1] + cats[1][1] + cats[2][1], total) + "%", "", "In three categories",
+    add(pct(cats[0][1] + cats[1][1] + cats[2][1], catSum) + "%", "", "In three categories",
         cats.slice(0,3).map(function(c){ return esc(c[0]) + " " + esc(money(c[1])); }).join(" &middot; "));
   }
 
@@ -1245,7 +1256,7 @@ function renderMonth(){
   $("summary").innerHTML = ins.join("") + foot;
 
   /* category bars */
-  for(i=0;i<cats.length;i++) cats[i][2] = pct(cats[i][1], total);
+  for(i=0;i<cats.length;i++) cats[i][2] = pct(cats[i][1], catSum);
   var catsHtml = bars(cats, cats.length?cats[0][1]:1);
   var fixedCats = byCat(list, "fixed");
   if(fixedCats.length){
@@ -1268,7 +1279,7 @@ function renderMonth(){
     mm[t.merch] = (mm[t.merch]||0) + t.spend;
   }
   var tops = [];
-  for(k in mm) tops.push([k, mm[k]]);
+  for(k in mm) tops.push([k, mm[k], null, k]);
   tops.sort(function(a,b){ return b[1]-a[1]; });
   $("topMerch").innerHTML = bars(tops.slice(0,10), 0, "");
 }
@@ -1745,15 +1756,33 @@ $("tabs").addEventListener("click", function(e){
 
 /* The uncategorised figure is only useful if you can act on it, so the tile
    is a shortcut: it opens the month's uncategorised rows, ready to retag. */
-function openUncategorised(){
+function goTxns(o){
   document.querySelector('.tab[data-tab="txns"]').click();
-  $("q").value = "";
-  $("fMonth").value = curMonth;
-  MCat.set(["uncategorized"]);
+  $("q").value = o.q || "";
+  $("fMonth").value = o.month || "";
+  MCat.set(o.cats || []);
   MAcct.set([]);
+  $("amtLo").value = 0; $("amtHi").value = 1000; amtDraw();
   renderTxns();
   $("p-txns").scrollIntoView({ behavior:"smooth", block:"start" });
 }
+function openUncategorised(){ goTxns({ cats:["uncategorized"], month:curMonth }); }
+
+/* A bar is a question — these are the spendings behind it — so clicking one
+   opens exactly those rows rather than making you rebuild the filter. */
+function wireBars(id, handler){
+  function hit(e){
+    var b = e.target.closest ? e.target.closest("[data-bar]") : null;
+    if(!b) return null;
+    if(e.type === "keydown" && e.key !== "Enter" && e.key !== " ") return null;
+    if(e.type === "keydown") e.preventDefault();
+    return b.getAttribute("data-bar");
+  }
+  $(id).addEventListener("click", function(e){ var k = hit(e); if(k) handler(k); });
+  $(id).addEventListener("keydown", function(e){ var k = hit(e); if(k) handler(k); });
+}
+wireBars("cats",     function(k){ goTxns({ cats:[k], month:curMonth }); });
+wireBars("topMerch", function(k){ goTxns({ q:k,      month:curMonth }); });
 $("meters").addEventListener("click", function(e){
   var m = e.target.closest ? e.target.closest("[data-goto]") : null;
   if(m && m.getAttribute("data-goto") === "unc") openUncategorised();
