@@ -18,6 +18,11 @@ var CAT_LABEL = {
   transfers: "Internal transfers", uncategorized: "Uncategorised"
 };
 
+/* A credit from a shop is a refund. A credit from a person, or cash going back
+   into the account, is not — it is money arriving, and calling it a refund would
+   make a Zelle from a flatmate look like a shop gave you money back. */
+var MONEY_IN = { cash: 1, external: 1, uncategorized: 1 };
+
 /* Not spending. Excluded from every total, chart and comparison. Only
    movement between your own accounts belongs here: money sent to another
    person has left, and counting it as a transfer would hide it. */
