@@ -65,6 +65,15 @@ button{font:inherit;cursor:pointer}
 #drop h2{margin:0 0 6px;font-size:16px}
 #drop p{margin:0;color:var(--muted);font-size:13.5px}
 #drop .privacy{margin-top:12px;font-size:12.5px;color:var(--go)}
+#drop .howto{margin-top:14px;text-align:left;max-width:52ch;margin-left:auto;margin-right:auto}
+#drop summary{cursor:pointer;font-size:12.5px;color:var(--muted);text-align:center;
+  list-style:none}
+#drop summary::-webkit-details-marker{display:none}
+#drop summary:hover{color:var(--ink-2)}
+#drop summary::before{content:"\203A ";display:inline-block;transition:transform .15s}
+#drop details[open] summary::before{transform:rotate(90deg)}
+#drop .howto p{margin:10px 0 0;font-size:12.5px;line-height:1.6}
+#drop .howto a{color:var(--brand)}
 #file{display:none}
 
 /* ---- cards ---- */
@@ -194,6 +203,28 @@ input[type=search]{min-width:200px}
     <h2>Drop your statement here</h2>
     <p>or <button class="btn" id="pick">choose a file</button> &nbsp;·&nbsp; CSV from your bank or card</p>
     <p class="privacy">Nothing leaves your computer. No upload, no account, no server.</p>
+
+    <details class="howto">
+      <summary>Where do I get a CSV?</summary>
+      <p>
+        Your bank's phone app probably only offers PDF statements. Sign in on a
+        desktop browser instead, open an account, and look for a download or
+        export link above the list of transactions &mdash; pick the Excel or CSV
+        format and the months you want.
+      </p>
+      <p>
+        Bank of America keeps them under
+        <a href="https://secure.bankofamerica.com/statements-documents/home/"
+           target="_blank" rel="noopener noreferrer">Statements &amp; Documents</a>.
+      </p>
+      <p>
+        Download generously: re-importing a month you already have changes
+        nothing, so overlapping date ranges are safe. Load every account &mdash;
+        card, checking, savings &mdash; and money moved between them is left out
+        of the totals.
+      </p>
+    </details>
+
     <input type="file" id="file" accept=".csv,text/csv" multiple>
   </div>
 
