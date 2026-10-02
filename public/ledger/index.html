@@ -109,38 +109,6 @@ button{font:inherit;cursor:pointer}
 .fill{height:100%;background:var(--brand);border-radius:5px}
 .fill.fixedbar{background:var(--faint)}
 
-/* Categorical hues, validated against both surfaces (OKLab CVD and contrast
-   checks). Colour marks the things you bought; money movement, the fixed
-   commitments and the admin tail stay neutral, so the hue itself says
-   "this is a purchase". Eight slots, fixed per category, never cycled. */
-.c-groceries    {background:#008300}
-.c-restaurants  {background:#eb6834}
-.c-shopping     {background:#e87ba4}
-.c-travel       {background:#1baf7a}
-.c-transport    {background:#2a78d6}
-.c-entertainment{background:#4a3aa7}
-.c-utilities    {background:#eda100}
-.c-cash         {background:#e34948}
-.c-rest         {background:var(--faint)}
-
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]) .c-groceries    {background:#008300}
-  :root:not([data-theme="light"]) .c-restaurants  {background:#d95926}
-  :root:not([data-theme="light"]) .c-shopping     {background:#d55181}
-  :root:not([data-theme="light"]) .c-travel       {background:#199e70}
-  :root:not([data-theme="light"]) .c-transport    {background:#3987e5}
-  :root:not([data-theme="light"]) .c-entertainment{background:#9085e9}
-  :root:not([data-theme="light"]) .c-utilities    {background:#c98500}
-  :root:not([data-theme="light"]) .c-cash         {background:#e66767}
-}
-:root[data-theme="dark"] .c-groceries    {background:#008300}
-:root[data-theme="dark"] .c-restaurants  {background:#d95926}
-:root[data-theme="dark"] .c-shopping     {background:#d55181}
-:root[data-theme="dark"] .c-travel       {background:#199e70}
-:root[data-theme="dark"] .c-transport    {background:#3987e5}
-:root[data-theme="dark"] .c-entertainment{background:#9085e9}
-:root[data-theme="dark"] .c-utilities    {background:#c98500}
-:root[data-theme="dark"] .c-cash         {background:#e66767}
 .frow.go{cursor:pointer;border-radius:7px;margin:0 -7px;padding:0 7px;
   transition:background .14s}
 .frow.go:hover,.frow.go:focus-visible{background:var(--sunken);outline:none}
@@ -191,6 +159,18 @@ select.cat.unc{border-color:var(--warn);color:var(--warn)}
   letter-spacing:-.02em;color:var(--ink);text-align:right;white-space:nowrap}
 .ins-v.go{color:var(--go)} .ins-v.warn{color:var(--warn)} .ins-v.stop{color:var(--stop)}
 .ins-v.faint{color:var(--faint);font-size:15px}
+
+/* Each insight's figure carries its own hue, fixed per insight rather than
+   per position, so a colour means the same thing every month. Validated
+   against both surfaces; the dark steps are chosen, not flipped. */
+.ins-v.i-fixed {color:#4a3aa7}
+.ins-v.i-big   {color:#b14a7d}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .ins-v.i-fixed{color:#9085e9}
+  :root:not([data-theme="light"]) .ins-v.i-big  {color:#d55181}
+}
+:root[data-theme="dark"] .ins-v.i-fixed{color:#9085e9}
+:root[data-theme="dark"] .ins-v.i-big  {color:#d55181}
 .ins-t b{display:block;font-size:13.5px;font-weight:600;color:var(--ink-2);line-height:1.35}
 .ins-t span{display:block;font-size:12px;color:var(--muted);line-height:1.5;margin-top:2px}
 .ins-foot{margin:12px 0 0;padding-top:10px;border-top:1px solid var(--line-soft);
@@ -983,7 +963,7 @@ function bars(rows, max, cls){
     /* r[3] is what this bar stands for; with one the row becomes a way in. */
     var go = r[3] ? ' go" tabindex="0" role="button" data-bar="'+esc(r[3])+'"' : '"';
     return '<div class="frow'+go+'><div class="flabel" title="'+esc(r[0])+'">'+esc(r[0])+'</div>'
-      + '<div class="track"><div class="fill '+(r[4] || cls || "")+'" style="width:'+w+'%"></div></div>'
+      + '<div class="track"><div class="fill '+(cls||"")+'" style="width:'+w+'%"></div></div>'
       + '<div class="fnum">'+money0(r[1])+(r[2]!=null?'<span class="fpct">'+r[2]+'%</span>':'')+'</div></div>';
   }).join("");
 }
@@ -1252,7 +1232,7 @@ function renderMonth(){
 
   if(fixed > 0){
     var fc = byCat(list, "fixed");
-    add(money(fixed), "faint", "Fixed commitments",
+    add(money(fixed), "i-fixed", "Fixed commitments",
         fc.map(function(r){ return esc(CAT_LABEL_OF(r)) + " " + esc(money(r[1])); }).join(" &middot; ")
         + " &middot; kept out of the figures above");
   }
@@ -1279,7 +1259,7 @@ function renderMonth(){
 
   var big = list.filter(function(t){ return t.spend > 0 && !FIXED[t.cat]; })
                 .sort(function(a,b){ return b.spend - a.spend; })[0];
-  if(big) add(money(big.spend), "", "Largest charge",
+  if(big) add(money(big.spend), "i-big", "Largest charge",
               esc(big.merch) + " &middot; " + esc(big.date));
 
   if(refunds > 0)
@@ -1298,10 +1278,7 @@ function renderMonth(){
   $("summary").innerHTML = ins.join("") + foot;
 
   /* category bars */
-  for(i=0;i<cats.length;i++){
-    cats[i][2] = pct(cats[i][1], catSum);
-    cats[i][4] = catFill(cats[i][3]);
-  }
+  for(i=0;i<cats.length;i++) cats[i][2] = pct(cats[i][1], catSum);
   var catsHtml = bars(cats, cats.length?cats[0][1]:1);
   var fixedCats = byCat(list, "fixed");
   if(fixedCats.length){
@@ -1321,22 +1298,15 @@ function renderMonth(){
   for(i=0;i<list.length;i++){
     var t = list[i];
     if(NOT_SPEND[t.cat] || FIXED[t.cat] || t.spend <= 0) continue;
-    if(!mm[t.merch]) mm[t.merch] = { sum:0, cat:t.cat };
-    mm[t.merch].sum += t.spend;
+    mm[t.merch] = (mm[t.merch]||0) + t.spend;
   }
   var tops = [];
-  for(k in mm) tops.push([k, mm[k].sum, null, k, catFill(mm[k].cat)]);
+  for(k in mm) tops.push([k, mm[k], null, k]);
   tops.sort(function(a,b){ return b[1]-a[1]; });
   $("topMerch").innerHTML = bars(tops.slice(0,10), 0, "");
 }
 
 function CAT_LABEL_OF(row){ return row[0]; }
-
-/* Eight categories carry a hue; everything else — transfers, fees, the fixed
-   commitments, the uncategorised queue — stays neutral on purpose. */
-var CAT_FILL = { groceries:1, restaurants:1, shopping:1, travel:1,
-                 transport:1, entertainment:1, utilities:1, cash:1 };
-function catFill(key){ return CAT_FILL[key] ? "c-" + key : "c-rest"; }
 
 function meter(n, l, cls, goTo){
   var g = goTo ? ' go" tabindex="0" role="button" data-goto="'+esc(goTo)+'"' : '"';
