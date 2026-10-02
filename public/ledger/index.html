@@ -1618,7 +1618,7 @@ function amtDraw(){
      amount in the data, so an impossible number here is a parsing problem
      worth seeing rather than something hidden behind the word "max". */
   $("amtTxt").textContent = amtFull()
-    ? "Any amount · up to " + money0(AMT.max)
+    ? "Up to " + money0(AMT.max)
     : money0(amtAt(lo)) + " – " + money0(amtAt(hi));
 }
 
