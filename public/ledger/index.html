@@ -65,6 +65,8 @@ button{font:inherit;cursor:pointer}
 #drop h2{margin:0 0 6px;font-size:16px}
 #drop p{margin:0;color:var(--muted);font-size:13.5px}
 #drop .privacy{margin-top:12px;font-size:12.5px;color:var(--go)}
+#drop .covers{margin-top:10px;font-size:12.5px;color:var(--ink-2)}
+#drop .covers b{font-family:var(--f-mono);font-weight:600}
 #drop .howto{margin-top:14px;text-align:left;max-width:52ch;margin-left:auto;margin-right:auto}
 #drop summary{cursor:pointer;font-size:13.5px;font-weight:600;color:var(--brand);
   text-align:center;list-style:none;padding:4px 0}
@@ -288,6 +290,7 @@ input[type=search]{min-width:200px}
     <h2>Drop your statement here</h2>
     <p>or <button class="btn" id="pick">choose a file</button> &nbsp;·&nbsp; CSV from your bank or card</p>
     <p class="privacy">Nothing leaves your computer. No upload, no account, no server.</p>
+    <p class="covers" id="covers" hidden></p>
 
     <details class="howto">
       <summary>Don&rsquo;t have a CSV yet? Here is where to find it</summary>
@@ -1783,6 +1786,19 @@ function fillSelect(el, vals, label){
   el.value = cur;
 }
 
+function sayWhatIsCovered(){
+  var el = $("covers");
+  if(!V.length){ el.hidden = true; return; }
+  var last = V[0].date, first = V[V.length-1].date;   /* V is newest first */
+  var from = isoOf(dayNum(last) - 6);                 /* overlap, since the
+                                                         final days may still
+                                                         have been pending */
+  el.innerHTML = "You have <b>" + esc(first) + "</b> to <b>" + esc(last)
+    + "</b>. For the next one, download from <b>" + esc(from)
+    + "</b> onwards &mdash; importing days you already have changes nothing.";
+  el.hidden = false;
+}
+
 function render(){
   V = view();
   if(!V.length){ $("app").hidden = true; $("add").hidden = true; return; }
@@ -1802,6 +1818,7 @@ function render(){
   amtInit();
   fillSelect($("fMonth"), ms.map(function(m){ return [m, monthName(m)]; }), "All months");
 
+  sayWhatIsCovered();
   renderMonth();
   renderSubs();
   if(!$("p-txns").hidden) renderTxns();
