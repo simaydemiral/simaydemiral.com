@@ -35,6 +35,12 @@ var NOT_SPEND = { income: 1, rewards: 1, transfers: 1 };
    category from here to fold it back into the main number. */
 var FIXED = { housing: 1, education: 1 };
 
+/* Cash is its own figure. A withdrawal is not yet spending on anything a
+   statement can name, and a deposit is money arriving, so neither belongs in
+   the spending totals: counted there, one deposit can push a month below zero.
+   The month view reports the net of the two in a box of its own. */
+var CASH = { cash: 1 };
+
 var PROCESSOR_PREFIXES = [
   "SQ", "TST", "SP", "PY", "PP", "PAYPAL", "EB", "IN", "WL", "CKE", "POS",
   "DD", "MOB", "ACH", "WPY", "GOOGLE", "APL", "STRIPE", "TOAST", "CLOVER",
