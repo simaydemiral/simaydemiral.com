@@ -346,9 +346,13 @@ input[type=search]{min-width:200px}
     <input type="file" id="bakfile" accept=".json,application/json">
   </div>
 
-  <div id="app" hidden>
+  <!-- Outside #app on purpose. #app is hidden while there are no
+       transactions, which is exactly the state you are in when your first
+       file fails to parse, and the explanation was being written into a box
+       nobody could see. -->
+  <div id="receipt"></div>
 
-    <div id="receipt"></div>
+  <div id="app" hidden>
 
 
     <div class="meters" id="meters"></div>
@@ -912,6 +916,7 @@ function normMerchant(raw){
     s = s.replace(/^[A-Z]{2,4}\s?\*+\s?(?=[A-Z0-9])/,"");
   s = s.replace(/^AMZN\s+MKTPL?A?C?E?(\s+[A-Z]{2})?\b/,"AMAZON")
        .replace(/^AMAZON\s+(MKTPL?A?C?E?|RETA|PRIME)\*?\s*/,"AMAZON ")
+       .replace(/^AMAZON\s+PMTS?\b\s*/,"AMAZON ")
        .replace(/\bAMZN\b/g,"AMAZON")
        .replace(/^PAYPAL\s*[\*:]?\s*/,"PAYPAL ");
 
@@ -925,6 +930,12 @@ function normMerchant(raw){
     while(parts.length>1 && /^(MOBILE|ONLINE)$/.test(parts[0])) parts.shift();
   }
   while(parts.length>1 && RAIL.test(parts[0])) parts.shift();
+  /* "CHECKCARD 0909 TRADER JOE'S #186" — taking CHECKCARD off leaves the date
+     as the first word, and nothing else recognises a bare MMDD. Six months of
+     one shop became six merchants: "0909 Trader Joe's", "0908 Trader Joe's".
+     Only drop it if a name follows, so a shop called 1800 Flowers survives. */
+  if(parts.length > 1 && /^(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])$/.test(parts[0]))
+    parts.shift();
   while(parts.length>1 && RAIL.test(parts[parts.length-1])) parts.pop();
   s = parts.join(" ");
 
@@ -958,7 +969,10 @@ function normMerchant(raw){
 
   /* store numbers */
   s = s.replace(/\s#\s?\d{1,6}\b/g," ")
-       .replace(/\bSTORE\s*#?\s?\d{1,6}\b/g," ")
+       /* the number goes, the word stays: APPLE STORE 0199 was becoming
+          "APPLE EMERYVILLE", which matches no rule at all. Same for CONTAINER
+          STORE, SHOE STORE, TOY STORE. */
+       .replace(/\b(STORE)\s*#?\s?\d{1,6}\b/g,"$1")
        .replace(/\bT-?\d{3,4}\b/g," ");
 
   /* trailing city / state / zip */
@@ -968,7 +982,13 @@ function normMerchant(raw){
        .replace(/\s+(US|USA)\s*$/," ");
 
   s = s.replace(/[^A-Z0-9&'\/\- ]/g," ").replace(/\s+/g," ").trim();
-  if(!NUMBER_NAME_MERCHANTS.test(s)) s = s.replace(/\s\d{1,5}$/,"");
+  if(!NUMBER_NAME_MERCHANTS.test(s)){
+    s = s.replace(/\s\d{1,5}$/,"");
+    /* "ZARA USA 0188 SAN FRANCISCO": a branch number in the middle, with no #
+       in front of it, kept two Zaras from ever being one merchant. A
+       leading-zero run of four or five digits is a store number, not a name. */
+    s = s.replace(/\s0\d{3,4}(?=\s)/g," ");
+  }
 
   /* Stripping a URL often leaves the brand twice over:
      "AMAZON MKTPL*5X.. Amzn.com/bill" -> "AMAZON ... AMAZON".
@@ -1020,7 +1040,8 @@ function titleCase(s){
     .replace(/(^|[^a-z'])([a-z])/g, function(m, a, b){ return a + b.toUpperCase(); })
     /* initialisms a bank writes as words: "Atm Fee" is not a shop */
     .replace(/\b(Atm|Usps|Dmv|Irs|Cvs|Ups|Llc|Suv|Dvd|Pg&E)\b/g,
-             function(w){ return w === "Pg&E" ? "PG&E" : w.toUpperCase(); });
+             function(w){ return w === "Pg&E" ? "PG&E" : w.toUpperCase(); })
+    .replace(/\bBoa\b/g, "BofA").replace(/\bUsa\b/g, "USA");
 }
 
 /* ============================================================
@@ -1191,11 +1212,23 @@ function view(){
   return out;
 }
 
+/* Every month between the first transaction and the last, including the ones
+   with nothing in them. A month you spent nothing in is a fact about your
+   year: the chart already zero-filled it, while the month picker skipped it
+   and the median quietly left it out, so the two disagreed about whether
+   November happened. */
 function months(v){
-  var m = {}, i, out = [];
-  for(i=0;i<v.length;i++) m[v[i].month] = 1;
-  for(var k in m) out.push(k);
-  out.sort(); out.reverse();
+  if(!v.length) return [];
+  var out = [], last = v[0].month, first = v[v.length-1].month;
+  var y = +first.slice(0,4), mo = +first.slice(5,7);
+  while(true){
+    var ym = y + "-" + (mo<10?"0":"") + mo;
+    out.push(ym);
+    if(ym >= last) break;
+    mo++; if(mo > 12){ mo = 1; y++; }
+    if(out.length > 600) break;              /* a corrupt date cannot hang the page */
+  }
+  out.reverse();
   return out;
 }
 
@@ -1222,7 +1255,8 @@ function bars(rows, max, cls){
     var go = r[3] ? ' go" tabindex="0" role="button" data-bar="'+esc(r[3])+'"' : '"';
     return '<div class="frow'+go+'><div class="flabel" title="'+esc(r[0])+'">'+esc(r[0])+'</div>'
       + '<div class="track"><div class="fill '+(cls||"")+'" style="width:'+w+'%"></div></div>'
-      + '<div class="fnum">'+money0(r[1])+(r[2]!=null?'<span class="fpct">'+r[2]+'%</span>':'')+'</div></div>';
+      + '<div class="fnum">'+(Math.abs(r[1]) < 100 ? money2(r[1]) : money0(r[1]))
+      + (r[2]!=null?'<span class="fpct">'+r[2]+'%</span>':'')+'</div></div>';
   }).join("");
 }
 
@@ -1281,7 +1315,7 @@ function isoOf(n){ return new Date(n*86400000).toISOString().slice(0,10); }
 /* Monday-start weeks. 1 January 1970 was a Thursday, hence the +3. */
 function weekStartNum(n){ return n - ((n + 3) % 7); }
 
-/* 1, 2 or 5 x 10^k — the only axis tops that read as round numbers. */
+/* Axis tops that read as round numbers. */
 var NICE = [1, 1.25, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10];
 function niceTop(v){
   if(v <= 0) return 1;
@@ -1463,7 +1497,15 @@ function renderMonth(){
   var income = 0, i;
   for(i=0;i<list.length;i++) if(list[i].cat === "income") income += list[i].amt;
   var unc = list.filter(function(t){ return t.cat === "uncategorized"; });
-  var uncAmt = spendOf(unc);
+  /* Everything still to tag, whichever way it went. This counted only money
+     going out, so an unrecognised $1,150 credit sat two inches under a receipt
+     saying "1 merchant I do not recognise, worth $1,150" beside a tile reading
+     $0. The tile is a to-do list, not a spending figure. */
+  var uncAmt = 0, uncIn = 0;
+  for(i=0;i<unc.length;i++){
+    uncAmt += Math.abs(unc[i].amt);
+    if(unc[i].amt > 0) uncIn += unc[i].amt;
+  }
 
   var hist = months(V).filter(function(m){ return m < curMonth; }).slice(0,6)
     .map(function(m){ return spendOf(V.filter(function(t){ return t.month===m; }), "day"); });
@@ -1472,20 +1514,37 @@ function renderMonth(){
   var refunds = 0;
   for(i=0;i<list.length;i++) if(!MONEY_IN[list[i].cat]) refunds += list[i].refund;
   var pendSum = 0;
-  for(i=0;i<db.pending.length;i++) pendSum += Math.abs(db.pending[i].amt);
+  /* Scoped to the month on screen, like every other tile beside it. It used to
+     sum every pending charge whatever its date, so one logged for December
+     showed up in August, September and October too. */
+  for(i=0;i<db.pending.length;i++)
+    if(String(db.pending[i].date).slice(0,7) === curMonth)
+      pendSum += Math.abs(db.pending[i].amt);
   var cashOut = 0, cashIn = 0;
   for(i=0;i<list.length;i++) if(CASH[list[i].cat]){ cashOut += list[i].spend; cashIn += list[i].refund; }
   var cashNet = cashOut - cashIn;
 
   $("meters").innerHTML =
-      meter(money(total), "Day-to-day in " + monthName(curMonth).split(" ")[0], "", "day")
-    + meter(fixed ? money(fixed) : "$0", "Fixed commitments (e.g., rent, tuition fee)", "", "fixed")
-    + meter(refunds ? "+" + money(refunds) : "$0", "Refunded back", refunds ? "is-go" : "", "refund")
-    + meter(cashOut ? money(cashOut) : "$0", "Cash withdrawn", "", cashOut ? "cash" : "")
-    + meter(med ? (total>med?"+":"") + pct(total-med, med) + "%" : "—",
-            med ? "Vs your median" : "No history yet", med && total>med*1.15 ? "is-stop" : "")
-    + meter(pendSum ? money(pendSum) : "$0", "Pending", pendSum ? "is-stop" : "", "pend")
-    + meter(uncAmt ? money(uncAmt) : "$0", "Uncategorised",
+    /* money0s, not money, so the row reads at one precision: "$80.00 Cash
+       withdrawn" beside "$1,182 Day-to-day" made the small number look more
+       exact than the big one. The cents are in the table underneath. */
+      meter(money0s(total), "Day-to-day in " + monthName(curMonth).split(" ")[0], "", "day")
+    + meter(fixed ? money0s(fixed) : "$0", "Fixed commitments (e.g., rent, tuition fee)", "", "fixed")
+    + meter(refunds ? "+" + money0(refunds) : "$0", "Refunded back", refunds ? "is-go" : "", "refund")
+    + meter(cashOut ? money0(cashOut) : "$0", "Cash withdrawn", "", cashOut ? "cash" : "")
+    /* A percentage against a median stops meaning anything once the month
+       itself is negative: "-296% vs your median" is not a smaller number than
+       usual, it is a different kind of month. */
+    + (!list.length
+        ? meter("\u2014", "Nothing imported for " + monthName(curMonth).split(" ")[0], "")
+        : med && total < 0
+        ? meter(money0s(total), "More came back than went out", "")
+        : meter(med ? (total>med?"+":"") + pct(total-med, med) + "%" : "—",
+                med ? "Vs your median" : "No history yet",
+                med && total>med*1.15 ? "is-stop" : ""))
+    + meter(pendSum ? money0(pendSum) : "$0", "Pending", pendSum ? "is-stop" : "", "pend")
+    + meter(uncAmt ? money0(uncAmt) : "$0",
+            uncIn && uncIn === uncAmt ? "Uncategorised, all money in" : "Uncategorised",
             uncAmt > 0 && uncAmt > total*0.15 ? "is-stop" : "", "unc");
 
   /* summary */
@@ -1506,16 +1565,29 @@ function renderMonth(){
 
   var shortMonth = monthName(curMonth).split(" ")[0];
 
-  if(!hist.length){
+  if(!list.length){
+    /* Reading "-100% below your usual", in green, for a month you have no
+       statement for is worse than saying nothing. */
+    add("\u2014", "", "Nothing in " + shortMonth,
+        "No transactions were imported for this month");
+  } else if(!hist.length){
     add(money(total), "", "Spent in " + shortMonth,
         list.length + " transactions &middot; first month, nothing to compare yet");
   } else {
     var dp = med ? Math.round((total - med) / med * 100) : 0;
     var near = Math.abs(dp) < 8;
-    add((dp > 0 ? "+" : "") + dp + "%", near ? "" : (dp > 0 ? "warn" : "go"),
-        near ? "About your usual" : (dp > 0 ? "Above your usual" : "Below your usual"),
-        esc(money(total)) + " this month &middot; " + esc(money(med)) + " median of "
-        + hist.length + " months");
+    if(total < 0)
+      /* "129% below your usual", in green, for a month where refunds
+         outweighed spending. A percentage below zero is not a smaller number,
+         it is a different kind of month. */
+      add(money(total), "", "More came back than went out",
+          "against a median of " + esc(money(med)) + " over " + hist.length
+          + " month" + (hist.length === 1 ? "" : "s"));
+    else
+      add((dp > 0 ? "+" : "") + dp + "%", near ? "" : (dp > 0 ? "warn" : "go"),
+          near ? "About your usual" : (dp > 0 ? "Above your usual" : "Below your usual"),
+          esc(money(total)) + " this month &middot; " + esc(money(med)) + " median of "
+          + hist.length + " month" + (hist.length === 1 ? "" : "s"));
   }
 
   if(fixed > 0){
@@ -1525,21 +1597,31 @@ function renderMonth(){
         + " &middot; kept out of the figures above");
   }
 
-  if(cats.length >= 3){
+  /* Only when the headline and these bars share a denominator. In a month
+     where more came back than went out, total is negative while catSum is the
+     sum of the categories that stayed positive, and "100% in three
+     categories" was a percentage of a number shown nowhere on the page. */
+  if(cats.length >= 3 && total > 0 && Math.abs(catSum - total) < Math.max(1, total * 0.02)){
     add(pct(cats[0][1] + cats[1][1] + cats[2][1], catSum) + "%", "", "In three categories",
+        cats.slice(0,3).map(function(c){ return esc(c[0]) + " " + esc(money(c[1])); }).join(" &middot; "));
+  } else if(cats.length >= 3){
+    add(money(cats[0][1] + cats[1][1] + cats[2][1]), "", "In three categories",
         cats.slice(0,3).map(function(c){ return esc(c[0]) + " " + esc(money(c[1])); }).join(" &middot; "));
   }
 
-  /* Withdrawals and deposits are separate facts. Netting them is useful, but
-     calling a deposit "put back" would claim it is the same money, which the
-     statement cannot know. */
-  if(cashOut || cashIn){
-    var cashSub = (cashOut && cashIn)
-      ? esc(money(cashOut)) + " out, " + esc(money(cashIn))
-        + " in &middot; a statement cannot itemise cash"
-      : "A statement cannot itemise cash";
-    if(cashNet > 0)      add(money(cashNet), "warn", "Taken as cash", cashSub);
-    else if(cashNet < 0) add("+" + money(-cashNet), "go", "Cash deposited", cashSub);
+  /* Withdrawals and deposits are separate events, and this line used to
+     subtract one from the other — the same netting the totals refuse to do.
+     A month with $300 out and $1,200 in read "+$900 Cash deposited" in green,
+     and itemising the $300 made the green number bigger. Only what went out
+     is spending, so only that is shown. */
+  if(cashOut){
+    add(money(cashOut), "warn", "Taken as cash",
+        (cashIn ? esc(money(cashIn)) + " was paid in as well, which is money "
+                + "arriving, not this money coming back &middot; " : "")
+        + "a statement cannot itemise cash");
+  } else if(cashIn){
+    add("+" + money(cashIn), "", "Cash paid in",
+        "Money arriving &middot; it does not reduce what you spent");
   }
 
   var big = list.filter(function(t){ return t.spend > 0 && !FIXED[t.cat] && !CASH[t.cat]; })
@@ -1550,11 +1632,22 @@ function renderMonth(){
   if(refunds > 0)
     add("+" + money(refunds), "go", "Refunded",
         list.filter(function(t){ return t.refund > 0 && !MONEY_IN[t.cat]; }).length
-        + " credits from shops, already netted off");
+        + " credit" + (list.filter(function(t){ return t.refund > 0 && !MONEY_IN[t.cat]; }).length === 1 ? "" : "s")
+        + " from shops, already netted off");
 
-  if(uncAmt > 0 && uncAmt > total * 0.1)
+  /* "1312% of the month" — the tile counts everything still to tag, money in
+     included, while the month total counts only spending. A percentage across
+     the two is a number of nothing. */
+  if(uncAmt > 0 && (uncIn === uncAmt || total <= 0))
     add(money(uncAmt), "stop", "Still uncategorised",
-        pct(uncAmt, total) + "% of the month &middot; tag a few merchants to fix it");
+        unc.length + " transaction" + (unc.length===1?"":"s")
+        + (uncIn === uncAmt ? ", all money arriving" : "")
+        + " &middot; tag a few merchants to fix it");
+  else if(uncAmt - uncIn > total * 0.1)
+    add(money(uncAmt), "stop", "Still uncategorised",
+        pct(uncAmt - uncIn, total) + "% of what went out"
+        + (uncIn ? ", plus " + esc(money(uncIn)) + " arriving" : "")
+        + " &middot; tag a few merchants to fix it");
 
   if(hist.length && hist.length < 3)
     foot = '<p class="ins-foot">' + (hist.length + 1)
@@ -1590,11 +1683,15 @@ function renderMonth(){
   var mm = {}, k;
   for(i=0;i<list.length;i++){
     var t = list[i];
-    if(NOT_SPEND[t.cat] || FIXED[t.cat] || CASH[t.cat] || t.spend <= 0) continue;
-    mm[t.merch] = (mm[t.merch]||0) + t.spend;
+    if(NOT_SPEND[t.cat] || FIXED[t.cat] || CASH[t.cat]) continue;
+    /* The same rule as every other figure: a shop's refund reduces what you
+       spent there. Without it a jacket bought and returned in one month stood
+       in this list at full price, and clicking the bar opened two rows that
+       cancelled out. */
+    mm[t.merch] = (mm[t.merch]||0) + t.spend - (MONEY_IN[t.cat] ? 0 : t.refund);
   }
   var tops = [];
-  for(k in mm) tops.push([k, mm[k], null, k]);
+  for(k in mm) if(mm[k] > 0) tops.push([k, mm[k], null, k]);
   tops.sort(function(a,b){ return b[1]-a[1]; });
   $("topMerch").innerHTML = bars(tops.slice(0,10), 0, "");
 }
@@ -1765,7 +1862,11 @@ function recurring(){
     /* Taking $100 out on the same day each month is a habit, not a bill you
        could cancel, and listing it among the subscriptions put it in the
        yearly figure as if it were one. */
-    if(NOT_SPEND[t.cat] || FIXED[t.cat] || CASH[t.cat] || t.amt >= 0) continue;
+    /* and not EXTERNAL either: $220 a month to a flatmate is as regular as
+       Netflix and there is no button that cancels it, so pricing it per year
+       alongside things you could drop is the wrong frame. */
+    if(NOT_SPEND[t.cat] || FIXED[t.cat] || CASH[t.cat] || t.cat === "external"
+       || t.amt >= 0) continue;
     (m[t.key] = m[t.key] || []).push(t);
   }
   var out = [], newest = V.length ? dayNum(V[0].date) : 0;
@@ -2264,7 +2365,7 @@ function wireBars(id, handler){
   $(id).addEventListener("keydown", function(e){ var k = hit(e); if(k) handler(k); });
 }
 wireBars("cats",     function(k){ goTxns({ cats:[k], month:curMonth, dir:"spend" }); });
-wireBars("topMerch", function(k){ goTxns({ q:k,      month:curMonth }); });
+wireBars("topMerch", function(k){ goTxns({ q:k, month:curMonth, dir:"spend" }); });
 $("meters").addEventListener("click", function(e){
   var m = e.target.closest ? e.target.closest("[data-goto]") : null;
   if(m) openMeter(m.getAttribute("data-goto"));
@@ -2349,11 +2450,17 @@ function splitTally(box){
   if(!t) return;
   var left = Math.round((t.amt - splitTotalOf(box)) * 100) / 100;
   var el = box.querySelector(".left");
+  /* "-$27.00 still unaccounted for" asked the reader to hold a negative
+     amount of a negative amount in their head. */
   el.textContent = left === 0
-    ? "Adds up to " + money(t.amt)
-    : money(left) + " still unaccounted for";
+    ? "The parts add up"
+    : money2(Math.abs(left))
+      + ((left < 0) === (t.amt < 0) ? " still to assign" : " too much");
   el.className = "left" + (left === 0 ? "" : " bad");
-  box.querySelector(".sp-save").disabled = left !== 0;
+  /* Two parts with amounts, or Save does nothing but toast at you. */
+  var real = 0, rs = box.querySelectorAll(".sp-amt");
+  for(i=0;i<rs.length;i++){ var pa = parseAmount(rs[i].value); if(pa.ok && pa.value) real++; }
+  box.querySelector(".sp-save").disabled = left !== 0 || real < 2;
 }
 
 document.addEventListener("click", function(e){
@@ -2509,9 +2616,24 @@ $("exp").addEventListener("click", function(){
      What is exported is what the filters are showing, because a button next to
      a filtered table that ignores the filter is a trap. */
   var rows = [["date","description","amount","account","category","merchant"]];
-  var list = txnList();
-  for(var i=0;i<list.length;i++){
+  var list = txnList(), seen = {}, i;
+  for(i=0;i<list.length;i++){
     var t = list[i];
+    /* A split charge is one line on the statement and has to leave here as one
+       line, or re-importing the export adds its parts as new transactions
+       beside the charge they came from. The parts are yours, not the bank's;
+       they live in the backup file, which is what restores them. */
+    var base = String(t.id).split("#")[0];
+    if(t.part !== undefined && t.part !== null){
+      if(seen[base]) continue;
+      seen[base] = 1;
+      var parent = null, pi;
+      for(pi=0;pi<db.txns.length;pi++) if(db.txns[pi].id === base) parent = db.txns[pi];
+      if(!parent) continue;
+      rows.push([parent.date, parent.desc, parent.amt.toFixed(2), parent.acct,
+                 "(split into " + db.splits[base].length + " parts)", t.merch]);
+      continue;
+    }
     rows.push([t.date, t.desc, t.amt.toFixed(2), t.acct, t.cat, t.merch]);
   }
   var csv = rows.map(function(r){
