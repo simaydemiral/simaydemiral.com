@@ -83,6 +83,9 @@ button{font:inherit;cursor:pointer}
   margin:12px 0 0;break-inside:avoid}
 .assume-body b{color:var(--ink-2)}
 .assume-body a{color:var(--brand)}
+.assume-body ul{margin:6px 0 0;padding-left:1.1rem}
+.assume-body li{font-size:12.5px;line-height:1.6;color:var(--muted);margin-bottom:3px}
+.assume-body ul + p{margin-top:8px}
 @media (max-width:820px){ .assume-body{columns:1} }
 #drop .covers b{font-family:var(--f-mono);font-weight:600}
 #drop .howto{margin-top:14px;text-align:left;max-width:52ch;margin-left:auto;margin-right:auto}
@@ -350,12 +353,18 @@ input[type=search]{min-width:200px}
           between checking and savings are left out of every figure.</p>
 
         <p><b>Cash counts as spending when you take it out, not when you spend
-          it.</b> A statement cannot see the second, but you can: give a
-          withdrawal a category of its own, or split it into the things you
-          actually bought &mdash; <a href="#" id="seeCash">see your
-          withdrawals</a>. Whatever you leave stays as Cash, which means money
-          gone and unaccounted for. A deposit never reduces the figure, because
-          money arriving may be funding rather than unspent notes coming back.</p>
+          it.</b> A statement cannot see the second, but you can:</p>
+        <ul>
+          <li>give a withdrawal a category of its own, or</li>
+          <li>split it into the things you actually bought &mdash;
+            <a href="#" id="seeCash">see your withdrawals</a>.</li>
+        </ul>
+        <p>Whatever you leave stays as Cash spending, which means money gone and
+          unaccounted for.</p>
+
+        <p><b>A cash deposit never reduces that figure.</b> Money arriving may be
+          funding from somewhere else rather than unspent notes coming back, and
+          cancelling the two would erase spending that really happened.</p>
 
         <p><b>Rent and tuition are reported on their own line.</b> They are real
           spending, but they are so much larger than everything else that
