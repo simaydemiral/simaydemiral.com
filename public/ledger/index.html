@@ -412,6 +412,7 @@ input[type=search]{min-width:200px}
           <option value="">In and out</option>
           <option value="out">Money out</option>
           <option value="in">Money in</option>
+          <option value="spend">Counts as spending</option>
         </select>
         <div class="amt">
           <div class="amt-wrap">
@@ -503,7 +504,16 @@ function money(n){
   if(a >= 100) return s + "$" + Math.round(a).toLocaleString("en-US");
   return s + "$" + a.toFixed(2);
 }
+/* Rounded money is right for a headline and wrong for a row: a statement line
+   is $1,204.37, not $1,204. */
+function money2(n){
+  var a = Math.abs(n), s = n < 0 ? "-" : "";
+  return s + "$" + a.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
 function money0(n){ return "$" + Math.round(Math.abs(n)).toLocaleString("en-US"); }
+/* Same, but a negative stays negative. On an axis and in a total, dropping the
+   minus sign does not round a number, it changes it. */
+function money0s(n){ return (Math.round(n) < 0 ? "-" : "") + money0(n); }
 function pct(a,b){ return b ? Math.round(a/b*100) : 0; }
 function median(a){
   if(!a.length) return 0;
@@ -1004,7 +1014,13 @@ function cashKey(s){
 }
 
 function titleCase(s){
-  return String(s||"").toLowerCase().replace(/\b[a-z]/g, function(c){ return c.toUpperCase(); });
+  /* \b puts a word boundary after an apostrophe, which is how TRADER JOE'S
+     came out as "Trader Joe'S". */
+  return String(s||"").toLowerCase()
+    .replace(/(^|[^a-z'])([a-z])/g, function(m, a, b){ return a + b.toUpperCase(); })
+    /* initialisms a bank writes as words: "Atm Fee" is not a shop */
+    .replace(/\b(Atm|Usps|Dmv|Irs|Cvs|Ups|Llc|Suv|Dvd|Pg&E)\b/g,
+             function(w){ return w === "Pg&E" ? "PG&E" : w.toUpperCase(); });
 }
 
 /* ============================================================
@@ -1122,8 +1138,12 @@ function clearPending(){
       if((t.amt < 0) !== (p.amt < 0)) continue;
       var da = Math.abs(Math.abs(t.amt) - Math.abs(p.amt));
       if(da > Math.max(1, Math.abs(p.amt) * 0.02)) continue;
-      var dd = Math.abs(dayNum(t.date) - dayNum(p.date));
-      if(dd > 14) continue;
+      /* The real charge posts on or after the day you logged it. Matching
+         backwards let an unrelated import clear a pending Peets against a
+         charge from ten days earlier that was already in the file. Two days of
+         slack, for a purchase logged a little late. */
+      var dd = dayNum(t.date) - dayNum(p.date);
+      if(dd < -2 || dd > 14) continue;
       var a = normMerchant(t.desc), b = pk;
       if(a.indexOf(b) < 0 && b.indexOf(a) < 0 && a.slice(0,5) !== b.slice(0,5)) continue;
       hit = t; break;
@@ -1245,13 +1265,17 @@ function byCat(list, mode){
    at a daily scale than at a monthly one.
    ============================================================ */
 var MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+/* Counted in buckets, not days. "12 months" used to mean 372 days back, which
+   began mid-month and put a part month next to eleven whole ones: the first
+   point read as a collapse that never happened, and it dragged the average
+   down with it. */
 var SPANS = {
   day:   [["30 days",30],["90 days",90],["All",0]],
-  week:  [["12 weeks",84],["26 weeks",182],["All",0]],
-  month: [["6 months",186],["12 months",372],["All",0]]
+  week:  [["12 weeks",12],["26 weeks",26],["All",0]],
+  month: [["6 months",6],["12 months",12],["All",0]]
 };
 var trendGrain = "month";
-var trendDays  = { day:30, week:84, month:372 };
+var trendSpan  = { day:30, week:12, month:12 };
 
 function isoOf(n){ return new Date(n*86400000).toISOString().slice(0,10); }
 /* Monday-start weeks. 1 January 1970 was a Thursday, hence the +3. */
@@ -1280,9 +1304,16 @@ function tFull(k){
    is a real data point, and skipping it would flatter the line. */
 function trendSeries(){
   if(!V.length) return { keys:[], vals:[] };
-  var days = trendDays[trendGrain];
-  var maxD = dayNum(V[0].date), oldest = dayNum(V[V.length-1].date);
-  var minD = days ? Math.max(oldest, maxD - days + 1) : oldest;
+  var want = trendSpan[trendGrain];
+  var maxD = dayNum(V[0].date), oldest = dayNum(V[V.length-1].date), minD;
+  if(!want) minD = oldest;
+  else if(trendGrain === "day")  minD = Math.max(oldest, maxD - want + 1);
+  else if(trendGrain === "week") minD = Math.max(oldest, weekStartNum(maxD) - (want-1)*7);
+  else {
+    var sy = +V[0].date.slice(0,4), sm = +V[0].date.slice(5,7) - (want - 1);
+    while(sm < 1){ sm += 12; sy--; }
+    minD = Math.max(oldest, dayNum(sy + "-" + (sm<10?"0":"") + sm + "-01"));
+  }
 
   var m = {}, i, n;
   for(i=0;i<V.length;i++){
@@ -1293,7 +1324,9 @@ function trendSeries(){
     var k = trendGrain === "day"  ? t.date
           : trendGrain === "week" ? isoOf(weekStartNum(n))
           : t.month;
-    m[k] = (m[k]||0) + t.spend - t.refund;
+    /* same rule as the boxes: a shop's refund reduces what you spent
+       there, money arriving from elsewhere does not */
+    m[k] = (m[k]||0) + t.spend - (MONEY_IN[t.cat] ? 0 : t.refund);
   }
 
   var keys = [];
@@ -1331,7 +1364,7 @@ function chartSVG(keys, vals){
     var gv = bot + (top-bot)*j/TICKS, gy = Y(gv).toFixed(1);
     s += '<line class="ch-grid" x1="'+L+'" y1="'+gy+'" x2="'+(W-R)+'" y2="'+gy+'"/>'
        + '<text class="ch-axis" x="'+(L-8)+'" y="'+(Y(gv)+3.5).toFixed(1)+'" text-anchor="end">'
-       + money0(gv) + '</text>';
+       + money0s(gv) + '</text>';
   }
   if(bot < 0)
     s += '<line class="ch-zero" x1="'+L+'" y1="'+Y(0).toFixed(1)+'" x2="'+(W-R)+'" y2="'+Y(0).toFixed(1)+'"/>';
@@ -1343,10 +1376,21 @@ function chartSVG(keys, vals){
      + ' L'+X(0).toFixed(1)+' '+base.toFixed(1)+' Z"/>'
      + '<path class="ch-line" d="'+d+'"/>';
 
-  var step = Math.max(1, Math.ceil(keys.length/5));
-  for(i=0;i<keys.length;i+=step){
-    var anc = i === 0 ? "start" : i >= keys.length-step ? "end" : "middle";
-    var lx  = i === 0 ? L : i >= keys.length-step ? W-R : X(i);
+  /* Label the first and last points and spread the rest between them. The old
+     loop stepped from the start and then pinned whatever it landed on last to
+     the right-hand edge, so with fourteen months "Aug '26" sat under
+     September. */
+  var step = Math.max(1, Math.ceil(keys.length/5)), marks = [0], mi;
+  for(mi=step; mi<keys.length-1; mi+=step) marks.push(mi);
+  if(keys.length > 1){
+    if(marks.length > 1 && keys.length-1 - marks[marks.length-1] < step*0.6) marks.pop();
+    marks.push(keys.length-1);
+  }
+  for(mi=0;mi<marks.length;mi++){
+    i = marks[mi];
+    var last = i === keys.length-1 && keys.length > 1;
+    var anc  = i === 0 ? "start" : last ? "end" : "middle";
+    var lx   = i === 0 ? L : last ? W-R : X(i);
     s += '<text class="ch-axis" x="'+lx.toFixed(1)+'" y="'+(H-8)+'" text-anchor="'+anc+'">'
        + esc(tLabel(keys[i])) + '</text>';
   }
@@ -1371,7 +1415,7 @@ function renderTrend(){
   for(i=0;i<g.length;i++)
     g[i].className = "seg-b" + (g[i].getAttribute("data-grain") === trendGrain ? " is-on" : "");
   $("tSpan").innerHTML = SPANS[trendGrain].map(function(o){
-    return '<button class="seg-b' + (trendDays[trendGrain] === o[1] ? " is-on" : "")
+    return '<button class="seg-b' + (trendSpan[trendGrain] === o[1] ? " is-on" : "")
       + '" data-days="' + o[1] + '">' + esc(o[0]) + '</button>';
   }).join("");
 
@@ -1385,8 +1429,8 @@ function renderTrend(){
 
   $("trend").innerHTML = '<div class="chart" id="chWrap">' + c.svg
     + '<div class="ch-tip" id="chTip"></div></div>'
-    + '<div class="ch-foot"><span>' + money0(tot) + ' across ' + n + ' ' + unit + (n===1?"":"s")
-    + '</span><span>' + money0(tot/n) + ' a ' + unit + ' on average</span></div>';
+    + '<div class="ch-foot"><span>' + money0s(tot) + ' across ' + n + ' ' + unit + (n===1?"":"s")
+    + '</span><span>' + money0s(tot/n) + ' a ' + unit + ' on average</span></div>';
 
   var wrap = $("chWrap"), tip = $("chTip");
   var guide = wrap.querySelector(".ch-guide"), live = wrap.querySelector(".ch-live");
@@ -1442,7 +1486,7 @@ function renderMonth(){
             med ? "Vs your median" : "No history yet", med && total>med*1.15 ? "is-stop" : "")
     + meter(pendSum ? money(pendSum) : "$0", "Pending", pendSum ? "is-stop" : "", "pend")
     + meter(uncAmt ? money(uncAmt) : "$0", "Uncategorised",
-            uncAmt > total*0.15 ? "is-stop" : "", "unc");
+            uncAmt > 0 && uncAmt > total*0.15 ? "is-stop" : "", "unc");
 
   /* summary */
   var cats = byCat(list, "day");
@@ -1505,10 +1549,10 @@ function renderMonth(){
 
   if(refunds > 0)
     add("+" + money(refunds), "go", "Refunded",
-        list.filter(function(t){ return t.refund > 0; }).length
-        + " credits, already netted off");
+        list.filter(function(t){ return t.refund > 0 && !MONEY_IN[t.cat]; }).length
+        + " credits from shops, already netted off");
 
-  if(uncAmt > total * 0.1)
+  if(uncAmt > 0 && uncAmt > total * 0.1)
     add(money(uncAmt), "stop", "Still uncategorised",
         pct(uncAmt, total) + "% of the month &middot; tag a few merchants to fix it");
 
@@ -1529,6 +1573,14 @@ function renderMonth(){
       + 'your ' + esc(money0(allIn)) + ' total for the month — the rest is the '
       + 'day-to-day above</p>' + bars(fixedCats, allIn, "fixedbar");
   }
+  /* A month can end up negative: refunds arriving for things bought earlier,
+     with little or nothing spent since. There is then nothing to break down,
+     and "Nothing here." reads as a loading failure rather than an answer. */
+  if(!cats.length && total < 0)
+    catsHtml = '<p class="empty">More came back than went out in '
+      + esc(shortMonth) + ' &mdash; ' + esc(money(-total))
+      + ' of refunds against nothing spent, so there is nothing to break down.</p>'
+      + catsHtml.replace('<p class="empty">Nothing here.</p>', '');
   $("cats").innerHTML = catsHtml;
 
   renderTrend();
@@ -1598,19 +1650,26 @@ function catSelect(cat, id){
   return '<select class="cat'+(cat==="uncategorized"?' unc':'')+'" data-id="'+esc(id)+'">'+o+'</select>';
 }
 
-function renderTxns(){
+function txnList(){
   var q = $("q").value.toLowerCase().trim(), fm = $("fMonth").value, fd = $("fDir").value;
   var aFull = amtFull(), aLo = amtAt(+$("amtLo").value), aHi = amtAt(+$("amtHi").value);
-  var list = V.filter(function(t){
+  return V.filter(function(t){
     if(!MCat.has(t.cat)) return false;
     if(!MAcct.has(t.acct)) return false;
     if(!aFull){ var abs = Math.abs(t.amt); if(abs < aLo || abs > aHi) return false; }
     if(fm && t.month !== fm) return false;
     if(fd === "out" && t.amt >= 0) return false;
     if(fd === "in"  && t.amt <= 0) return false;
+    /* What the month boxes count: everything going out, plus a shop's refund,
+       but not money arriving from a person or from cash. */
+    if(fd === "spend" && t.amt > 0 && MONEY_IN[t.cat]) return false;
     if(q && t.merch.toLowerCase().indexOf(q) < 0 && t.desc.toLowerCase().indexOf(q) < 0) return false;
     return true;
   });
+}
+
+function renderTxns(){
+  var list = txnList();
   $("nTx").textContent = V.length;
 
   if(!list.length){ $("tbl").innerHTML = '<p class="empty">No transactions match.</p>'; return; }
@@ -1624,7 +1683,7 @@ function renderTxns(){
       + '<div class="t-raw" title="'+esc(t.why)+'">'+esc(t.desc)+'</div></td>'
       + '<td>'+catSelect(t.cat, t.id)+'</td>'
       + '<td class="t-acct">'+esc(t.acct)+'</td>'
-      + '<td class="t-amt '+(t.amt<0?'neg':'pos')+'">'+esc(money(t.amt))+'</td>'
+      + '<td class="t-amt '+(t.amt<0?'neg':'pos')+'">'+esc(money2(t.amt))+'</td>'
       + '<td class="t-split">'
       + (t.part
           ? '<span class="partof">' + t.part.i + '/' + t.part.n + '</span>'
@@ -1653,7 +1712,7 @@ function renderPend(){
       var p = db.pending[i];
       h += '<tr><td class="t-date">'+esc(p.date)+'</td>'
         + '<td class="t-merch">'+esc(p.merch)+'</td>'
-        + '<td class="t-amt neg">'+esc(money(-Math.abs(p.amt)))+'</td>'
+        + '<td class="t-amt neg">'+esc(money2(-Math.abs(p.amt)))+'</td>'
         + '<td><button class="btn-q" data-pdel="'+esc(p.id)+'">Remove</button></td></tr>';
     }
     $("pend").innerHTML = h + '</tbody></table>';
@@ -1673,7 +1732,7 @@ function renderPend(){
       h += '<tr><td class="t-date">'+esc(rows[j].date)+'</td>'
          + '<td class="t-merch">'+esc(rows[j].merch)+'</td>'
          + '<td class="t-acct">'+esc(labelOf(rows[j].cat))+'</td>'
-         + '<td class="t-amt pos">+'+esc(money(rows[j].refund))+'</td></tr>';
+         + '<td class="t-amt pos">+'+esc(money2(rows[j].refund))+'</td></tr>';
     return h + '</tbody></table><p class="note" style="margin-top:10px">'
          + rows.length + ' ' + noun + (rows.length === 1 ? "" : "s")
          + ' totalling <b>' + esc(money(tot)) + '</b>.</p>';
@@ -1703,7 +1762,10 @@ function recurring(){
   var m = {}, i, k;
   for(i=0;i<V.length;i++){
     var t = V[i];
-    if(NOT_SPEND[t.cat] || FIXED[t.cat] || t.amt >= 0) continue;
+    /* Taking $100 out on the same day each month is a habit, not a bill you
+       could cancel, and listing it among the subscriptions put it in the
+       yearly figure as if it were one. */
+    if(NOT_SPEND[t.cat] || FIXED[t.cat] || CASH[t.cat] || t.amt >= 0) continue;
     (m[t.key] = m[t.key] || []).push(t);
   }
   var out = [], newest = V.length ? dayNum(V[0].date) : 0;
@@ -1762,6 +1824,9 @@ function duplicates(list){
     var ts = byKey[k];
     for(i=0;i<ts.length;i++) for(j=i+1;j<ts.length;j++){
       var a = ts[i], b = ts[j];
+      /* Two halves of one charge you split yourself are the same merchant,
+         the same day and often the same amount. They are one charge. */
+      if(String(a.id).split("#")[0] === String(b.id).split("#")[0]) continue;
       if(Math.abs(a.amt - b.amt) > 0.009) continue;
       if(Math.abs(dayNum(a.date) - dayNum(b.date)) > 1) continue;
       if(-a.amt < dupFloor(a.cat)) continue;
@@ -1792,7 +1857,7 @@ function renderDups(list){
              ? 'twice on ' + esc(d[i].d1)
              : esc(d[i].d1) + ' and ' + esc(d[i].d2))+'</td>'
        + '<td class="t-acct">'+esc(d[i].acct)+'</td>'
-       + '<td class="t-amt">'+esc(money(d[i].amt))+' each</td>'
+       + '<td class="t-amt">'+esc(money2(d[i].amt))+' each</td>'
        + '<td style="text-align:right"><button class="btn-q" data-dupok="'
        + esc(d[i].key)+'">Acknowledge</button></td></tr>';
   $("dups").innerHTML = h + '</tbody></table></div>';
@@ -1835,7 +1900,7 @@ function renderMerch(){
     var t = V[i];
     if(NOT_SPEND[t.cat]) continue;
     if(!m[t.key]) m[t.key] = { n:0, sum:0, merch:t.merch, cat:t.cat };
-    m[t.key].n++; m[t.key].sum += t.spend - t.refund;
+    m[t.key].n++; m[t.key].sum += t.spend - (MONEY_IN[t.cat] ? 0 : t.refund);
   }
   var rows = [];
   for(k in m) if(m[k].sum > 0) rows.push([k, m[k]]);
@@ -1852,7 +1917,9 @@ function renderMerch(){
       + '<td class="t-acct">'+r.n+'</td>'
       + '<td class="t-amt">'+esc(money(r.sum))+'</td></tr>';
   }
-  $("merch").innerHTML = h + '</tbody></table>';
+  $("merch").innerHTML = h + '</tbody></table>'
+    + (rows.length > 200 ? '<p class="note" style="margin-top:10px">The 200 biggest of '
+        + rows.length + ' merchants.</p>' : '');
 }
 
 function renderFiles(){
@@ -2039,6 +2106,13 @@ function render(){
   if(!$("p-files").hidden) renderFiles();
   $("nTx").textContent = V.length;
   $("nPe").textContent = db.pending.length;
+  $("nFi").textContent = db.files.length;
+  /* The merchant count read 0 until you opened the tab, which looked like an
+     empty tab rather than one nobody had asked for yet. */
+  var mk = {}, mn = 0, mi;
+  for(mi=0;mi<V.length;mi++)
+    if(!NOT_SPEND[V[mi].cat] && !mk[V[mi].key]){ mk[V[mi].key] = 1; mn++; }
+  $("nMe").textContent = mn;
 }
 
 /* ============================================================
@@ -2046,7 +2120,7 @@ function render(){
    ============================================================ */
 /* What an import actually did. A silent jump to the dashboard hides the one
    thing worth acting on: the merchants the rules have never seen before. */
-function showReceipt(added, dupes, files){
+function showReceipt(added, dupes, files, notes){
   var seen = {}, n = 0, worth = 0, i;
   for(i=0;i<V.length;i++) if(V[i].cat === "uncategorized"){
     worth += Math.abs(V[i].amt);
@@ -2060,7 +2134,11 @@ function showReceipt(added, dupes, files){
            + ' I do not recognise, worth ' + money0(worth)
            + '. Tagging one teaches it for good.</p>'
            + '<button class="btn" id="rcGo">Tag them</button>';
-  else h += 'Every merchant was recognised.</p>';
+  else h += (added ? 'Every merchant was recognised.' : '') + '</p>';
+  /* A file that failed used to say "0 transactions added" here and put the
+     reason in a toast that was gone in under three seconds. */
+  if(notes && notes.length)
+    h += '<p class="note" style="margin:8px 0 0">' + notes.map(esc).join('<br>') + '</p>';
   $("receipt").innerHTML = h + '<button class="btn-q" id="rcHide">Dismiss</button></div>';
 }
 
@@ -2085,10 +2163,12 @@ function readFiles(fileList){
         reports.push(res.ok
           ? f.name + ": " + res.added + " new"
             + (res.dupes ? ", " + res.dupes + " already had" : "")
+            + (res.skipped ? ", " + res.skipped + " rows with no date or amount" : "")
+            + (res.dayFirst ? ", read as day/month/year" : "")
             + (res.cleared ? ", " + res.cleared + " pending cleared" : "")
           : f.name + ": " + res.why);
         if(--pending === 0){
-          render(); showReceipt(nAdded, nDupes, nFiles); toast(reports.join(" · "));
+          render(); showReceipt(nAdded, nDupes, nFiles, reports); toast(reports.join(" · "));
         }
       };
       r.onerror = function(){
@@ -2145,17 +2225,20 @@ function goTxns(o){
 }
 function openUncategorised(){ goTxns({ cats:["uncategorized"], month:curMonth }); }
 function catsWhere(test){
-  var out = [];
-  for(var i=0;i<CATEGORIES.length;i++) if(test(CATEGORIES[i])) out.push(CATEGORIES[i]);
+  /* allCategories, not CATEGORIES: a category you invented belongs in these
+     lists too, and leaving it out meant its charges counted towards a box and
+     then went missing from the rows behind it. */
+  var all = allCategories(), out = [], i;
+  for(i=0;i<all.length;i++) if(test(all[i])) out.push(all[i]);
   return out;
 }
 function openMeter(k){
   if(k === "unc") return openUncategorised();
-  if(k === "day") return goTxns({ month:curMonth,
+  if(k === "day") return goTxns({ month:curMonth, dir:"spend",
     cats:catsWhere(function(c){ return !NOT_SPEND[c] && !FIXED[c]; }) });
-  if(k === "fixed") return goTxns({ month:curMonth,
+  if(k === "fixed") return goTxns({ month:curMonth, dir:"spend",
     cats:catsWhere(function(c){ return !!FIXED[c]; }) });
-  if(k === "cash") return goTxns({ month:curMonth,
+  if(k === "cash") return goTxns({ month:curMonth, dir:"spend",
     cats:catsWhere(function(c){ return !!CASH[c]; }) });
   /* Refunds are the credits from shops: money in, in any category that is
      neither money arriving from a person nor movement between accounts. */
@@ -2180,7 +2263,7 @@ function wireBars(id, handler){
   $(id).addEventListener("click", function(e){ var k = hit(e); if(k) handler(k); });
   $(id).addEventListener("keydown", function(e){ var k = hit(e); if(k) handler(k); });
 }
-wireBars("cats",     function(k){ goTxns({ cats:[k], month:curMonth }); });
+wireBars("cats",     function(k){ goTxns({ cats:[k], month:curMonth, dir:"spend" }); });
 wireBars("topMerch", function(k){ goTxns({ q:k,      month:curMonth }); });
 $("meters").addEventListener("click", function(e){
   var m = e.target.closest ? e.target.closest("[data-goto]") : null;
@@ -2203,7 +2286,7 @@ $("tGrain").addEventListener("click", function(e){
 $("tSpan").addEventListener("click", function(e){
   var b = e.target.closest ? e.target.closest("[data-days]") : null;
   if(!b) return;
-  trendDays[trendGrain] = +b.getAttribute("data-days");
+  trendSpan[trendGrain] = +b.getAttribute("data-days");
   renderTrend();
 });
 var MCat  = multiFilter("fCat",  "All categories", function(){ renderTxns(); });
@@ -2307,7 +2390,9 @@ document.addEventListener("click", function(e){
     for(i=0;i<rows.length;i++){
       var a = parseAmount(rows[i].querySelector(".sp-amt").value);
       if(!a.ok || !a.value) continue;              /* a zero part is just noise */
-      parts.push({ amt: a.value, cat: rows[i].querySelector("select.cat").value });
+      var pc = rows[i].querySelector("select.cat").value;
+      if(pc === "__new"){ toast("Name the new category first."); return; }
+      parts.push({ amt: a.value, cat: pc });
     }
     if(parts.length < 2){ toast("A split needs two parts with amounts."); return; }
     db.splits[id] = parts;
@@ -2315,6 +2400,12 @@ document.addEventListener("click", function(e){
     save(); render();
     toast("Split into " + parts.length + " parts.");
   }
+});
+
+/* What the select said before you touched it, so cancelling a new category
+   puts the old one back. */
+document.addEventListener("focusin", function(e){
+  if(e.target.classList && e.target.classList.contains("cat")) e.target.__prev = e.target.value;
 });
 
 document.addEventListener("input", function(e){
@@ -2329,8 +2420,25 @@ document.addEventListener("change", function(e){
   if(!s.classList || !s.classList.contains("cat")) return;
   var id = s.getAttribute("data-id"), key, val = s.value;
 
-  /* inside the split editor the select is just a field, not a rule */
-  if(id.indexOf("split:") === 0) return;
+  /* Inside the split editor the select is a field, not a rule — but
+     "+ New category" still has to mean something, or Save files the part
+     under a category literally called "__new". */
+  if(id.indexOf("split:") === 0){
+    if(val === "__new"){
+      var made = addCategory(window.prompt(
+        "Name your category \u2014 electronics, childcare, hobbies, whatever you spend on:", ""));
+      if(made){
+        var opt = document.createElement("option");
+        opt.value = made; opt.textContent = labelOf(made);
+        s.insertBefore(opt, s.querySelector('option[value="__new"]'));
+        s.value = made;
+      } else {
+        s.value = s.__prev || "uncategorized";
+      }
+    }
+    s.__prev = s.value;
+    return;
+  }
 
   /* a part carries its own category; the merchant rule is not touched */
   if(id.indexOf("#") > 0){
@@ -2394,10 +2502,17 @@ document.addEventListener("click", function(e){
 });
 
 $("exp").addEventListener("click", function(){
-  var rows = [["date","merchant","category","account","amount","raw description"]];
-  for(var i=0;i<V.length;i++){
-    var t = V[i];
-    rows.push([t.date, t.merch, t.cat, t.acct, t.amt.toFixed(2), t.desc]);
+  /* "description" first, holding what the bank wrote. It used to hold the
+     tidied merchant name, so importing the export back produced different
+     transactions and doubled everything. Now a round trip adds nothing.
+
+     What is exported is what the filters are showing, because a button next to
+     a filtered table that ignores the filter is a trap. */
+  var rows = [["date","description","amount","account","category","merchant"]];
+  var list = txnList();
+  for(var i=0;i<list.length;i++){
+    var t = list[i];
+    rows.push([t.date, t.desc, t.amt.toFixed(2), t.acct, t.cat, t.merch]);
   }
   var csv = rows.map(function(r){
     return r.map(function(c){ return '"' + String(c).replace(/"/g,'""') + '"'; }).join(",");
@@ -2406,7 +2521,8 @@ $("exp").addEventListener("click", function(){
   a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv;charset=utf-8"}));
   a.download = "spending-export.csv";
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  toast("Exported " + V.length + " transactions.");
+  URL.revokeObjectURL(a.href);
+  toast("Exported " + list.length + " transaction" + (list.length===1?"":"s") + ".");
 });
 
 /* ------------------------------------------------------------
@@ -2439,6 +2555,21 @@ $("bakfile").addEventListener("change", function(){
     if(!d || !d.txns || Object.prototype.toString.call(d.txns) !== "[object Array]"){
       toast("That file is not a Ledger backup."); return;
     }
+    /* A row without a date or an amount breaks every total downstream, and the
+       page came up as an empty drop zone with the data still in storage. Check
+       before replacing anything. */
+    var bad = 0, bi;
+    for(bi=0;bi<d.txns.length;bi++){
+      var bt = d.txns[bi];
+      if(!bt || typeof bt.amt !== "number" || isNaN(bt.amt)
+         || !/^\d{4}-\d{2}-\d{2}$/.test(String(bt.date))
+         || typeof bt.desc !== "string"){ bad++; }
+    }
+    if(bad){
+      toast(bad + " of " + d.txns.length + " rows in that file are not transactions. "
+            + "Nothing was changed.");
+      return;
+    }
     if(db.txns.length && !confirm(
         "Replace the " + db.txns.length + " transactions in this browser with the "
         + d.txns.length + " in the backup?")) return;
@@ -2461,6 +2592,8 @@ $("reset").addEventListener("click", function(){
   curMonth = "";
   render();
   $("app").hidden = true;
+  $("covers").hidden = true;
+  $("receipt").innerHTML = "";
   toast("Cleared.");
 });
 

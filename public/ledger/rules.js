@@ -72,6 +72,9 @@ var RULES = [
   { t: 2, c: "transfers", re: /\bWIRE TRANSFER\b/ },   /* the FEE rule is tier 1, so it wins */
   { t: 1, c: "transfers", re: /\bTRANSFER (TO|FROM)\b/ },
   { t: 1, c: "transfers", re: /\b(SCHWAB|FIDELITY|VANGUARD|ROBINHOOD|COINBASE|BETTERMENT|WEALTHFRONT)\b/ },
+  /* Before the cash rule below, which matches ATM too and would otherwise
+     fold the charge into the money you took out. */
+  { t: 0, c: "fees", re: /\b(ATM|NON-?NETWORK|OUT-?OF-?NETWORK)\b.*\bFEE\b|\bFEE\b.*\bATM\b/ },
   { t: 1, c: "cash", re: /\b(ATM|CASH WITHDRAWAL|CASH DEPOSIT|CASH WITHDRWL)\b/ },
 
   /* ---- income ---- */
