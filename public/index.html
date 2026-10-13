@@ -50,7 +50,7 @@
       <h1>Simay Demiral</h1>
 
       <p class="lede">
-        MBA candidate at UC Berkeley Haas<br>
+        <span class="lede-top">MBA candidate at UC Berkeley Haas</span>
         Prior to business school, 3+ years at McKinsey &amp; Company working across
         healthcare, energy and consumer clients — building AI products, running
         digital transformations, and optimizing costs and processes. Now
@@ -267,9 +267,9 @@
     bgOuter: '#120d0b',
     accent:  '#e8935a',          // peach-orange
     cream:   '#f5ebdd',
-    webParticles: 90,            // background constellation nodes
-    webLinkFrac: 0.26,           // link distance as fraction of canvas size
-    webAlpha: 0.085,             // constellation faintness
+    webParticles: 30,            // background constellation nodes
+    webLinkDist: 120,
+    webAlpha: 0.06,              // constellation faintness
     breatheMs: 6000,             // star appear/disappear cycle
     morphRadius: 0.20,           // front geometric shapes size
     speed: 0.9
@@ -278,7 +278,7 @@
   var reduceMotion = window.matchMedia &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  var W = 0, H = 0, DPR = 1, CX = 0, CY = 0, R = 0, LD = 120;
+  var W = 0, H = 0, DPR = 1, CX = 0, CY = 0, R = 0;
 
   function resize() {
     DPR = Math.min(window.devicePixelRatio || 1, 2);
@@ -288,7 +288,6 @@
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     CX = W / 2; CY = H / 2;
     R = Math.min(W, H) * CFG.morphRadius;
-    LD = Math.min(W, H) * CFG.webLinkFrac;
   }
   window.addEventListener('resize', resize);
   resize();
@@ -305,8 +304,8 @@
   for (var i = 0; i < CFG.webParticles; i++) {
     web.push({
       x: rnd(0, W), y: rnd(0, H),
-      vx: rnd(-0.13, 0.13), vy: rnd(-0.13, 0.13),
-      r: rnd(1.2, 2.8), ph: rnd(0, Math.PI * 2),
+      vx: rnd(-0.08, 0.08), vy: rnd(-0.08, 0.08),
+      r: rnd(1, 2.2), ph: rnd(0, Math.PI * 2),
       cream: Math.random() < 0.15
     });
   }
@@ -315,8 +314,8 @@
     var s = CFG.speed, i, p;
     for (i = 0; i < web.length; i++) {
       p = web[i];
-      p.x += p.vx * s + Math.sin(t * 0.00036 * s + p.ph) * 0.12;
-      p.y += p.vy * s + Math.cos(t * 0.00032 * s + p.ph) * 0.12;
+      p.x += p.vx * s + Math.sin(t * 0.00030 * s + p.ph) * 0.08;
+      p.y += p.vy * s + Math.cos(t * 0.00026 * s + p.ph) * 0.08;
       if (p.x < -10) p.x = W + 10; if (p.x > W + 10) p.x = -10;
       if (p.y < -10) p.y = H + 10; if (p.y > H + 10) p.y = -10;
     }
@@ -326,8 +325,8 @@
         var a = web[i], b = web[j];
         var dx = a.x - b.x, dy = a.y - b.y;
         var d = Math.sqrt(dx * dx + dy * dy);
-        if (d < LD) {
-          ctx.strokeStyle = hexA(CFG.accent, CFG.webAlpha * (1 - d / LD));
+        if (d < CFG.webLinkDist) {
+          ctx.strokeStyle = hexA(CFG.accent, CFG.webAlpha * (1 - d / CFG.webLinkDist));
           ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
         }
       }
@@ -336,8 +335,8 @@
       p = web[i];
       var tw = 0.6 + 0.4 * Math.sin(t * 0.0009 * s + p.ph);
       ctx.fillStyle = p.cream
-        ? hexA(CFG.cream, 0.38 * tw)
-        : hexA(CFG.accent, 0.32 * tw);
+        ? hexA(CFG.cream, 0.30 * tw)
+        : hexA(CFG.accent, 0.25 * tw);
       ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
     }
   }
