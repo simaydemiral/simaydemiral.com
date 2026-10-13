@@ -441,7 +441,7 @@ input[type=search]{min-width:200px}
           <input type="search" id="pAmt" placeholder="Amount" style="min-width:90px">
           <button class="btn" id="pAdd">Add</button>
         </div>
-        <div id="pend"></div>
+        <div class="tscroll" id="pend"></div>
       </div>
 
       <div class="grid2" style="margin-top:14px">
@@ -450,14 +450,14 @@ input[type=search]{min-width:200px}
           <p class="note" style="margin:-4px 0 12px">Money that came back from a
             merchant. These are netted off your category totals, so a returned sofa
             does not leave you looking like you spent one.</p>
-          <div id="refunds"></div>
+          <div class="tscroll" id="refunds"></div>
         </div>
         <div class="card">
           <h3>Money in</h3>
           <p class="note" style="margin:-4px 0 12px">Cash deposited, and money sent
             to you by another person. Not a refund of anything &mdash; it is netted
             against cash and external transfers rather than a shop.</p>
-          <div id="moneyin"></div>
+          <div class="tscroll" id="moneyin"></div>
         </div>
       </div>
     </section>
@@ -1850,7 +1850,7 @@ function renderDups(list){
         + '<p class="note" style="margin:-4px 0 10px">Same merchant, same amount, '
         + 'a day apart or less. Some of these will be genuine &mdash; acknowledge one '
         + 'and it will not come back.</p>'
-        + '<table><tbody>';
+        + '<div class="tscroll"><table><tbody>';
   for(i=0;i<d.length;i++)
     h += '<tr><td class="t-merch">'+esc(d[i].merch)+'</td>'
        + '<td class="t-date">'+(d[i].d1 === d[i].d2
@@ -1860,7 +1860,7 @@ function renderDups(list){
        + '<td class="t-amt">'+esc(money2(d[i].amt))+' each</td>'
        + '<td style="text-align:right"><button class="btn-q" data-dupok="'
        + esc(d[i].key)+'">Acknowledge</button></td></tr>';
-  $("dups").innerHTML = h + '</tbody></table></div>';
+  $("dups").innerHTML = h + '</tbody></table></div></div>';
 }
 
 function renderSubs(){
