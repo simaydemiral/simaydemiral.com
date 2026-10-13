@@ -309,6 +309,11 @@ var RULES = [
 ];
 
 /* Header names seen across US issuers. Used as a prior, not a decision. */
+/* Bills whose whole point is that the amount moves: you are charged for what
+   you used. These are held to the date they land on, not to the number, when
+   deciding what belongs in "Bills you could cancel". */
+var VARIABLE_BILL = { utilities:1, fees:1, health:1 };
+
 var HEADER_SETS = {
   date: ["date", "posted date", "post date", "posting date", "transaction date",
          "trans date", "trans. date", "purchase date", "activity date", "effective date"],
