@@ -468,6 +468,47 @@ function median(a){
 var KEY = "spend.v1";
 var db = { v:1, txns:[], rules:{}, files:[], pending:[], dupsOk:{}, cats:[], splits:{} };
 
+/* Anything imported before the id stopped including the account may hold the
+   same transaction twice. Collapse those once, on the way in. */
+function dedupeStored(){
+  /* Rows doubled by the old rule carry different account names, because the
+     account came from the filename and the browser renamed the second
+     download. Two identical rows from the SAME account are a real pair — two
+     bus taps on one day — so for each signature we keep as many as the
+     busiest single account had, and no more. */
+  var groups = {}, i, k;
+  for(i=0;i<db.txns.length;i++){
+    var t = db.txns[i];
+    var sig = t.date + "|" + t.amt.toFixed(2) + "|" + t.desc;
+    (groups[sig] = groups[sig] || []).push(t);
+  }
+  var keep = [], dropped = 0;
+  for(k in groups){
+    var g = groups[k], perAcct = {}, most = 0;
+    for(i=0;i<g.length;i++){
+      perAcct[g[i].acct] = (perAcct[g[i].acct] || 0) + 1;
+      if(perAcct[g[i].acct] > most) most = perAcct[g[i].acct];
+    }
+    for(i=0;i<g.length;i++){
+      if(i < most) keep.push(g[i]); else dropped++;
+    }
+  }
+  if(dropped){
+    /* ids and account names were both built under the old rule, so rebuild
+       them; the categories were never stored, so nothing else needs touching */
+    var nth = {};
+    for(i=0;i<keep.length;i++){
+      var s2 = keep[i].date + "|" + keep[i].amt.toFixed(2) + "|" + keep[i].desc;
+      nth[s2] = (nth[s2] || 0) + 1;
+      keep[i].id = hash(s2 + (nth[s2] > 1 ? "|" + nth[s2] : ""));
+      keep[i].acct = String(keep[i].acct).replace(/\s*\(\d+\)\s*$/, "");
+    }
+    db.txns = keep;
+    save();
+  }
+  return dropped;
+}
+
 function load(){
   try{
     var raw = localStorage.getItem(KEY);
@@ -866,7 +907,9 @@ function hash(s){
    string is used as a key, and the page may be opened from file:// where the
    charset is not declared. */
 function accountFromName(name){
-  var stem = String(name).replace(/\.csv$/i,"").trim();
+  /* "stmt (2).csv" is the browser numbering a repeat download, not a second
+     account, so the suffix comes off before anything is read into it. */
+  var stem = String(name).replace(/\.csv$/i,"").replace(/\s*\(\d+\)\s*$/,"").trim();
   var m = stem.match(/(\d{4})(?!.*\d{4})/);
   if(m) return "*" + m[1];
   return stem.slice(0,20) || "Account";
@@ -882,6 +925,10 @@ function importFile(name, text){
   var added = 0, dupes = 0, skipped = 0, sum = 0, i;
   var seen = {};
   for(i=0;i<db.txns.length;i++) seen[db.txns[i].id] = 1;
+  /* Two genuinely identical charges in one file are two charges, so each gets
+     its place in the run. The same file read twice numbers them the same way,
+     which is what lets re-importing stay harmless. */
+  var nth = {};
 
   for(i=0;i<d.data.length;i++){
     var row = d.data[i];
@@ -893,7 +940,13 @@ function importFile(name, text){
     var desc = String(row[d.cols.desc]||"").replace(/\s+/g," ").trim();
     if(!desc){ skipped++; continue; }
 
-    var id = hash(dt.value + "|" + amt.toFixed(2) + "|" + desc + "|" + acct);
+    /* The account used to be part of this, which meant the same row arriving
+       in stmt.csv and stmt (2).csv counted twice: the account is taken from
+       the filename, and a browser renames a second download. A transaction is
+       its date, its amount and what the bank wrote, wherever it came from. */
+    var sig = dt.value + "|" + amt.toFixed(2) + "|" + desc;
+    nth[sig] = (nth[sig] || 0) + 1;
+    var id = hash(sig + (nth[sig] > 1 ? "|" + nth[sig] : ""));
     if(seen[id]){ dupes++; continue; }
     seen[id] = 1;
     db.txns.push({ id:id, date:dt.value, desc:desc, key:normMerchant(desc),
@@ -2243,6 +2296,8 @@ window.SPEND = { parseCSV:parseCSV, detect:detect, normMerchant:normMerchant,
                  db:function(){ return db; }, render:render };
 
 load();
+var healed = dedupeStored();
 render();
+if(healed) toast("Removed " + healed + " transactions that had been imported twice.");
 })();
 </script>
