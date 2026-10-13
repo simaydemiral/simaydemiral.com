@@ -82,6 +82,7 @@ button{font:inherit;cursor:pointer}
 .assume-body p{font-size:12.5px;line-height:1.65;color:var(--muted);
   margin:12px 0 0;break-inside:avoid}
 .assume-body b{color:var(--ink-2)}
+.assume-body a{color:var(--brand)}
 @media (max-width:820px){ .assume-body{columns:1} }
 #drop .covers b{font-family:var(--f-mono);font-weight:600}
 #drop .howto{margin-top:14px;text-align:left;max-width:52ch;margin-left:auto;margin-right:auto}
@@ -342,19 +343,19 @@ input[type=search]{min-width:200px}
     <div class="meters" id="meters"></div>
 
     <details class="assume">
-      <summary>How these numbers are counted</summary>
+      <summary>Worth knowing before you read these numbers</summary>
       <div class="assume-body">
         <p><b>Spending is money leaving your accounts.</b> Money moving between
           accounts you own is not spending, so card payments and transfers
           between checking and savings are left out of every figure.</p>
 
-        <p><b>Cash counts when you take it out, not when you spend it.</b> A
-          statement cannot see the second. A deposit never reduces that figure:
-          money going into an account may be unspent notes coming back, or it
-          may be funding from somewhere else, and cancelling the two would erase
-          spending that really happened. Split a withdrawal to say where it
-          went; whatever you leave stays as Cash, which means money gone and
-          unaccounted for.</p>
+        <p><b>Cash counts as spending when you take it out, not when you spend
+          it.</b> A statement cannot see the second, but you can: give a
+          withdrawal a category of its own, or split it into the things you
+          actually bought &mdash; <a href="#" id="seeCash">see your
+          withdrawals</a>. Whatever you leave stays as Cash, which means money
+          gone and unaccounted for. A deposit never reduces the figure, because
+          money arriving may be funding rather than unspent notes coming back.</p>
 
         <p><b>Rent and tuition are reported on their own line.</b> They are real
           spending, but they are so much larger than everything else that
@@ -1872,6 +1873,16 @@ function multiFilter(id, label, onChange){
   m.draw();
   return m;
 }
+
+/* The rule about cash is only useful if you can act on it, so the line that
+   explains it is also the way to the rows. */
+document.addEventListener("click", function(e){
+  if(!e.target || e.target.id !== "seeCash") return;
+  e.preventDefault();
+  var d = document.querySelector(".assume");
+  if(d) d.open = false;
+  goTxns({ cats:["cash"], dir:"out" });     /* every month, withdrawals only */
+});
 
 /* Clicking anywhere else closes an open panel. The test is the event's own
    path rather than contains(), because by the time this runs the panel has
