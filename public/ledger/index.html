@@ -515,47 +515,34 @@ function median(a){
    STORE
    ============================================================ */
 var KEY = "spend.v1";
-var db = { v:1, txns:[], rules:{}, files:[], pending:[], dupsOk:{}, cats:[], splits:{} };
+var db = { v:1, idv:2, txns:[], rules:{}, files:[], pending:[], dupsOk:{}, cats:[], splits:{} };
 
-/* Anything imported before the id stopped including the account may hold the
-   same transaction twice. Collapse those once, on the way in. */
-function dedupeStored(){
-  /* Rows doubled by the old rule carry different account names, because the
-     account came from the filename and the browser renamed the second
-     download. Two identical rows from the SAME account are a real pair — two
-     bus taps on one day — so for each signature we keep as many as the
-     busiest single account had, and no more. */
-  var groups = {}, i, k;
+/* Ids used to include the account, which came from the filename, so the same
+   row arriving as stmt.csv and stmt (2).csv counted twice. Rows stored under
+   that scheme are renumbered once, here.
+
+   Nothing is deleted. The earlier version of this guessed which of two
+   identical rows was real and got it wrong: two bus taps on one day, or one
+   charge that appeared in two overlapping exports, look the same from here,
+   and it was silently removing a legitimate transaction on every reload. */
+function migrateIds(){
+  if(db.idv === 2) return 0;
+  var nth = {}, i, n = 0;
   for(i=0;i<db.txns.length;i++){
     var t = db.txns[i];
     var sig = t.date + "|" + t.amt.toFixed(2) + "|" + t.desc;
-    (groups[sig] = groups[sig] || []).push(t);
-  }
-  var keep = [], dropped = 0;
-  for(k in groups){
-    var g = groups[k], perAcct = {}, most = 0;
-    for(i=0;i<g.length;i++){
-      perAcct[g[i].acct] = (perAcct[g[i].acct] || 0) + 1;
-      if(perAcct[g[i].acct] > most) most = perAcct[g[i].acct];
+    nth[sig] = (nth[sig] || 0) + 1;
+    var id = hash(sig + (nth[sig] > 1 ? "|" + nth[sig] : ""));
+    if(id !== t.id){
+      if(db.splits[t.id]){ db.splits[id] = db.splits[t.id]; delete db.splits[t.id]; }
+      t.id = id; n++;
     }
-    for(i=0;i<g.length;i++){
-      if(i < most) keep.push(g[i]); else dropped++;
-    }
+    /* "(2)" is the browser numbering a repeat download, not a second account */
+    t.acct = String(t.acct).replace(/\s*\(\d+\)\s*$/, "");
   }
-  if(dropped){
-    /* ids and account names were both built under the old rule, so rebuild
-       them; the categories were never stored, so nothing else needs touching */
-    var nth = {};
-    for(i=0;i<keep.length;i++){
-      var s2 = keep[i].date + "|" + keep[i].amt.toFixed(2) + "|" + keep[i].desc;
-      nth[s2] = (nth[s2] || 0) + 1;
-      keep[i].id = hash(s2 + (nth[s2] > 1 ? "|" + nth[s2] : ""));
-      keep[i].acct = String(keep[i].acct).replace(/\s*\(\d+\)\s*$/, "");
-    }
-    db.txns = keep;
-    save();
-  }
-  return dropped;
+  db.idv = 2;
+  save();
+  return n;
 }
 
 function load(){
@@ -614,7 +601,7 @@ function parseAmount(v){
   return {ok:true, value: neg ? -Math.abs(n) : n};
 }
 
-function parseDate(v){
+function parseDate(v, dayFirst){
   if(!v) return {ok:false};
   var s = String(v).trim(), m;
   m = s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);
@@ -622,10 +609,14 @@ function parseDate(v){
   m = s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{2,4})/);
   if(m){
     var y = +m[3]; if(y < 100) y += (y <= 69 ? 2000 : 1900);
-    return iso(y, +m[1], +m[2]);           /* US order; see plan for the DD/MM caveat */
+    return dayFirst ? iso(y, +m[2], +m[1]) : iso(y, +m[1], +m[2]);
   }
   return {ok:false};
 }
+/* Either reading will do when all we are asking is "is this column dates?".
+   A file of 13/09, 25/09 has no month-first reading at all, and judging the
+   column on the US order alone made it invisible. */
+function looksDate(v){ return parseDate(v).ok || parseDate(v, true).ok; }
 function iso(y,mo,d){
   if(mo<1||mo>12||d<1||d>31) return {ok:false};
   var p = function(n){ return (n<10?"0":"")+n; };
@@ -649,7 +640,7 @@ function findHeader(rows){
       if(!t){ blanks++; continue; }
       if(known[t]) score += 3;
       else if(/^[a-z .\/#&-]+$/.test(t) && t.split(" ").length <= 4) score += 1;
-      if(parseDate(cells[j]).ok) score -= 4;
+      if(looksDate(cells[j])) score -= 4;
       if(parseAmount(cells[j]).ok) score -= 4;
     }
     score -= blanks;
@@ -671,7 +662,7 @@ function detect(rows){
   if(hIdx < 0) return { ok:false, why:"Could not find a header row in this file." };
   var header = rows[hIdx], data = rows.slice(hIdx+1), i, j;
 
-  var cols = { date:-1, desc:-1, amount:-1, debit:-1, credit:-1, balance:-1, ref:-1 };
+  var cols = { date:-1, desc:-1, amount:-1, debit:-1, credit:-1, balance:-1, ref:-1, type:-1 };
   var nameHit = {};
 
   for(j=0;j<header.length;j++){
@@ -689,7 +680,7 @@ function detect(rows){
       var v = data[i][j]; if(v===undefined) continue; n++;
       v = String(v).trim(); if(!v) continue;
       nonEmpty++;
-      if(parseDate(v).ok) dates++;
+      if(looksDate(v)) dates++;
       var a = parseAmount(v);
       if(a.ok) amts++;
       else if(/[A-Za-z]{3}/.test(v)) texty++;
@@ -736,30 +727,52 @@ function detect(rows){
   var namedDebit  = cands.filter(function(j){ return nameHit[j]==="debit"; });
   var namedCredit = cands.filter(function(j){ return nameHit[j]==="credit"; });
 
-  if(namedDebit.length && namedCredit.length){
-    cols.debit = namedDebit[0]; cols.credit = namedCredit[0];
+  /* A column the bank called Balance is never the amount, whatever else is in
+     the file. Take it out of the running before anything else is weighed. */
+  if(namedBal.length && cands.length > namedBal.length)
+    cands = cands.filter(function(j){ return nameHit[j] !== "balance"; });
+
+  if(namedDebit.length || namedCredit.length){
+    /* One of the pair is enough. A month of nothing but refunds exports a
+       Credit column with an empty Debit beside it, and reading that as a
+       single signed column turned every refund into a purchase. */
+    if(namedDebit.length)  cols.debit  = namedDebit[0];
+    if(namedCredit.length) cols.credit = namedCredit[0];
+    if(namedBal.length) cols.balance = namedBal[0];
   } else if(namedAmount.length){
     cols.amount = namedAmount[0];
     if(namedBal.length) cols.balance = namedBal[0];
   } else if(cands.length === 1){
     cols.amount = cands[0];
   } else if(cands.length >= 2){
-    /* balance moves with the running total; amount does not */
-    var pick = cands[0];
-    for(var ci=0;ci<cands.length;ci++){
-      var c1 = cands[ci];
-      var looksBal = isRunningBalance(data, c1, cands);
-      if(!looksBal){ pick = c1; break; }
-    }
-    cols.amount = pick;
-    for(ci=0;ci<cands.length;ci++) if(cands[ci]!==pick) cols.balance = cands[ci];
+    /* No name to go on. A running balance is the trap: it parses as money and
+       sits right next to the amount. Drop whatever tracks a total, then prefer
+       the smaller typical value, because a balance is bigger than the
+       movements that build it. */
+    var open = cands.filter(function(j){ return !isRunningBalance(data, j, cands); });
+    if(!open.length) open = cands.slice();
+    if(open.length > 1)
+      open.sort(function(a, b){ return colScale(data, a) - colScale(data, b); });
+    cols.amount = open[0];
+    for(var ci=0;ci<cands.length;ci++)
+      if(cands[ci] !== cols.amount && cols.balance < 0) cols.balance = cands[ci];
   }
 
+  /* A Type column saying Debit or Credit beside unsigned amounts. Capital One
+     and several credit unions export this shape. */
+  for(j=0;j<header.length;j++)
+    if(nameHit[j] === "type" && cols.type < 0 && j !== cols.amount) cols.type = j;
+
   if(cols.date < 0) return { ok:false, why:"No date column found." };
-  if(cols.amount < 0 && cols.debit < 0) return { ok:false, why:"No amount column found." };
+  if(cols.amount < 0 && cols.debit < 0 && cols.credit < 0)
+    return { ok:false, why:"No amount column found." };
   if(cols.desc < 0) return { ok:false, why:"No description column found." };
 
-  /* sign convention: is spending negative? */
+  /* Sign convention. Only a lone signed column is ever in doubt: Debit and
+     Credit columns already say which way the money went, and so does a Type
+     column. Guessing from the mix of signs was reading a month of refunds as a
+     month of purchases, and inverting every file that happened to be mostly
+     money arriving. */
   var neg=0, pos=0;
   for(i=0;i<data.length;i++){
     var av = amountOf(data[i], cols);
@@ -767,25 +780,91 @@ function detect(rows){
     if(av < 0) neg++; else if(av > 0) pos++;
   }
   var flip = 1;
-  if(pos > neg * 2 && neg < data.length * 0.25) flip = -1;   /* card export: purchases positive */
+  if(cols.debit < 0 && cols.credit < 0){
+    if(cols.type >= 0 && neg === 0 && typeDecides(data, cols)) cols.useType = true;
+    else if(cols.type < 0 && pos > neg * 2 && neg < data.length * 0.25
+            && positivesLookLikeSpending(data, cols)) flip = -1;
+  }
+
+  /* 13/09 cannot be a month. One such row means the whole column is day-first,
+     and reading it as US order threw those rows away without saying so. */
+  var firstBig = 0, secondBig = 0;
+  for(i=0;i<data.length;i++){
+    var dm = String(data[i][cols.date]||"").trim()
+               .match(/^(\d{1,2})[-\/](\d{1,2})[-\/]\d{2,4}/);
+    if(!dm) continue;
+    if(+dm[1] > 12) firstBig++;
+    if(+dm[2] > 12) secondBig++;
+  }
+  var dayFirst = firstBig > 0 && secondBig === 0;
 
   return { ok:true, headerRow:hIdx, header:header, data:data, cols:cols, flip:flip,
-           negShare: neg/Math.max(1,neg+pos) };
+           dayFirst:dayFirst, negShare: neg/Math.max(1,neg+pos) };
 }
 
 function isRunningBalance(data, col, others){
-  var hits=0, tries=0, i;
-  var amtCol = -1;
-  for(i=0;i<others.length;i++) if(others[i] !== col){ amtCol = others[i]; break; }
-  if(amtCol < 0) return false;
-  for(i=1;i<Math.min(data.length,40);i++){
-    var b0 = parseAmount(data[i-1][col]), b1 = parseAmount(data[i][col]),
-        a  = parseAmount(data[i][amtCol]);
-    if(!b0.ok || !b1.ok || !a.ok) continue;
-    tries++;
-    if(Math.abs((b1.value - b0.value) - a.value) < 0.02) hits++;
+  var i, k;
+  for(k=0;k<others.length;k++){
+    var amtCol = others[k];
+    if(amtCol === col) continue;
+    var hits=0, back=0, tries=0;
+    for(i=1;i<Math.min(data.length,40);i++){
+      var b0 = parseAmount(data[i-1][col]), b1 = parseAmount(data[i][col]),
+          a  = parseAmount(data[i][amtCol]);
+      if(!b0.ok || !b1.ok || !a.ok) continue;
+      tries++;
+      /* An oldest-first file adds the amount as you read down; a newest-first
+         file subtracts it, and most bank exports are newest first. */
+      if(Math.abs((b1.value - b0.value) - a.value) < 0.02) hits++;
+      else if(Math.abs((b0.value - b1.value) - a.value) < 0.02) back++;
+    }
+    if(tries >= 3 && (hits/tries >= 0.6 || back/tries >= 0.6)) return true;
   }
-  return tries >= 5 && hits/tries >= 0.6;
+  return false;
+}
+
+/* A card export can list purchases as positive numbers, and inverting the
+   whole file on that guess is how seven Zelle receipts became seven purchases.
+   So read what the positive rows say: a grocer and a petrol station are
+   spending, money from a person is not. */
+function positivesLookLikeSpending(data, cols){
+  var spend = 0, other = 0, n = 0, i;
+  for(i=0;i<data.length && n<120;i++){
+    var a = amountOf(data[i], cols);
+    if(a === null || a <= 0) continue;
+    n++;
+    var c = categorize(normMerchant(String(data[i][cols.desc]||"")), -1).c;
+    if(NOT_SPEND[c] || c === "income" || c === "external") other++;
+    else if(c !== "uncategorized") spend++;
+  }
+  return n > 0 && spend >= other;
+}
+
+/* The typical size of a column, for telling a balance from a movement. */
+function colScale(data, col){
+  var vals = [], i;
+  for(i=0;i<data.length && vals.length<60;i++){
+    var a = parseAmount(data[i][col]);
+    if(a.ok) vals.push(Math.abs(a.value));
+  }
+  return median(vals);
+}
+
+/* Which way a Type column says the money went. 0 means it does not say. */
+function typeOf(v){
+  var s = String(v||"");
+  if(/\b(credit|cr|deposit|refund|received)\b/i.test(s)) return 1;
+  if(/\b(debit|dr|withdraw\w*|purchase|charge|fee|sale)\b/i.test(s)) return -1;
+  return 0;
+}
+function typeDecides(data, cols){
+  var n = 0, ok = 0, i;
+  for(i=0;i<data.length && n<80;i++){
+    var v = data[i][cols.type];
+    if(v === undefined || !String(v).trim()) continue;
+    n++; if(typeOf(v)) ok++;
+  }
+  return n >= 3 && ok/n >= 0.8;
 }
 
 function amountOf(row, cols){
@@ -796,7 +875,12 @@ function amountOf(row, cols){
     return (c.ok ? Math.abs(c.value) : 0) - (d.ok ? Math.abs(d.value) : 0);
   }
   var a = parseAmount(row[cols.amount]);
-  return a.ok ? a.value : null;
+  if(!a.ok) return null;
+  if(cols.useType){
+    var dir = typeOf(row[cols.type]);
+    if(dir) return dir * Math.abs(a.value);
+  }
+  return a.value;
 }
 
 /* ============================================================
@@ -959,8 +1043,16 @@ function accountFromName(name){
   /* "stmt (2).csv" is the browser numbering a repeat download, not a second
      account, so the suffix comes off before anything is read into it. */
   var stem = String(name).replace(/\.csv$/i,"").replace(/\s*\(\d+\)\s*$/,"").trim();
-  var m = stem.match(/(\d{4})(?!.*\d{4})/);
-  if(m) return "*" + m[1];
+  /* Four digits standing alone are the last four of a card. Eight in a row are
+     a date range and 2026 is a year: Activity20260101_20260930_20261005.CSV
+     was being filed under account *1005. */
+  var groups = stem.match(/\d+/g) || [], i, found = "";
+  for(i=0;i<groups.length;i++){
+    if(groups[i].length !== 4) continue;
+    if(+groups[i] >= 1900 && +groups[i] <= 2100) continue;
+    found = groups[i];
+  }
+  if(found) return "*" + found;
   return stem.slice(0,20) || "Account";
 }
 
@@ -981,7 +1073,7 @@ function importFile(name, text){
 
   for(i=0;i<d.data.length;i++){
     var row = d.data[i];
-    var dt = parseDate(row[d.cols.date]);
+    var dt = parseDate(row[d.cols.date], d.dayFirst);
     if(!dt.ok){ skipped++; continue; }
     var amt = amountOf(row, d.cols);
     if(amt === null){ skipped++; continue; }   /* e.g. BofA's "Beginning balance" line */
@@ -1008,7 +1100,8 @@ function importFile(name, text){
   var cleared = clearPending();
   save();
   return { ok:true, added:added, dupes:dupes, skipped:skipped, acct:acct,
-           sum:sum, flip:d.flip, cols:d.cols, header:d.header, cleared:cleared };
+           sum:sum, flip:d.flip, dayFirst:d.dayFirst, cols:d.cols,
+           header:d.header, cleared:cleared };
 }
 
 /* ------------------------------------------------------------
@@ -2349,9 +2442,10 @@ $("bakfile").addEventListener("change", function(){
     if(db.txns.length && !confirm(
         "Replace the " + db.txns.length + " transactions in this browser with the "
         + d.txns.length + " in the backup?")) return;
-    db = { v:1, txns:d.txns, rules:d.rules||{}, files:d.files||[],
+    db = { v:1, idv:d.idv, txns:d.txns, rules:d.rules||{}, files:d.files||[],
            pending:d.pending||[], dupsOk:d.dupsOk||{}, cats:d.cats||[],
            splits:d.splits||{} };
+    migrateIds();
     save();
     curMonth = "";
     render();
@@ -2362,7 +2456,7 @@ $("bakfile").addEventListener("change", function(){
 
 $("reset").addEventListener("click", function(){
   if(!confirm("Delete every transaction and rule stored in this browser?")) return;
-  db = { v:1, txns:[], rules:{}, files:[], pending:[], dupsOk:{}, cats:[], splits:{} };
+  db = { v:1, idv:2, txns:[], rules:{}, files:[], pending:[], dupsOk:{}, cats:[], splits:{} };
   try{ localStorage.removeItem(KEY); }catch(e){}
   curMonth = "";
   render();
@@ -2386,9 +2480,8 @@ window.SPEND = { parseCSV:parseCSV, detect:detect, normMerchant:normMerchant,
                  db:function(){ return db; }, render:render };
 
 load();
-var healed = dedupeStored();
+migrateIds();
 render();
-if(healed) toast("Removed " + healed + " transactions that had been imported twice.");
 })();
 </script>
 </body>

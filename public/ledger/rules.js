@@ -311,7 +311,7 @@ var HEADER_SETS = {
          "trans date", "trans. date", "purchase date", "activity date", "effective date"],
   desc: ["description", "payee", "merchant", "name", "memo", "details",
          "original description", "transaction description"],
-  amount: ["amount", "amount (usd)", "transaction amount", "amt", "value"],
+  amount: ["amount", "amount (usd)", "transaction amount", "net amount", "amt", "value"],
   debit: ["debit", "withdrawal", "withdrawals", "money out", "debit amount"],
   credit: ["credit", "deposit", "deposits", "money in", "credit amount"],
   balance: ["balance", "running bal.", "running balance", "ending balance", "bal"],
