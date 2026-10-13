@@ -1,4 +1,8 @@
+<!doctype html>
+<html lang="en">
+<head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ledger</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23171210'/%3E%3Ccircle cx='32' cy='32' r='20' fill='none' stroke='%23e8935a' stroke-width='.9' opacity='.18'/%3E%3Cline x1='32' y1='32' x2='41.24' y2='35.83' stroke='%23e8935a' stroke-width='1.3' stroke-linecap='round' opacity='.45'/%3E%3Cline x1='32' y1='32' x2='35.83' y2='41.24' stroke='%23e8935a' stroke-width='1.3' stroke-linecap='round' opacity='.45'/%3E%3Cline x1='32' y1='32' x2='28.17' y2='41.24' stroke='%23e8935a' stroke-width='1.3' stroke-linecap='round' opacity='.45'/%3E%3Cline x1='32' y1='32' x2='22.76' y2='35.83' stroke='%23e8935a' stroke-width='1.3' stroke-linecap='round' opacity='.45'/%3E%3Cline x1='32' y1='32' x2='22.76' y2='28.17' stroke='%23e8935a' stroke-width='1.3' stroke-linecap='round' opacity='.45'/%3E%3Cline x1='32' y1='32' x2='28.17' y2='22.76' stroke='%23e8935a' stroke-width='1.3' stroke-linecap='round' opacity='.45'/%3E%3Cline x1='32' y1='32' x2='35.83' y2='22.76' stroke='%23e8935a' stroke-width='1.3' stroke-linecap='round' opacity='.45'/%3E%3Cline x1='32' y1='32' x2='41.24' y2='28.17' stroke='%23e8935a' stroke-width='1.3' stroke-linecap='round' opacity='.45'/%3E%3Cline x1='32' y1='32' x2='45.08' y2='45.08' stroke='%23e8935a' stroke-width='2.3' stroke-linecap='round' opacity='.8'/%3E%3Cline x1='32' y1='32' x2='18.92' y2='45.08' stroke='%23e8935a' stroke-width='2.3' stroke-linecap='round' opacity='.8'/%3E%3Cline x1='32' y1='32' x2='18.92' y2='18.92' stroke='%23e8935a' stroke-width='2.3' stroke-linecap='round' opacity='.8'/%3E%3Cline x1='32' y1='32' x2='45.08' y2='18.92' stroke='%23e8935a' stroke-width='2.3' stroke-linecap='round' opacity='.8'/%3E%3Cline x1='32' y1='32' x2='58.00' y2='32.00' stroke='%23e8935a' stroke-width='3.2' stroke-linecap='round' opacity='1'/%3E%3Cline x1='32' y1='32' x2='32.00' y2='58.00' stroke='%23e8935a' stroke-width='3.2' stroke-linecap='round' opacity='1'/%3E%3Cline x1='32' y1='32' x2='6.00' y2='32.00' stroke='%23e8935a' stroke-width='3.2' stroke-linecap='round' opacity='1'/%3E%3Cline x1='32' y1='32' x2='32.00' y2='6.00' stroke='%23e8935a' stroke-width='3.2' stroke-linecap='round' opacity='1'/%3E%3Ccircle cx='32' cy='32' r='8' fill='%23e8935a' opacity='.32'/%3E%3Ccircle cx='32' cy='32' r='4' fill='%23f5ebdd'/%3E%3C/svg%3E">
   <meta name="theme-color" content="#171210">
@@ -147,6 +151,10 @@ button{font:inherit;cursor:pointer}
 
 /* ---- table ---- */
 table{width:100%;border-collapse:collapse;font-size:13.5px}
+/* A statement table has six columns and will not fold; on a narrow screen
+   it scrolls inside its card rather than stretching the page. */
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tscroll table{min-width:520px}
 th{text-align:left;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);
   font-weight:700;padding:8px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
 th.s{cursor:pointer} th.s:hover{color:var(--brand)}
@@ -288,6 +296,8 @@ input[type=search]{min-width:200px}
 .recon.ok{background:var(--go-wash);color:var(--go)}
 .recon.bad{background:var(--stop-wash);color:var(--stop)}
 </style>
+</head>
+<body>
 
 <div class="shell">
 
@@ -414,7 +424,7 @@ input[type=search]{min-width:200px}
         </div>
         <button class="btn-q" id="exp">Export CSV</button>
       </div>
-      <div class="card" style="padding:4px 10px"><div id="tbl"></div></div>
+      <div class="card" style="padding:4px 10px"><div class="tscroll" id="tbl"></div></div>
     </section>
 
     <section id="p-pend" hidden>
@@ -452,15 +462,15 @@ input[type=search]{min-width:200px}
     </section>
 
     <section id="p-subs" hidden>
-      <div class="card"><h3>Recurring charges <span class="note" style="font-weight:400;text-transform:none;letter-spacing:0">three or more on a steady cadence</span></h3><div id="subs"></div></div>
+      <div class="card"><h3>Recurring charges <span class="note" style="font-weight:400;text-transform:none;letter-spacing:0">three or more on a steady cadence</span></h3><div class="tscroll" id="subs"></div></div>
     </section>
 
     <section id="p-merch" hidden>
-      <div class="card"><h3>By merchant, all time</h3><div id="merch"></div></div>
+      <div class="card"><h3>By merchant, all time</h3><div class="tscroll" id="merch"></div></div>
     </section>
 
     <section id="p-files" hidden>
-      <div class="card"><h3>Imported files</h3><div id="files"></div></div>
+      <div class="card"><h3>Imported files</h3><div class="tscroll" id="files"></div></div>
     </section>
 
   </div>
@@ -2381,3 +2391,5 @@ render();
 if(healed) toast("Removed " + healed + " transactions that had been imported twice.");
 })();
 </script>
+</body>
+</html>
