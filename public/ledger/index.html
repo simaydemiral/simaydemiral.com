@@ -1076,12 +1076,11 @@ function spendOf(list, mode){
   var s = 0, i;
   for(i=0;i<list.length;i++){
     var t = list[i], isFixed = !!FIXED[t.cat];
-    if(CASH[t.cat]) continue;
     if(mode === "day" && isFixed) continue;
     if(mode === "fixed" && !isFixed) continue;
-    /* A shop refunding you reduces what you spent there. Money arriving from a
-       person, or a credit nobody has named yet, is not a refund of anything —
-       netting it off would let a repayment from a flatmate shrink the month. */
+    /* A shop refunding you reduces what you spent there. Money arriving — from
+       a person, as cash, or a credit nobody has named yet — is not a refund of
+       anything, and netting it off would let it shrink the month. */
     s += t.spend - (MONEY_IN[t.cat] ? 0 : t.refund);
   }
   return s;
@@ -1091,7 +1090,7 @@ function byCat(list, mode){
   var m = {}, i, out = [];
   for(i=0;i<list.length;i++){
     var t = list[i];
-    if(NOT_SPEND[t.cat] || CASH[t.cat]) continue;
+    if(NOT_SPEND[t.cat]) continue;
     var isFixed = !!FIXED[t.cat];
     if(mode === "day" && isFixed) continue;
     if(mode === "fixed" && !isFixed) continue;
@@ -1151,7 +1150,7 @@ function trendSeries(){
   var m = {}, i, n;
   for(i=0;i<V.length;i++){
     var t = V[i];
-    if(NOT_SPEND[t.cat] || FIXED[t.cat] || CASH[t.cat]) continue;
+    if(NOT_SPEND[t.cat] || FIXED[t.cat]) continue;
     n = dayNum(t.date);
     if(n < minD || n > maxD) continue;
     var k = trendGrain === "day"  ? t.date
@@ -1301,8 +1300,7 @@ function renderMonth(){
       meter(money(total), "Day-to-day in " + monthName(curMonth).split(" ")[0], "", "day")
     + meter(fixed ? money(fixed) : "$0", "Fixed commitments (e.g., rent, tuition fee)", "", "fixed")
     + meter(refunds ? "+" + money(refunds) : "$0", "Refunded back", refunds ? "is-go" : "", "refund")
-    + meter(cashNet < 0 ? "+" + money(-cashNet) : cashNet > 0 ? money(cashNet) : "$0",
-            cashNet < 0 ? "Net cash deposited" : cashNet > 0 ? "Net cash withdrawn" : "Net cash", "", "cash")
+    + meter(cashOut ? money(cashOut) : "$0", "Cash withdrawn", "", cashOut ? "cash" : "")
     + meter(med ? (total>med?"+":"") + pct(total-med, med) + "%" : "—",
             med ? "Vs your median" : "No history yet", med && total>med*1.15 ? "is-stop" : "")
     + meter(pendSum ? money(pendSum) : "$0", "Pending", pendSum ? "is-stop" : "", "pend")
@@ -2007,7 +2005,7 @@ function catsWhere(test){
 function openMeter(k){
   if(k === "unc") return openUncategorised();
   if(k === "day") return goTxns({ month:curMonth,
-    cats:catsWhere(function(c){ return !NOT_SPEND[c] && !FIXED[c] && !CASH[c]; }) });
+    cats:catsWhere(function(c){ return !NOT_SPEND[c] && !FIXED[c]; }) });
   if(k === "fixed") return goTxns({ month:curMonth,
     cats:catsWhere(function(c){ return !!FIXED[c]; }) });
   if(k === "cash") return goTxns({ month:curMonth,

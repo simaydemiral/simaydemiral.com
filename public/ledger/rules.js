@@ -35,10 +35,11 @@ var NOT_SPEND = { income: 1, rewards: 1, transfers: 1 };
    category from here to fold it back into the main number. */
 var FIXED = { housing: 1, education: 1 };
 
-/* Cash is its own figure. A withdrawal is not yet spending on anything a
-   statement can name, and a deposit is money arriving, so neither belongs in
-   the spending totals: counted there, one deposit can push a month below zero.
-   The month view reports the net of the two in a box of its own. */
+/* Cash runs one way. A withdrawal is money gone — unitemised, but spent —
+   so it counts. A deposit is money arriving, and the statement cannot say
+   from where: your own unspent notes, a cash gift, or funding an account
+   from somewhere else. The two are never netted, because a deposit that is
+   really funding would cancel out spending that really happened. */
 var CASH = { cash: 1 };
 
 var PROCESSOR_PREFIXES = [
