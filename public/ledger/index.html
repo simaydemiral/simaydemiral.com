@@ -292,6 +292,13 @@ input[type=search]{min-width:200px}
   color:var(--ground);padding:9px 16px;border-radius:999px;font-size:13px;opacity:0;
   pointer-events:none;transition:opacity .2s;z-index:50}
 #toast.on{opacity:1}
+/* The one question the page asks you. It earns the interruption by being
+   about the biggest bar on your month, and by only ever asking once. */
+.askcard{background:var(--surface);border:1px solid var(--accent);border-radius:var(--radius);
+  padding:14px 16px;margin-bottom:14px}
+.askcard p{margin:0 0 10px;font-size:14px;line-height:1.5}
+.askcard .note{margin:8px 0 0}
+.askrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .recon{font:400 12px/1.4 var(--f-mono);padding:8px 10px;border-radius:8px;margin-top:10px}
 .recon.ok{background:var(--go-wash);color:var(--go)}
 .recon.bad{background:var(--stop-wash);color:var(--stop)}
@@ -315,11 +322,14 @@ input[type=search]{min-width:200px}
     </div>
   </div>
 
+  <!-- Folded away once there is data: three of the things in here are for
+       someone who has none, and on a phone they put a thousand pixels between
+       you and the first number. The header's "Add a statement" button is the
+       way back in. -->
   <div id="drop">
     <h2>Drop your statement here</h2>
     <p>or <button class="btn" id="pick">choose a file</button> &nbsp;·&nbsp; CSV from your bank or card</p>
     <p class="privacy">Nothing leaves your computer. No upload, no account, no server.</p>
-    <p class="covers" id="covers" hidden></p>
 
     <details class="howto">
       <summary>Don&rsquo;t have a CSV yet? Here is where to find it</summary>
@@ -353,6 +363,10 @@ input[type=search]{min-width:200px}
   <div id="receipt"></div>
 
   <div id="app" hidden>
+
+    <p class="covers" id="covers" hidden></p>
+
+    <div id="ask"></div>
 
 
     <div class="meters" id="meters"></div>
@@ -467,7 +481,7 @@ input[type=search]{min-width:200px}
     </section>
 
     <section id="p-subs" hidden>
-      <div class="card"><h3>Recurring charges <span class="note" style="font-weight:400;text-transform:none;letter-spacing:0">three or more on a steady cadence</span></h3><div class="tscroll" id="subs"></div></div>
+      <div class="card"><h3>Bills you could cancel <span class="note" style="font-weight:400;text-transform:none;letter-spacing:0">the same amount, on a steady cadence, three times or more</span></h3><div class="tscroll" id="subs"></div></div>
     </section>
 
     <section id="p-merch" hidden>
@@ -529,7 +543,7 @@ function median(a){
    STORE
    ============================================================ */
 var KEY = "spend.v1";
-var db = { v:1, idv:2, txns:[], rules:{}, files:[], pending:[], dupsOk:{}, cats:[], splits:{} };
+var db = { v:1, idv:2, txns:[], rules:{}, files:[], pending:[], dupsOk:{}, cats:[], splits:{}, asked:{} };
 
 /* Ids used to include the account, which came from the filename, so the same
    row arriving as stmt.csv and stmt (2).csv counted twice. Rows stored under
@@ -562,7 +576,7 @@ function migrateIds(){
 function load(){
   try{
     var raw = localStorage.getItem(KEY);
-    if(raw){ var d = JSON.parse(raw); if(d && d.txns){ db = d; db.rules = db.rules||{}; db.files = db.files||[]; db.pending = db.pending||[]; db.dupsOk = db.dupsOk||{}; db.cats = db.cats||[]; db.splits = db.splits||{}; } }
+    if(raw){ var d = JSON.parse(raw); if(d && d.txns){ db = d; db.rules = db.rules||{}; db.files = db.files||[]; db.pending = db.pending||[]; db.dupsOk = db.dupsOk||{}; db.cats = db.cats||[]; db.splits = db.splits||{}; db.asked = db.asked||{}; } }
   }catch(e){ /* corrupt or blocked storage — start empty rather than break */ }
 }
 function save(){
@@ -1741,7 +1755,8 @@ function addCategory(label){
 }
 
 function catSelect(cat, id){
-  var o = allCategories().map(function(c){
+  var o = (cat === "" ? '<option value="">Choose a category\u2026</option>' : "")
+    + allCategories().map(function(c){
     return '<option value="'+c+'"'+(c===cat?' selected':'')+'>'+esc(labelOf(c))+'</option>';
   }).join("") + '<option value="__new">+ New category\u2026</option>';
   return '<select class="cat'+(cat==="uncategorized"?' unc':'')+'" data-id="'+esc(id)+'">'+o+'</select>';
@@ -1880,10 +1895,16 @@ function recurring(){
     var a = median(amts), g = median(gaps);
     if(!a) continue;
 
+    /* A bill charges you the same number every time. A shop you happen to
+       visit every month does not: Safeway at $82.14, $91.07, $76.33 passed the
+       old 25% band and was listed beside Netflix with a yearly price on it,
+       which only makes sense for something you could cancel. Every occurrence
+       now has to sit within a dollar, or 2%, of the median — which keeps a
+       meal-kit box at $69.99 and drops the groceries it looks like. */
     var steady = 0;
     for(i=0;i<amts.length;i++)
-      if(Math.abs(amts[i] - a) <= Math.max(1, a * 0.25)) steady++;
-    if(steady < ts.length - 1) continue;
+      if(Math.abs(amts[i] - a) <= Math.max(1, a * 0.02)) steady++;
+    if(steady < ts.length) continue;
 
     var cad = null;
     for(i=0;i<CADENCE.length;i++)
@@ -1897,6 +1918,24 @@ function recurring(){
       if(Math.abs(gaps[i] - cad[1]) <= Math.max(3, cad[1] * 0.3)) onBeat++;
     if(onBeat < Math.ceil(gaps.length * 0.7)) continue;
 
+    /* A bill arrives on its date. Netflix is the 12th every month; four trips
+       to Safeway in four weeks are four different days that happen to be about
+       thirty apart, which is how the groceries got in here. Every occurrence
+       has to land within four days of the same date — or, on a weekly rhythm,
+       the same day of the week. */
+    var marks = [], onDate = 0;
+    for(i=0;i<ts.length;i++) marks.push(cad[1] >= 26
+      ? +ts[i].date.slice(8,10)                      /* day of the month */
+      : (dayNum(ts[i].date) + 4) % 7);               /* day of the week */
+    var mark = median(marks);
+    for(i=0;i<marks.length;i++){
+      var off = Math.abs(marks[i] - mark);
+      if(cad[1] >= 26) off = Math.min(off, 31 - off);   /* the 1st is near the 30th */
+      else off = Math.min(off, 7 - off);
+      if(off <= (cad[1] >= 26 ? 4 : 1)) onDate++;
+    }
+    if(onDate < ts.length) continue;
+
     var last = ts[ts.length-1], lastN = dayNum(last.date), total = 0;
     for(i=0;i<amts.length;i++) total += amts[i];
     out.push({ key:k, merch:last.merch, cat:last.cat, n:ts.length, amt:a, cad:cad[0],
@@ -1906,6 +1945,69 @@ function recurring(){
   }
   out.sort(function(x,y){ return (y.live - x.live) || (y.yearly - x.yearly); });
   return out;
+}
+
+/* ------------------------------------------------------------
+   Money moving between people. "External transfers" is reliably the
+   biggest bar on a month and it is not a place: $220 to a flatmate every
+   month is rent, and the page is the only thing that cannot see it. So
+   where the same person appears on the same rhythm, ask once, and keep
+   the answer as a rule like any other.
+
+   Deliberately narrow: three or more, monthly, one direction, amounts in
+   a 25% band — because a flatmate's share of a bill moves a little and a
+   one-off dinner split is not a question worth asking.
+   ------------------------------------------------------------ */
+function askable(){
+  var m = {}, k, i, out = [];
+  for(i=0;i<V.length;i++){
+    var t = V[i];
+    if(t.cat !== "external") continue;
+    if(db.rules[t.key]) continue;              /* you have already said */
+    if(db.asked[t.key]) continue;              /* you have already declined */
+    var dir = t.amt < 0 ? "out" : "in";
+    (m[t.key + "|" + dir] = m[t.key + "|" + dir] || []).push(t);
+  }
+  for(k in m){
+    var ts = m[k].slice().sort(function(a,b){ return dayNum(a.date) - dayNum(b.date); });
+    if(ts.length < 3) continue;
+    var gaps = [], amts = [];
+    for(i=1;i<ts.length;i++) gaps.push(dayNum(ts[i].date) - dayNum(ts[i-1].date));
+    for(i=0;i<ts.length;i++) amts.push(Math.abs(ts[i].amt));
+    var g = median(gaps), a = median(amts);
+    if(g < 26 || g > 35 || !a) continue;
+    var onBeat = 0;
+    for(i=0;i<gaps.length;i++) if(Math.abs(gaps[i] - 30) <= 9) onBeat++;
+    if(onBeat < Math.ceil(gaps.length * 0.7)) continue;
+    var steady = 0;
+    for(i=0;i<amts.length;i++) if(Math.abs(amts[i] - a) <= Math.max(5, a * 0.25)) steady++;
+    if(steady < amts.length) continue;
+    out.push({ key:ts[0].key, merch:ts[0].merch, dir:k.split("|")[1], n:ts.length, amt:a });
+  }
+  out.sort(function(x,y){ return y.amt * y.n - x.amt * x.n; });
+  return out;
+}
+
+function renderAsk(){
+  var q = askable()[0];                        /* one at a time, never a queue */
+  if(!q){ $("ask").innerHTML = ""; return; }
+  var out = q.dir === "out";
+  /* The rail word is how the bank labels the pipe, not who is on the other end
+     of it: "Zelle Payment From Emre K has sent you $310" reads like a company. */
+  var who = String(q.merch)
+    .replace(/^(Zelle|Venmo|Paypal|Cash ?App|Apple Cash)\s+(Payment\s+)?(To|From)\s+/i, "")
+    .replace(/^(Zelle|Venmo|Paypal|Cash ?App|Apple Cash)\s+Payment\b\s*/i, "$1 ") || q.merch;
+  $("ask").innerHTML =
+    '<div class="askcard"><p>' + (out
+      ? 'You have sent <b>' + esc(who) + '</b> ' + esc(money(q.amt)) + ' a month, '
+        + q.n + ' months running.'
+      : '<b>' + esc(who) + '</b> has sent you ' + esc(money(q.amt)) + ' a month, '
+        + q.n + ' months running.')
+    + ' What is this?</p>'
+    + '<div class="askrow">' + catSelect("", "ask:" + q.key)
+    + '<button class="btn-q" id="askNo">Leave it as a transfer</button></div>'
+    + '<p class="note">Answering sets it for every month, back and forward. '
+    + 'It is a rule you can change later like any other.</p></div>';
 }
 
 /* Paying twice looks exactly like paying once, twice — so the test is a
@@ -1968,16 +2070,17 @@ function renderSubs(){
   var rows = recurring(), i;
   $("nSu").textContent = rows.length;
   if(!rows.length){
-    $("subs").innerHTML = '<p class="empty">Nothing recurring yet &mdash; this needs at '
-      + 'least three charges from one merchant on a steady cadence.</p>';
+    $("subs").innerHTML = '<p class="empty">Nothing yet &mdash; this needs three or more '
+      + 'charges from one merchant, at the same amount, on a steady cadence.</p>';
     return;
   }
   var live = 0, perYear = 0;
   for(i=0;i<rows.length;i++) if(rows[i].live){ live++; perYear += rows[i].yearly; }
   var h = '<p class="note" style="margin:-4px 0 12px">' + live + ' active, '
         + (rows.length - live) + ' lapsed &mdash; about ' + money0(perYear)
-        + ' a year. Rent and tuition are left out; they are on their own line '
-        + 'in the month view.</p>'
+        + ' a year. Only charges that land on the same day for the same amount '
+        + 'are here, so this is money you could decide to stop. Rent, tuition, '
+        + 'cash and money sent to people are left out.</p>'
         + '<table><thead><tr><th>Merchant</th><th>Every</th><th class="t-amt">Amount</th>'
         + '<th>Seen</th><th>Last</th><th>Next</th><th class="t-amt">Paid so far</th>'
         + '</tr></thead><tbody>';
@@ -2173,16 +2276,22 @@ function sayWhatIsCovered(){
   var from = isoOf(dayNum(last) - 6);                 /* overlap, since the
                                                          final days may still
                                                          have been pending */
-  el.innerHTML = "You have <b>" + esc(first) + "</b> to <b>" + esc(last)
-    + "</b>. For the next one, download from <b>" + esc(from)
+  el.innerHTML = "<b>" + esc(first) + "</b> to <b>" + esc(last)
+    + "</b> &middot; read in this browser, never uploaded &middot; for the next one, "
+    + "download from <b>" + esc(from)
     + "</b> onwards &mdash; importing days you already have changes nothing.";
   el.hidden = false;
 }
 
 function render(){
   V = view();
-  if(!V.length){ $("app").hidden = true; $("add").hidden = true; return; }
+  if(!V.length){
+    $("app").hidden = true; $("add").hidden = true;
+    $("drop").hidden = false; $("covers").hidden = true;
+    return;
+  }
   $("app").hidden = false; $("add").hidden = false;
+  $("drop").hidden = true;
 
   var ms = months(V);
   if(!curMonth || ms.indexOf(curMonth) < 0) curMonth = ms[0];
@@ -2199,6 +2308,7 @@ function render(){
   fillSelect($("fMonth"), ms.map(function(m){ return [m, monthName(m)]; }), "All months");
 
   sayWhatIsCovered();
+  renderAsk();
   renderMonth();
   renderSubs();
   if(!$("p-txns").hidden) renderTxns();
@@ -2243,6 +2353,15 @@ function showReceipt(added, dupes, files, notes){
   $("receipt").innerHTML = h + '<button class="btn-q" id="rcHide">Dismiss</button></div>';
 }
 
+$("ask").addEventListener("click", function(e){
+  if(e.target.id !== "askNo") return;
+  var sel = $("ask").querySelector("select.cat");
+  if(sel){
+    db.asked[String(sel.getAttribute("data-id")).slice(4)] = 1;
+    save(); renderAsk();
+  }
+});
+
 $("receipt").addEventListener("click", function(e){
   if(e.target.id === "rcHide"){ $("receipt").innerHTML = ""; return; }
   if(e.target.id === "rcGo"){
@@ -2282,17 +2401,37 @@ function readFiles(fileList){
 }
 
 var drop = $("drop");
+/* Bound to the document, not to the drop zone. The zone folds away once there
+   is data, and a listener on a hidden element means dragging a statement onto
+   the dashboard does nothing at all — the browser just opens the CSV in a new
+   tab and your work is gone. Dragging anywhere works, and the zone comes back
+   to show you where it landed. */
 ["dragenter","dragover"].forEach(function(e){
-  drop.addEventListener(e, function(ev){ ev.preventDefault(); drop.classList.add("over"); });
+  document.addEventListener(e, function(ev){
+    if(!ev.dataTransfer || !/Files/.test(String(ev.dataTransfer.types))) return;
+    ev.preventDefault();
+    if(V.length) $("drop").hidden = false;
+    drop.classList.add("over");
+  });
 });
-["dragleave","drop"].forEach(function(e){
-  drop.addEventListener(e, function(ev){ ev.preventDefault(); drop.classList.remove("over"); });
+document.addEventListener("dragleave", function(ev){
+  if(ev.relatedTarget) return;                    /* still inside the window */
+  drop.classList.remove("over");
+  if(V.length) $("drop").hidden = true;
 });
-drop.addEventListener("drop", function(ev){
-  if(ev.dataTransfer && ev.dataTransfer.files) readFiles(ev.dataTransfer.files);
+document.addEventListener("drop", function(ev){
+  if(!ev.dataTransfer || !ev.dataTransfer.files || !ev.dataTransfer.files.length) return;
+  ev.preventDefault();
+  drop.classList.remove("over");
+  readFiles(ev.dataTransfer.files);
 });
 $("pick").addEventListener("click", function(){ $("file").click(); });
-$("add").addEventListener("click", function(){ $("file").click(); });
+/* Re-opens the zone rather than firing the file dialog: the guide, the privacy
+   line and the drop target are what you came back for. */
+$("add").addEventListener("click", function(){
+  $("drop").hidden = false;
+  $("drop").scrollIntoView({ behavior:"smooth", block:"start" });
+});
 $("file").addEventListener("change", function(){ readFiles(this.files); this.value=""; });
 
 $("tabs").addEventListener("click", function(e){
@@ -2527,6 +2666,22 @@ document.addEventListener("change", function(e){
   if(!s.classList || !s.classList.contains("cat")) return;
   var id = s.getAttribute("data-id"), key, val = s.value;
 
+  /* The one question the page asks. Same effect as retagging the merchant:
+     it is written to db.rules, applies to every month, and can be changed
+     again from the Transactions tab. */
+  if(id.indexOf("ask:") === 0){
+    if(!val) return;
+    if(val === "__new"){
+      val = addCategory(window.prompt(
+        "Name your category \u2014 electronics, childcare, hobbies, whatever you spend on:", ""));
+      if(!val){ renderAsk(); return; }
+    }
+    db.rules[id.slice(4)] = val;
+    save(); render();
+    toast("Set to " + labelOf(val) + " \u2014 every month, back and forward.");
+    return;
+  }
+
   /* Inside the split editor the select is a field, not a rule — but
      "+ New category" still has to mean something, or Save files the part
      under a category literally called "__new". */
@@ -2697,7 +2852,7 @@ $("bakfile").addEventListener("change", function(){
         + d.txns.length + " in the backup?")) return;
     db = { v:1, idv:d.idv, txns:d.txns, rules:d.rules||{}, files:d.files||[],
            pending:d.pending||[], dupsOk:d.dupsOk||{}, cats:d.cats||[],
-           splits:d.splits||{} };
+           splits:d.splits||{}, asked:d.asked||{} };
     migrateIds();
     save();
     curMonth = "";
@@ -2709,11 +2864,12 @@ $("bakfile").addEventListener("change", function(){
 
 $("reset").addEventListener("click", function(){
   if(!confirm("Delete every transaction and rule stored in this browser?")) return;
-  db = { v:1, idv:2, txns:[], rules:{}, files:[], pending:[], dupsOk:{}, cats:[], splits:{} };
+  db = { v:1, idv:2, txns:[], rules:{}, files:[], pending:[], dupsOk:{}, cats:[], splits:{}, asked:{} };
   try{ localStorage.removeItem(KEY); }catch(e){}
   curMonth = "";
   render();
   $("app").hidden = true;
+  $("drop").hidden = false;
   $("covers").hidden = true;
   $("receipt").innerHTML = "";
   toast("Cleared.");
