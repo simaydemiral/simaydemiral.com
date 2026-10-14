@@ -1682,6 +1682,22 @@ function renderMonth(){
   if(big) add(money(big.spend), "i-big", "Largest charge",
               esc(big.merch) + " &middot; " + esc(big.date));
 
+  /* Money from people, sitting outside every figure. It is correct there, and
+     it is also the one thing on the page most likely to be wrong in your
+     favour: if some of it was their half of a bill you paid, your month reads
+     higher than it was. Said once, with the way to answer it. */
+  var fromPeople = 0, fromPeopleN = 0;
+  for(i=0;i<list.length;i++)
+    if(list[i].amt > 0 && !list[i].nets && !CASH[list[i].cat] && !NOT_SPEND[list[i].cat]){
+      fromPeople += list[i].amt; fromPeopleN++;
+    }
+  if(fromPeople > 0)
+    add("+" + money(fromPeople), "", "Came in from people",
+        fromPeopleN + " payment" + (fromPeopleN === 1 ? "" : "s")
+        + ", counted as neither spending nor a refund &middot; "
+        + '<a href="#" id="seePeople">was any of it their share of something '
+        + 'you paid for?</a>');
+
   if(refunds > 0)
     add("+" + money(refunds), "go", "Refunded",
         list.filter(function(t){ return t.refund > 0 && t.nets; }).length
@@ -1833,6 +1849,24 @@ function txnList(){
   });
 }
 
+/* Their half of a bill you paid, said about one row. The same control wherever
+   a credit is listed, because the place you notice the money is the place you
+   should be able to answer for it. */
+function payBackCtl(t){
+  if(!(t.amt > 0) || t.part || CASH[t.cat]) return "";
+  if(t.nets && !db.paidBackTx[t.id]) return "";        /* already a shop's refund */
+  if(pbOpen === t.id)
+    return ' <span class="asklbl">Their share of what?</span> '
+      + catSelect(db.paidBackTx[t.id] || "", "pb:" + t.id,
+                  'Not sure \u2014 just take it off my spending')
+      + ' <button class="btn-q" data-pbcancel="1">Back</button>';
+  return ' <button class="btn-q' + (db.paidBackTx[t.id] ? ' is-on' : '')
+    + '" data-pb="'+esc(t.id)+'" title="Their share of something you paid for '
+    + '\u2014 it comes off what you spent">'
+    + (db.paidBackTx[t.id] ? 'Paying me back \u2713' : 'Paying me back')
+    + '</button>';
+}
+
 function renderTxns(){
   var list = txnList();
   $("nTx").textContent = V.length;
@@ -1859,20 +1893,7 @@ function renderTxns(){
          notes you took out on Friday and did not spend. If it was the second,
          say so on that one deposit and it comes off your cash spending. Per
          transaction, not per merchant, because the same ATM does both. */
-      /* Any money arriving that is not already coming off something: their
-         half of a bill you paid, told once, about this row only. */
-      + (t.amt > 0 && !t.part && !CASH[t.cat] && (!t.nets || db.paidBackTx[t.id])
-          ? (pbOpen === t.id
-              ? ' <span class="asklbl">Their share of what?</span> '
-                + catSelect(db.paidBackTx[t.id] || "", "pb:" + t.id,
-                            'Not sure \u2014 just take it off my spending')
-                + ' <button class="btn-q" data-pbcancel="1">Back</button>'
-              : ' <button class="btn-q' + (db.paidBackTx[t.id] ? ' is-on' : '')
-                + '" data-pb="'+esc(t.id)+'" title="Their share of something you '
-                + 'paid for \u2014 it comes off what you spent">'
-                + (db.paidBackTx[t.id] ? 'Paying me back \u2713' : 'Paying me back')
-                + '</button>')
-          : '')
+      + payBackCtl(t)
       + (CASH[t.cat] && t.amt > 0 && !t.part
           ? ' <button class="btn-q' + (db.unspent[t.id] ? ' is-on' : '')
             + '" data-unspent="'+esc(t.id)+'" title="'
@@ -1914,17 +1935,20 @@ function renderPend(){
   var refunds = credits.filter(function(t){ return  t.nets; });
   var moneyIn = credits.filter(function(t){ return !t.nets; });
 
-  function creditTable(rows, head, noun, empty){
+  function creditTable(rows, head, noun, empty, ctl){
     if(!rows.length) return '<p class="empty">' + empty + '</p>';
     var tot = 0, j;
     for(j=0;j<rows.length;j++) tot += rows[j].refund;
     var h = '<table><thead><tr><th>Date</th><th>Merchant</th><th>Category</th>'
-          + '<th class="t-amt">' + head + '</th></tr></thead><tbody>';
+          + '<th class="t-amt">' + head + '</th>' + (ctl ? '<th></th>' : '')
+          + '</tr></thead><tbody>';
     for(j=0;j<rows.length;j++)
       h += '<tr><td class="t-date">'+esc(rows[j].date)+'</td>'
          + '<td class="t-merch">'+esc(rows[j].merch)+'</td>'
          + '<td class="t-acct">'+esc(labelOf(rows[j].cat))+'</td>'
-         + '<td class="t-amt pos">+'+esc(money2(rows[j].refund))+'</td></tr>';
+         + '<td class="t-amt pos">+'+esc(money2(rows[j].refund))+'</td>'
+         + (ctl ? '<td class="t-split">' + payBackCtl(rows[j]) + '</td>' : '')
+         + '</tr>';
     return h + '</tbody></table><p class="note" style="margin-top:10px">'
          + rows.length + ' ' + noun + (rows.length === 1 ? "" : "s")
          + ' totalling <b>' + esc(money(tot)) + '</b>.</p>';
@@ -1933,7 +1957,10 @@ function renderPend(){
   $("refunds").innerHTML = creditTable(refunds, "Refunded", "refund",
     "No refunds yet.");
   $("moneyin").innerHTML = creditTable(moneyIn, "Received", "credit",
-    "Nothing received yet.");
+    "Nothing received yet.", true)
+    + '<p class="note" style="margin-top:4px">None of this counts as spending. '
+    + 'If any of it was someone\u2019s share of something you paid for, say so and '
+    + 'it comes off what you spent.</p>';
 }
 
 /* ============================================================
@@ -2353,6 +2380,12 @@ function multiFilter(id, label, onChange){
 /* The rule about cash is only useful if you can act on it, so the line that
    explains it is also the way to the rows. */
 document.addEventListener("click", function(e){
+  if(e.target && e.target.id === "seePeople"){
+    e.preventDefault();
+    document.querySelector('.tab[data-tab="pend"]').click();
+    $("p-pend").scrollIntoView({ behavior:"smooth", block:"start" });
+    return;
+  }
   if(!e.target) return;
   var want = e.target.id === "seeCash" ? "out"
            : (e.target.id === "seeDeposits" || e.target.id === "seeCashIn") ? "in" : "";
@@ -2702,6 +2735,10 @@ $("fCat").__m = MCat; $("fAcct").__m = MAcct;
    ------------------------------------------------------------ */
 var splitOpen = "";
 var pbOpen = "";          /* the row whose "paying me back" picker is open */
+function redrawLists(){
+  if(!$("p-txns").hidden) renderTxns();
+  if(!$("p-pend").hidden) renderPend();
+}
 
 function splitEditor(id){
   var t = null, i;
@@ -2761,12 +2798,12 @@ document.addEventListener("click", function(e){
   }
   if(b.getAttribute && b.getAttribute("data-pb")){
     var pid = b.getAttribute("data-pb");
-    if(db.paidBackTx[pid]){ delete db.paidBackTx[pid]; save(); render(); renderTxns();
+    if(db.paidBackTx[pid]){ delete db.paidBackTx[pid]; save(); render(); redrawLists();
       toast("Back to money arriving \u2014 it no longer comes off what you spent."); }
-    else { pbOpen = pid; renderTxns(); }
+    else { pbOpen = pid; redrawLists(); }
     return;
   }
-  if(b.getAttribute && b.getAttribute("data-pbcancel")){ pbOpen = ""; renderTxns(); return; }
+  if(b.getAttribute && b.getAttribute("data-pbcancel")){ pbOpen = ""; redrawLists(); return; }
 
   if(b.getAttribute && b.getAttribute("data-unspent")){
     var uid = b.getAttribute("data-unspent");
@@ -2842,11 +2879,11 @@ document.addEventListener("change", function(e){
     else if(val === "__new"){
       val = addCategory(window.prompt(
         "Name your category \u2014 electronics, childcare, hobbies, whatever you spend on:", ""));
-      if(!val){ renderTxns(); return; }
+      if(!val){ redrawLists(); return; }
     }
     db.paidBackTx[txid] = val;
     pbOpen = "";
-    save(); render(); renderTxns();
+    save(); render(); redrawLists();
     toast("Comes off what you spent.");
     return;
   }
