@@ -294,11 +294,13 @@ input[type=search]{min-width:200px}
 #toast.on{opacity:1}
 /* The one question the page asks you. It earns the interruption by being
    about the biggest bar on your month, and by only ever asking once. */
-.askcard{background:var(--surface);border:1px solid var(--accent);border-radius:var(--radius);
+.askcard{background:var(--surface);border:1px solid var(--brand);border-radius:var(--radius);
   padding:14px 16px;margin-bottom:14px}
 .askcard p{margin:0 0 10px;font-size:14px;line-height:1.5}
 .askcard .note{margin:8px 0 0}
 .askrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.asklbl{font-size:13px;color:var(--ink-2)}
+.btn-q.is-on{background:var(--go-wash);color:var(--go);border-color:currentColor}
 .recon{font:400 12px/1.4 var(--f-mono);padding:8px 10px;border-radius:8px;margin-top:10px}
 .recon.ok{background:var(--go-wash);color:var(--go)}
 .recon.bad{background:var(--stop-wash);color:var(--stop)}
@@ -383,6 +385,15 @@ input[type=search]{min-width:200px}
         </ul>
         <p>Whatever you leave stays as Cash spending, which means money gone and
           unaccounted for.</p>
+        <p><b>A deposit is not a withdrawal coming back.</b> Money paid in is new
+          money arriving, and the statement cannot say where from &mdash; so the
+          two never cancel. $300 taken out and $1,200 paid in is $300 spent and
+          $1,200 arrived, not $900 back.</p>
+        <ul>
+          <li>if it really was cash you took out and did not spend, say so on
+            that one deposit and it comes off your cash spending &mdash;
+            <a href="#" id="seeDeposits">see your deposits</a>.</li>
+        </ul>
       </div>
     </details>
 
@@ -543,7 +554,7 @@ function median(a){
    STORE
    ============================================================ */
 var KEY = "spend.v1";
-var db = { v:1, idv:2, txns:[], rules:{}, files:[], pending:[], dupsOk:{}, cats:[], splits:{}, asked:{} };
+var db = { v:1, idv:2, txns:[], rules:{}, files:[], pending:[], dupsOk:{}, cats:[], splits:{}, asked:{}, paidBack:{}, unspent:{} };
 
 /* Ids used to include the account, which came from the filename, so the same
    row arriving as stmt.csv and stmt (2).csv counted twice. Rows stored under
@@ -576,7 +587,8 @@ function migrateIds(){
 function load(){
   try{
     var raw = localStorage.getItem(KEY);
-    if(raw){ var d = JSON.parse(raw); if(d && d.txns){ db = d; db.rules = db.rules||{}; db.files = db.files||[]; db.pending = db.pending||[]; db.dupsOk = db.dupsOk||{}; db.cats = db.cats||[]; db.splits = db.splits||{}; db.asked = db.asked||{}; } }
+    if(raw){ var d = JSON.parse(raw); if(d && d.txns){ db = d; db.rules = db.rules||{}; db.files = db.files||[]; db.pending = db.pending||[]; db.dupsOk = db.dupsOk||{}; db.cats = db.cats||[]; db.splits = db.splits||{}; db.asked = db.asked||{};
+        db.paidBack = db.paidBack||{}; db.unspent = db.unspent||{}; } }
   }catch(e){ /* corrupt or blocked storage — start empty rather than break */ }
 }
 function save(){
@@ -1197,9 +1209,18 @@ function dayNum(iso){ return Math.floor(Date.parse(iso + "T00:00:00") / 86400000
 function view(){
   var out = [], i, j;
 
+  /* Does money arriving come off what you spent? Normally no: a credit in
+     cash, in a transfer, or in nothing yet, is money arriving and netting it
+     would let it shrink a month it had nothing to do with. Two exceptions, and
+     both are things you said out loud:
+       paidBack — this person is sending you their half of something you paid for
+       unspent  — this deposit is cash you took out and did not spend
+     A shop's refund has always netted and still does. */
   function row(t, key, merch, id, amt, cat, why, part){
+    var nets = !MONEY_IN[cat] || !!db.paidBack[key] || !!db.unspent[t.id];
     return { id:id, date:t.date, month:t.date.slice(0,7), desc:t.desc, key:key,
              merch:merch, amt:amt, acct:t.acct, cat:cat, why:why, part:part,
+             nets: nets,
              spend: NOT_SPEND[cat] ? 0 : (amt < 0 ? -amt : 0),
              refund: NOT_SPEND[cat] ? 0 : (amt > 0 ? amt : 0) };
   }
@@ -1286,7 +1307,7 @@ function spendOf(list, mode){
     /* A shop refunding you reduces what you spent there. Money arriving — from
        a person, as cash, or a credit nobody has named yet — is not a refund of
        anything, and netting it off would let it shrink the month. */
-    s += t.spend - (MONEY_IN[t.cat] ? 0 : t.refund);
+    s += t.spend - (t.nets ? t.refund : 0);
   }
   return s;
 }
@@ -1299,7 +1320,7 @@ function byCat(list, mode){
     var isFixed = !!FIXED[t.cat];
     if(mode === "day" && isFixed) continue;
     if(mode === "fixed" && !isFixed) continue;
-    m[t.cat] = (m[t.cat]||0) + t.spend - (MONEY_IN[t.cat] ? 0 : t.refund);
+    m[t.cat] = (m[t.cat]||0) + t.spend - (t.nets ? t.refund : 0);
   }
   for(var k in m) if(m[k] > 0) out.push([labelOf(k), m[k], 0, k]);
   out.sort(function(a,b){ return b[1]-a[1]; });
@@ -1374,7 +1395,7 @@ function trendSeries(){
           : t.month;
     /* same rule as the boxes: a shop's refund reduces what you spent
        there, money arriving from elsewhere does not */
-    m[k] = (m[k]||0) + t.spend - (MONEY_IN[t.cat] ? 0 : t.refund);
+    m[k] = (m[k]||0) + t.spend - (t.nets ? t.refund : 0);
   }
 
   var keys = [];
@@ -1526,7 +1547,7 @@ function renderMonth(){
   var med = median(hist);
 
   var refunds = 0;
-  for(i=0;i<list.length;i++) if(!MONEY_IN[list[i].cat]) refunds += list[i].refund;
+  for(i=0;i<list.length;i++) if(list[i].nets) refunds += list[i].refund;
   var pendSum = 0;
   /* Scoped to the month on screen, like every other tile beside it. It used to
      sum every pending charge whatever its date, so one logged for December
@@ -1534,9 +1555,14 @@ function renderMonth(){
   for(i=0;i<db.pending.length;i++)
     if(String(db.pending[i].date).slice(0,7) === curMonth)
       pendSum += Math.abs(db.pending[i].amt);
-  var cashOut = 0, cashIn = 0;
-  for(i=0;i<list.length;i++) if(CASH[list[i].cat]){ cashOut += list[i].spend; cashIn += list[i].refund; }
-  var cashNet = cashOut - cashIn;
+  var cashOut = 0, cashIn = 0, cashBack = 0;
+  for(i=0;i<list.length;i++) if(CASH[list[i].cat]){
+    cashOut += list[i].spend;
+    /* a deposit you marked as cash you did not spend comes off; everything
+       else paid in is money arriving and stays separate */
+    if(list[i].nets) cashBack += list[i].refund; else cashIn += list[i].refund;
+  }
+  cashOut -= cashBack;
 
   $("meters").innerHTML =
     /* money0s, not money, so the row reads at one precision: "$80.00 Cash
@@ -1545,7 +1571,8 @@ function renderMonth(){
       meter(money0s(total), "Day-to-day in " + monthName(curMonth).split(" ")[0], "", "day")
     + meter(fixed ? money0s(fixed) : "$0", "Fixed commitments (e.g., rent, tuition fee)", "", "fixed")
     + meter(refunds ? "+" + money0(refunds) : "$0", "Refunded back", refunds ? "is-go" : "", "refund")
-    + meter(cashOut ? money0(cashOut) : "$0", "Cash withdrawn", "", cashOut ? "cash" : "")
+    + meter(cashOut ? money0(cashOut) : "$0",
+            cashBack ? "Cash spent" : "Cash withdrawn", "", cashOut ? "cash" : "")
     /* A percentage against a median stops meaning anything once the month
        itself is negative: "-296% vs your median" is not a smaller number than
        usual, it is a different kind of month. */
@@ -1629,13 +1656,17 @@ function renderMonth(){
      and itemising the $300 made the green number bigger. Only what went out
      is spending, so only that is shown. */
   if(cashOut){
-    add(money(cashOut), "warn", "Taken as cash",
-        (cashIn ? esc(money(cashIn)) + " was paid in as well, which is money "
-                + "arriving, not this money coming back &middot; " : "")
+    add(money(cashOut), "warn", cashBack ? "Spent as cash" : "Taken as cash",
+        (cashBack ? esc(money(cashBack)) + " you marked as coming back is already "
+                  + "off this &middot; " : "")
+        + (cashIn ? '<a href="#" id="seeCashIn">' + esc(money(cashIn))
+                + " was paid in as well</a>, which is money arriving, not this "
+                + "money coming back &middot; " : "")
         + "a statement cannot itemise cash");
   } else if(cashIn){
     add("+" + money(cashIn), "", "Cash paid in",
-        "Money arriving &middot; it does not reduce what you spent");
+        '<a href="#" id="seeCashIn">Money arriving</a> &middot; it does not '
+        + "reduce what you spent");
   }
 
   var big = list.filter(function(t){ return t.spend > 0 && !FIXED[t.cat] && !CASH[t.cat]; })
@@ -1645,8 +1676,8 @@ function renderMonth(){
 
   if(refunds > 0)
     add("+" + money(refunds), "go", "Refunded",
-        list.filter(function(t){ return t.refund > 0 && !MONEY_IN[t.cat]; }).length
-        + " credit" + (list.filter(function(t){ return t.refund > 0 && !MONEY_IN[t.cat]; }).length === 1 ? "" : "s")
+        list.filter(function(t){ return t.refund > 0 && t.nets; }).length
+        + " credit" + (list.filter(function(t){ return t.refund > 0 && t.nets; }).length === 1 ? "" : "s")
         + " from shops, already netted off");
 
   /* "1312% of the month" — the tile counts everything still to tag, money in
@@ -1702,7 +1733,7 @@ function renderMonth(){
        spent there. Without it a jacket bought and returned in one month stood
        in this list at full price, and clicking the bar opened two rows that
        cancelled out. */
-    mm[t.merch] = (mm[t.merch]||0) + t.spend - (MONEY_IN[t.cat] ? 0 : t.refund);
+    mm[t.merch] = (mm[t.merch]||0) + t.spend - (t.nets ? t.refund : 0);
   }
   var tops = [];
   for(k in mm) if(mm[k] > 0) tops.push([k, mm[k], null, k]);
@@ -1774,7 +1805,7 @@ function txnList(){
     if(fd === "in"  && t.amt <= 0) return false;
     /* What the month boxes count: everything going out, plus a shop's refund,
        but not money arriving from a person or from cash. */
-    if(fd === "spend" && t.amt > 0 && MONEY_IN[t.cat]) return false;
+    if(fd === "spend" && t.amt > 0 && !t.nets) return false;
     if(q && t.merch.toLowerCase().indexOf(q) < 0 && t.desc.toLowerCase().indexOf(q) < 0) return false;
     return true;
   });
@@ -1801,6 +1832,19 @@ function renderTxns(){
           ? '<span class="partof">' + t.part.i + '/' + t.part.n + '</span>'
             + (t.part.i === 1 ? ' <button class="btn-q" data-unsplit="'+esc(t.part.of)+'">Undo</button>' : '')
           : '<button class="btn-q" data-split="'+esc(t.id)+'">Split</button>')
+      /* A cash deposit is money arriving by default, because most of them are:
+         a statement cannot tell a pay-in from your own bank abroad from the
+         notes you took out on Friday and did not spend. If it was the second,
+         say so on that one deposit and it comes off your cash spending. Per
+         transaction, not per merchant, because the same ATM does both. */
+      + (CASH[t.cat] && t.amt > 0 && !t.part
+          ? ' <button class="btn-q' + (db.unspent[t.id] ? ' is-on' : '')
+            + '" data-unspent="'+esc(t.id)+'" title="'
+            + (db.unspent[t.id]
+               ? 'Counting this as cash you took out and did not spend'
+               : 'Cash you took out and did not spend, coming back')
+            + '">' + (db.unspent[t.id] ? 'Unspent cash \u2713' : 'Unspent cash') + '</button>'
+          : '')
       + '</td></tr>';
     if(splitOpen && t.id === splitOpen) h += splitEditor(t.id);
   }
@@ -1831,8 +1875,8 @@ function renderPend(){
   }
 
   var credits = V.filter(function(t){ return t.refund > 0; });
-  var refunds = credits.filter(function(t){ return !MONEY_IN[t.cat]; });
-  var moneyIn = credits.filter(function(t){ return  MONEY_IN[t.cat]; });
+  var refunds = credits.filter(function(t){ return  t.nets; });
+  var moneyIn = credits.filter(function(t){ return !t.nets; });
 
   function creditTable(rows, head, noun, empty){
     if(!rows.length) return '<p class="empty">' + empty + '</p>';
@@ -2015,6 +2059,7 @@ function askable(){
   return out;
 }
 
+var askBack = "";
 function renderAsk(){
   var q = askable()[0];                        /* one at a time, never a queue */
   if(!q){ $("ask").innerHTML = ""; return; }
@@ -2024,17 +2069,39 @@ function renderAsk(){
   var who = String(q.merch)
     .replace(/^(Zelle|Venmo|Paypal|Cash ?App|Apple Cash)\s+(Payment\s+)?(To|From)\s+/i, "")
     .replace(/^(Zelle|Venmo|Paypal|Cash ?App|Apple Cash)\s+Payment\b\s*/i, "$1 ") || q.merch;
+  if(out){
+    $("ask").innerHTML =
+      '<div class="askcard"><p>You have sent <b>' + esc(who) + '</b> '
+      + esc(money(q.amt)) + ' a month, ' + q.n + ' months running. What is this?</p>'
+      + '<div class="askrow">' + catSelect("", "ask:" + q.key)
+      + '<button class="btn-q" id="askNo">Leave it as a transfer</button></div>'
+      + '<p class="note">Answering sets it for every month, back and forward. '
+      + 'It is a rule you can change later like any other.</p></div>';
+    return;
+  }
+
+  /* Money arriving needs a different question, because the usual answer is not
+     a category at all: you paid for something you both used and they are
+     sending you their half. Picking "Restaurants" from a plain list would file
+     their $310 as $310 of restaurant spending. So the first answer is what
+     happened, and the category is the follow-up. */
   $("ask").innerHTML =
-    '<div class="askcard"><p>' + (out
-      ? 'You have sent <b>' + esc(who) + '</b> ' + esc(money(q.amt)) + ' a month, '
-        + q.n + ' months running.'
-      : '<b>' + esc(who) + '</b> has sent you ' + esc(money(q.amt)) + ' a month, '
-        + q.n + ' months running.')
-    + ' What is this?</p>'
-    + '<div class="askrow">' + catSelect("", "ask:" + q.key)
-    + '<button class="btn-q" id="askNo">Leave it as a transfer</button></div>'
-    + '<p class="note">Answering sets it for every month, back and forward. '
-    + 'It is a rule you can change later like any other.</p></div>';
+    '<div class="askcard"><p><b>' + esc(who) + '</b> has sent you '
+    + esc(money(q.amt)) + ' a month, ' + q.n + ' months running. What is this?</p>'
+    + (askBack === q.key
+        ? '<div class="askrow"><span class="asklbl">Paying you back for what?</span>'
+          + catSelect("", "back:" + q.key)
+          + '<button class="btn-q" id="askCancel">Never mind</button></div>'
+          + '<p class="note">Their share comes off that category, the way a shop\u2019s '
+          + 'refund does &mdash; so the month shows what you actually paid, not what '
+          + 'went through your account.</p>'
+        : '<div class="askrow">'
+          + '<button class="btn" id="askBack">Paying me back</button>'
+          + '<button class="btn-q" id="askIncome">It is income</button>'
+          + '<button class="btn-q" id="askNo">Leave it as a transfer</button></div>'
+          + '<p class="note">Answering sets it for every month, back and forward. '
+          + 'It is a rule you can change later like any other.</p>')
+    + '</div>';
 }
 
 /* Paying twice looks exactly like paying once, twice — so the test is a
@@ -2131,7 +2198,7 @@ function renderMerch(){
     var t = V[i];
     if(NOT_SPEND[t.cat]) continue;
     if(!m[t.key]) m[t.key] = { n:0, sum:0, merch:t.merch, cat:t.cat };
-    m[t.key].n++; m[t.key].sum += t.spend - (MONEY_IN[t.cat] ? 0 : t.refund);
+    m[t.key].n++; m[t.key].sum += t.spend - (t.nets ? t.refund : 0);
   }
   var rows = [];
   for(k in m) if(m[k].sum > 0) rows.push([k, m[k]]);
@@ -2243,11 +2310,14 @@ function multiFilter(id, label, onChange){
 /* The rule about cash is only useful if you can act on it, so the line that
    explains it is also the way to the rows. */
 document.addEventListener("click", function(e){
-  if(!e.target || e.target.id !== "seeCash") return;
+  if(!e.target) return;
+  var want = e.target.id === "seeCash" ? "out"
+           : (e.target.id === "seeDeposits" || e.target.id === "seeCashIn") ? "in" : "";
+  if(!want) return;
   e.preventDefault();
   var d = document.querySelector(".assume");
   if(d) d.open = false;
-  goTxns({ cats:["cash"], dir:"out" });     /* every month, withdrawals only */
+  goTxns({ cats:["cash"], dir:want });      /* every month */
 });
 
 /* Clicking anywhere else closes an open panel. The test is the event's own
@@ -2381,12 +2451,16 @@ function showReceipt(added, dupes, files, notes){
 }
 
 $("ask").addEventListener("click", function(e){
-  if(e.target.id !== "askNo") return;
-  var sel = $("ask").querySelector("select.cat");
-  if(sel){
-    db.asked[String(sel.getAttribute("data-id")).slice(4)] = 1;
-    save(); renderAsk();
+  var id = e.target && e.target.id, q = askable()[0];
+  if(!q) return;
+  if(id === "askBack"){ askBack = q.key; renderAsk(); return; }
+  if(id === "askCancel"){ askBack = ""; renderAsk(); return; }
+  if(id === "askIncome"){
+    db.rules[q.key] = "income"; askBack = "";
+    save(); render(); toast("Set to Income \u2014 every month, back and forward.");
+    return;
   }
+  if(id === "askNo"){ db.asked[q.key] = 1; askBack = ""; save(); renderAsk(); }
 });
 
 $("receipt").addEventListener("click", function(e){
@@ -2637,6 +2711,16 @@ document.addEventListener("click", function(e){
     renderTxns();
     return;
   }
+  if(b.getAttribute && b.getAttribute("data-unspent")){
+    var uid = b.getAttribute("data-unspent");
+    if(db.unspent[uid]) delete db.unspent[uid]; else db.unspent[uid] = 1;
+    save(); render(); renderTxns();
+    toast(db.unspent[uid]
+      ? "Counted as cash coming back \u2014 it comes off your cash spending."
+      : "Back to money arriving \u2014 it no longer reduces your cash spending.");
+    return;
+  }
+
   if(b.getAttribute && b.getAttribute("data-unsplit")){
     delete db.splits[b.getAttribute("data-unsplit")];
     save(); render();
@@ -2692,6 +2776,25 @@ document.addEventListener("change", function(e){
   var s = e.target;
   if(!s.classList || !s.classList.contains("cat")) return;
   var id = s.getAttribute("data-id"), key, val = s.value;
+
+  /* "Paying me back" is a category plus one extra fact: that the money coming
+     in should come off that category rather than sit beside it. Without the
+     mark it would be filed as spending, which is the opposite of what happened. */
+  if(id.indexOf("back:") === 0){
+    if(!val) return;
+    if(val === "__new"){
+      val = addCategory(window.prompt(
+        "Name your category \u2014 electronics, childcare, hobbies, whatever you spend on:", ""));
+      if(!val){ renderAsk(); return; }
+    }
+    var bkey = id.slice(5);
+    db.rules[bkey] = val;
+    db.paidBack[bkey] = 1;
+    askBack = "";
+    save(); render();
+    toast("Comes off " + labelOf(val) + " \u2014 every month, back and forward.");
+    return;
+  }
 
   /* The one question the page asks. Same effect as retagging the merchant:
      it is written to db.rules, applies to every month, and can be changed
@@ -2879,7 +2982,8 @@ $("bakfile").addEventListener("change", function(){
         + d.txns.length + " in the backup?")) return;
     db = { v:1, idv:d.idv, txns:d.txns, rules:d.rules||{}, files:d.files||[],
            pending:d.pending||[], dupsOk:d.dupsOk||{}, cats:d.cats||[],
-           splits:d.splits||{}, asked:d.asked||{} };
+           splits:d.splits||{}, asked:d.asked||{}, paidBack:d.paidBack||{},
+           unspent:d.unspent||{} };
     migrateIds();
     save();
     curMonth = "";
@@ -2891,7 +2995,7 @@ $("bakfile").addEventListener("change", function(){
 
 $("reset").addEventListener("click", function(){
   if(!confirm("Delete every transaction and rule stored in this browser?")) return;
-  db = { v:1, idv:2, txns:[], rules:{}, files:[], pending:[], dupsOk:{}, cats:[], splits:{}, asked:{} };
+  db = { v:1, idv:2, txns:[], rules:{}, files:[], pending:[], dupsOk:{}, cats:[], splits:{}, asked:{}, paidBack:{}, unspent:{} };
   try{ localStorage.removeItem(KEY); }catch(e){}
   curMonth = "";
   render();
