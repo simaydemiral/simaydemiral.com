@@ -90,6 +90,7 @@ button{font:inherit;cursor:pointer}
   margin:12px 0 0;break-inside:avoid}
 .assume-body b{color:var(--ink-2)}
 .assume-body a{color:var(--brand)}
+select.cat.own{box-shadow:inset 3px 0 0 var(--brand)}
 /* Visited counts too: the browser's purple is as hard to read on this
    background as its blue. */
 .ins-t a, .ins-t a:visited{color:var(--link)}
@@ -1863,7 +1864,16 @@ function catSelect(cat, id, anyLabel){
     + allCategories().map(function(c){
     return '<option value="'+c+'"'+(c===cat?' selected':'')+'>'+esc(labelOf(c))+'</option>';
   }).join("") + '<option value="__new">+ New category\u2026</option>';
-  return '<select class="cat'+(cat==="uncategorized"?' unc':'')+'" data-id="'+esc(id)+'">'+o+'</select>';
+  /* A transaction carrying a category of its own, rather than its merchant's.
+     The mark goes on the row because that is what it is a fact about: the
+     merchant list stays a list of defaults, and you see this while you are
+     looking at the thing it describes. */
+  var own = !!(db.catTx[id] || db.paidBackTx[id]);
+  return '<select class="cat'+(cat==="uncategorized"?' unc':'')+(own?' own':'')
+    + '" data-id="'+esc(id)+'"'
+    + (own ? ' title="You set this one. Everything else from this merchant '
+           + 'follows the merchant\u2019s category."' : '')
+    + '>'+o+'</select>';
 }
 
 function txnList(){
