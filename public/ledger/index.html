@@ -367,7 +367,9 @@ input[type=search]{min-width:200px}
 :root[data-demo] #drop{transition:border-color .3s ease,background .3s ease}
 /* Embedded in a fixed crop, the browser scrolling a clicked tab into view takes
    the figures off the top of the window, which reads as them vanishing. */
-:root[data-demo], :root[data-demo] body{overflow:hidden}
+:root[data-demo].is-locked, :root[data-demo].is-locked body{overflow:hidden}
+.stage-file.is-press, #stageCursor.is-press{transform-origin:center}
+#stageCursor.is-press svg{transform:scale(.82);transition:transform .12s ease}
 
 /* Embedded on another page, the controls that act on stored data have nothing
    to act on and only raise questions. */
@@ -3636,6 +3638,25 @@ function demoStage(){
   var cur = $("stageCursor"), cards = stage.querySelectorAll(".stage-file");
   var replay = $("stageReplay"), timers = [];
   function at(el, x, y){ el.style.transform = "translate(" + x + "px," + y + "px)"; }
+
+  /* Smooth scrolling is not honoured everywhere, and an embedded page is
+     exactly where it quietly is not, so the glide is ours. */
+  var gliding = 0;
+  function glide(to, ms){
+    /* Driven by timers rather than animation frames. An embedded page is not
+       always granted frames — the pane this was built in hands out none at all
+       — and a scroll that silently does nothing is worse than a coarse one. */
+    var from = window.pageYOffset, t0 = Date.now();
+    gliding++;
+    var mine = gliding;
+    (function step(){
+      if(mine !== gliding) return;
+      var k = Math.min(1, (Date.now() - t0) / ms);
+      var e = k < 0.5 ? 2*k*k : 1 - Math.pow(-2*k + 2, 2) / 2;
+      window.scrollTo(0, Math.round(from + (to - from) * e));
+      if(k < 1) setTimeout(step, 16);
+    })();
+  }
   function after(ms, fn){ timers.push(setTimeout(fn, ms)); }
   function clearAll(){ for(var t=0;t<timers.length;t++) clearTimeout(timers[t]); timers = []; }
 
@@ -3656,6 +3677,10 @@ function demoStage(){
   function play(){
     clearAll();
     replay.classList.remove("on");
+    document.documentElement.classList.add("is-locked");
+    window.scrollTo(0, 0);
+    var mt = document.querySelector('.tab[data-tab="month"]');
+    if(mt) mt.click();
     db.txns = []; db.files = []; curMonth = "";
     render();
     var geo = layout(), k;
@@ -3705,8 +3730,45 @@ function demoStage(){
       $("covers").hidden = true;
       window.scrollTo(0, 0);
     });
-    after(3600, function(){ cur.style.opacity = "0"; });
-    after(4700, function(){ replay.classList.add("on"); });
+    /* What a screenshot cannot show: that every figure is a way into the rows
+       behind it. The cursor takes a look down the page, opens one of them, and
+       then hands the page over. */
+    var root = document.documentElement;
+    after(3400, function(){ root.classList.remove("is-locked"); });
+    after(3850, function(){ glide(380, 700); });
+    after(4900, function(){ glide(0, 600); });
+
+    after(5450, function(){
+      var tile = document.querySelector('#meters [data-goto="day"]');
+      if(!tile) return;
+      var r = tile.getBoundingClientRect();
+      at(cur, r.left + r.width * 0.5, r.top + r.height * 0.62);
+    });
+    after(6150, function(){
+      var tile = document.querySelector('#meters [data-goto="day"]');
+      cur.classList.add("is-press");
+      if(tile) tile.click();
+    });
+    after(6450, function(){ cur.classList.remove("is-press"); });
+
+    after(7650, function(){
+      var tab = document.querySelector('.tab[data-tab="month"]');
+      if(!tab) return;
+      var r = tab.getBoundingClientRect();
+      at(cur, r.left + r.width * 0.5, r.top + r.height * 0.7);
+    });
+    after(8300, function(){
+      var tab = document.querySelector('.tab[data-tab="month"]');
+      cur.classList.add("is-press");
+      if(tab) tab.click();
+      window.scrollTo(0, 0);
+    });
+    after(8650, function(){
+      cur.classList.remove("is-press");
+      cur.style.opacity = "0";
+      root.classList.add("is-locked");          /* the crop stops moving again */
+    });
+    after(9150, function(){ replay.classList.add("on"); });
   }
 
   replay.addEventListener("click", play);
@@ -3724,6 +3786,7 @@ function demoStage(){
      does. */
   var started = false;
   function once(){ if(started) return; started = true; play(); }
+  document.documentElement.classList.add("is-locked");
   if(window.parent !== window){
     window.addEventListener("message", function(e){
       if(e && e.data === "ledger:play") once();
