@@ -1531,7 +1531,9 @@ function renderMonth(){
   /* meters */
   var income = 0, i;
   for(i=0;i<list.length;i++) if(list[i].cat === "income") income += list[i].amt;
-  var unc = list.filter(function(t){ return t.cat === "uncategorized"; });
+  var unc = list.filter(function(t){
+    return t.cat === "uncategorized" && !db.paidBack[t.key];
+  });
   /* Everything still to tag, whichever way it went. This counted only money
      going out, so an unrecognised $1,150 credit sat two inches under a receipt
      saying "1 merchant I do not recognise, worth $1,150" beside a tile reading
@@ -1714,6 +1716,16 @@ function renderMonth(){
   /* A month can end up negative: refunds arriving for things bought earlier,
      with little or nothing spent since. There is then nothing to break down,
      and "Nothing here." reads as a loading failure rather than an answer. */
+  /* Money coming back that was never assigned a category is off the headline
+     and in none of these bars, so the bars would otherwise add to more than the
+     figure above them with nothing on screen to explain the difference. */
+  var loose = catSum - total;
+  if(cats.length && loose > 0.5)
+    catsHtml += '<p class="note" style="margin:12px 0 0;padding-top:10px;'
+      + 'border-top:1px solid var(--line-soft)">' + esc(money(loose))
+      + ' came back without a category &mdash; it is off the '
+      + esc(money(total)) + ' above, but it belongs to none of these bars.</p>';
+
   if(!cats.length && total < 0)
     catsHtml = '<p class="empty">More came back than went out in '
       + esc(shortMonth) + ' &mdash; ' + esc(money(-total))
@@ -1785,8 +1797,12 @@ function addCategory(label){
   return k;
 }
 
-function catSelect(cat, id){
+function catSelect(cat, id, anyLabel){
+  /* anyLabel is for the one question where "which category" is a detail and
+     "is this mine at all" is the answer: knowing their $310 was not your
+     spending is worth having even when you cannot say what it bought. */
   var o = (cat === "" ? '<option value="">Choose a category\u2026</option>' : "")
+    + (anyLabel ? '<option value="__any">' + esc(anyLabel) + '</option>' : "")
     + allCategories().map(function(c){
     return '<option value="'+c+'"'+(c===cat?' selected':'')+'>'+esc(labelOf(c))+'</option>';
   }).join("") + '<option value="__new">+ New category\u2026</option>';
@@ -2072,7 +2088,7 @@ function renderAsk(){
   if(out){
     $("ask").innerHTML =
       '<div class="askcard"><p>You have sent <b>' + esc(who) + '</b> '
-      + esc(money(q.amt)) + ' a month, ' + q.n + ' months running. What is this?</p>'
+      + esc(money(q.amt)) + ' a month, ' + q.n + ' times. What is this?</p>'
       + '<div class="askrow">' + catSelect("", "ask:" + q.key)
       + '<button class="btn-q" id="askNo">Leave it as a transfer</button></div>'
       + '<p class="note">Answering sets it for every month, back and forward. '
@@ -2085,22 +2101,29 @@ function renderAsk(){
      sending you their half. Picking "Restaurants" from a plain list would file
      their $310 as $310 of restaurant spending. So the first answer is what
      happened, and the category is the follow-up. */
+  /* One question with a yes and a no, because only two things can happen to
+     the figures: the money comes off what you spent, or it does not. Income, a
+     gift and your own money arriving from another account are the same
+     arithmetic as each other and only differ as labels, so they are all No. */
   $("ask").innerHTML =
     '<div class="askcard"><p><b>' + esc(who) + '</b> has sent you '
-    + esc(money(q.amt)) + ' a month, ' + q.n + ' months running. What is this?</p>'
+    + esc(money(q.amt)) + ' a month, ' + q.n + ' times.<br>'
+    + '<b>Is this their share of something you paid for?</b></p>'
     + (askBack === q.key
-        ? '<div class="askrow"><span class="asklbl">Paying you back for what?</span>'
-          + catSelect("", "back:" + q.key)
-          + '<button class="btn-q" id="askCancel">Never mind</button></div>'
+        ? '<div class="askrow"><span class="asklbl">Their share of what?</span>'
+          + catSelect("", "back:" + q.key, 'Not sure \u2014 just take it off my spending')
+          + '<button class="btn-q" id="askCancel">Back</button></div>'
           + '<p class="note">Their share comes off that category, the way a shop\u2019s '
           + 'refund does &mdash; so the month shows what you actually paid, not what '
           + 'went through your account.</p>'
         : '<div class="askrow">'
-          + '<button class="btn" id="askBack">Paying me back</button>'
-          + '<button class="btn-q" id="askIncome">It is income</button>'
-          + '<button class="btn-q" id="askNo">Leave it as a transfer</button></div>'
-          + '<p class="note">Answering sets it for every month, back and forward. '
-          + 'It is a rule you can change later like any other.</p>')
+          + '<button class="btn" id="askBack">Yes</button>'
+          + '<button class="btn-q" id="askNotMine">No</button>'
+          + '<button class="btn-q" id="askNo">Ask me later</button></div>'
+          + '<p class="note"><b>Yes</b> and their share comes off what you spent. '
+          + '<b>No</b> and nothing changes &mdash; money you earned, a gift, or your '
+          + 'own money arriving from somewhere else is not spending of yours either '
+          + 'way. Either answer holds for every month, back and forward.</p>')
     + '</div>';
 }
 
@@ -2430,7 +2453,7 @@ function render(){
    thing worth acting on: the merchants the rules have never seen before. */
 function showReceipt(added, dupes, files, notes){
   var seen = {}, n = 0, worth = 0, i;
-  for(i=0;i<V.length;i++) if(V[i].cat === "uncategorized"){
+  for(i=0;i<V.length;i++) if(V[i].cat === "uncategorized" && !db.paidBack[V[i].key]){
     worth += Math.abs(V[i].amt);
     if(!seen[V[i].key]){ seen[V[i].key] = 1; n++; }
   }
@@ -2455,9 +2478,13 @@ $("ask").addEventListener("click", function(e){
   if(!q) return;
   if(id === "askBack"){ askBack = q.key; renderAsk(); return; }
   if(id === "askCancel"){ askBack = ""; renderAsk(); return; }
-  if(id === "askIncome"){
-    db.rules[q.key] = "income"; askBack = "";
-    save(); render(); toast("Set to Income \u2014 every month, back and forward.");
+  if(id === "askNotMine"){
+    /* Nothing to change: external already sits in MONEY_IN, so it never
+       touched what you spent. The answer is recorded so you are not asked
+       again, and that is the whole of it. */
+    db.asked[q.key] = 1; askBack = "";
+    save(); renderAsk();
+    toast("Left alone \u2014 it does not count towards what you spent.");
     return;
   }
   if(id === "askNo"){ db.asked[q.key] = 1; askBack = ""; save(); renderAsk(); }
@@ -2782,7 +2809,11 @@ document.addEventListener("change", function(e){
      mark it would be filed as spending, which is the opposite of what happened. */
   if(id.indexOf("back:") === 0){
     if(!val) return;
-    if(val === "__new"){
+    /* Comes off the total, lands in no bar, and stops being nagged about as
+       something still to tag — it has been answered, just not itemised. */
+    var vague = (val === "__any");
+    if(vague) val = "uncategorized";
+    else if(val === "__new"){
       val = addCategory(window.prompt(
         "Name your category \u2014 electronics, childcare, hobbies, whatever you spend on:", ""));
       if(!val){ renderAsk(); return; }
@@ -2792,7 +2823,9 @@ document.addEventListener("change", function(e){
     db.paidBack[bkey] = 1;
     askBack = "";
     save(); render();
-    toast("Comes off " + labelOf(val) + " \u2014 every month, back and forward.");
+    toast(vague
+      ? "Comes off what you spent \u2014 every month, back and forward."
+      : "Comes off " + labelOf(val) + " \u2014 every month, back and forward.");
     return;
   }
 
