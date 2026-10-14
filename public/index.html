@@ -303,6 +303,27 @@
   window.addEventListener('resize', resize);
   resize();
 
+  /* The one thing on the page that answers back. The pointer pulls the
+     composition toward it, and each layer follows by a different amount, so
+     the shapes sit in front of the constellation rather than on it. Eased
+     rather than tracked, so it drifts instead of twitching. */
+  var PARALLAX = 26, px = 0, py = 0, tx = 0, ty = 0;
+
+  function aim(e) {
+    var rect = canvas.parentElement.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    tx = ((e.clientX - rect.left) / rect.width  - 0.5) * 2 * PARALLAX;
+    ty = ((e.clientY - rect.top)  / rect.height - 0.5) * 2 * PARALLAX;
+  }
+  function release() { tx = 0; ty = 0; }
+
+  if (!reduceMotion && window.matchMedia &&
+      window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    window.addEventListener('pointermove', aim, { passive: true });
+    window.addEventListener('pointerleave', release);
+    window.addEventListener('blur', release);
+  }
+
   function rnd(a, b) { return a + Math.random() * (b - a); }
   function hexA(hex, a) {
     var n = parseInt(hex.slice(1), 16);
@@ -474,14 +495,25 @@
     }
   }
 
+  function layer(fn, t, depth) {
+    ctx.save();
+    ctx.translate(px * depth, py * depth);
+    fn(t);
+    ctx.restore();
+  }
+
   function draw(t) {
+    /* ease toward the pointer: a tenth of the remaining distance each frame */
+    px += (tx - px) * 0.06;
+    py += (ty - py) * 0.06;
+
     var g = ctx.createRadialGradient(CX, CY, 0, CX, CY, Math.max(W, H) * 0.7);
     g.addColorStop(0, CFG.bgInner); g.addColorStop(1, CFG.bgOuter);
     ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
 
-    drawWeb(t);     /* back: faint constellation */
-    drawStar(t);    /* middle: breathing star */
-    drawShapes(t);  /* front: the two morphing geometric shapes */
+    layer(drawWeb,    t, 0.28);   /* back: faint constellation */
+    layer(drawStar,   t, 0.60);   /* middle: breathing star */
+    layer(drawShapes, t, 1.00);   /* front: the two morphing geometric shapes */
 
     var v = ctx.createRadialGradient(CX, CY, Math.min(W, H) * 0.35, CX, CY, Math.max(W, H) * 0.75);
     v.addColorStop(0, 'rgba(0,0,0,0)');

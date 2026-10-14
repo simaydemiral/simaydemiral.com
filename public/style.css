@@ -145,8 +145,11 @@ nav ul a:hover { color: var(--ink); border-bottom-color: var(--accent); }
 }
 
 h1 {
-  font: 300 clamp(2.9rem, 7.2vw, 5.1rem)/1.02 var(--serif);
-  letter-spacing: -0.015em;
+  /* Scale is the cheapest confidence a page has. The ceiling was doing the
+     restraining, not the base: on a wide screen the name sat at 5.1rem in a
+     column that could carry half as much again. */
+  font: 300 clamp(3.1rem, 8.4vw, 7rem)/0.98 var(--serif);
+  letter-spacing: -0.028em;
   color: var(--ink);
   margin: 0 0 1.5rem;
 }
@@ -158,12 +161,16 @@ h1 em {
 .lede-top {
   display: block;
   margin-bottom: 0.7rem;
+  /* The one line that says who she is now reads as a line, not as the first
+     sentence of the paragraph under it. */
+  font-size: 1.12rem;
+  color: var(--ink);
 }
 
 .lede {
   font-size: 1rem;
   line-height: 1.75;
-  max-width: 30rem;
+  max-width: 32rem;
   margin: 0 0 2rem;
 }
 
@@ -244,8 +251,8 @@ h1 em {
 }
 
 .item h3 {
-  font: 400 clamp(1.45rem, 2.6vw, 1.85rem)/1.2 var(--serif);
-  letter-spacing: -0.008em;
+  font: 400 clamp(1.7rem, 3.2vw, 2.4rem)/1.15 var(--serif);
+  letter-spacing: -0.016em;
   color: var(--ink);
   margin: 0 0 0.45rem;
   max-width: 32rem;
