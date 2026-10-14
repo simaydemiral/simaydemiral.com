@@ -3133,8 +3133,22 @@ document.addEventListener("change", function(e){
      every charge from that merchant, backwards and forwards, and say so only
      in a toast that was gone in under three seconds \u2014 so one withdrawal that
      was rent became twelve months of rent. */
-  for(var i=0;i<db.txns.length;i++) if(db.txns[i].id === id){ key = normMerchant(db.txns[i].desc); break; }
+  var tx = null;
+  for(var i=0;i<db.txns.length;i++) if(db.txns[i].id === id){ tx = db.txns[i]; key = normMerchant(tx.desc); break; }
   if(!key) return;
+
+  /* Choosing what the merchant already says is not an exception to it. Storing
+     it as one left the row marked as changed, and offering to apply it to the
+     others would have offered to change nothing. */
+  if(val === categorize(key, tx.amt).c){
+    var had = !!db.catTx[id];
+    delete db.catTx[id];
+    catOffer = null;
+    save(); render(); redrawLists();
+    if(had) toast("Back to the category this merchant uses.");
+    return;
+  }
+
   db.catTx[id] = val;
   catOffer = { id:id, key:key, cat:val };
   save(); render(); redrawLists();
