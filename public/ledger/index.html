@@ -307,6 +307,11 @@ input[type=search]{min-width:200px}
 .btn-help:hover{color:var(--ink);border-color:var(--ink-2)}
 .btn-help[aria-expanded="true"]{background:var(--ink);color:var(--ground);border-color:var(--ink)}
 .helprow td{padding-top:0;border-top:none}
+.offer{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:12.5px;
+  line-height:1.5;color:var(--ink-2);margin:2px 0 10px;padding:10px 12px;
+  background:var(--brand-wash);border-radius:8px;white-space:normal;text-align:left;
+  font-weight:400}
+.offer span{flex:1 1 20rem}
 .helpnote{font-size:12.5px;line-height:1.55;color:var(--ink-2);max-width:46rem;
   margin:2px 0 10px;padding:10px 12px;background:var(--sunken);border-radius:8px;
   white-space:normal;text-align:left;font-weight:400}
@@ -566,7 +571,7 @@ function median(a){
    STORE
    ============================================================ */
 var KEY = "spend.v1";
-var db = { v:1, idv:2, txns:[], rules:{}, files:[], pending:[], dupsOk:{}, cats:[], splits:{}, asked:{}, paidBack:{}, unspent:{}, paidBackTx:{} };
+var db = { v:1, idv:2, txns:[], rules:{}, files:[], pending:[], dupsOk:{}, cats:[], splits:{}, asked:{}, paidBack:{}, unspent:{}, paidBackTx:{}, catTx:{} };
 
 /* Ids used to include the account, which came from the filename, so the same
    row arriving as stmt.csv and stmt (2).csv counted twice. Rows stored under
@@ -601,7 +606,7 @@ function load(){
     var raw = localStorage.getItem(KEY);
     if(raw){ var d = JSON.parse(raw); if(d && d.txns){ db = d; db.rules = db.rules||{}; db.files = db.files||[]; db.pending = db.pending||[]; db.dupsOk = db.dupsOk||{}; db.cats = db.cats||[]; db.splits = db.splits||{}; db.asked = db.asked||{};
         db.paidBack = db.paidBack||{}; db.unspent = db.unspent||{};
-        db.paidBackTx = db.paidBackTx||{}; } }
+        db.paidBackTx = db.paidBackTx||{}; db.catTx = db.catTx||{}; } }
   }catch(e){ /* corrupt or blocked storage — start empty rather than break */ }
 }
 function save(){
@@ -1235,6 +1240,10 @@ function view(){
        and retagging the merchant would have moved every Venmo you ever had. */
     var one = db.paidBackTx[t.id];
     if(one && !part){ cat = one; why = "you said this was paying you back"; }
+    /* Said about this row and nothing else. A merchant rule is the right tool
+       for a shop; it is the wrong tool for a cash machine, which is not a
+       merchant but a hole that different money goes through. */
+    else if(db.catTx[t.id] && !part){ cat = db.catTx[t.id]; why = "you set this one"; }
     var nets = !MONEY_IN[cat] || !!db.paidBack[key] || !!db.unspent[t.id] || !!one;
     return { id:id, date:t.date, month:t.date.slice(0,7), desc:t.desc, key:key,
              merch:merch, amt:amt, acct:t.acct, cat:cat, why:why, part:part,
@@ -1966,6 +1975,7 @@ function renderTxns(){
          transaction, not per merchant, because the same ATM does both. */
       + creditCtl(t)
       + '</td></tr>'
+      + catOfferRow(t.id, 6)
       + helpRow(t.id, 6);
     if(splitOpen && t.id === splitOpen) h += splitEditor(t.id);
   }
@@ -2890,6 +2900,20 @@ document.addEventListener("click", function(e){
   }
   if(b.getAttribute && b.getAttribute("data-pbcancel")){ pbOpen = ""; redrawLists(); return; }
 
+  if(b.id === "catOne"){ catOffer = null; redrawLists(); return; }
+  if(b.id === "catAll"){
+    var off = catOffer;
+    catOffer = null;
+    if(off){
+      db.rules[off.key] = off.cat;
+      for(var oi=0;oi<V.length;oi++) if(V[oi].key === off.key) delete db.catTx[V[oi].id];
+      save(); render(); redrawLists();
+      toast('"' + (MERCH_LABEL[off.key] || titleCase(off.key)) + '" is now '
+        + labelOf(off.cat) + ' \u2014 everywhere.');
+    }
+    return;
+  }
+
   if(b.getAttribute && b.getAttribute("data-help")){
     var hk = b.getAttribute("data-help");
     helpOpen = (helpOpen === hk) ? "" : hk;
@@ -3065,16 +3089,50 @@ document.addEventListener("change", function(e){
     if(!val){ render(); return; }      /* cancelled: put the old value back */
   }
 
-  if(id.indexOf("key:") === 0) key = id.slice(4);
-  else {
-    for(var i=0;i<db.txns.length;i++) if(db.txns[i].id === id){ key = normMerchant(db.txns[i].desc); break; }
+  /* From the Merchants tab, where the row IS the merchant: everywhere, as
+     before. That screen is about the merchant, and nothing else would make
+     sense on it. */
+  if(id.indexOf("key:") === 0){
+    key = id.slice(4);
+    db.rules[key] = val;
+    /* a rule for the merchant outranks nothing: clear the one-offs it covers,
+       or they would quietly survive the thing meant to replace them */
+    for(var ci=0;ci<V.length;ci++) if(V[ci].key === key) delete db.catTx[V[ci].id];
+    save(); render(); renderMerch();
+    toast('"' + (MERCH_LABEL[key] || titleCase(key)) + '" is now ' + labelOf(val)
+      + ' \u2014 everywhere.');
+    return;
   }
+
+  /* From a transaction row: this transaction. Changing a row used to rewrite
+     every charge from that merchant, backwards and forwards, and say so only
+     in a toast that was gone in under three seconds \u2014 so one withdrawal that
+     was rent became twelve months of rent. */
+  for(var i=0;i<db.txns.length;i++) if(db.txns[i].id === id){ key = normMerchant(db.txns[i].desc); break; }
   if(!key) return;
-  db.rules[key] = val;
-  save();
-  render();
-  toast('"' + titleCase(key) + '" is now ' + labelOf(val) + ' — everywhere.');
+  db.catTx[id] = val;
+  catOffer = { id:id, key:key, cat:val };
+  save(); render(); redrawLists();
 });
+
+/* How many other transactions the merchant rule would reach, so the size of
+   the thing is on screen before it is done rather than after. */
+var catOffer = null;
+
+function catOfferRow(id, cols){
+  if(!catOffer || catOffer.id !== id) return "";
+  var n = 0, i;
+  for(i=0;i<V.length;i++)
+    if(V[i].key === catOffer.key && V[i].id !== id && !V[i].part) n++;
+  if(!n){ return ""; }
+  return '<tr class="helprow"><td colspan="'+cols+'"><div class="offer">'
+    + '<span>Just this one, for now. Also change the other <b>' + n + '</b> '
+    + esc(MERCH_LABEL[catOffer.key] || titleCase(catOffer.key)) + ' transaction'
+    + (n === 1 ? '' : 's') + ', and everything that arrives later?</span>'
+    + '<button class="btn-q" id="catAll">Change all ' + (n+1) + '</button>'
+    + '<button class="btn-q" id="catOne">Keep it to this one</button>'
+    + '</div></td></tr>';
+}
 
 $("pAdd").addEventListener("click", function(){
   var d = $("pDate").value, m = $("pMerch").value.trim(), a = parseAmount($("pAmt").value);
@@ -3192,7 +3250,7 @@ $("bakfile").addEventListener("change", function(){
     db = { v:1, idv:d.idv, txns:d.txns, rules:d.rules||{}, files:d.files||[],
            pending:d.pending||[], dupsOk:d.dupsOk||{}, cats:d.cats||[],
            splits:d.splits||{}, asked:d.asked||{}, paidBack:d.paidBack||{},
-           unspent:d.unspent||{}, paidBackTx:d.paidBackTx||{} };
+           unspent:d.unspent||{}, paidBackTx:d.paidBackTx||{}, catTx:d.catTx||{} };
     migrateIds();
     save();
     curMonth = "";
@@ -3204,7 +3262,7 @@ $("bakfile").addEventListener("change", function(){
 
 $("reset").addEventListener("click", function(){
   if(!confirm("Delete every transaction and rule stored in this browser?")) return;
-  db = { v:1, idv:2, txns:[], rules:{}, files:[], pending:[], dupsOk:{}, cats:[], splits:{}, asked:{}, paidBack:{}, unspent:{}, paidBackTx:{} };
+  db = { v:1, idv:2, txns:[], rules:{}, files:[], pending:[], dupsOk:{}, cats:[], splits:{}, asked:{}, paidBack:{}, unspent:{}, paidBackTx:{}, catTx:{} };
   try{ localStorage.removeItem(KEY); }catch(e){}
   curMonth = "";
   render();
