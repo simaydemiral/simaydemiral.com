@@ -2361,12 +2361,19 @@ function renderMerch(){
     ? "Hide rent & tuition" : "Show rent & tuition";
   for(i=0;i<V.length;i++){
     var t = V[i];
-    if(NOT_SPEND[t.cat]) continue;
+    /* The merchant's own category, which is the rule — not the category of
+       whichever of its transactions happened to be read first. One withdrawal
+       changed by hand made this whole row read Housing while the saved rule
+       still said Cash, so the screen you go to in order to check the default
+       was the screen misreporting it. */
+    var rc = t.part ? t.cat : categorize(t.key, t.amt).c;
+    if(NOT_SPEND[rc]) continue;
     /* The month card says "excl. rent & tuition" and this list did not, so its
        top two rows were the two things you can do nothing about. */
-    if(!merchFixed && FIXED[t.cat]) continue;
-    if(!m[t.key]) m[t.key] = { n:0, sum:0, merch:t.merch, cat:t.cat };
+    if(!merchFixed && FIXED[rc]) continue;
+    if(!m[t.key]) m[t.key] = { n:0, sum:0, own:0, merch:t.merch, cat:rc };
     m[t.key].n++; m[t.key].sum += t.spend - (t.nets ? t.refund : 0);
+    if(t.cat !== rc) m[t.key].own++;        /* changed on their own */
   }
   var rows = [];
   for(k in m) if(m[k].sum > 0) rows.push([k, m[k]]);
@@ -2379,7 +2386,11 @@ function renderMerch(){
   for(i=0;i<Math.min(rows.length,200);i++){
     var r = rows[i][1];
     h += '<tr><td class="t-merch">'+esc(r.merch)+'</td>'
-      + '<td>'+catSelect(r.cat, "key:"+rows[i][0])+'</td>'
+      + '<td>'+catSelect(r.cat, "key:"+rows[i][0])
+      + (r.own ? '<div class="note" style="margin-top:4px">' + r.own
+          + (r.own === 1 ? ' is set on its own' : ' are set on their own')
+          + '</div>' : '')
+      + '</td>'
       + '<td class="t-acct">'+r.n+'</td>'
       + '<td class="t-amt">'+esc(money(r.sum))+'</td></tr>';
   }
