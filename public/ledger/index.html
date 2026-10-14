@@ -610,6 +610,23 @@ function migrateIds(){
   return n;
 }
 
+/* An override saying the same thing as the merchant's own category is not an
+   override. Earlier versions wrote one whenever you set a row back to its
+   default, so the row stayed marked as changed for good — and preventing new
+   ones does nothing about the ones already saved. */
+function pruneOverrides(){
+  var n = 0, i;
+  for(i=0;i<db.txns.length;i++){
+    var t = db.txns[i];
+    if(!db.catTx[t.id]) continue;
+    if(db.catTx[t.id] === categorize(normMerchant(t.desc), t.amt).c){
+      delete db.catTx[t.id]; n++;
+    }
+  }
+  if(n) save();
+  return n;
+}
+
 function load(){
   try{
     var raw = localStorage.getItem(KEY);
@@ -3329,6 +3346,7 @@ window.SPEND = { parseCSV:parseCSV, detect:detect, normMerchant:normMerchant,
 
 load();
 migrateIds();
+pruneOverrides();
 render();
 })();
 </script>
