@@ -260,6 +260,12 @@ select.cat option[value="__new"]{color:var(--brand);font-weight:600}
 .ok{color:var(--go)} .bad{color:var(--stop)} .warnc{color:var(--warn)}
 .empty{color:var(--muted);font-size:13.5px;padding:18px 0;text-align:center}
 .filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+/* What the filters are currently showing, where the filters are — at the foot
+   of 259 rows it was a number you had to go looking for. */
+.txnbar{display:flex;gap:16px;align-items:baseline;flex-wrap:wrap;margin:-4px 0 12px}
+.txnbar p{margin:0}
+#txnSum{margin-left:auto;white-space:nowrap}
+#txnSum b{color:var(--ink-2);font-weight:600}
 input[type=search],select.f{font:inherit;font-size:13px;padding:6px 9px;border:1px solid var(--line);
   border-radius:8px;background:var(--surface);color:var(--ink)}
 input[type=search]{min-width:200px}
@@ -477,7 +483,10 @@ input[type=search]{min-width:200px}
         </div>
         <button class="btn-q" id="exp">Export CSV</button>
       </div>
-      <p class="note" id="fdirNote" hidden></p>
+      <div class="txnbar">
+        <p class="note" id="fdirNote" hidden></p>
+        <p class="note" id="txnSum"></p>
+      </div>
       <div class="card" style="padding:4px 10px"><div class="tscroll" id="tbl"></div></div>
     </section>
 
@@ -1977,6 +1986,16 @@ function renderTxns(){
   var list = txnList();
   /* The rule behind the option has never been on screen, so the label had to
      carry it alone and could not. It is shown exactly when it is in use. */
+  /* Recomputed on every filter change, because it is only worth anything if
+     it is the total of what is on screen right now. */
+  var tOut = 0, tIn = 0, si;
+  for(si=0;si<list.length;si++){
+    if(list[si].amt < 0) tOut -= list[si].amt; else tIn += list[si].amt;
+  }
+  $("txnSum").innerHTML = list.length + " transaction" + (list.length === 1 ? "" : "s")
+    + (tOut ? ' &middot; <b>' + esc(money2(tOut)) + '</b> out' : '')
+    + (tIn  ? ' &middot; <b>' + esc(money2(tIn))  + '</b> in'  : '');
+
   var fn = $("fdirNote");
   if($("fDir").value === "spend"){
     fn.textContent = "Everything going out, plus refunds from shops. Not money "
@@ -2015,15 +2034,9 @@ function renderTxns(){
     if(splitOpen && t.id === splitOpen) h += splitEditor(t.id);
   }
   h += '</tbody></table>';
-  /* What the rows add up to. Every box on the month is a claim, and until now
-     the only way to check one was to add the rows up by hand. */
-  var tOut = 0, tIn = 0;
-  for(i=0;i<list.length;i++){ if(list[i].amt < 0) tOut -= list[i].amt; else tIn += list[i].amt; }
-  h += '<p class="note" style="padding:8px 2px 10px">' + list.length + ' transaction'
-    + (list.length === 1 ? "" : "s")
-    + (tOut ? ' &middot; ' + esc(money2(tOut)) + ' out' : '')
-    + (tIn  ? ' &middot; ' + esc(money2(tIn))  + ' in'  : '')
-    + (list.length > 500 ? ' &middot; showing the first 500' : '') + '</p>';
+  if(list.length > 500)
+    h += '<p class="note" style="padding:8px 2px 10px">The first 500 of '
+      + list.length + '. The total above counts them all.</p>';
   $("tbl").innerHTML = h;
   var box = $("tbl").querySelector(".splitbox");
   if(box) splitTally(box);          /* the running total starts correct */
