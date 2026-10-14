@@ -330,6 +330,40 @@ input[type=search]{min-width:200px}
 .helpnote{font-size:12.5px;line-height:1.55;color:var(--ink-2);max-width:46rem;
   margin:2px 0 10px;padding:10px 12px;background:var(--sunken);border-radius:8px;
   white-space:normal;text-align:left;font-weight:400}
+/* ------------------------------------------------------------------
+   The demo plays itself: three bank exports waiting at the side, a
+   cursor that picks one up and drops it on the zone, and then the real
+   import running on it. Nothing here exists outside ?demo=1.
+   ------------------------------------------------------------------ */
+#stage{position:fixed;inset:0;pointer-events:none;z-index:60}
+.stage-file{
+  position:absolute;width:188px;padding:12px 14px;border-radius:10px;
+  background:var(--surface);border:1px solid var(--line);
+  box-shadow:0 10px 30px rgba(0,0,0,.35);
+  font:500 12.5px/1.35 var(--f-body);color:var(--ink);
+  display:flex;gap:10px;align-items:flex-start;
+  transition:transform .85s cubic-bezier(.4,.05,.2,1),opacity .4s ease;
+  will-change:transform}
+.stage-file .sf-x{font:600 10px/1 var(--f-mono);letter-spacing:.06em;
+  color:var(--brand);border:1px solid var(--brand);border-radius:4px;
+  padding:4px 5px;flex:none;margin-top:1px}
+.stage-file .sf-n{display:block}
+.stage-file .sf-m{display:block;color:var(--muted);font-weight:400;font-size:11px;
+  margin-top:3px}
+.stage-file.is-held{box-shadow:0 18px 44px rgba(0,0,0,.5);transform:scale(.97)}
+.stage-file.is-gone{opacity:0;transition:opacity .25s ease}
+#stageCursor{position:absolute;width:22px;height:22px;margin:-2px 0 0 -2px;
+  transition:transform .85s cubic-bezier(.4,.05,.2,1),opacity .35s ease;
+  opacity:0;will-change:transform}
+#stageCursor svg{display:block;filter:drop-shadow(0 2px 4px rgba(0,0,0,.6))}
+#stageReplay{position:absolute;right:16px;bottom:14px;pointer-events:auto;
+  font:500 11.5px/1 var(--f-body);color:var(--muted);background:var(--surface);
+  border:1px solid var(--line);border-radius:999px;padding:7px 12px;cursor:pointer;
+  opacity:0;transition:opacity .4s ease}
+#stageReplay.on{opacity:1}
+#stageReplay:hover{color:var(--ink);border-color:var(--ink-2)}
+:root[data-demo] #drop{transition:border-color .3s ease,background .3s ease}
+
 /* Embedded on another page, the controls that act on stored data have nothing
    to act on and only raise questions. */
 :root[data-demo] #backup, :root[data-demo] #restore, :root[data-demo] #reset,
@@ -3519,16 +3553,128 @@ function demoData(){
   curMonth = "2026-09";
 }
 
+/* The story the page cannot tell in prose: a file from your bank goes in, and
+   the numbers come out. It plays once, on the real import path, and leaves the
+   dashboard on screen. */
+function demoStage(){
+  var files = [
+    ["CSV", "September2026_4471.csv", "Card \u00b7 86 rows"],
+    ["CSV", "stmt.csv",               "Checking \u00b7 41 rows"],
+    ["PDF", "statement-aug.pdf",      "Not a CSV"]
+  ];
+  var stage = document.createElement("div");
+  stage.id = "stage";
+  stage.setAttribute("aria-hidden", "true");
+  var html = "", i;
+  for(i=0;i<files.length;i++)
+    html += '<div class="stage-file" data-f="'+i+'"><span class="sf-x">'+files[i][0]
+          + '</span><span><span class="sf-n">'+esc(files[i][1])+'</span>'
+          + '<span class="sf-m">'+esc(files[i][2])+'</span></span></div>';
+  html += '<div id="stageCursor"><svg viewBox="0 0 24 24" width="22" height="22">'
+        + '<path d="M5 2 L5 19 L9.5 14.8 L12.3 21 L15 19.7 L12.2 13.7 L18.4 13.4 Z" '
+        + 'fill="#f5ebdd" stroke="#171210" stroke-width="1.2" stroke-linejoin="round"/></svg></div>'
+        + '<button id="stageReplay" type="button">Play again</button>';
+  stage.innerHTML = html;
+  document.body.appendChild(stage);
+
+  var cur = $("stageCursor"), cards = stage.querySelectorAll(".stage-file");
+  var replay = $("stageReplay"), timers = [];
+  function at(el, x, y){ el.style.transform = "translate(" + x + "px," + y + "px)"; }
+  function after(ms, fn){ timers.push(setTimeout(fn, ms)); }
+  function clearAll(){ for(var t=0;t<timers.length;t++) clearTimeout(timers[t]); timers = []; }
+
+  function layout(){
+    var w = window.innerWidth, h = window.innerHeight;
+    var x = Math.max(w - 232, w * 0.62);
+    for(var k=0;k<cards.length;k++){
+      cards[k].dataset.hx = x; cards[k].dataset.hy = 150 + k * 86;
+      at(cards[k], x, 150 + k * 86);
+      cards[k].classList.remove("is-gone", "is-held");
+    }
+    return { w:w, h:h };
+  }
+
+  function play(){
+    clearAll();
+    replay.classList.remove("on");
+    db.txns = []; db.files = []; curMonth = "";
+    render();
+    var geo = layout();
+    var card = cards[0];
+    var drop = $("drop").getBoundingClientRect();
+    var tx = drop.left + drop.width / 2 - 94;
+    var ty = drop.top + drop.height / 2 - 30;
+
+    cur.style.opacity = "0";
+    at(cur, geo.w + 40, geo.h * 0.42);
+
+    after(500, function(){
+      cur.style.opacity = "1";
+      at(cur, +card.dataset.hx + 150, +card.dataset.hy + 30);
+    });
+    after(1500, function(){ card.classList.add("is-held"); });
+    after(1750, function(){
+      at(cur, tx + 150, ty + 30);
+      at(card, tx, ty);
+      $("drop").classList.add("over");
+    });
+    after(2600, function(){
+      /* the rest of the pile goes with it: once the numbers are up, three
+         cards floating over them are just litter */
+      for(var k=1;k<cards.length;k++){
+        at(cards[k], +cards[k].dataset.hx + 90, +cards[k].dataset.hy);
+        cards[k].classList.add("is-gone");
+      }
+    });
+    after(2750, function(){
+      card.classList.remove("is-held");
+      card.classList.add("is-gone");
+      $("drop").classList.remove("over");
+      demoData();
+      render();
+      $("receipt").innerHTML = "";
+      $("covers").hidden = true;
+      window.scrollTo(0, 0);
+    });
+    after(3100, function(){ cur.style.opacity = "0"; });
+    after(4200, function(){ replay.classList.add("on"); });
+  }
+
+  replay.addEventListener("click", play);
+  window.addEventListener("resize", function(){ if(!db.txns.length) layout(); });
+
+  /* Anyone who asked for less movement gets the answer without the journey. */
+  if(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+    demoData(); render(); $("receipt").innerHTML = ""; $("covers").hidden = true;
+    stage.style.display = "none";
+    return;
+  }
+  /* Embedded, the page loads before it is on screen, so playing on load means
+     the visitor scrolls down to the answer and misses the question. The parent
+     says when it is actually visible; the timeout is there in case it never
+     does. */
+  var started = false;
+  function once(){ if(started) return; started = true; play(); }
+  if(window.parent !== window){
+    window.addEventListener("message", function(e){
+      if(e && e.data === "ledger:play") once();
+    });
+    after(6000, once);
+  } else {
+    after(650, once);
+  }
+}
+
 if(DEMO){
   document.documentElement.setAttribute("data-demo", "1");
-  demoData();
+  render();
+  demoStage();
 } else {
   load();
   migrateIds();
   pruneOverrides();
+  render();
 }
-render();
-if(DEMO){ $("receipt").innerHTML = ""; $("covers").hidden = true; }
 })();
 </script>
 </body>

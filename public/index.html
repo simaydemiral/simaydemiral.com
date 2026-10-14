@@ -267,6 +267,42 @@
 </div><!-- /.sheet -->
 
 <script>
+/* The embedded tool is rendered at a fixed desktop width and scaled to fit, so
+   the layout a visitor sees is the real one rather than the cramped column a
+   narrow iframe would lay out. The scale has to follow the frame, or it leaves
+   a band of empty page beside it. */
+(function () {
+  var frame = document.querySelector('.showcase-frame');
+  if (!frame) return;
+  var DESIGN_W = 1340;
+  function fit() {
+    var w = frame.getBoundingClientRect().width;
+    if (w) frame.style.setProperty('--showcase-scale', (w / DESIGN_W).toFixed(4));
+  }
+  fit();
+  window.addEventListener('resize', fit);
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(frame);
+
+  /* Tell it to play when it is actually on screen, so the drag is not over
+     before the reader arrives. */
+  var iframe = frame.querySelector('iframe'), sent = false;
+  function cue() {
+    if (sent || !iframe.contentWindow) return;
+    sent = true;
+    iframe.contentWindow.postMessage('ledger:play', window.location.origin);
+  }
+  if (window.IntersectionObserver) {
+    new IntersectionObserver(function (entries) {
+      for (var i = 0; i < entries.length; i++)
+        if (entries[i].isIntersecting && entries[i].intersectionRatio > 0.35) {
+          iframe.complete || iframe.contentDocument ? cue()
+            : iframe.addEventListener('load', cue, { once: true });
+        }
+    }, { threshold: [0, 0.35, 0.6] }).observe(frame);
+  } else {
+    iframe.addEventListener('load', cue, { once: true });
+  }
+})();
 (function () {
   var canvas = document.getElementById('sdHeroCanvas');
   if (!canvas) return;
