@@ -430,7 +430,7 @@ input[type=search]{min-width:200px}
       <button class="tab" role="tab" aria-selected="true" data-tab="month">This month</button>
       <button class="tab" role="tab" aria-selected="false" data-tab="txns">Transactions <span class="tab-n" id="nTx">0</span></button>
       <button class="tab" role="tab" aria-selected="false" data-tab="pend">Pending &amp; refunds <span class="tab-n" id="nPe">0</span></button>
-      <button class="tab" role="tab" aria-selected="false" data-tab="subs">Subscriptions <span class="tab-n" id="nSu">0</span></button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="subs">Bills <span class="tab-n" id="nSu">0</span></button>
       <button class="tab" role="tab" aria-selected="false" data-tab="merch">Merchants <span class="tab-n" id="nMe">0</span></button>
       <button class="tab" role="tab" aria-selected="false" data-tab="files">Files <span class="tab-n" id="nFi">0</span></button>
     </nav>
@@ -1586,6 +1586,19 @@ function renderTrend(){
 
 function renderMonth(){
   var list = V.filter(function(t){ return t.month === curMonth; });
+
+  /* The statement stops where it stops. If the month on screen is the one it
+     stops inside, the figures are a part month and every comparison against a
+     whole one flatters it: ten days of October read as a 73% collapse in
+     spending, on the first number of the page, on every visit, because the
+     picker opens here. The page cannot know what you spent on the 11th, and
+     says so rather than pretending the month is over. */
+  var covEnd = V.length ? V[0].date : "";
+  var daysIn = curMonth
+    ? new Date(+curMonth.slice(0,4), +curMonth.slice(5,7), 0).getDate() : 31;
+  var daysHave = covEnd.slice(0,7) === curMonth ? +covEnd.slice(8,10) : daysIn;
+  var partial = daysHave < daysIn;
+  var soFar = partial ? daysHave + " of " + daysIn + " days" : "";
   var total = spendOf(list, "day");
   var fixed = spendOf(list, "fixed");
   var allIn = total + fixed;
@@ -1632,7 +1645,8 @@ function renderMonth(){
     /* money0s, not money, so the row reads at one precision: "$80.00 Cash
        withdrawn" beside "$1,182 Day-to-day" made the small number look more
        exact than the big one. The cents are in the table underneath. */
-      meter(money0s(total), "Day-to-day in " + monthName(curMonth).split(" ")[0], "", "day")
+      meter(money0s(total), "Day-to-day in " + monthName(curMonth).split(" ")[0]
+            + (partial ? " so far" : ""), "", "day")
     + meterIf(fixed, money0s(fixed), "Fixed commitments (e.g., rent, tuition fee)", "", "fixed")
     + meterIf(refunds, "+" + money0(refunds), "Refunded back", "is-go", "refund")
     + meterIf(cashOut, money0(cashOut),
@@ -1642,6 +1656,9 @@ function renderMonth(){
        usual, it is a different kind of month. */
     + (!list.length
         ? meter("\u2014", "Nothing imported for " + monthName(curMonth).split(" ")[0], "")
+        : partial
+        ? meter(daysHave + "/" + daysIn,
+                monthName(curMonth).split(" ")[0] + " is not over yet", "")
         : med && total < 0
         ? meter(money0s(total), "More came back than went out", "")
         : meter(med ? (total>med?"+":"") + pct(total-med, med) + "%" : "—",
@@ -1675,6 +1692,10 @@ function renderMonth(){
        statement for is worse than saying nothing. */
     add("\u2014", "", "Nothing in " + shortMonth,
         "No transactions were imported for this month");
+  } else if(partial){
+    add(money(total), "", "Spent in " + shortMonth + " so far",
+        list.length + " transactions over " + esc(soFar)
+        + " &middot; too early to compare this with a whole month");
   } else if(!hist.length){
     add(money(total), "", "Spent in " + shortMonth,
         list.length + " transactions &middot; first month, nothing to compare yet");
@@ -1686,13 +1707,15 @@ function renderMonth(){
          outweighed spending. A percentage below zero is not a smaller number,
          it is a different kind of month. */
       add(money(total), "", "More came back than went out",
-          "against a median of " + esc(money(med)) + " over " + hist.length
-          + " month" + (hist.length === 1 ? "" : "s"));
+          (hist.length === 1 ? "against " + esc(money(med)) + " last month"
+                             : "against a median of " + esc(money(med)) + " over "
+                               + hist.length + " months"));
     else
       add((dp > 0 ? "+" : "") + dp + "%", near ? "" : (dp > 0 ? "warn" : "go"),
           near ? "About your usual" : (dp > 0 ? "Above your usual" : "Below your usual"),
-          esc(money(total)) + " this month &middot; " + esc(money(med)) + " median of "
-          + hist.length + " month" + (hist.length === 1 ? "" : "s"));
+          esc(money(total)) + " this month &middot; " + esc(money(med))
+          + (hist.length === 1 ? " last month"
+                               : " median of " + hist.length + " months"));
   }
 
   if(fixed > 0){
@@ -1801,7 +1824,7 @@ function renderMonth(){
   if(cats.length && loose > 0.5)
     catsHtml += '<p class="note" style="margin:12px 0 0;padding-top:10px;'
       + 'border-top:1px solid var(--line-soft)">' + esc(money(loose))
-      + ' came back without a category &mdash; it is off the '
+      + ' came back without a category &mdash; already subtracted from the '
       + esc(money(total)) + ' above, but it belongs to none of these bars.</p>';
 
   if(!cats.length && total < 0)
@@ -2366,7 +2389,12 @@ function renderSubs(){
   $("nSu").textContent = rows.length;
   if(!rows.length){
     $("subs").innerHTML = '<p class="empty">Nothing yet &mdash; this needs three or more '
-      + 'charges from one merchant, at the same amount, on a steady cadence.</p>';
+      + 'charges from one merchant, at the same amount, on a steady cadence.'
+      + (months(V).length < 4
+          ? ' You have ' + months(V).length + ' month'
+            + (months(V).length === 1 ? '' : 's') + ' loaded, so a monthly bill '
+            + 'has barely had the chance. Import more and they will appear.'
+          : '') + '</p>';
     return;
   }
   var live = 0, perYear = 0;
@@ -2375,7 +2403,12 @@ function renderSubs(){
         + (rows.length - live) + ' lapsed &mdash; about ' + money0(perYear)
         + ' a year. Everything here lands on the same day each month: power and '
         + 'water can move by a lot, anything else has to repeat at the same '
-        + 'amount. Rent, tuition, cash and money sent to people are left out.</p>'
+        + 'amount. Rent, tuition, cash and money sent to people are left out.'
+        + (months(V).length < 4
+            ? ' With ' + months(V).length + ' months loaded, a bill has to have '
+              + 'been seen three times to show up here \u2014 import more months to '
+              + 'find the rest.'
+            : '') + '</p>'
         + '<table><thead><tr><th>Merchant</th><th>Every</th><th class="t-amt">Amount</th>'
         + '<th>Seen</th><th>Last</th><th>Next</th><th class="t-amt">Paid so far</th>'
         + '</tr></thead><tbody>';
@@ -2417,8 +2450,8 @@ function renderMerch(){
   var rows = [];
   for(k in m) if(m[k].sum > 0) rows.push([k, m[k]]);
   rows.sort(function(a,b){ return b[1].sum - a[1].sum; });
-  $("nMe").textContent = rows.length;
-
+  /* The badge stays the all-time count. It used to follow this table, so it
+     changed when the rent toggle did, for no reason a reader could see. */
   if(!rows.length){ $("merch").innerHTML = '<p class="empty">Nothing yet.</p>'; return; }
   var h = '<table><thead><tr><th>Merchant</th><th>Category</th><th>Times</th>'
         + '<th class="t-amt">Total</th></tr></thead><tbody>';
@@ -2634,7 +2667,12 @@ function render(){
   if(!$("p-merch").hidden) renderMerch();
   if(!$("p-files").hidden) renderFiles();
   $("nTx").textContent = V.length;
-  $("nPe").textContent = db.pending.length;
+  /* Counting only pending items made this read 0 almost always, because a
+     pending charge is the one thing a bank export cannot contain — so the tab
+     holding every refund and every credit announced itself as empty. */
+  var nCred = 0;
+  for(var ci=0;ci<V.length;ci++) if(V[ci].refund > 0) nCred++;
+  $("nPe").textContent = db.pending.length + nCred;
   $("nFi").textContent = db.files.length;
   /* The merchant count read 0 until you opened the tab, which looked like an
      empty tab rather than one nobody had asked for yet. */
@@ -2660,7 +2698,7 @@ function showReceipt(added, dupes, files, notes){
         + (files === 1 ? "" : "s")
         + (dupes ? ', <b>' + dupes + '</b> already had' : '') + '. ';
   if(n) h += 'There ' + (n === 1 ? 'is <b>1</b> merchant' : 'are <b>' + n + '</b> merchants')
-           + ' I do not recognise, worth ' + money0(worth)
+           + ' I do not recognise, ' + money0(worth) + ' in all'
            + '. Tagging one teaches it for good.</p>'
            + '<button class="btn" id="rcGo">Tag them</button>';
   else h += (added ? 'Every merchant was recognised.' : '') + '</p>';
@@ -2910,11 +2948,23 @@ function splitEditor(id){
   return h + '</div></td></tr>';
 }
 
-function splitTotalOf(box){
+/* Typing 30 into a split of a $80 charge means thirty dollars of it, not
+   thirty dollars back. Read literally it made the parts total -$50 and the
+   editor answered "$30.00 still to assign" — the same number just typed, which
+   reads as nothing having happened. A part follows the sign of the charge it
+   came from unless you write the other sign yourself. */
+function partAmt(raw, parentAmt){
+  var a = parseAmount(raw);
+  if(!a.ok) return null;
+  if(/^\s*[-+]/.test(String(raw))) return a.value;      /* you said which way */
+  return parentAmt < 0 ? -Math.abs(a.value) : Math.abs(a.value);
+}
+
+function splitTotalOf(box, parentAmt){
   var ins = box.querySelectorAll(".sp-amt"), sum = 0, i;
   for(i=0;i<ins.length;i++){
-    var a = parseAmount(ins[i].value);
-    sum += a.ok ? a.value : 0;
+    var v = partAmt(ins[i].value, parentAmt);
+    if(v !== null) sum += v;
   }
   return Math.round(sum * 100) / 100;
 }
@@ -2923,18 +2973,19 @@ function splitTally(box){
   var id = box.getAttribute("data-for"), t = null, i;
   for(i=0;i<db.txns.length;i++) if(db.txns[i].id === id) t = db.txns[i];
   if(!t) return;
-  var left = Math.round((t.amt - splitTotalOf(box)) * 100) / 100;
+  var left = Math.round((t.amt - splitTotalOf(box, t.amt)) * 100) / 100;
   var el = box.querySelector(".left");
-  /* "-$27.00 still unaccounted for" asked the reader to hold a negative
-     amount of a negative amount in their head. */
+  /* Naming the whole as well as the remainder, so the number on screen cannot
+     be mistaken for the number just typed. */
   el.textContent = left === 0
     ? "The parts add up"
-    : money2(Math.abs(left))
-      + ((left < 0) === (t.amt < 0) ? " still to assign" : " too much");
+    : ((left < 0) === (t.amt < 0)
+        ? money2(Math.abs(left)) + " of " + money2(Math.abs(t.amt)) + " still to assign"
+        : money2(Math.abs(left)) + " more than the charge");
   el.className = "left" + (left === 0 ? "" : " bad");
   /* Two parts with amounts, or Save does nothing but toast at you. */
   var real = 0, rs = box.querySelectorAll(".sp-amt");
-  for(i=0;i<rs.length;i++){ var pa = parseAmount(rs[i].value); if(pa.ok && pa.value) real++; }
+  for(i=0;i<rs.length;i++){ var pa = partAmt(rs[i].value, t.amt); if(pa) real++; }
   box.querySelector(".sp-save").disabled = left !== 0 || real < 2;
 }
 
@@ -2970,9 +3021,25 @@ document.addEventListener("click", function(e){
   }
 
   if(b.getAttribute && b.getAttribute("data-help")){
+    /* Redrawing the table replaced every row, which threw a reader back to the
+       top of a long list to read one sentence. The row goes in beside the
+       button instead, and nothing else moves. */
     var hk = b.getAttribute("data-help");
-    helpOpen = (helpOpen === hk) ? "" : hk;
-    redrawLists();
+    var openNow = (helpOpen === hk) ? "" : hk;
+    var tr = b.closest ? b.closest("tr") : null;
+    var old = tr && tr.nextSibling && tr.nextSibling.className === "helprow"
+            ? tr.nextSibling : null;
+    if(old) old.parentNode.removeChild(old);
+    helpOpen = openNow;
+    if(openNow && tr){
+      var cols = tr.children.length;
+      var ins = document.createElement("tr");
+      ins.className = "helprow";
+      ins.innerHTML = '<td colspan="'+cols+'"><div class="helpnote">'
+        + esc(HELP[openNow.split(":")[0]]) + '</div></td>';
+      tr.parentNode.insertBefore(ins, tr.nextSibling);
+    }
+    b.setAttribute("aria-expanded", openNow ? "true" : "false");
     return;
   }
 
@@ -3009,12 +3076,14 @@ document.addEventListener("click", function(e){
     splitOpen = ""; renderTxns();
   } else if(b.classList.contains("sp-save")){
     var id = box.getAttribute("data-for"), rows = box.querySelectorAll(".splitrow"), parts = [], i;
+    var parentAmt = 0;
+    for(i=0;i<db.txns.length;i++) if(db.txns[i].id === id) parentAmt = db.txns[i].amt;
     for(i=0;i<rows.length;i++){
-      var a = parseAmount(rows[i].querySelector(".sp-amt").value);
-      if(!a.ok || !a.value) continue;              /* a zero part is just noise */
+      var a = partAmt(rows[i].querySelector(".sp-amt").value, parentAmt);
+      if(!a) continue;                             /* a zero part is just noise */
       var pc = rows[i].querySelector("select.cat").value;
       if(pc === "__new"){ toast("Name the new category first."); return; }
-      parts.push({ amt: a.value, cat: pc });
+      parts.push({ amt: a, cat: pc });
     }
     if(parts.length < 2){ toast("A split needs two parts with amounts."); return; }
     db.splits[id] = parts;
