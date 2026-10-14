@@ -103,8 +103,11 @@
            away from the browser storage a real visitor's ledger lives in. -->
       <figure class="showcase">
         <div class="showcase-frame">
+          <!-- Not lazy. It has to be loaded and parked on the drop zone before
+               the reader arrives, or the animation they came for starts late
+               or not at all; it is a small same-origin page. -->
           <iframe src="/ledger/?demo=1" title="Ledger, running on sample data"
-                  loading="lazy" scrolling="no"></iframe>
+                  scrolling="no"></iframe>
         </div>
         <figcaption>Running here, on invented numbers. Four months of a made-up
           statement, categorised on load.</figcaption>
@@ -285,23 +288,38 @@
 
   /* Tell it to play when it is actually on screen, so the drag is not over
      before the reader arrives. */
-  var iframe = frame.querySelector('iframe'), sent = false;
-  function cue() {
-    if (sent || !iframe.contentWindow) return;
+  /* It plays when the reader reaches it, not when the page loads. Both sides
+     have to agree on when that is: the frame is lazy, so it may still be empty
+     when it scrolls into view, and it may be ready long before. Each says what
+     it knows and the play goes out once both are true. */
+  var iframe = frame.querySelector('iframe'), ready = false, sent = false;
+
+  /* Whether it is really on screen, measured rather than reported. An observer
+     ought to answer this, and the browser pane this was built in answered that
+     a frame 1,223px below the fold was in view — so the geometry is checked
+     directly and the observer is only a reason to look again. */
+  function onScreen() {
+    var r = frame.getBoundingClientRect();
+    var vh = window.innerHeight || document.documentElement.clientHeight;
+    return r.height > 0 && r.top < vh * 0.8 && r.bottom > vh * 0.2;
+  }
+  function maybePlay() {
+    if (sent || !ready || !iframe.contentWindow || !onScreen()) return;
     sent = true;
     iframe.contentWindow.postMessage('ledger:play', window.location.origin);
   }
-  if (window.IntersectionObserver) {
-    new IntersectionObserver(function (entries) {
-      for (var i = 0; i < entries.length; i++)
-        if (entries[i].isIntersecting && entries[i].intersectionRatio > 0.35) {
-          iframe.complete || iframe.contentDocument ? cue()
-            : iframe.addEventListener('load', cue, { once: true });
-        }
-    }, { threshold: [0, 0.35, 0.6] }).observe(frame);
-  } else {
-    iframe.addEventListener('load', cue, { once: true });
-  }
+  window.addEventListener('message', function (e) {
+    if (e.source === iframe.contentWindow && e.data === 'ledger:ready') {
+      ready = true;
+      maybePlay();
+    }
+  });
+  iframe.addEventListener('load', function () { ready = true; maybePlay(); });
+  window.addEventListener('scroll', maybePlay, { passive: true });
+  window.addEventListener('resize', maybePlay);
+  if (window.IntersectionObserver)
+    new IntersectionObserver(maybePlay, { threshold: [0, 0.3, 0.6] }).observe(frame);
+  maybePlay();
 })();
 (function () {
   var canvas = document.getElementById('sdHeroCanvas');
