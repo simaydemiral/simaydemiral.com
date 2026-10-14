@@ -82,7 +82,7 @@
   <main id="work">
     <p class="section-label"><span class="dash"></span>Selected work</p>
 
-    <article class="item item--illustrated">
+    <article class="item item--live">
 
       <div class="item-body">
       <h3><a class="item-link" href="/tinkering/ledger">Ledger</a></h3>
@@ -90,14 +90,25 @@
       <p>
         Much more than a bank app can show you. Drop in a statement for spending
         patterns, subscriptions and refunds, categories you can correct, and a
-        flag when a charge looks doubled.
+        flag when a charge looks doubled. Your statement is read in your own
+        browser and never uploaded &mdash; there is no server to upload it to.
+      </p>
+      <p class="actions actions--tight">
+        <a class="btn" href="/ledger/">Try it with your own statement <span aria-hidden="true">&rarr;</span></a>
         <a class="item-more" href="/tinkering/ledger">Read the case study &rarr;</a>
       </p>
       </div>
 
-      <a class="plate" href="/tinkering/ledger" aria-hidden="true" tabindex="-1">
-        <span class="plate-art" style="--art:url('/img/ledger.webp');--art-ratio:1943/461"></span>
-      </a>
+      <!-- The tool itself, on invented data, writing nothing. ?demo=1 keeps it
+           away from the browser storage a real visitor's ledger lives in. -->
+      <figure class="showcase">
+        <div class="showcase-frame">
+          <iframe src="/ledger/?demo=1" title="Ledger, running on sample data"
+                  loading="lazy" scrolling="no"></iframe>
+        </div>
+        <figcaption>Running here, on invented numbers. Four months of a made-up
+          statement, categorised on load.</figcaption>
+      </figure>
     </article>
 
     <article class="item item--illustrated">

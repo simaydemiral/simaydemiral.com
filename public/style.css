@@ -960,6 +960,52 @@ h1 em {
 
 .item-body > :first-child { margin-top: 0; }
 
+/* The Ledger card runs the tool rather than describing it: a visitor learns it
+   is real software without clicking anything. The iframe is the same page the
+   Try it button opens, in a mode that reads and writes no storage. */
+.item--showcase { display: block; }
+.item--showcase .item-body p:last-of-type { max-width: none; }
+
+.actions--tight { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
+
+.showcase { display: block; margin: 1.5rem 0 0; }
+
+.showcase-frame {
+  position: relative;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  overflow: hidden;
+  background: #171210;
+  /* Tall enough for the tiles, the insights and the category bars — the part
+     that answers "where did my money go" without scrolling. */
+  aspect-ratio: 16 / 10;
+  max-height: 32rem;
+}
+
+.showcase-frame iframe {
+  position: absolute;
+  top: 0; left: 0;
+  width: 1340px;
+  /* Taller than the frame on purpose: the bottom is cropped rather than
+     leaving a band of empty page under the dashboard. */
+  height: 1180px;
+  border: 0;
+  /* Rendered at desktop width and scaled down, so the layout is the real one
+     rather than the cramped column a narrow iframe would produce. */
+  transform: scale(var(--showcase-scale, 0.52));
+  transform-origin: top left;
+}
+
+.showcase figcaption {
+  margin-top: 0.6rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+@media (max-width: 60rem) { .showcase-frame { --showcase-scale: 0.42; aspect-ratio: 16 / 11; } }
+@media (max-width: 42rem) { .showcase-frame { --showcase-scale: 0.30; aspect-ratio: 4 / 3; } }
+
 /* Text on the left, drawing on the right; stacks on narrow screens. */
 .item--illustrated {
   display: grid;

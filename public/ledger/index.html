@@ -330,6 +330,11 @@ input[type=search]{min-width:200px}
 .helpnote{font-size:12.5px;line-height:1.55;color:var(--ink-2);max-width:46rem;
   margin:2px 0 10px;padding:10px 12px;background:var(--sunken);border-radius:8px;
   white-space:normal;text-align:left;font-weight:400}
+/* Embedded on another page, the controls that act on stored data have nothing
+   to act on and only raise questions. */
+:root[data-demo] #backup, :root[data-demo] #restore, :root[data-demo] #reset,
+:root[data-demo] #add, :root[data-demo] #covers{display:none}
+:root[data-demo] .shell{padding-top:18px}
 .recon{font:400 12px/1.4 var(--f-mono);padding:8px 10px;border-radius:8px;margin-top:10px}
 .recon.ok{background:var(--go-wash);color:var(--go)}
 .recon.bad{background:var(--stop-wash);color:var(--stop)}
@@ -637,6 +642,7 @@ function pruneOverrides(){
 }
 
 function load(){
+  if(DEMO) return;
   try{
     var raw = localStorage.getItem(KEY);
     if(raw){ var d = JSON.parse(raw); if(d && d.txns){ db = d; db.rules = db.rules||{}; db.files = db.files||[]; db.pending = db.pending||[]; db.dupsOk = db.dupsOk||{}; db.cats = db.cats||[]; db.splits = db.splits||{}; db.asked = db.asked||{};
@@ -644,7 +650,14 @@ function load(){
         db.paidBackTx = db.paidBackTx||{}; db.catTx = db.catTx||{}; } }
   }catch(e){ /* corrupt or blocked storage — start empty rather than break */ }
 }
+/* ?demo=1 runs the page on invented data and writes nothing, so it can be
+   embedded somewhere public without reading or overwriting the ledger of
+   whoever happens to be looking at it. Same origin, same storage key: without
+   this it would do both. */
+var DEMO = /[?&]demo=1\b/.test(location.search);
+
 function save(){
+  if(DEMO) return;
   try{ localStorage.setItem(KEY, JSON.stringify(db)); }
   catch(e){ toast("Could not save — browser storage is full or blocked."); }
 }
@@ -3467,10 +3480,55 @@ window.SPEND = { parseCSV:parseCSV, detect:detect, normMerchant:normMerchant,
                  categorize:categorize, importFile:importFile, view:view,
                  db:function(){ return db; }, render:render };
 
-load();
-migrateIds();
-pruneOverrides();
+/* A invented four months, run through the same parser as a real statement
+   rather than poked into the store, so what a visitor sees is the thing
+   working and not a mock of it. */
+function demoData(){
+  var M = ["06","07","08","09"], csv = "Date,Description,Amount\n", i, m, d;
+  var shop = [["04",-86.40],["11",-112.75],["19",-74.20],["26",-98.10]];
+  var out  = [["05","PEETS COFFEE",-6.50],["09","CHIPOTLE 2703",-18.40],
+              ["14","SWEETGREEN",-24.10],["22","PEETS COFFEE",-7.25],
+              ["27","PIZZERIA DELFINA",-41.30]];
+  var go   = [["06","CLIPPER TRANSIT FARE",-28.00],["16","UBER TRIP",-19.40],
+              ["24","CHEVRON 0188",-52.60]];
+  for(i=0;i<M.length;i++){
+    m = M[i];
+    csv += m+"/01/2026,RIVERBEND APTS RENT PAYMENT,-1850.00\n"
+         + m+"/12/2026,NETFLIX.COM,-15.99\n"
+         + m+"/03/2026,SPOTIFY USA,-11.99\n"
+         + m+"/21/2026,ADOBE CREATIVE CLOUD,-22.99\n"
+         + m+"/09/2026,COMCAST XFINITY INTERNET,-79.99\n"
+         + m+"/18/2026,PACIFIC POWER AND LIGHT,-"+(78+((+m*7)%55))+".40\n"
+         + m+"/08/2026,NORDSTROM #0423,-"+(60+((+m*13)%110))+".00\n"
+         + m+"/28/2026,CVS PHARMACY #4411,-"+(18+((+m*5)%30))+".25\n";
+    for(d=0;d<shop.length;d++)
+      csv += m+"/"+shop[d][0]+"/2026,CHECKCARD "+m+shop[d][0]
+           + " TRADER JOE'S #186 OAKLAND CA,"+shop[d][1].toFixed(2)+"\n";
+    for(d=0;d<out.length;d++)
+      csv += m+"/"+out[d][0]+"/2026,"+out[d][1]+" OAKLAND CA,"+out[d][2].toFixed(2)+"\n";
+    for(d=0;d<go.length;d++)
+      csv += m+"/"+go[d][0]+"/2026,"+go[d][1]+","+go[d][2].toFixed(2)+"\n";
+  }
+  csv += "09/15/2026,NORDSTROM #0423,64.00\n"
+       + "09/30/2026,TRADER JOE'S #186 OAKLAND CA,-41.80\n"
+       + "09/10/2026,BKOFAMERICA ATM 09/10 #000001213 WITHDRWL SHATTUCK OAKLAND CA,-120.00\n"
+       + "08/02/2026,UNITED AIRLINES 0162,-312.00\n"
+       + "07/19/2026,MARRIOTT SANTA CRUZ CA,-188.00\n";
+  importFile("september-2026_4471.csv", csv);
+  db.files = [];                     /* the receipt is noise on a demo */
+  curMonth = "2026-09";
+}
+
+if(DEMO){
+  document.documentElement.setAttribute("data-demo", "1");
+  demoData();
+} else {
+  load();
+  migrateIds();
+  pruneOverrides();
+}
 render();
+if(DEMO){ $("receipt").innerHTML = ""; $("covers").hidden = true; }
 })();
 </script>
 </body>
