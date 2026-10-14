@@ -16,6 +16,7 @@
   --ink:#1f1c18; --ink-2:#4b443c; --muted:#6a6157; --faint:#938a7d;
   --line:#d6cbb8; --line-soft:#e2dacb;
   --brand:#c05a2a; --brand-wash:#f7e9e0;
+  --link:#1a3fd0;
   --go:#4f7a52; --go-wash:#e6efe4;
   --warn:#b07a28; --warn-wash:#f8eeda;
   --stop:#a8452f; --stop-wash:#f8e5df;
@@ -31,6 +32,8 @@
     --ink:#f6f1e9; --ink-2:#e2d9cc; --muted:#d4cabc; --faint:#9b9183;
     --line:#423830; --line-soft:#372f27;
     --brand:#e08b52; --brand-wash:#33230f;
+    /* the browser's own link blue is unreadable on this background */
+    --link:#8fb6ff;
     --go:#7fb384; --go-wash:#15251a;
     --warn:#dba85a; --warn-wash:#33260f;
     --stop:#dd8a72; --stop-wash:#331a14;
@@ -42,6 +45,7 @@
   --ink:#f6f1e9; --ink-2:#e2d9cc; --muted:#d4cabc; --faint:#9b9183;
   --line:#423830; --line-soft:#372f27;
   --brand:#e08b52; --brand-wash:#33230f;
+  --link:#8fb6ff;
   --go:#7fb384; --go-wash:#15251a;
   --warn:#dba85a; --warn-wash:#33260f;
   --stop:#dd8a72; --stop-wash:#331a14;
@@ -86,6 +90,10 @@ button{font:inherit;cursor:pointer}
   margin:12px 0 0;break-inside:avoid}
 .assume-body b{color:var(--ink-2)}
 .assume-body a{color:var(--brand)}
+/* Visited counts too: the browser's purple is as hard to read on this
+   background as its blue. */
+.ins-t a, .ins-t a:visited{color:var(--link)}
+.ins-t a:hover{color:var(--ink)}
 .assume-body ul{margin:6px 0 0;padding-left:1.1rem}
 .assume-body li{font-size:12.5px;line-height:1.6;color:var(--muted);margin-bottom:3px}
 .assume-body ul + p{margin-top:8px}
