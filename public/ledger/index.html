@@ -337,7 +337,7 @@ input[type=search]{min-width:200px}
    ------------------------------------------------------------------ */
 #stage{position:fixed;inset:0;pointer-events:none;z-index:60}
 .stage-file{
-  position:absolute;width:188px;padding:12px 14px;border-radius:10px;
+  position:absolute;width:252px;padding:12px 14px;border-radius:10px;
   background:var(--surface);border:1px solid var(--line);
   box-shadow:0 10px 30px rgba(0,0,0,.35);
   font:500 12.5px/1.35 var(--f-body);color:var(--ink);
@@ -347,10 +347,12 @@ input[type=search]{min-width:200px}
 .stage-file .sf-x{font:600 10px/1 var(--f-mono);letter-spacing:.06em;
   color:var(--brand);border:1px solid var(--brand);border-radius:4px;
   padding:4px 5px;flex:none;margin-top:1px}
-.stage-file .sf-n{display:block}
+.stage-file .sf-n{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stage-file .sf-m{display:block;color:var(--muted);font-weight:400;font-size:11px;
   margin-top:3px}
-.stage-file.is-held{box-shadow:0 18px 44px rgba(0,0,0,.5);transform:scale(.97)}
+.stage-file.is-picked{border-color:var(--brand);box-shadow:0 0 0 2px var(--brand-wash),
+  0 10px 30px rgba(0,0,0,.35)}
+.stage-file.is-held{box-shadow:0 18px 44px rgba(0,0,0,.5)}
 .stage-file.is-gone{opacity:0;transition:opacity .25s ease}
 #stageCursor{position:absolute;width:22px;height:22px;margin:-2px 0 0 -2px;
   transition:transform .85s cubic-bezier(.4,.05,.2,1),opacity .35s ease;
@@ -363,6 +365,9 @@ input[type=search]{min-width:200px}
 #stageReplay.on{opacity:1}
 #stageReplay:hover{color:var(--ink);border-color:var(--ink-2)}
 :root[data-demo] #drop{transition:border-color .3s ease,background .3s ease}
+/* Embedded in a fixed crop, the browser scrolling a clicked tab into view takes
+   the figures off the top of the window, which reads as them vanishing. */
+:root[data-demo], :root[data-demo] body{overflow:hidden}
 
 /* Embedded on another page, the controls that act on stored data have nothing
    to act on and only raise questions. */
@@ -3517,7 +3522,7 @@ window.SPEND = { parseCSV:parseCSV, detect:detect, normMerchant:normMerchant,
 /* A invented four months, run through the same parser as a real statement
    rather than poked into the store, so what a visitor sees is the thing
    working and not a mock of it. */
-function demoData(){
+function demoCardCsv(){
   var M = ["06","07","08","09"], csv = "Date,Description,Amount\n", i, m, d;
   var shop = [["04",-86.40],["11",-112.75],["19",-74.20],["26",-98.10]];
   var out  = [["05","PEETS COFFEE",-6.50],["09","CHIPOTLE 2703",-18.40],
@@ -3548,7 +3553,59 @@ function demoData(){
        + "09/10/2026,BKOFAMERICA ATM 09/10 #000001213 WITHDRWL SHATTUCK OAKLAND CA,-120.00\n"
        + "08/02/2026,UNITED AIRLINES 0162,-312.00\n"
        + "07/19/2026,MARRIOTT SANTA CRUZ CA,-188.00\n";
-  importFile("september-2026_4471.csv", csv);
+  return csv;
+}
+
+/* Three files, because that is how it arrives: a card, a current account and
+   the savings it is paid from. Loading all of them is what lets the page tell
+   a transfer between your own accounts from money actually spent. */
+function demoFiles(){
+  var M = ["06","07","08","09"], card = "Date,Description,Amount\n",
+      chk = "Date,Description,Amount\n", sav = "Date,Description,Amount\n", i, m;
+  var shop = [["04",-86.40],["11",-112.75],["19",-74.20],["26",-98.10]];
+  var out  = [["05","PEETS COFFEE",-6.50],["09","CHIPOTLE 2703",-18.40],
+              ["14","SWEETGREEN",-24.10],["22","PEETS COFFEE",-7.25],
+              ["27","PIZZERIA DELFINA",-41.30]];
+  var go   = [["06","CLIPPER TRANSIT FARE",-28.00],["16","UBER TRIP",-19.40],
+              ["24","CHEVRON 0188",-52.60]];
+  for(i=0;i<M.length;i++){
+    m = M[i];
+    card += m+"/12/2026,NETFLIX.COM,-15.99\n"
+          + m+"/03/2026,SPOTIFY USA,-11.99\n"
+          + m+"/21/2026,ADOBE CREATIVE CLOUD,-22.99\n"
+          + m+"/08/2026,NORDSTROM #0423,-"+(60+((+m*13)%110))+".00\n"
+          + m+"/28/2026,CVS PHARMACY #4411,-"+(18+((+m*5)%30))+".25\n";
+    for(var d=0;d<shop.length;d++)
+      card += m+"/"+shop[d][0]+"/2026,CHECKCARD "+m+shop[d][0]
+            + " TRADER JOE'S #186 OAKLAND CA,"+shop[d][1].toFixed(2)+"\n";
+    for(d=0;d<out.length;d++)
+      card += m+"/"+out[d][0]+"/2026,"+out[d][1]+" OAKLAND CA,"+out[d][2].toFixed(2)+"\n";
+    for(d=0;d<go.length;d++)
+      card += m+"/"+go[d][0]+"/2026,"+go[d][1]+","+go[d][2].toFixed(2)+"\n";
+
+    chk += m+"/01/2026,RIVERBEND APTS RENT PAYMENT,-1850.00\n"
+         + m+"/09/2026,COMCAST XFINITY INTERNET,-79.99\n"
+         + m+"/18/2026,PACIFIC POWER AND LIGHT,-"+(78+((+m*7)%55))+".40\n"
+         + m+"/15/2026,Online Banking payment to CRD 4471,-"+(900+((+m*17)%300))+".00\n";
+
+    sav += m+"/14/2026,Online Banking transfer to CHK 2291,-600.00\n"
+         + m+"/02/2026,INTEREST EARNED,"+(3+((+m*2)%6))+".18\n";
+  }
+  card += "09/15/2026,NORDSTROM #0423,64.00\n"
+        + "08/02/2026,UNITED AIRLINES 0162,-312.00\n"
+        + "07/19/2026,MARRIOTT SANTA CRUZ CA,-188.00\n";
+  chk  += "09/10/2026,BKOFAMERICA ATM 09/10 #000001213 WITHDRWL SHATTUCK OAKLAND CA,-120.00\n"
+        + "09/30/2026,TRADER JOE'S #186 OAKLAND CA,-41.80\n";
+  return [
+    ["September2026_4471.csv", "Credit card",     card],
+    ["checking_2291.csv",      "Current account", chk],
+    ["savings_8830.csv",       "Savings",         sav]
+  ];
+}
+
+function demoData(){
+  var f = demoFiles(), i;
+  for(i=0;i<f.length;i++) importFile(f[i][0], f[i][2]);
   db.files = [];                     /* the receipt is noise on a demo */
   curMonth = "2026-09";
 }
@@ -3557,11 +3614,10 @@ function demoData(){
    the numbers come out. It plays once, on the real import path, and leaves the
    dashboard on screen. */
 function demoStage(){
-  var files = [
-    ["CSV", "September2026_4471.csv", "Card \u00b7 86 rows"],
-    ["CSV", "stmt.csv",               "Checking \u00b7 41 rows"],
-    ["PDF", "statement-aug.pdf",      "Not a CSV"]
-  ];
+  var src = demoFiles(), files = [], fi;
+  for(fi=0;fi<src.length;fi++)
+    files.push(["CSV", src[fi][0], src[fi][1] + " \u00b7 "
+                + (src[fi][2].split("\n").length - 2) + " rows"]);
   var stage = document.createElement("div");
   stage.id = "stage";
   stage.setAttribute("aria-hidden", "true");
@@ -3585,50 +3641,63 @@ function demoStage(){
 
   function layout(){
     var w = window.innerWidth, h = window.innerHeight;
-    var x = Math.max(w - 232, w * 0.62);
+    var x = Math.max(w - 288, w * 0.58);   /* 252 wide plus a margin */
     for(var k=0;k<cards.length;k++){
       cards[k].dataset.hx = x; cards[k].dataset.hy = 150 + k * 86;
       at(cards[k], x, 150 + k * 86);
-      cards[k].classList.remove("is-gone", "is-held");
+      cards[k].classList.remove("is-gone", "is-held", "is-picked");
     }
     return { w:w, h:h };
   }
 
+  /* All three at once, because that is what you do: the card, the current
+     account and the savings go in together, and loading them together is the
+     only way the page can tell a transfer between them from money spent. */
   function play(){
     clearAll();
     replay.classList.remove("on");
     db.txns = []; db.files = []; curMonth = "";
     render();
-    var geo = layout();
-    var card = cards[0];
+    var geo = layout(), k;
     var drop = $("drop").getBoundingClientRect();
-    var tx = drop.left + drop.width / 2 - 94;
-    var ty = drop.top + drop.height / 2 - 30;
+    var tx = drop.left + drop.width / 2 - 126;
+    var ty = drop.top + drop.height / 2 - 40;
 
     cur.style.opacity = "0";
     at(cur, geo.w + 40, geo.h * 0.42);
 
+    /* the cursor arrives beside the pile */
     after(500, function(){
       cur.style.opacity = "1";
-      at(cur, +card.dataset.hx + 150, +card.dataset.hy + 30);
+      at(cur, +cards[0].dataset.hx - 18, +cards[1].dataset.hy + 20);
     });
-    after(1500, function(){ card.classList.add("is-held"); });
+
+    /* all three light up as one selection */
+    after(1350, function(){
+      for(k=0;k<cards.length;k++) cards[k].classList.add("is-picked");
+    });
+
+    /* and gather into a single stack under the cursor */
     after(1750, function(){
-      at(cur, tx + 150, ty + 30);
-      at(card, tx, ty);
-      $("drop").classList.add("over");
-    });
-    after(2600, function(){
-      /* the rest of the pile goes with it: once the numbers are up, three
-         cards floating over them are just litter */
-      for(var k=1;k<cards.length;k++){
-        at(cards[k], +cards[k].dataset.hx + 90, +cards[k].dataset.hy);
-        cards[k].classList.add("is-gone");
+      for(k=0;k<cards.length;k++){
+        cards[k].classList.add("is-held");
+        at(cards[k], +cards[0].dataset.hx + k * 7, +cards[1].dataset.hy + k * 7);
       }
     });
-    after(2750, function(){
-      card.classList.remove("is-held");
-      card.classList.add("is-gone");
+
+    /* carried over together */
+    after(2350, function(){
+      at(cur, tx + 150, ty + 34);
+      for(k=0;k<cards.length;k++) at(cards[k], tx + k * 7, ty + k * 7);
+      $("drop").classList.add("over");
+    });
+
+    /* dropped: the real import, three files, in order */
+    after(3250, function(){
+      for(k=0;k<cards.length;k++){
+        cards[k].classList.remove("is-held", "is-picked");
+        cards[k].classList.add("is-gone");
+      }
       $("drop").classList.remove("over");
       demoData();
       render();
@@ -3636,8 +3705,8 @@ function demoStage(){
       $("covers").hidden = true;
       window.scrollTo(0, 0);
     });
-    after(3100, function(){ cur.style.opacity = "0"; });
-    after(4200, function(){ replay.classList.add("on"); });
+    after(3600, function(){ cur.style.opacity = "0"; });
+    after(4700, function(){ replay.classList.add("on"); });
   }
 
   replay.addEventListener("click", play);
