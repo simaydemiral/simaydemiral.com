@@ -2201,7 +2201,7 @@ function renderAsk(){
   if(!q){ $("ask").innerHTML = ""; return; }
   var out = q.dir === "out";
   /* The rail word is how the bank labels the pipe, not who is on the other end
-     of it: "Zelle Payment From Emre K has sent you $310" reads like a company. */
+     of it: "Zelle Payment From A Friend has sent you $310" reads like a firm. */
   var who = String(q.merch)
     .replace(/^(Zelle|Venmo|Paypal|Cash ?App|Apple Cash)\s+(Payment\s+)?(To|From)\s+/i, "")
     .replace(/^(Zelle|Venmo|Paypal|Cash ?App|Apple Cash)\s+Payment\b\s*/i, "$1 ") || q.merch;
