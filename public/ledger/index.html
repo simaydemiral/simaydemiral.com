@@ -554,7 +554,7 @@ function median(a){
    STORE
    ============================================================ */
 var KEY = "spend.v1";
-var db = { v:1, idv:2, txns:[], rules:{}, files:[], pending:[], dupsOk:{}, cats:[], splits:{}, asked:{}, paidBack:{}, unspent:{} };
+var db = { v:1, idv:2, txns:[], rules:{}, files:[], pending:[], dupsOk:{}, cats:[], splits:{}, asked:{}, paidBack:{}, unspent:{}, paidBackTx:{} };
 
 /* Ids used to include the account, which came from the filename, so the same
    row arriving as stmt.csv and stmt (2).csv counted twice. Rows stored under
@@ -588,7 +588,8 @@ function load(){
   try{
     var raw = localStorage.getItem(KEY);
     if(raw){ var d = JSON.parse(raw); if(d && d.txns){ db = d; db.rules = db.rules||{}; db.files = db.files||[]; db.pending = db.pending||[]; db.dupsOk = db.dupsOk||{}; db.cats = db.cats||[]; db.splits = db.splits||{}; db.asked = db.asked||{};
-        db.paidBack = db.paidBack||{}; db.unspent = db.unspent||{}; } }
+        db.paidBack = db.paidBack||{}; db.unspent = db.unspent||{};
+        db.paidBackTx = db.paidBackTx||{}; } }
   }catch(e){ /* corrupt or blocked storage — start empty rather than break */ }
 }
 function save(){
@@ -1217,7 +1218,12 @@ function view(){
        unspent  — this deposit is cash you took out and did not spend
      A shop's refund has always netted and still does. */
   function row(t, key, merch, id, amt, cat, why, part){
-    var nets = !MONEY_IN[cat] || !!db.paidBack[key] || !!db.unspent[t.id];
+    /* Said about this one transaction rather than about the person: a friend
+       who sends you $60 for dinner once is not a pattern worth asking about,
+       and retagging the merchant would have moved every Venmo you ever had. */
+    var one = db.paidBackTx[t.id];
+    if(one && !part){ cat = one; why = "you said this was paying you back"; }
+    var nets = !MONEY_IN[cat] || !!db.paidBack[key] || !!db.unspent[t.id] || !!one;
     return { id:id, date:t.date, month:t.date.slice(0,7), desc:t.desc, key:key,
              merch:merch, amt:amt, acct:t.acct, cat:cat, why:why, part:part,
              nets: nets,
@@ -1853,6 +1859,20 @@ function renderTxns(){
          notes you took out on Friday and did not spend. If it was the second,
          say so on that one deposit and it comes off your cash spending. Per
          transaction, not per merchant, because the same ATM does both. */
+      /* Any money arriving that is not already coming off something: their
+         half of a bill you paid, told once, about this row only. */
+      + (t.amt > 0 && !t.part && !CASH[t.cat] && (!t.nets || db.paidBackTx[t.id])
+          ? (pbOpen === t.id
+              ? ' <span class="asklbl">Their share of what?</span> '
+                + catSelect(db.paidBackTx[t.id] || "", "pb:" + t.id,
+                            'Not sure \u2014 just take it off my spending')
+                + ' <button class="btn-q" data-pbcancel="1">Back</button>'
+              : ' <button class="btn-q' + (db.paidBackTx[t.id] ? ' is-on' : '')
+                + '" data-pb="'+esc(t.id)+'" title="Their share of something you '
+                + 'paid for \u2014 it comes off what you spent">'
+                + (db.paidBackTx[t.id] ? 'Paying me back \u2713' : 'Paying me back')
+                + '</button>')
+          : '')
       + (CASH[t.cat] && t.amt > 0 && !t.part
           ? ' <button class="btn-q' + (db.unspent[t.id] ? ' is-on' : '')
             + '" data-unspent="'+esc(t.id)+'" title="'
@@ -2681,6 +2701,7 @@ $("fCat").__m = MCat; $("fAcct").__m = MAcct;
    split that does not balance would quietly invent or lose money.
    ------------------------------------------------------------ */
 var splitOpen = "";
+var pbOpen = "";          /* the row whose "paying me back" picker is open */
 
 function splitEditor(id){
   var t = null, i;
@@ -2738,6 +2759,15 @@ document.addEventListener("click", function(e){
     renderTxns();
     return;
   }
+  if(b.getAttribute && b.getAttribute("data-pb")){
+    var pid = b.getAttribute("data-pb");
+    if(db.paidBackTx[pid]){ delete db.paidBackTx[pid]; save(); render(); renderTxns();
+      toast("Back to money arriving \u2014 it no longer comes off what you spent."); }
+    else { pbOpen = pid; renderTxns(); }
+    return;
+  }
+  if(b.getAttribute && b.getAttribute("data-pbcancel")){ pbOpen = ""; renderTxns(); return; }
+
   if(b.getAttribute && b.getAttribute("data-unspent")){
     var uid = b.getAttribute("data-unspent");
     if(db.unspent[uid]) delete db.unspent[uid]; else db.unspent[uid] = 1;
@@ -2803,6 +2833,23 @@ document.addEventListener("change", function(e){
   var s = e.target;
   if(!s.classList || !s.classList.contains("cat")) return;
   var id = s.getAttribute("data-id"), key, val = s.value;
+
+  /* The same answer, said about one transaction instead of about the person. */
+  if(id.indexOf("pb:") === 0){
+    if(!val) return;
+    var txid = id.slice(3);
+    if(val === "__any") val = "uncategorized";
+    else if(val === "__new"){
+      val = addCategory(window.prompt(
+        "Name your category \u2014 electronics, childcare, hobbies, whatever you spend on:", ""));
+      if(!val){ renderTxns(); return; }
+    }
+    db.paidBackTx[txid] = val;
+    pbOpen = "";
+    save(); render(); renderTxns();
+    toast("Comes off what you spent.");
+    return;
+  }
 
   /* "Paying me back" is a category plus one extra fact: that the money coming
      in should come off that category rather than sit beside it. Without the
@@ -3016,7 +3063,7 @@ $("bakfile").addEventListener("change", function(){
     db = { v:1, idv:d.idv, txns:d.txns, rules:d.rules||{}, files:d.files||[],
            pending:d.pending||[], dupsOk:d.dupsOk||{}, cats:d.cats||[],
            splits:d.splits||{}, asked:d.asked||{}, paidBack:d.paidBack||{},
-           unspent:d.unspent||{} };
+           unspent:d.unspent||{}, paidBackTx:d.paidBackTx||{} };
     migrateIds();
     save();
     curMonth = "";
@@ -3028,7 +3075,7 @@ $("bakfile").addEventListener("change", function(){
 
 $("reset").addEventListener("click", function(){
   if(!confirm("Delete every transaction and rule stored in this browser?")) return;
-  db = { v:1, idv:2, txns:[], rules:{}, files:[], pending:[], dupsOk:{}, cats:[], splits:{}, asked:{}, paidBack:{}, unspent:{} };
+  db = { v:1, idv:2, txns:[], rules:{}, files:[], pending:[], dupsOk:{}, cats:[], splits:{}, asked:{}, paidBack:{}, unspent:{}, paidBackTx:{} };
   try{ localStorage.removeItem(KEY); }catch(e){}
   curMonth = "";
   render();
