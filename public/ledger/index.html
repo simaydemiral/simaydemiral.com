@@ -368,11 +368,10 @@ input[type=search]{min-width:200px}
 #stageThumb{position:absolute;left:1px;width:8px;border-radius:999px;
   background:var(--faint);opacity:.55;transition:background .2s ease,opacity .2s ease}
 #stageThumb.is-grabbed{background:var(--brand);opacity:1}
-/* The click itself, which otherwise happens with nothing to see. */
-.stage-ping{position:absolute;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;
-  border:2px solid var(--brand);opacity:.9;pointer-events:none;
-  transition:transform .45s ease-out,opacity .45s ease-out}
-.stage-ping.go{transform:scale(3.6);opacity:0}
+/* The click is shown by the thing being clicked, not by a ring drawn over it:
+   it settles a shade, the way a button does under a real press. */
+.meter.go.is-press{background:var(--ground);transform:translateY(1px)}
+.tab.is-press{opacity:.65}
 #stageReplay{position:absolute;right:16px;bottom:14px;pointer-events:auto;
   font:500 11.5px/1 var(--f-body);color:var(--muted);background:var(--surface);
   border:1px solid var(--line);border-radius:999px;padding:7px 12px;cursor:pointer;
@@ -383,8 +382,11 @@ input[type=search]{min-width:200px}
 /* Embedded in a fixed crop, the browser scrolling a clicked tab into view takes
    the figures off the top of the window, which reads as them vanishing. */
 :root[data-demo].is-locked, :root[data-demo].is-locked body{overflow:hidden}
-.stage-file.is-press, #stageCursor.is-press{transform-origin:center}
-#stageCursor.is-press svg{transform:scale(.82);transition:transform .12s ease}
+#stageCursor.is-press svg{transform:scale(.9);transition:transform .1s ease}
+/* While it has hold of the thumb the cursor must track it exactly. With the
+   easing still on, it trailed most of a second behind the scroll it was
+   supposedly causing, which is what made the whole gesture feel loose. */
+#stageCursor.is-dragging{transition:opacity .35s ease}
 
 /* Embedded on another page, the controls that act on stored data have nothing
    to act on and only raise questions. */
@@ -3668,38 +3670,49 @@ function demoStage(){
   }
   window.addEventListener("scroll", function(){ if(bar.classList.contains("on")) syncThumb(); });
 
-  function ping(x, y){
-    var el = document.createElement("span");
-    el.className = "stage-ping";
-    el.style.left = x + "px"; el.style.top = y + "px";
-    stage.appendChild(el);
-    setTimeout(function(){ el.classList.add("go"); }, 20);
-    setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 600);
-  }
+
   var replay = $("stageReplay"), timers = [];
   function at(el, x, y){ el.style.transform = "translate(" + x + "px," + y + "px)"; }
 
   /* Smooth scrolling is not honoured everywhere, and an embedded page is
      exactly where it quietly is not, so the glide is ours. */
+  /* Decided once, at the start: does this page actually get animation frames?
+     Asking per-step and falling back only when one is late recovered for a
+     single step and then went back to asking, so the scroll moved two pixels
+     and stopped. */
+  var FRAMES = !!window.requestAnimationFrame, frameSeen = false;
+  if(FRAMES){
+    requestAnimationFrame(function(){ frameSeen = true; });
+    setTimeout(function(){ FRAMES = frameSeen; }, 220);
+  }
+
   var gliding = 0;
   function glide(to, ms){
-    /* Driven by timers rather than animation frames. An embedded page is not
-       always granted frames — the pane this was built in hands out none at all
-       — and a scroll that silently does nothing is worse than a coarse one. */
+    /* Animation frames where they exist, timers where they do not. An embedded
+       page is not always granted frames — the pane this was built in hands out
+       none at all — and a scroll that silently never moves is worse than a
+       coarse one. Frames first, because they are what makes it smooth. */
     var from = window.pageYOffset, t0 = Date.now();
     gliding++;
     var mine = gliding;
-    (function step(){
+    function step(){
       if(mine !== gliding) return;
       var k = Math.min(1, (Date.now() - t0) / ms);
-      var e = k < 0.5 ? 2*k*k : 1 - Math.pow(-2*k + 2, 2) / 2;
-      window.scrollTo(0, Math.round(from + (to - from) * e));
+      /* ease in and out on a cubic: gentler at both ends than the quadratic,
+         which started with a jolt */
+      var e = k < 0.5 ? 4*k*k*k : 1 - Math.pow(-2*k + 2, 3) / 2;
+      window.scrollTo(0, from + (to - from) * e);
       if(bar.classList.contains("on")){
         var tp = syncThumb();
         at(cur, tp.x - 9, tp.y - 6);
       }
-      if(k < 1) setTimeout(step, 16);
-    })();
+      if(k < 1) next();
+    }
+    function next(){
+      if(FRAMES) requestAnimationFrame(step);
+      else setTimeout(step, 16);
+    }
+    next();
   }
   function after(ms, fn){ timers.push(setTimeout(fn, ms)); }
   function clearAll(){ for(var t=0;t<timers.length;t++) clearTimeout(timers[t]); timers = []; }
@@ -3734,6 +3747,7 @@ function demoStage(){
     var tx = drop.left + drop.width / 2 - 126;
     var ty = drop.top + drop.height / 2 - 40;
 
+    cur.classList.remove("is-dragging", "is-press");
     cur.style.opacity = "0";
     at(cur, geo.w + 40, geo.h * 0.42);
 
@@ -3786,55 +3800,61 @@ function demoStage(){
       var tp = syncThumb();
       at(cur, tp.x - 9, tp.y - 6);          /* the cursor goes to the thumb */
     });
-    after(3450, function(){ thumb.classList.add("is-grabbed"); });
-    after(3700, function(){ glide(380, 800); });
-    after(4850, function(){ glide(0, 650); });
-    after(5650, function(){ thumb.classList.remove("is-grabbed"); });
+    after(3450, function(){
+      thumb.classList.add("is-grabbed");
+      cur.classList.add("is-dragging");
+    });
+    after(3700, function(){ glide(380, 1150); });
+    after(5250, function(){ glide(0, 950); });
+    after(6300, function(){
+      thumb.classList.remove("is-grabbed");
+      cur.classList.remove("is-dragging");
+    });
 
     /* the figure lights up before it is pressed, the way it would under a real
        pointer, and the press is something you can see */
     var tile = null;
-    after(5800, function(){
+    after(6450, function(){
       tile = document.querySelector('#meters [data-goto="day"]');
       if(!tile) return;
       var r = tile.getBoundingClientRect();
       at(cur, r.left + r.width * 0.52, r.top + r.height * 0.6);
     });
-    after(6500, function(){ if(tile) tile.classList.add("is-hover"); });
-    after(6950, function(){
+    after(7150, function(){ if(tile) tile.classList.add("is-hover"); });
+    after(7600, function(){
       if(!tile) return;
-      var r = tile.getBoundingClientRect();
       cur.classList.add("is-press");
-      ping(r.left + r.width * 0.52, r.top + r.height * 0.6);
+      tile.classList.add("is-press");
       tile.click();
     });
-    after(7250, function(){
+    after(7780, function(){
       cur.classList.remove("is-press");
-      if(tile) tile.classList.remove("is-hover");
+      if(tile) tile.classList.remove("is-press", "is-hover");
     });
 
-    after(8400, function(){
+    after(8900, function(){
       var tab = document.querySelector('.tab[data-tab="month"]');
       if(!tab) return;
       var r = tab.getBoundingClientRect();
       at(cur, r.left + r.width * 0.5, r.top + r.height * 0.72);
     });
-    after(9050, function(){
+    after(9550, function(){
       var tab = document.querySelector('.tab[data-tab="month"]');
       if(!tab) return;
-      var r = tab.getBoundingClientRect();
       cur.classList.add("is-press");
-      ping(r.left + r.width * 0.5, r.top + r.height * 0.72);
+      tab.classList.add("is-press");
       tab.click();
       window.scrollTo(0, 0);
     });
-    after(9350, function(){
+    after(9830, function(){
       cur.classList.remove("is-press");
+      var mt = document.querySelector('.tab[data-tab="month"]');
+      if(mt) mt.classList.remove("is-press");
       cur.style.opacity = "0";
       bar.classList.remove("on");
       root.classList.add("is-locked");          /* the crop stops moving again */
     });
-    after(9850, function(){ replay.classList.add("on"); });
+    after(10350, function(){ replay.classList.add("on"); });
   }
 
   replay.addEventListener("click", play);
