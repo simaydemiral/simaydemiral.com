@@ -3126,11 +3126,11 @@ function catOfferRow(id, cols){
     if(V[i].key === catOffer.key && V[i].id !== id && !V[i].part) n++;
   if(!n){ return ""; }
   return '<tr class="helprow"><td colspan="'+cols+'"><div class="offer">'
-    + '<span>Just this one, for now. Also change the other <b>' + n + '</b> '
+    + '<span>Changed this one. Also change the other <b>' + n + '</b> '
     + esc(MERCH_LABEL[catOffer.key] || titleCase(catOffer.key)) + ' transaction'
     + (n === 1 ? '' : 's') + ', and everything that arrives later?</span>'
     + '<button class="btn-q" id="catAll">Change all ' + (n+1) + '</button>'
-    + '<button class="btn-q" id="catOne">Keep it to this one</button>'
+    + '<button class="btn-q" id="catOne">Only change this one</button>'
     + '</div></td></tr>';
 }
 
