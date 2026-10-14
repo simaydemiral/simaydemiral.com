@@ -301,6 +301,15 @@ input[type=search]{min-width:200px}
 .askrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .asklbl{font-size:13px;color:var(--ink-2)}
 .btn-q.is-on{background:var(--go-wash);color:var(--go);border-color:currentColor}
+.btn-help{width:17px;height:17px;padding:0;border-radius:50%;border:1px solid var(--line);
+  background:transparent;color:var(--muted);font:600 11px/1 var(--f-body);cursor:pointer;
+  vertical-align:middle}
+.btn-help:hover{color:var(--ink);border-color:var(--ink-2)}
+.btn-help[aria-expanded="true"]{background:var(--ink);color:var(--ground);border-color:var(--ink)}
+.helprow td{padding-top:0;border-top:none}
+.helpnote{font-size:12.5px;line-height:1.55;color:var(--ink-2);max-width:46rem;
+  margin:2px 0 10px;padding:10px 12px;background:var(--sunken);border-radius:8px;
+  white-space:normal;text-align:left;font-weight:400}
 .recon{font:400 12px/1.4 var(--f-mono);padding:8px 10px;border-radius:8px;margin-top:10px}
 .recon.ok{background:var(--go-wash);color:var(--go)}
 .recon.bad{background:var(--stop-wash);color:var(--stop)}
@@ -1849,6 +1858,53 @@ function txnList(){
   });
 }
 
+/* The words on these buttons are ours, not anyone's: "unspent cash" and
+   "paying me back" both read as obvious to whoever wrote them and as nothing at
+   all to everyone else. A "?" beside each, and one plain sentence under it. */
+var HELP = {
+  unspent: "Cash you took out of a machine and later paid back in without "
+    + "spending it. The page counts cash as spent the day you take it out, so "
+    + "notes that went back untouched would be counted as spending that never "
+    + "happened. Saying so here takes this one deposit off your cash spending. "
+    + "A deposit of money from anywhere else \u2014 a wage, a transfer from your "
+    + "own account elsewhere \u2014 is not this.",
+  payback: "You paid for something you shared, and they sent you their half. "
+    + "Their half comes off what you spent in whichever category you pick, the "
+    + "way a shop\u2019s refund does, so the month shows what the evening cost "
+    + "you rather than what went through your account."
+};
+var helpOpen = "";
+
+function helpBtn(topic, id){
+  var k = topic + ":" + id;
+  return ' <button class="btn-help" data-help="'+esc(k)+'" aria-expanded="'
+    + (helpOpen === k ? "true" : "false") + '" aria-label="What this means">?</button>';
+}
+
+/* The sentence goes in a row of its own. Dropped into the last cell it was a
+   column inch wide and twelve lines tall. */
+function helpRow(id, cols){
+  if(!helpOpen || helpOpen.split(":").slice(1).join(":") !== String(id)) return "";
+  var topic = helpOpen.split(":")[0];
+  if(!HELP[topic]) return "";
+  return '<tr class="helprow"><td colspan="'+cols+'"><div class="helpnote">'
+    + esc(HELP[topic]) + '</div></td></tr>';
+}
+
+/* Cash you took out and did not spend. A deposit is money arriving by default,
+   because most of them are: a statement cannot tell a pay-in from your own bank
+   abroad from the notes you took out on Friday. Per transaction, not per
+   merchant, because the same machine does both. */
+function unspentCtl(t){
+  if(!CASH[t.cat] || !(t.amt > 0) || t.part) return "";
+  return ' <button class="btn-q' + (db.unspent[t.id] ? ' is-on' : '')
+    + '" data-unspent="'+esc(t.id)+'">'
+    + (db.unspent[t.id] ? 'Unspent cash \u2713' : 'Unspent cash') + '</button>'
+    + helpBtn("unspent", t.id);
+}
+
+function creditCtl(t){ return payBackCtl(t) + unspentCtl(t); }
+
 /* Their half of a bill you paid, said about one row. The same control wherever
    a credit is listed, because the place you notice the money is the place you
    should be able to answer for it. */
@@ -1861,10 +1917,9 @@ function payBackCtl(t){
                   'Not sure \u2014 just take it off my spending')
       + ' <button class="btn-q" data-pbcancel="1">Back</button>';
   return ' <button class="btn-q' + (db.paidBackTx[t.id] ? ' is-on' : '')
-    + '" data-pb="'+esc(t.id)+'" title="Their share of something you paid for '
-    + '\u2014 it comes off what you spent">'
+    + '" data-pb="'+esc(t.id)+'">'
     + (db.paidBackTx[t.id] ? 'Paying me back \u2713' : 'Paying me back')
-    + '</button>';
+    + '</button>' + helpBtn("payback", t.id);
 }
 
 function renderTxns(){
@@ -1893,16 +1948,9 @@ function renderTxns(){
          notes you took out on Friday and did not spend. If it was the second,
          say so on that one deposit and it comes off your cash spending. Per
          transaction, not per merchant, because the same ATM does both. */
-      + payBackCtl(t)
-      + (CASH[t.cat] && t.amt > 0 && !t.part
-          ? ' <button class="btn-q' + (db.unspent[t.id] ? ' is-on' : '')
-            + '" data-unspent="'+esc(t.id)+'" title="'
-            + (db.unspent[t.id]
-               ? 'Counting this as cash you took out and did not spend'
-               : 'Cash you took out and did not spend, coming back')
-            + '">' + (db.unspent[t.id] ? 'Unspent cash \u2713' : 'Unspent cash') + '</button>'
-          : '')
-      + '</td></tr>';
+      + creditCtl(t)
+      + '</td></tr>'
+      + helpRow(t.id, 6);
     if(splitOpen && t.id === splitOpen) h += splitEditor(t.id);
   }
   h += '</tbody></table>';
@@ -1947,8 +1995,9 @@ function renderPend(){
          + '<td class="t-merch">'+esc(rows[j].merch)+'</td>'
          + '<td class="t-acct">'+esc(labelOf(rows[j].cat))+'</td>'
          + '<td class="t-amt pos">+'+esc(money2(rows[j].refund))+'</td>'
-         + (ctl ? '<td class="t-split">' + payBackCtl(rows[j]) + '</td>' : '')
-         + '</tr>';
+         + (ctl ? '<td class="t-split">' + creditCtl(rows[j]) + '</td>' : '')
+         + '</tr>'
+         + (ctl ? helpRow(rows[j].id, 5) : '');
     return h + '</tbody></table><p class="note" style="margin-top:10px">'
          + rows.length + ' ' + noun + (rows.length === 1 ? "" : "s")
          + ' totalling <b>' + esc(money(tot)) + '</b>.</p>';
@@ -2804,6 +2853,13 @@ document.addEventListener("click", function(e){
     return;
   }
   if(b.getAttribute && b.getAttribute("data-pbcancel")){ pbOpen = ""; redrawLists(); return; }
+
+  if(b.getAttribute && b.getAttribute("data-help")){
+    var hk = b.getAttribute("data-help");
+    helpOpen = (helpOpen === hk) ? "" : hk;
+    redrawLists();
+    return;
+  }
 
   if(b.getAttribute && b.getAttribute("data-unspent")){
     var uid = b.getAttribute("data-unspent");
