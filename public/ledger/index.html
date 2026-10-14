@@ -1173,6 +1173,12 @@ function accountFromName(name){
 }
 
 function importFile(name, text){
+  /* The page's own guide warns that the statements page gives PDFs, so this is
+     the mistake a reader is primed to make, and "looks empty" sent them looking
+     for the wrong problem. */
+  if(/^%PDF-/.test(text)) return { ok:false, why:"that is a PDF, not a CSV." };
+  if(/\.(pdf|xlsx?|docx?|numbers|zip|png|jpe?g)$/i.test(name))
+    return { ok:false, why:"that is not a CSV." };
   var rows = parseCSV(text);
   if(rows.length < 2) return { ok:false, why:"That file looks empty." };
   var d = detect(rows);
@@ -1279,7 +1285,13 @@ function view(){
        for a shop; it is the wrong tool for a cash machine, which is not a
        merchant but a hole that different money goes through. */
     else if(db.catTx[t.id] && !part){ cat = db.catTx[t.id]; why = "you set this one"; }
-    var nets = !MONEY_IN[cat] || !!db.paidBack[key] || !!db.unspent[t.id] || !!one;
+    /* A part carries its own category, chosen in the split editor, so its
+       netting follows that and nothing else. Inheriting the parent's exception
+       without the parent's category made a credit filed under Restaurants come
+       off External transfers, cancelling $180 she really had sent a friend and
+       deleting the bar it belonged to. */
+    var nets = part ? !MONEY_IN[cat]
+             : (!MONEY_IN[cat] || !!db.paidBack[key] || !!db.unspent[t.id] || !!one);
     return { id:id, date:t.date, month:t.date.slice(0,7), desc:t.desc, key:key,
              merch:merch, amt:amt, acct:t.acct, cat:cat, why:why, part:part,
              nets: nets,
@@ -1623,8 +1635,13 @@ function renderMonth(){
     .map(function(m){ return spendOf(V.filter(function(t){ return t.month===m; }), "day"); });
   var med = median(hist);
 
+  /* Money that came off what you spent, excluding cash you marked as unspent:
+     that has its own tile, and counting it here reported one dollar twice.
+     Excluding it also makes this agree with the rows behind it, which are
+     chosen by category and so never included cash. */
   var refunds = 0;
-  for(i=0;i<list.length;i++) if(list[i].nets) refunds += list[i].refund;
+  for(i=0;i<list.length;i++)
+    if(list[i].nets && !CASH[list[i].cat]) refunds += list[i].refund;
   var pendSum = 0;
   /* Scoped to the month on screen, like every other tile beside it. It used to
      sum every pending charge whatever its date, so one logged for December
@@ -1779,9 +1796,9 @@ function renderMonth(){
 
   if(refunds > 0)
     add("+" + money(refunds), "go", "Refunded",
-        list.filter(function(t){ return t.refund > 0 && t.nets; }).length
-        + " credit" + (list.filter(function(t){ return t.refund > 0 && t.nets; }).length === 1 ? "" : "s")
-        + " from shops, already netted off");
+        list.filter(function(t){ return t.refund > 0 && t.nets && !CASH[t.cat]; }).length
+        + " credit" + (list.filter(function(t){ return t.refund > 0 && t.nets && !CASH[t.cat]; }).length === 1 ? "" : "s")
+        + ", already subtracted above");
 
   /* "1312% of the month" — the tile counts everything still to tag, money in
      included, while the month total counts only spending. A percentage across
@@ -1824,8 +1841,9 @@ function renderMonth(){
   if(cats.length && loose > 0.5)
     catsHtml += '<p class="note" style="margin:12px 0 0;padding-top:10px;'
       + 'border-top:1px solid var(--line-soft)">' + esc(money(loose))
-      + ' came back without a category &mdash; already subtracted from the '
-      + esc(money(total)) + ' above, but it belongs to none of these bars.</p>';
+      + ' came back into a category that more came back from than went out '
+      + 'this month &mdash; already subtracted from the ' + esc(money(total))
+      + ' above, which is why the bars add up to more than it.</p>';
 
   if(!cats.length && total < 0)
     catsHtml = '<p class="empty">More came back than went out in '
@@ -2182,12 +2200,17 @@ function recurring(){
          disappears at exactly the moment you would want to see it. So each
          charge is compared with the one before it, and the series is allowed
          one step up or down. */
-      var steps = 0;
+      var steps = 0, stepAt = -1;
       steady = 1;
       for(i=1;i<amts.length;i++){
         if(Math.abs(amts[i] - amts[i-1]) <= Math.max(1, amts[i-1] * 0.02)) steady++;
-        else if(steps === 0){ steps = 1; steady++; }
+        else if(steps === 0){ steps = 1; stepAt = i; steady++; }
       }
+      /* A price rise is a rise once it has been charged twice. Accepting it on
+         the strength of the final charge priced $9.99, $9.99, $9.99, $199.00 at
+         $199 a month — a row claiming $2,388 a year from a service that had
+         taken $229 in total, and most of the yearly headline with it. */
+      if(steps && stepAt >= amts.length - 1) continue;
       /* and what it costs now is the price it last charged, not the middle of
          what it used to charge */
       if(steps) a = amts[amts.length-1];
@@ -3122,6 +3145,9 @@ document.addEventListener("change", function(e){
       if(!val){ redrawLists(); return; }
     }
     db.paidBackTx[txid] = val;
+    /* A category set on this row earlier would otherwise sit underneath,
+       invisible, and surface as a third category when this mark is removed. */
+    if(db.catTx[txid]) delete db.catTx[txid];
     pbOpen = "";
     save(); render(); redrawLists();
     toast("Comes off what you spent.");
@@ -3221,10 +3247,16 @@ document.addEventListener("change", function(e){
     db.rules[key] = val;
     /* a rule for the merchant outranks nothing: clear the one-offs it covers,
        or they would quietly survive the thing meant to replace them */
-    for(var ci=0;ci<V.length;ci++) if(V[ci].key === key) delete db.catTx[V[ci].id];
+    var cleared = 0;
+    for(var ci=0;ci<V.length;ci++)
+      if(V[ci].key === key && db.catTx[V[ci].id]){ delete db.catTx[V[ci].id]; cleared++; }
     save(); render(); renderMerch();
+    /* Saying how many exceptions went with it, because changing your mind back
+       will not bring them back. */
     toast('"' + (MERCH_LABEL[key] || titleCase(key)) + '" is now ' + labelOf(val)
-      + ' \u2014 everywhere.');
+      + ' \u2014 everywhere.'
+      + (cleared ? " " + cleared + " transaction" + (cleared === 1 ? "" : "s")
+                 + " you had set separately went with it." : ""));
     return;
   }
 
@@ -3249,8 +3281,16 @@ document.addEventListener("change", function(e){
   }
 
   db.catTx[id] = val;
+  /* Marks that only make sense in the category they were made in. "Unspent
+     cash" on a row that is no longer cash kept netting from a control that had
+     disappeared, and came back on its own if the category ever returned. */
+  if(!CASH[val] && db.unspent[id]) delete db.unspent[id];
   catOffer = { id:id, key:key, cat:val };
   save(); render(); redrawLists();
+  /* On a merchant with one transaction no offer appears, and without this the
+     only sign anything happened was a coloured edge you had to notice. */
+  if(!catOffer || !V.filter(function(v){ return v.key === key && v.id !== id && !v.part; }).length)
+    toast("This one is now " + labelOf(val) + ". Others from this merchant are unchanged.");
 });
 
 /* How many other transactions the merchant rule would reach, so the size of
@@ -3266,7 +3306,8 @@ function catOfferRow(id, cols){
   return '<tr class="helprow"><td colspan="'+cols+'"><div class="offer">'
     + '<span>Changed this one. Also change the other <b>' + n + '</b> '
     + esc(MERCH_LABEL[catOffer.key] || titleCase(catOffer.key)) + ' transaction'
-    + (n === 1 ? '' : 's') + ', and everything that arrives later?</span>'
+    + (n === 1 ? '' : 's') + ' &mdash; ' + (n+1) + ' in all &mdash; and everything '
+    + 'that arrives later?</span>'
     + '<button class="btn-q" id="catAll">Change all ' + (n+1) + '</button>'
     + '<button class="btn-q" id="catOne">Only change this one</button>'
     + '</div></td></tr>';
