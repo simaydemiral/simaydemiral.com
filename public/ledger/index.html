@@ -3782,7 +3782,15 @@ function demoStage(){
      moves it takes the figures off the top. Tracked as a flag rather than read
      off a class, so it cannot be left in the wrong state by a timer firing
      late. */
-  var scrollOwned = false;     /* the demo is deliberately moving the page */
+  var scrollOwned = false;     /* a glide is moving the page right now */
+  /* ...and this one stays true for the whole scripted stretch. scrollOwned
+     goes false on a glide's last step, but the scroll event that step caused
+     is delivered after it — so the guard below saw a page sitting at the
+     bottom that nothing claimed to be moving, and snapped it home. That is
+     the jump to the top with the cursor nowhere near the bar. It showed up
+     on a phone because there the page is long enough for the snap to cover
+     real ground. */
+  var scripted = false;
   var handedOver = false;      /* the visitor is in charge now */
 
   /* Handing over means unlocking: up to here the document is overflow:hidden
@@ -3794,6 +3802,7 @@ function demoStage(){
     if(handedOver) return;
     handedOver = true;
     scrollOwned = false;
+    scripted = false;
     clearAll();
     /* Grabbed mid-performance, the files would otherwise freeze halfway
        across the screen. Skip to the end rather than leaving the trick
@@ -3969,6 +3978,7 @@ function demoStage(){
        then hands the page over. */
     var root = document.documentElement;
     after(3360, function(){
+      scripted = true;
       root.classList.remove("is-locked");
       bar.classList.add("on");
       var tp = syncThumb();
@@ -4064,7 +4074,7 @@ function demoStage(){
   /* Whatever else tries to scroll — a focus ring, a browser restoring a
      position — the locked crop stays where it is. */
   window.addEventListener("scroll", function(){
-    if(!scrollOwned && !handedOver && window.pageYOffset) window.scrollTo(0, 0);
+    if(!scrollOwned && !scripted && !handedOver && window.pageYOffset) window.scrollTo(0, 0);
   }, { passive: true });
 
   document.documentElement.classList.add("is-locked");
