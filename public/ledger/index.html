@@ -3830,6 +3830,7 @@ function demoStage(){
        none at all — and a scroll that silently never moves is worse than a
        coarse one. Frames first, because they are what makes it smooth. */
     var from = window.pageYOffset, t0 = Date.now();
+    ms = Math.round(ms * PACE);
     gliding++;
     var mine = gliding;
     scrollOwned = true;
@@ -3852,7 +3853,12 @@ function demoStage(){
     }
     next();
   }
-  function after(ms, fn){ timers.push(setTimeout(fn, ms)); }
+  /* One knob for the whole performance. Every beat and every glide is
+     written at its natural spacing and then stretched by this, so slowing
+     the thing down does not mean re-timing twenty steps against each
+     other. */
+  var PACE = 1.25;
+  function after(ms, fn){ timers.push(setTimeout(fn, Math.round(ms * PACE))); }
   function clearAll(){ for(var t=0;t<timers.length;t++) clearTimeout(timers[t]); timers = []; }
 
   function layout(){
@@ -3975,9 +3981,13 @@ function demoStage(){
     /* All the way down and all the way back, not 380px and back: a drag that
        stops a sixth of the way through reads as the page having run out,
        which is the opposite of what it is there to show. */
-    after(4110, function(){ glide(maxScroll(), 1600); });
-    after(6010, function(){ glide(0, 1300); });
-    after(7410, function(){
+    after(4110, function(){ glide(maxScroll(), 1900); });
+    /* A beat at the bottom before the climb, and a slower climb than the
+       descent. Coming back up covers the same ground in less time than it
+       took to go down reads as a snap rather than a drag, however faithfully
+       the cursor follows it. */
+    after(6510, function(){ glide(0, 2300); });
+    after(9060, function(){
       thumb.classList.remove("is-grabbed");
       cur.classList.remove("is-dragging");
     });
@@ -3985,31 +3995,31 @@ function demoStage(){
     /* the figure lights up before it is pressed, the way it would under a real
        pointer, and the press is something you can see */
     var tile = null;
-    after(7560, function(){
+    after(9210, function(){
       tile = document.querySelector('#meters [data-goto="day"]');
       if(!tile) return;
       var r = tile.getBoundingClientRect();
       at(cur, r.left + r.width * 0.52, r.top + r.height * 0.6);
     });
-    after(8110, function(){ if(tile) tile.classList.add("is-hover"); });
-    after(8560, function(){
+    after(9760, function(){ if(tile) tile.classList.add("is-hover"); });
+    after(10210, function(){
       if(!tile) return;
       cur.classList.add("is-press");
       tile.classList.add("is-press");
       tile.click();
     });
-    after(8740, function(){
+    after(10390, function(){
       cur.classList.remove("is-press");
       if(tile) tile.classList.remove("is-press", "is-hover");
     });
 
-    after(9860, function(){
+    after(11510, function(){
       var tab = document.querySelector('.tab[data-tab="month"]');
       if(!tab) return;
       var r = tab.getBoundingClientRect();
       at(cur, r.left + r.width * 0.5, r.top + r.height * 0.72);
     });
-    after(10410, function(){
+    after(12060, function(){
       var tab = document.querySelector('.tab[data-tab="month"]');
       if(!tab) return;
       cur.classList.add("is-press");
@@ -4019,7 +4029,7 @@ function demoStage(){
          there sent the bar flying up on its own with the cursor nowhere
          near it. */
     });
-    after(10690, function(){
+    after(12340, function(){
       cur.classList.remove("is-press");
       var mt = document.querySelector('.tab[data-tab="month"]');
       if(mt) mt.classList.remove("is-press");
@@ -4028,7 +4038,7 @@ function demoStage(){
          it just will not wander on its own. */
       handOver();
     });
-    after(11190, function(){ replay.classList.add("on"); });
+    after(12840, function(){ replay.classList.add("on"); });
   }
 
   replay.addEventListener("click", play);
