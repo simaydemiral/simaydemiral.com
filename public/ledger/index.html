@@ -139,6 +139,7 @@ select.cat.own{box-shadow:inset 3px 0 0 var(--brand)}
   .meter{padding:10px 11px}
   .meter-n{font-size:18px}
   .meter-l{font-size:10.5px;margin-top:3px}
+  .meter-hint{display:none}
   /* five: the last two split the second row */
   .meters > :nth-child(4):nth-last-child(2),
   .meters > :nth-child(5):nth-last-child(1){grid-column:span 3}
@@ -1779,7 +1780,7 @@ function renderMonth(){
        exact than the big one. The cents are in the table underneath. */
       meter(money0s(total), "Day-to-day in " + monthName(curMonth).split(" ")[0]
             + (partial ? " so far" : ""), "", "day")
-    + meterIf(fixed, money0s(fixed), "Fixed costs", "", "fixed")
+    + meterIf(fixed, money0s(fixed), "Fixed costs", "", "fixed", "(e.g., rent, tuition)")
     + meterIf(refunds, "+" + money0(refunds), "Refunded back", "is-go", "refund")
     + meterIf(cashOut, money0(cashOut),
               cashBack ? "Cash spent" : "Cash withdrawn", "", "cash")
@@ -1989,17 +1990,21 @@ function renderMonth(){
 
 function CAT_LABEL_OF(row){ return row[0]; }
 
-function meter(n, l, cls, goTo){
+function meter(n, l, cls, goTo, hint){
   var g = goTo ? ' go" tabindex="0" role="button" data-goto="'+esc(goTo)+'"' : '"';
+  /* The hint is the example that makes a label concrete, and the first thing
+     to go when the tile is a third of a phone wide: at that size it wrapped
+     to four lines and set the height of every tile beside it. */
+  var h = hint ? '<span class="meter-hint"> ' + esc(hint) + '</span>' : '';
   return '<div class="meter '+cls+g+'><div class="meter-n">'+esc(n)+'</div>'
-       + '<div class="meter-l">'+esc(l)+'</div></div>';
+       + '<div class="meter-l">'+esc(l)+h+'</div></div>';
 }
 
 /* A tile reading $0 takes the same room as one reading $10,275 and says
    nothing: no refunds, no pending, nothing left to tag is the ordinary state
    of an ordinary month. The month figure stays whatever it reads, because a
    month with nothing in it is itself worth seeing. */
-function meterIf(v, n, l, cls, goTo){ return v ? meter(n, l, cls, goTo) : ""; }
+function meterIf(v, n, l, cls, goTo, hint){ return v ? meter(n, l, cls, goTo, hint) : ""; }
 
 /* ------------------------------------------------------------
    Your own categories. The built-in list covers what most people
