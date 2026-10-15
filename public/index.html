@@ -270,64 +270,6 @@
 </div><!-- /.sheet -->
 
 <script>
-/* The name resolves out of noise. A scramble rather than a typewriter, because
-   the letters arrive together and the shape of the word is there from the
-   first frame — it reads as a signal tuning in, not as something being typed
-   at you. One second, once, on load.
-
-   The real name stays in the markup and on aria-label, so a reader who never
-   sees the animation — a screen reader, a search engine, anyone who asked for
-   less motion — gets the word and not the noise. */
-(function () {
-  var el = document.querySelector('.hero-copy h1');
-  if (!el) return;
-  var FINAL = el.textContent.trim();
-  el.setAttribute('aria-label', FINAL);
-
-  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-  /* Marks and letters, no emoji and nothing that reads as a different
-     alphabet: it should look like the name under interference. */
-  var GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz/\\|<>~=+*·:;§±#%&';
-  function noise() { return GLYPHS.charAt(Math.floor(Math.random() * GLYPHS.length)); }
-
-  /* Hold the box it already fills, or every frame of noise would re-measure
-     the line and the paragraph under it would jump. */
-  var box = el.getBoundingClientRect();
-  el.style.minHeight = Math.ceil(box.height) + 'px';
-
-  var chars = FINAL.split('');
-  var settle = chars.map(function (c, i) {
-    /* left to right, loosely: a little randomness stops it reading as a wipe */
-    return c === ' ' ? 0 : 260 + i * 52 + Math.random() * 220;
-  });
-  var DUR = Math.max.apply(null, settle) + 90;
-  var t0 = Date.now(), last = 0;
-
-  function frame() {
-    var t = Date.now() - t0;
-    /* new glyphs about 18 times a second: faster is a blur, slower is a slot
-       machine */
-    if (t - last > 55 || t >= DUR) {
-      last = t;
-      var out = '', i;
-      for (i = 0; i < chars.length; i++)
-        out += (chars[i] === ' ' || t >= settle[i]) ? chars[i] : noise();
-      el.textContent = out;
-    }
-    if (t < DUR) requestAnimationFrame(frame);
-    else { el.textContent = FINAL; el.style.minHeight = ''; }
-  }
-  el.textContent = chars.map(function (c) { return c === ' ' ? ' ' : noise(); }).join('');
-  requestAnimationFrame(frame);
-
-  /* If frames never come — a hidden tab, an odd embedding — the name must not
-     be left as noise. */
-  setTimeout(function () {
-    if (el.textContent !== FINAL) { el.textContent = FINAL; el.style.minHeight = ''; }
-  }, DUR + 1200);
-})();
-
 /* The embedded tool is rendered at a fixed desktop width and scaled to fit, so
    the layout a visitor sees is the real one rather than the cramped column a
    narrow iframe would lay out. The scale has to follow the frame, or it leaves
