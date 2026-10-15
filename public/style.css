@@ -1060,6 +1060,9 @@ h1 em {
 @media (max-width: 42rem) {
   /* A phone reads a shorter line, so the same type size sits heavier there
      than it does on a desktop. A notch down, not a different voice. */
+  /* A circle this size is most of a phone's width, which makes the portrait
+     the headline instead of the name under it. */
+  .portrait { width: 12rem; height: 12rem; margin-bottom: 1.4rem; }
   .lede { font-size: 0.97rem; }
   .item-body > p:not(.meta):not(.actions),
   .item > p:not(.meta):not(.actions) { font-size: 0.94rem; }
