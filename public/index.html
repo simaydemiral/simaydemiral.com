@@ -46,6 +46,11 @@
       <li><a href="#background">Background</a></li>
       <li><a href="#contact">Contact</a></li>
     </ul>
+    <!-- The palette follows the system until someone says otherwise, and then
+         it remembers. -->
+    <button type="button" id="theme" class="theme-btn" aria-label="Switch between light and dark">
+      <span class="theme-dot" aria-hidden="true"></span><span id="themeWord">Dark</span>
+    </button>
   </nav>
 
 
@@ -600,5 +605,44 @@
 <!-- Cloudflare Web Analytics. Deliberately absent from /ledger/, whose case
      study invites the reader to open the network tab and find it empty. -->
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "b5ccee39b4ca42329bce3ede2880bcc6"}'></script>
+<script>
+/* Theme. Follows the system until someone chooses, then remembers — on every
+   page, so the choice does not evaporate when they open a case study. */
+(function () {
+  var root = document.documentElement, KEY = 'sd-theme';
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  if (saved === 'light' || saved === 'dark') root.setAttribute('data-theme', saved);
+
+  function systemDark() {
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  function isDark() {
+    var set = root.getAttribute('data-theme');
+    return set ? set === 'dark' : systemDark();
+  }
+  function label() {
+    var w = document.getElementById('themeWord');
+    /* the button names what it will give you, not what you are looking at */
+    if (w) w.textContent = isDark() ? 'Light' : 'Dark';
+  }
+  label();
+
+  var btn = document.getElementById('theme');
+  if (btn) btn.addEventListener('click', function () {
+    var next = isDark() ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem(KEY, next); } catch (e) {}
+    label();
+  });
+
+  /* if they never chose, keep following the system when it changes */
+  if (!saved && window.matchMedia) {
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    var follow = function () { label(); };
+    if (mq.addEventListener) mq.addEventListener('change', follow);
+  }
+})();
+</script>
 </body>
 </html>

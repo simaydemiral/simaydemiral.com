@@ -1089,7 +1089,9 @@ h1 em {
 
 @media (max-width: 42rem) {
   .item--illustrated { grid-template-columns: 1fr; }
-  .item--illustrated .plate { order: -1; }
+  /* Stacked, the drawing ran the full width of the card and overpowered the
+     title under it. Held to about the width of that title instead. */
+  .item--illustrated .plate { order: -1; max-width: 15rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1284,3 +1286,32 @@ h1 em {
 }
 :root[data-theme="dark"] .shot .shot-light { display: none; }
 :root[data-theme="dark"] .shot .shot-dark  { display: block; }
+
+
+/* ------------------------------------------------------------------
+   Theme control. The palette follows the system until someone chooses,
+   and the choice is kept for next time.
+   ------------------------------------------------------------------ */
+.theme-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.38rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: none;
+  color: var(--body);
+  font: 500 0.66rem/1 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.18s ease, border-color 0.18s ease;
+}
+.theme-btn:hover { color: var(--ink); border-color: var(--ink-2, var(--accent)); }
+.theme-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--accent);
+  flex: none;
+}

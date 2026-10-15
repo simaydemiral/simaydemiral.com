@@ -345,9 +345,15 @@ input[type=search]{min-width:200px}
   display:flex;gap:10px;align-items:flex-start;
   transition:transform .55s cubic-bezier(.33,.02,.2,1),opacity .35s ease;
   will-change:transform}
+@media (max-width:560px){
+  .stage-file{width:168px;padding:9px 10px;font-size:11px;gap:7px}
+  .stage-file .sf-m{font-size:9.5px}
+  #stageBar{width:8px;right:4px}
+}
 .stage-file .sf-x{font:600 10px/1 var(--f-mono);letter-spacing:.06em;
   color:var(--brand);border:1px solid var(--brand);border-radius:4px;
   padding:4px 5px;flex:none;margin-top:1px}
+.stage-file > span:last-child{min-width:0}
 .stage-file .sf-n{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stage-file .sf-m{display:block;color:var(--muted);font-weight:400;font-size:11px;
   margin-top:3px}
@@ -3785,10 +3791,16 @@ function demoStage(){
 
   function layout(){
     var w = window.innerWidth, h = window.innerHeight;
-    var x = Math.max(w - 288, w * 0.58);   /* 252 wide plus a margin */
+    /* Measured, not assumed: the cards are narrower on a narrow stage, and a
+       hard-coded inset put them over the right-hand edge there. */
+    var cw = cards[0].getBoundingClientRect().width || 252;
+    var ch = cards[0].getBoundingClientRect().height || 62;
+    var x = Math.max(10, w - cw - (w < 560 ? 14 : 36));
+    var gap = ch + (w < 560 ? 14 : 24);
+    var top = w < 560 ? 112 : 150;
     for(var k=0;k<cards.length;k++){
-      cards[k].dataset.hx = x; cards[k].dataset.hy = 150 + k * 86;
-      at(cards[k], x, 150 + k * 86);
+      cards[k].dataset.hx = x; cards[k].dataset.hy = top + k * gap;
+      at(cards[k], x, top + k * gap);
       cards[k].classList.remove("is-gone", "is-held", "is-picked", "is-click");
     }
     return { w:w, h:h };
@@ -3953,12 +3965,10 @@ function demoStage(){
   replay.addEventListener("click", play);
   window.addEventListener("resize", function(){ if(!db.txns.length) layout(); });
 
-  /* Anyone who asked for less movement gets the answer without the journey —
-     and so does a phone, where the page is laid out narrow and a cursor
-     dragging files across it would be a pantomime of an input nobody there
-     uses. */
-  if(window.innerWidth < 560 ||
-     (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches)){
+  /* Anyone who asked for less movement gets the answer without the journey.
+     A phone gets the journey too: the embed is a picture of a desktop either
+     way, and watching a file become numbers is the whole point of it. */
+  if(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches){
     demoData(); render(); $("receipt").innerHTML = ""; $("covers").hidden = true;
     stage.style.display = "none";
     return;
