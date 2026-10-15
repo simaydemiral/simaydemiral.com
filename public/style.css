@@ -258,7 +258,11 @@ h1 em {
 /* An empty placeholder box. Delete this class from an <article> once you
    put real content in it. */
 .item--empty {
-  min-height: 9rem;
+  /* Shorter than a real card: it is a promise, and it should not take the
+     same room on the page as the things that are actually finished. */
+  min-height: 5.5rem;
+  padding-top: 1.1rem;
+  padding-bottom: 1.1rem;
   display: grid;
   place-items: center;
 }
@@ -271,6 +275,16 @@ h1 em {
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: color-mix(in srgb, var(--body) 72%, transparent);
+  /* It breathes rather than blinks, and it is the words that move, not a
+     border: an outline pulsing around a card reads as a focus ring or
+     something gone wrong, where a label fading up and back reads as
+     something still on its way. Slow enough to notice only if you look. */
+  animation: breathe 4.2s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% { color: color-mix(in srgb, var(--body) 34%, transparent); }
+  50%      { color: color-mix(in srgb, var(--accent) 85%, var(--body)); }
 }
 
 .item h3 {
