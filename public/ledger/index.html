@@ -3641,7 +3641,10 @@ function demoFiles(){
 function demoData(){
   var f = demoFiles(), i;
   for(i=0;i<f.length;i++) importFile(f[i][0], f[i][2]);
-  db.files = [];                     /* the receipt is noise on a demo */
+  /* The files stay on the record. Clearing them kept the import receipt quiet
+     but also emptied the Files tab, so the page said nought beside a tab
+     holding the three statements it had just been given. The receipt is
+     silenced on its own, where it is drawn. */
   curMonth = "2026-09";
 }
 
