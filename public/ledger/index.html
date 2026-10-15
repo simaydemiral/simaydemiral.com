@@ -139,7 +139,9 @@ select.cat.own{box-shadow:inset 3px 0 0 var(--brand)}
   .meter{padding:10px 11px}
   .meter-n{font-size:18px}
   .meter-l{font-size:10.5px;margin-top:3px}
-  .meter-hint{display:none}
+  /* Its own line at this width: inline it would break mid-phrase and cost
+     three lines instead of two. */
+  .meter-hint{display:block}
   /* five: the last two split the second row */
   .meters > :nth-child(4):nth-last-child(2),
   .meters > :nth-child(5):nth-last-child(1){grid-column:span 3}
@@ -1780,7 +1782,7 @@ function renderMonth(){
        exact than the big one. The cents are in the table underneath. */
       meter(money0s(total), "Day-to-day in " + monthName(curMonth).split(" ")[0]
             + (partial ? " so far" : ""), "", "day")
-    + meterIf(fixed, money0s(fixed), "Fixed costs", "", "fixed", "(e.g., rent, tuition)")
+    + meterIf(fixed, money0s(fixed), "Fixed costs", "", "fixed", "(rent, tuition)")
     + meterIf(refunds, "+" + money0(refunds), "Refunded back", "is-go", "refund")
     + meterIf(cashOut, money0(cashOut),
               cashBack ? "Cash spent" : "Cash withdrawn", "", "cash")
