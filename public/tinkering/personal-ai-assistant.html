@@ -165,7 +165,10 @@
                 <rect x="12" y="12" width="24" height="24" fill="#fff"/>
                 <text class="gcal-num" x="24" y="31" fill="#4285f4">31</text>
               </svg>
-              <svg viewBox="0 0 48 48" aria-hidden="true">
+              <!-- logo-events is what styles the two <text> runs below; without
+                   it they fall back to 16px black, anchored left, and "SEP"
+                   walks out of the icon. -->
+              <svg viewBox="0 0 48 48" class="logo-events" aria-hidden="true">
                 <rect x="6" y="7" width="36" height="34" rx="7" fill="#fff" stroke="rgba(0,0,0,.14)"/>
                 <path d="M6 14a7 7 0 0 1 7-7h22a7 7 0 0 1 7 7v3H6z" fill="#ff3b30"/>
                 <text class="ev-mon" x="24" y="15">SEP</text>
