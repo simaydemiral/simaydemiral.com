@@ -353,6 +353,8 @@ input[type=search]{min-width:200px}
   margin-top:3px}
 .stage-file.is-picked{border-color:var(--brand);box-shadow:0 0 0 2px var(--brand-wash),
   0 10px 30px rgba(0,0,0,.35)}
+/* The press. Not a transform: that is what positions the card. */
+.stage-file.is-click{filter:brightness(1.14)}
 .stage-file.is-held{box-shadow:0 18px 44px rgba(0,0,0,.5)}
 .stage-file.is-gone{opacity:0;transition:opacity .25s ease}
 #stageCursor{position:absolute;width:22px;height:22px;margin:-2px 0 0 -2px;
@@ -3787,7 +3789,7 @@ function demoStage(){
     for(var k=0;k<cards.length;k++){
       cards[k].dataset.hx = x; cards[k].dataset.hy = 150 + k * 86;
       at(cards[k], x, 150 + k * 86);
-      cards[k].classList.remove("is-gone", "is-held", "is-picked");
+      cards[k].classList.remove("is-gone", "is-held", "is-picked", "is-click");
     }
     return { w:w, h:h };
   }
@@ -3816,36 +3818,59 @@ function demoStage(){
     cur.style.opacity = "0";
     at(cur, geo.w + 40, geo.h * 0.42);
 
-    /* the cursor arrives beside the pile */
-    after(140, function(){
-      cur.style.opacity = "1";
-      at(cur, +cards[0].dataset.hx - 18, +cards[1].dataset.hy + 20);
-    });
+    /* Selecting them the way a person does: the cursor lands on the first
+       file and clicks it, travels down to the last, and clicks that — which is
+       a range, and takes the middle one with it. Lighting all three at once
+       while the cursor was still in transit read as magic rather than as
+       somebody choosing. The cursor sits ON the card it is clicking. */
+    function onCard(i, dx, dy){
+      return [ +cards[i].dataset.hx + (dx === undefined ? 30 : dx),
+               +cards[i].dataset.hy + (dy === undefined ? 24 : dy) ];
+    }
+    function press(i){
+      cur.classList.add("is-press");
+      cards[i].classList.add("is-click");
+    }
+    function release(i){
+      cur.classList.remove("is-press");
+      cards[i].classList.remove("is-click");
+    }
 
-    /* all three light up as one selection */
-    after(620, function(){
-      for(k=0;k<cards.length;k++) cards[k].classList.add("is-picked");
+    after(120, function(){
+      cur.style.opacity = "1";
+      var a = onCard(0); at(cur, a[0], a[1]);
     });
+    after(640, function(){ press(0); cards[0].classList.add("is-picked"); });
+    after(840, function(){ release(0); });
+
+    after(1020, function(){ var a = onCard(2); at(cur, a[0], a[1]); });
+    after(1700, function(){
+      press(2);
+      cards[1].classList.add("is-picked");      /* the range fills in */
+      cards[2].classList.add("is-picked");
+    });
+    after(1900, function(){ release(2); });
 
     /* and gather into a single stack under the cursor */
-    after(900, function(){
+    after(2120, function(){
       for(k=0;k<cards.length;k++){
         cards[k].classList.add("is-held");
         at(cards[k], +cards[0].dataset.hx + k * 7, +cards[1].dataset.hy + k * 7);
       }
+      var a = onCard(1); at(cur, a[0], a[1]);
     });
 
     /* carried over together */
-    after(1350, function(){
+    after(2620, function(){
       at(cur, tx + 150, ty + 34);
       for(k=0;k<cards.length;k++) at(cards[k], tx + k * 7, ty + k * 7);
       $("drop").classList.add("over");
     });
 
     /* dropped: the real import, three files, in order */
-    after(2050, function(){
+    after(3300, function(){
       for(k=0;k<cards.length;k++){
-        cards[k].classList.remove("is-held", "is-picked");
+        cards[k].classList.remove("is-held", "is-picked", "is-click");
         cards[k].classList.add("is-gone");
       }
       $("drop").classList.remove("over");
@@ -3859,19 +3884,19 @@ function demoStage(){
        behind it. The cursor takes a look down the page, opens one of them, and
        then hands the page over. */
     var root = document.documentElement;
-    after(2250, function(){
+    after(3360, function(){
       root.classList.remove("is-locked");
       bar.classList.add("on");
       var tp = syncThumb();
       at(cur, tp.x - 9, tp.y - 6);          /* the cursor goes to the thumb */
     });
-    after(2750, function(){
+    after(3860, function(){
       thumb.classList.add("is-grabbed");
       cur.classList.add("is-dragging");
     });
-    after(3000, function(){ glide(380, 1150); });
-    after(4550, function(){ glide(0, 950); });
-    after(5600, function(){
+    after(4110, function(){ glide(380, 1150); });
+    after(5660, function(){ glide(0, 950); });
+    after(6710, function(){
       thumb.classList.remove("is-grabbed");
       cur.classList.remove("is-dragging");
     });
@@ -3879,31 +3904,31 @@ function demoStage(){
     /* the figure lights up before it is pressed, the way it would under a real
        pointer, and the press is something you can see */
     var tile = null;
-    after(5750, function(){
+    after(6860, function(){
       tile = document.querySelector('#meters [data-goto="day"]');
       if(!tile) return;
       var r = tile.getBoundingClientRect();
       at(cur, r.left + r.width * 0.52, r.top + r.height * 0.6);
     });
-    after(6300, function(){ if(tile) tile.classList.add("is-hover"); });
-    after(6750, function(){
+    after(7410, function(){ if(tile) tile.classList.add("is-hover"); });
+    after(7860, function(){
       if(!tile) return;
       cur.classList.add("is-press");
       tile.classList.add("is-press");
       tile.click();
     });
-    after(6930, function(){
+    after(8040, function(){
       cur.classList.remove("is-press");
       if(tile) tile.classList.remove("is-press", "is-hover");
     });
 
-    after(8050, function(){
+    after(9160, function(){
       var tab = document.querySelector('.tab[data-tab="month"]');
       if(!tab) return;
       var r = tab.getBoundingClientRect();
       at(cur, r.left + r.width * 0.5, r.top + r.height * 0.72);
     });
-    after(8600, function(){
+    after(9710, function(){
       var tab = document.querySelector('.tab[data-tab="month"]');
       if(!tab) return;
       cur.classList.add("is-press");
@@ -3911,7 +3936,7 @@ function demoStage(){
       tab.click();
       window.scrollTo(0, 0);
     });
-    after(8880, function(){
+    after(9990, function(){
       cur.classList.remove("is-press");
       var mt = document.querySelector('.tab[data-tab="month"]');
       if(mt) mt.classList.remove("is-press");
@@ -3922,7 +3947,7 @@ function demoStage(){
       bar.classList.add("is-live");
       root.classList.add("is-locked");
     });
-    after(9380, function(){ replay.classList.add("on"); });
+    after(10490, function(){ replay.classList.add("on"); });
   }
 
   replay.addEventListener("click", play);
