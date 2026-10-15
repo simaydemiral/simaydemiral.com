@@ -3874,8 +3874,11 @@ function demoStage(){
      the visitor scrolls down to the answer and misses the question. The parent
      says when it is actually visible; the timeout is there in case it never
      does. */
+  /* A beat before it begins, so the reader sees what the page looks like with
+     nothing in it — the drop zone, and the files waiting — before anything
+     starts moving. Without it the answer arrives before the question lands. */
   var started = false;
-  function once(){ if(started) return; started = true; play(); }
+  function once(){ if(started) return; started = true; setTimeout(play, 1500); }
   document.documentElement.classList.add("is-locked");
   if(window.parent !== window){
     window.addEventListener("message", function(e){
