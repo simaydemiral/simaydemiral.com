@@ -155,7 +155,10 @@ h1 {
   /* Scale is the cheapest confidence a page has. The ceiling was doing the
      restraining, not the base: on a wide screen the name sat at 5.1rem in a
      column that could carry half as much again. */
-  font: 500 clamp(3.05rem, 8.3vw, 6.9rem)/1.0 var(--display);
+  /* Sized to hold the name on one line in the hero column, and told not to
+     break in case a wider name or a narrower column ever tempts it. */
+  font: 500 clamp(2.45rem, 5.2vw, 4.5rem)/1.05 var(--display);
+  white-space: nowrap;
   letter-spacing: -0.035em;
   color: var(--ink);
   margin: 0 0 1.5rem;
