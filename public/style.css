@@ -491,6 +491,53 @@ h1 em {
    CASE STUDY PAGES  (/tinkering/*)
    =============================================================== */
 
+/* A write-up is a column of text with the one visual thing in it parked at
+   the bottom on a phone, which is the wrong way round for anyone deciding
+   whether to read it at all. This is the way to the picture. */
+.case-jump {
+  display: flex;
+  flex-wrap: wrap;
+  /* The element-level nav rule pushes its children to the right and hangs a
+     five-rem skirt under them, which is right for the site nav at the top of
+     the page and wrong for a row of chips inside the prose. */
+  justify-content: flex-start;
+  gap: 0.4rem 0.5rem;
+  margin: 0 0 2.25rem;
+  padding: 0;
+}
+.case-jump a {
+  font: 500 0.66rem/1 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--body);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 0.5rem 0.75rem;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.case-jump a:hover,
+.case-jump a:focus-visible {
+  color: var(--ink);
+  border-color: var(--accent);
+}
+/* The one that is not more prose gets to look like it. */
+.case-jump a.is-visual {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+}
+.case-jump a.is-visual:hover,
+.case-jump a.is-visual:focus-visible {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-color: var(--accent);
+}
+
+/* Landing a heading hard against the top edge reads as a page that jumped
+   rather than one that scrolled. */
+.case [id] { scroll-margin-top: 1.5rem; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
 .case { max-width: 100%; }
 
 @media (min-width: 66rem) {

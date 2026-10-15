@@ -48,6 +48,14 @@
     <p class="case-lede">
       One email every morning with everything I need to act on that day.
     </p>
+    <nav class="case-jump" aria-label="Sections of this write-up">
+      <a href="#problem">Problem</a>
+      <a href="#built">What I built</a>
+      <a href="#see" class="is-visual">See it</a>
+      <a href="#lessons">Lessons</a>
+      <a href="#stack">Stack</a>
+    </nav>
+
 
     <p>
       I built a personal AI assistant to pull together the things I was constantly
@@ -56,7 +64,7 @@
       career and social events in a separate website.
     </p>
 
-    <h2>The problem</h2>
+    <h2 id="problem">The problem</h2>
     <p>
       Important dates were scattered across four different places. I had deadlines
       in Canvas, interviews and meetings in my calendar, application deadlines and
@@ -67,7 +75,7 @@
       a lack of reminders. It was that no single place gave me the full picture.
     </p>
 
-    <h2>What I built</h2>
+    <h2 id="built">What I built</h2>
     <p>
       I set up a scheduled job that runs every morning at 7:30 and pulls information
       from all four sources into one email. The brief is organized into six sections,
@@ -80,7 +88,7 @@
       SMTP using credentials scoped specifically to the project.
     </p>
 
-    <h2>What I learned along the way</h2>
+    <h2 id="lessons">What I learned along the way</h2>
     <p>
       The first version worked, but using it every day exposed a lot of edge cases.
     </p>
@@ -107,7 +115,7 @@
       rather than a list.
     </p>
 
-    <h2>Stack</h2>
+    <h2 id="stack">Stack</h2>
     <p class="case-note">
       Python, Canvas REST API, Google Calendar API, SMTP, a scheduled task, and
       Claude Code for all of it.
@@ -115,8 +123,8 @@
 
     </div>
 
-    <section class="pipeline">
-      <p class="aside-label">What it looks like</p>
+    <section class="pipeline" id="see">
+      <p class="aside-label">See it</p>
       <p class="sources-note">Four surfaces that change every day, reduced to one short email.</p>
 
       <div class="pipe">
