@@ -72,7 +72,6 @@ button{font:inherit;cursor:pointer}
 #drop.over{border-color:var(--brand);background:var(--brand-wash)}
 #drop h2{margin:0 0 6px;font-size:16px}
 #drop p{margin:0;color:var(--muted);font-size:13.5px}
-#drop .privacy{margin-top:12px;font-size:12.5px;color:var(--go)}
 #drop .covers{margin-top:10px;font-size:12.5px;color:var(--ink-2)}
 
 /* ---- how these numbers are counted ---- */
@@ -362,7 +361,8 @@ input[type=search]{min-width:200px}
 /* The press. Not a transform: that is what positions the card. */
 .stage-file.is-click{filter:brightness(1.14)}
 .stage-file.is-held{box-shadow:0 18px 44px rgba(0,0,0,.5)}
-.stage-file.is-gone{opacity:0;transition:opacity .25s ease}
+.stage-file.is-gone{opacity:0;visibility:hidden;
+  transition:opacity .25s ease,visibility 0s linear .25s}
 #stageCursor{position:absolute;width:22px;height:22px;margin:-2px 0 0 -2px;
   transition:transform .55s cubic-bezier(.33,.02,.2,1),opacity .3s ease;
   opacity:0;will-change:transform}
@@ -418,7 +418,7 @@ input[type=search]{min-width:200px}
   <div class="head">
     <div>
       <h1>Ledger</h1>
-      <p class="sub">See where your money went. Drop a bank CSV — it is read in this browser and never uploaded.</p>
+      <p class="sub">See where your money went. Drop in a bank CSV and it is sorted the moment it lands.</p>
     </div>
     <div class="head-actions">
       <button class="btn-q" id="theme">Theme</button>
@@ -436,7 +436,6 @@ input[type=search]{min-width:200px}
   <div id="drop">
     <h2>Drop your statement here</h2>
     <p>or <button class="btn" id="pick">choose a file</button> &nbsp;·&nbsp; CSV from your bank or card</p>
-    <p class="privacy">Nothing leaves your computer. No upload, no account, no server.</p>
 
     <details class="howto">
       <summary>Don&rsquo;t have a CSV yet? Here is where to find it</summary>
@@ -2746,7 +2745,7 @@ function sayWhatIsCovered(){
                                                          final days may still
                                                          have been pending */
   el.innerHTML = "<b>" + esc(first) + "</b> to <b>" + esc(last)
-    + "</b> &middot; read in this browser, never uploaded &middot; for the next one, "
+    + "</b> &middot; for the next one, "
     + "download from <b>" + esc(from)
     + "</b> onwards &mdash; importing days you already have changes nothing.";
   el.hidden = false;
@@ -3757,6 +3756,44 @@ function demoStage(){
   var scrollOwned = false;     /* the demo is deliberately moving the page */
   var handedOver = false;      /* the visitor is in charge now */
 
+  /* Handing over means unlocking: up to here the document is overflow:hidden
+     so the crop cannot wander, but once it is theirs a wheel or a finger
+     inside the frame should move it like any other page. The bar stays, now
+     reflecting a real scroll position rather than being the only way to get
+     one. */
+  function handOver(){
+    if(handedOver) return;
+    handedOver = true;
+    scrollOwned = false;
+    clearAll();
+    /* Grabbed mid-performance, the files would otherwise freeze halfway
+       across the screen. Skip to the end rather than leaving the trick
+       visibly half-done. */
+    if(!db.txns.length){
+      demoData(); render();
+      $("receipt").innerHTML = ""; $("covers").hidden = true;
+    }
+    var cards = stage.querySelectorAll(".stage-file");
+    for(var i = 0; i < cards.length; i++){
+      cards[i].classList.remove("is-held", "is-picked", "is-click");
+      cards[i].classList.add("is-gone");
+    }
+    $("drop").classList.remove("over");
+    document.documentElement.classList.remove("is-locked");
+    bar.classList.add("on");
+    bar.classList.add("is-live");
+    if(cur) cur.style.opacity = "0";
+    if(replay) replay.classList.add("on");
+    syncThumb();
+  }
+  /* Reaching for it mid-animation is a clear enough statement of intent:
+     stop performing and let them look. */
+  function grabbed(){ handOver(); }
+  window.addEventListener("wheel", grabbed, { passive: true });
+  /* touchmove, not touchstart: a tap on a figure is someone using the thing,
+     not someone asking the animation to stop. */
+  window.addEventListener("touchmove", grabbed, { passive: true });
+
   var gliding = 0;
   function glide(to, ms){
     /* Animation frames where they exist, timers where they do not. An embedded
@@ -3955,9 +3992,7 @@ function demoStage(){
       cur.style.opacity = "0";
       /* The bar stays, and starts working: the page is theirs to look through,
          it just will not wander on its own. */
-      handedOver = true;
-      bar.classList.add("is-live");
-      root.classList.add("is-locked");
+      handOver();
     });
     after(10490, function(){ replay.classList.add("on"); });
   }

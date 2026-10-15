@@ -31,8 +31,12 @@
   --pad:      clamp(1.25rem, 3.2vw, 2.75rem);  /* sheet padding */
 }
 
+/* Dark in three layers, so the toggle in the nav has something to hold on to:
+   follow the OS unless the reader asked for light, and honour an explicit
+   choice of dark whatever the OS says. Without the middle layer the button
+   sets an attribute nothing reads. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --ground:  #17130f;
     --sheet:   #201b16;
     --surface: #2a241d;
@@ -41,6 +45,15 @@
     --accent:  #e08b52;
     --rule:    #362e25;
   }
+}
+:root[data-theme="dark"] {
+    --ground:  #17130f;
+    --sheet:   #201b16;
+    --surface: #2a241d;
+    --ink:     #f2ece2;
+    --body:    #cdc3b6;
+    --accent:  #e08b52;
+    --rule:    #362e25;
 }
 
 /* =============================================================== */
@@ -464,10 +477,11 @@ h1 em {
   .actions { gap: 1.1rem; }
 }
 
+/* Black wordmarks would vanish on a dark ground, so flip them. */
 @media (prefers-color-scheme: dark) {
-  /* Black wordmarks would vanish on a dark ground, so flip them. */
-  .logo-mono { filter: invert(1) brightness(1.6); }
+  :root:not([data-theme="light"]) .logo-mono { filter: invert(1) brightness(1.6); }
 }
+:root[data-theme="dark"] .logo-mono { filter: invert(1) brightness(1.6); }
 
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
@@ -1044,6 +1058,11 @@ h1 em {
 }
 
 @media (max-width: 42rem) {
+  /* A phone reads a shorter line, so the same type size sits heavier there
+     than it does on a desktop. A notch down, not a different voice. */
+  .lede { font-size: 0.97rem; }
+  .item-body > p, .item > p { font-size: 0.94rem; }
+
   .showcase-frame {
     --showcase-design: 420px;
     --showcase-tall: 680px;
