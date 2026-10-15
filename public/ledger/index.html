@@ -415,6 +415,17 @@ input[type=search]{min-width:200px}
   border:1px solid var(--line);border-radius:999px;padding:7px 12px;cursor:pointer;
   opacity:0;transition:opacity .4s ease}
 #stageReplay.on{opacity:1}
+/* Said once, in the middle, when the cursor lets go — and then gone, because
+   a standing instruction on top of the thing it is describing is in the way
+   of doing what it asks. */
+#stageHint{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
+  z-index:9;pointer-events:none;opacity:0;transition:opacity .45s ease;
+  text-align:center;padding:16px 22px;border-radius:14px;
+  background:var(--surface);
+  border:1px solid var(--line);box-shadow:0 20px 52px rgba(0,0,0,.42)}
+#stageHint.on{opacity:1}
+#stageHint b{display:block;font:600 15px/1.2 var(--f-sans);color:var(--ink)}
+#stageHint span{display:block;margin-top:4px;font-size:12.5px;color:var(--muted)}
 #stageReplay:hover{color:var(--ink);border-color:var(--ink-2)}
 :root[data-demo] #drop{transition:border-color .3s ease,background .3s ease}
 /* Embedded in a fixed crop, the browser scrolling a clicked tab into view takes
@@ -3704,6 +3715,8 @@ function demoStage(){
         + '<div id="stageCursor"><svg viewBox="0 0 24 24" width="22" height="22">'
         + '<path d="M5 2 L5 19 L9.5 14.8 L12.3 21 L15 19.7 L12.2 13.7 L18.4 13.4 Z" '
         + 'fill="#f5ebdd" stroke="#171210" stroke-width="1.2" stroke-linejoin="round"/></svg></div>'
+        + '<div id="stageHint"><b>Your turn</b><span>Scroll it, open a tab, '
+        + 'click a figure</span></div>'
         + '<button id="stageReplay" type="button">Play again</button>';
   stage.innerHTML = html;
   document.body.appendChild(stage);
@@ -3897,6 +3910,7 @@ function demoStage(){
     handedOver = false;
     $("stageBar").classList.remove("on", "is-live");
     $("stageThumb").classList.remove("is-grabbed");
+    if($("stageHint")) $("stageHint").classList.remove("on");
     window.scrollTo(0, 0);
     var mt = document.querySelector('.tab[data-tab="month"]');
     if(mt) mt.click();
@@ -4002,53 +4016,18 @@ function demoStage(){
       cur.classList.remove("is-dragging");
     });
 
-    /* the figure lights up before it is pressed, the way it would under a real
-       pointer, and the press is something you can see */
-    var tile = null;
-    after(9210, function(){
-      tile = document.querySelector('#meters [data-goto="day"]');
-      if(!tile) return;
-      var r = tile.getBoundingClientRect();
-      at(cur, r.left + r.width * 0.52, r.top + r.height * 0.6);
-    });
-    after(9760, function(){ if(tile) tile.classList.add("is-hover"); });
-    after(10210, function(){
-      if(!tile) return;
-      cur.classList.add("is-press");
-      tile.classList.add("is-press");
-      tile.click();
-    });
-    after(10390, function(){
-      cur.classList.remove("is-press");
-      if(tile) tile.classList.remove("is-press", "is-hover");
-    });
-
-    after(11510, function(){
-      var tab = document.querySelector('.tab[data-tab="month"]');
-      if(!tab) return;
-      var r = tab.getBoundingClientRect();
-      at(cur, r.left + r.width * 0.5, r.top + r.height * 0.72);
-    });
-    after(12060, function(){
-      var tab = document.querySelector('.tab[data-tab="month"]');
-      if(!tab) return;
-      cur.classList.add("is-press");
-      tab.classList.add("is-press");
-      tab.click();
-      /* No jump home here: the page is already at the top, and snapping it
-         there sent the bar flying up on its own with the cursor nowhere
-         near it. */
-    });
-    after(12340, function(){
-      cur.classList.remove("is-press");
-      var mt = document.querySelector('.tab[data-tab="month"]');
-      if(mt) mt.classList.remove("is-press");
+    after(9360, function(){
       cur.style.opacity = "0";
       /* The bar stays, and starts working: the page is theirs to look through,
          it just will not wander on its own. */
       handOver();
+      var hint = $("stageHint");
+      if(hint){
+        hint.classList.add("on");
+        timers.push(setTimeout(function(){ hint.classList.remove("on"); }, 3000));
+      }
     });
-    after(12840, function(){ replay.classList.add("on"); });
+    after(9860, function(){ replay.classList.add("on"); });
   }
 
   replay.addEventListener("click", play);
