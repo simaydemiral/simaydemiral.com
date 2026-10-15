@@ -128,6 +128,27 @@ select.cat.own{box-shadow:inset 3px 0 0 var(--brand)}
 .meter-n{font:600 22px/1.1 var(--f-mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .meter-l{font-size:11.5px;color:var(--muted);margin-top:4px;letter-spacing:.01em;text-transform:none}
 .meter.is-stop .meter-n{color:var(--stop)} .meter.is-go .meter-n{color:var(--go)}
+/* Narrow, auto-fit only ever manages two across, which turns five figures
+   into three rows and pushes everything else off the screen. A six-column
+   grid lets them share rows properly: three and two, not three rows of
+   almost nothing. The counts are matched exactly so a month with fewer
+   figures does not end up with a lone third-width tile. */
+@media (max-width:560px){
+  .meters{grid-template-columns:repeat(6,1fr);gap:8px}
+  .meters > *{grid-column:span 2;min-width:0}
+  .meter{padding:10px 11px}
+  .meter-n{font-size:18px}
+  .meter-l{font-size:10.5px;margin-top:3px}
+  /* five: the last two split the second row */
+  .meters > :nth-child(4):nth-last-child(2),
+  .meters > :nth-child(5):nth-last-child(1){grid-column:span 3}
+  /* four, or two: half and half */
+  .meters > :first-child:nth-last-child(4),
+  .meters > :first-child:nth-last-child(4) ~ *,
+  .meters > :first-child:nth-last-child(2),
+  .meters > :first-child:nth-last-child(2) ~ *{grid-column:span 3}
+  .meters > :only-child{grid-column:span 6}
+}
 
 /* ---- summary ---- */
 .summary li{margin-bottom:8px;line-height:1.6;color:var(--ink-2)}
