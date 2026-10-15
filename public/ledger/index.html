@@ -343,7 +343,7 @@ input[type=search]{min-width:200px}
   box-shadow:0 10px 30px rgba(0,0,0,.35);
   font:500 12.5px/1.35 var(--f-body);color:var(--ink);
   display:flex;gap:10px;align-items:flex-start;
-  transition:transform .85s cubic-bezier(.4,.05,.2,1),opacity .4s ease;
+  transition:transform .55s cubic-bezier(.33,.02,.2,1),opacity .35s ease;
   will-change:transform}
 .stage-file .sf-x{font:600 10px/1 var(--f-mono);letter-spacing:.06em;
   color:var(--brand);border:1px solid var(--brand);border-radius:4px;
@@ -356,7 +356,7 @@ input[type=search]{min-width:200px}
 .stage-file.is-held{box-shadow:0 18px 44px rgba(0,0,0,.5)}
 .stage-file.is-gone{opacity:0;transition:opacity .25s ease}
 #stageCursor{position:absolute;width:22px;height:22px;margin:-2px 0 0 -2px;
-  transition:transform .85s cubic-bezier(.4,.05,.2,1),opacity .35s ease;
+  transition:transform .55s cubic-bezier(.33,.02,.2,1),opacity .3s ease;
   opacity:0;will-change:transform}
 #stageCursor svg{display:block;filter:drop-shadow(0 2px 4px rgba(0,0,0,.6))}
 /* A scrollbar the cursor can actually take hold of. The page has its own, but
@@ -3752,18 +3752,18 @@ function demoStage(){
     at(cur, geo.w + 40, geo.h * 0.42);
 
     /* the cursor arrives beside the pile */
-    after(260, function(){
+    after(140, function(){
       cur.style.opacity = "1";
       at(cur, +cards[0].dataset.hx - 18, +cards[1].dataset.hy + 20);
     });
 
     /* all three light up as one selection */
-    after(900, function(){
+    after(620, function(){
       for(k=0;k<cards.length;k++) cards[k].classList.add("is-picked");
     });
 
     /* and gather into a single stack under the cursor */
-    after(1300, function(){
+    after(900, function(){
       for(k=0;k<cards.length;k++){
         cards[k].classList.add("is-held");
         at(cards[k], +cards[0].dataset.hx + k * 7, +cards[1].dataset.hy + k * 7);
@@ -3771,14 +3771,14 @@ function demoStage(){
     });
 
     /* carried over together */
-    after(1900, function(){
+    after(1350, function(){
       at(cur, tx + 150, ty + 34);
       for(k=0;k<cards.length;k++) at(cards[k], tx + k * 7, ty + k * 7);
       $("drop").classList.add("over");
     });
 
     /* dropped: the real import, three files, in order */
-    after(2800, function(){
+    after(2050, function(){
       for(k=0;k<cards.length;k++){
         cards[k].classList.remove("is-held", "is-picked");
         cards[k].classList.add("is-gone");
@@ -3794,19 +3794,19 @@ function demoStage(){
        behind it. The cursor takes a look down the page, opens one of them, and
        then hands the page over. */
     var root = document.documentElement;
-    after(2950, function(){
+    after(2250, function(){
       root.classList.remove("is-locked");
       bar.classList.add("on");
       var tp = syncThumb();
       at(cur, tp.x - 9, tp.y - 6);          /* the cursor goes to the thumb */
     });
-    after(3450, function(){
+    after(2750, function(){
       thumb.classList.add("is-grabbed");
       cur.classList.add("is-dragging");
     });
-    after(3700, function(){ glide(380, 1150); });
-    after(5250, function(){ glide(0, 950); });
-    after(6300, function(){
+    after(3000, function(){ glide(380, 1150); });
+    after(4550, function(){ glide(0, 950); });
+    after(5600, function(){
       thumb.classList.remove("is-grabbed");
       cur.classList.remove("is-dragging");
     });
@@ -3814,31 +3814,31 @@ function demoStage(){
     /* the figure lights up before it is pressed, the way it would under a real
        pointer, and the press is something you can see */
     var tile = null;
-    after(6450, function(){
+    after(5750, function(){
       tile = document.querySelector('#meters [data-goto="day"]');
       if(!tile) return;
       var r = tile.getBoundingClientRect();
       at(cur, r.left + r.width * 0.52, r.top + r.height * 0.6);
     });
-    after(7150, function(){ if(tile) tile.classList.add("is-hover"); });
-    after(7600, function(){
+    after(6300, function(){ if(tile) tile.classList.add("is-hover"); });
+    after(6750, function(){
       if(!tile) return;
       cur.classList.add("is-press");
       tile.classList.add("is-press");
       tile.click();
     });
-    after(7780, function(){
+    after(6930, function(){
       cur.classList.remove("is-press");
       if(tile) tile.classList.remove("is-press", "is-hover");
     });
 
-    after(8900, function(){
+    after(8050, function(){
       var tab = document.querySelector('.tab[data-tab="month"]');
       if(!tab) return;
       var r = tab.getBoundingClientRect();
       at(cur, r.left + r.width * 0.5, r.top + r.height * 0.72);
     });
-    after(9550, function(){
+    after(8600, function(){
       var tab = document.querySelector('.tab[data-tab="month"]');
       if(!tab) return;
       cur.classList.add("is-press");
@@ -3846,7 +3846,7 @@ function demoStage(){
       tab.click();
       window.scrollTo(0, 0);
     });
-    after(9830, function(){
+    after(8880, function(){
       cur.classList.remove("is-press");
       var mt = document.querySelector('.tab[data-tab="month"]');
       if(mt) mt.classList.remove("is-press");
@@ -3854,14 +3854,18 @@ function demoStage(){
       bar.classList.remove("on");
       root.classList.add("is-locked");          /* the crop stops moving again */
     });
-    after(10350, function(){ replay.classList.add("on"); });
+    after(9380, function(){ replay.classList.add("on"); });
   }
 
   replay.addEventListener("click", play);
   window.addEventListener("resize", function(){ if(!db.txns.length) layout(); });
 
-  /* Anyone who asked for less movement gets the answer without the journey. */
-  if(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+  /* Anyone who asked for less movement gets the answer without the journey —
+     and so does a phone, where the page is laid out narrow and a cursor
+     dragging files across it would be a pantomime of an input nobody there
+     uses. */
+  if(window.innerWidth < 560 ||
+     (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches)){
     demoData(); render(); $("receipt").innerHTML = ""; $("covers").hidden = true;
     stage.style.display = "none";
     return;

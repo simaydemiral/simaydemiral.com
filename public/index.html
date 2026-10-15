@@ -277,10 +277,10 @@
 (function () {
   var frame = document.querySelector('.showcase-frame');
   if (!frame) return;
-  var DESIGN_W = 1340;
   function fit() {
     var w = frame.getBoundingClientRect().width;
-    if (w) frame.style.setProperty('--showcase-scale', (w / DESIGN_W).toFixed(4));
+    var design = parseFloat(getComputedStyle(frame).getPropertyValue('--showcase-design')) || 1340;
+    if (w) frame.style.setProperty('--showcase-scale', (w / design).toFixed(4));
   }
   fit();
   window.addEventListener('resize', fit);
@@ -301,7 +301,9 @@
   function onScreen() {
     var r = frame.getBoundingClientRect();
     var vh = window.innerHeight || document.documentElement.clientHeight;
-    return r.height > 0 && r.top < vh * 0.8 && r.bottom > vh * 0.2;
+    /* As soon as a worthwhile piece of it is on screen, not once it is
+       centred — by then the reader has been looking at a still picture. */
+    return r.height > 0 && r.top < vh * 0.92 && r.bottom > vh * 0.08;
   }
   function maybePlay() {
     if (sent || !ready || !iframe.contentWindow || !onScreen()) return;
