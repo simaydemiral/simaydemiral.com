@@ -365,8 +365,13 @@ input[type=search]{min-width:200px}
 #stageBar{position:absolute;top:0;right:6px;bottom:0;width:10px;border-radius:999px;
   background:rgba(255,255,255,.04);opacity:0;transition:opacity .35s ease}
 #stageBar.on{opacity:1}
+/* Handed over, it stops being a prop and becomes the way to see the rest. */
+#stageBar.is-live{pointer-events:auto;cursor:pointer;background:rgba(255,255,255,.07)}
+#stageBar.is-live:hover #stageThumb{opacity:.85}
 #stageThumb{position:absolute;left:1px;width:8px;border-radius:999px;
   background:var(--faint);opacity:.55;transition:background .2s ease,opacity .2s ease}
+#stageBar.is-live #stageThumb{cursor:grab}
+#stageBar.is-live #stageThumb:active{cursor:grabbing}
 #stageThumb.is-grabbed{background:var(--brand);opacity:1}
 /* The click is shown by the thing being clicked, not by a ring drawn over it:
    it settles a shade, the way a button does under a real press. */
@@ -621,6 +626,17 @@ if(typeof RULES === "undefined" || typeof CATEGORIES === "undefined"){
 }
 
 var $ = function(id){ return document.getElementById(id); };
+
+/* Scrolling a panel into view is right on the real page and wrong inside the
+   embedded demo, where the window is a fixed crop: the scroll pushes the
+   figures off the top and they read as having disappeared. overflow:hidden
+   does not stop a programmatic scroll, so the call has to be the thing that
+   stops. */
+function reveal(id){
+  if(typeof DEMO !== "undefined" && DEMO) return;
+  var el = $(id);
+  if(el) el.scrollIntoView({ behavior:"smooth", block:"start" });
+}
 function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, function(c){
   return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
 function toast(m){ var t=$("toast"); t.textContent=m; t.className="on";
@@ -2655,7 +2671,7 @@ document.addEventListener("click", function(e){
   if(e.target && e.target.id === "seePeople"){
     e.preventDefault();
     document.querySelector('.tab[data-tab="pend"]').click();
-    $("p-pend").scrollIntoView({ behavior:"smooth", block:"start" });
+    reveal("p-pend");
     return;
   }
   if(!e.target) return;
@@ -2888,7 +2904,7 @@ $("pick").addEventListener("click", function(){ $("file").click(); });
    line and the drop target are what you came back for. */
 $("add").addEventListener("click", function(){
   $("drop").hidden = false;
-  $("drop").scrollIntoView({ behavior:"smooth", block:"start" });
+  reveal("drop");
 });
 $("file").addEventListener("change", function(){ readFiles(this.files); this.value=""; });
 
@@ -2919,7 +2935,7 @@ function goTxns(o){
   MAcct.set([]);
   $("amtLo").value = 0; $("amtHi").value = 1000; amtDraw();
   renderTxns();
-  $("p-txns").scrollIntoView({ behavior:"smooth", block:"start" });
+  reveal("p-txns");
 }
 function openUncategorised(){ goTxns({ cats:["uncategorized"], month:curMonth }); }
 function catsWhere(test){
@@ -2944,7 +2960,7 @@ function openMeter(k){
     cats:catsWhere(function(c){ return !NOT_SPEND[c] && !MONEY_IN[c]; }) });
   if(k === "pend"){
     document.querySelector('.tab[data-tab="pend"]').click();
-    $("p-pend").scrollIntoView({ behavior:"smooth", block:"start" });
+    reveal("p-pend");
   }
 }
 
@@ -3670,6 +3686,41 @@ function demoStage(){
   }
   window.addEventListener("scroll", function(){ if(bar.classList.contains("on")) syncThumb(); });
 
+  /* Dragging the thumb, and clicking the track to jump. The document itself
+     stays overflow:hidden, so a wheel over the embed scrolls the page past it
+     rather than being swallowed — this bar is the way in, and it moves the
+     page programmatically, which overflow:hidden does not prevent. */
+  function maxScroll(){
+    return Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+  }
+  function trackGeom(){
+    var r = bar.getBoundingClientRect();
+    return { top: r.top, h: r.height, th: thumb.getBoundingClientRect().height };
+  }
+  var drag = null;
+  thumb.addEventListener("pointerdown", function(e){
+    if(!handedOver) return;
+    e.preventDefault();
+    var g = trackGeom();
+    drag = { y: e.clientY, from: window.pageYOffset, span: Math.max(1, g.h - g.th) };
+    thumb.classList.add("is-grabbed");
+    thumb.setPointerCapture(e.pointerId);
+  });
+  thumb.addEventListener("pointermove", function(e){
+    if(!drag) return;
+    var moved = (e.clientY - drag.y) / drag.span * maxScroll();
+    window.scrollTo(0, Math.max(0, Math.min(maxScroll(), drag.from + moved)));
+  });
+  function endDrag(){ if(!drag) return; drag = null; thumb.classList.remove("is-grabbed"); }
+  thumb.addEventListener("pointerup", endDrag);
+  thumb.addEventListener("pointercancel", endDrag);
+  bar.addEventListener("pointerdown", function(e){
+    if(!handedOver || e.target === thumb) return;
+    var g = trackGeom();
+    var k = (e.clientY - g.top - g.th / 2) / Math.max(1, g.h - g.th);
+    glide(Math.max(0, Math.min(maxScroll(), k * maxScroll())), 420);
+  });
+
 
   var replay = $("stageReplay"), timers = [];
   function at(el, x, y){ el.style.transform = "translate(" + x + "px," + y + "px)"; }
@@ -3686,6 +3737,15 @@ function demoStage(){
     setTimeout(function(){ FRAMES = frameSeen; }, 220);
   }
 
+  /* True only while the demo is deliberately moving the page. Everything else
+     that scrolls — a focus ring, a restored position, a trackpad over the
+     embed — is put back, because the window is a fixed crop and anything that
+     moves it takes the figures off the top. Tracked as a flag rather than read
+     off a class, so it cannot be left in the wrong state by a timer firing
+     late. */
+  var scrollOwned = false;     /* the demo is deliberately moving the page */
+  var handedOver = false;      /* the visitor is in charge now */
+
   var gliding = 0;
   function glide(to, ms){
     /* Animation frames where they exist, timers where they do not. An embedded
@@ -3695,6 +3755,7 @@ function demoStage(){
     var from = window.pageYOffset, t0 = Date.now();
     gliding++;
     var mine = gliding;
+    scrollOwned = true;
     function step(){
       if(mine !== gliding) return;
       var k = Math.min(1, (Date.now() - t0) / ms);
@@ -3706,7 +3767,7 @@ function demoStage(){
         var tp = syncThumb();
         at(cur, tp.x - 9, tp.y - 6);
       }
-      if(k < 1) next();
+      if(k < 1) next(); else scrollOwned = false;
     }
     function next(){
       if(FRAMES) requestAnimationFrame(step);
@@ -3735,7 +3796,8 @@ function demoStage(){
     clearAll();
     replay.classList.remove("on");
     document.documentElement.classList.add("is-locked");
-    $("stageBar").classList.remove("on");
+    handedOver = false;
+    $("stageBar").classList.remove("on", "is-live");
     $("stageThumb").classList.remove("is-grabbed");
     window.scrollTo(0, 0);
     var mt = document.querySelector('.tab[data-tab="month"]');
@@ -3851,8 +3913,11 @@ function demoStage(){
       var mt = document.querySelector('.tab[data-tab="month"]');
       if(mt) mt.classList.remove("is-press");
       cur.style.opacity = "0";
-      bar.classList.remove("on");
-      root.classList.add("is-locked");          /* the crop stops moving again */
+      /* The bar stays, and starts working: the page is theirs to look through,
+         it just will not wander on its own. */
+      handedOver = true;
+      bar.classList.add("is-live");
+      root.classList.add("is-locked");
     });
     after(9380, function(){ replay.classList.add("on"); });
   }
@@ -3879,6 +3944,12 @@ function demoStage(){
      starts moving. Without it the answer arrives before the question lands. */
   var started = false;
   function once(){ if(started) return; started = true; setTimeout(play, 1500); }
+  /* Whatever else tries to scroll — a focus ring, a browser restoring a
+     position — the locked crop stays where it is. */
+  window.addEventListener("scroll", function(){
+    if(!scrollOwned && !handedOver && window.pageYOffset) window.scrollTo(0, 0);
+  }, { passive: true });
+
   document.documentElement.classList.add("is-locked");
   if(window.parent !== window){
     window.addEventListener("message", function(e){
