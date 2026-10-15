@@ -1061,7 +1061,18 @@ h1 em {
   /* A phone reads a shorter line, so the same type size sits heavier there
      than it does on a desktop. A notch down, not a different voice. */
   .lede { font-size: 0.97rem; }
-  .item-body > p, .item > p { font-size: 0.94rem; }
+  .item-body > p:not(.meta):not(.actions),
+  .item > p:not(.meta):not(.actions) { font-size: 0.94rem; }
+  /* These read as one line or they read as nothing: broken across two, a
+     dotted list of technologies stops looking like a caption and starts
+     looking like a sentence that failed. Tracking comes down with the size,
+     since letter-spacing is what costs the most room here. */
+  .item .meta, .showcase-label {
+    font-size: 0.57rem;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+  .showcase-label .dash { width: 1.1rem; flex: none; }
 
   .showcase-frame {
     --showcase-design: 420px;
