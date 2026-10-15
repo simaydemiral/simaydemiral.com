@@ -1779,7 +1779,7 @@ function renderMonth(){
        exact than the big one. The cents are in the table underneath. */
       meter(money0s(total), "Day-to-day in " + monthName(curMonth).split(" ")[0]
             + (partial ? " so far" : ""), "", "day")
-    + meterIf(fixed, money0s(fixed), "Fixed commitments (e.g., rent, tuition fee)", "", "fixed")
+    + meterIf(fixed, money0s(fixed), "Fixed costs", "", "fixed")
     + meterIf(refunds, "+" + money0(refunds), "Refunded back", "is-go", "refund")
     + meterIf(cashOut, money0(cashOut),
               cashBack ? "Cash spent" : "Cash withdrawn", "", "cash")
@@ -1852,7 +1852,7 @@ function renderMonth(){
 
   if(fixed > 0){
     var fc = byCat(list, "fixed");
-    add(money(fixed), "i-fixed", "Fixed commitments",
+    add(money(fixed), "i-fixed", "Fixed costs",
         fc.map(function(r){ return esc(CAT_LABEL_OF(r)) + " " + esc(money(r[1])); }).join(" &middot; ")
         + " &middot; kept out of the figures above");
   }
@@ -1942,7 +1942,7 @@ function renderMonth(){
   if(fixedCats.length){
     for(i=0;i<fixedCats.length;i++) fixedCats[i][2] = pct(fixedCats[i][1], allIn);
     catsHtml += '<p class="note" style="margin:14px 0 8px;padding-top:12px;'
-      + 'border-top:1px solid var(--line-soft)">Fixed commitments, as a share of '
+      + 'border-top:1px solid var(--line-soft)">Fixed costs, as a share of '
       + 'your ' + esc(money0(allIn)) + ' total for the month — the rest is the '
       + 'day-to-day above</p>' + bars(fixedCats, allIn, "fixedbar");
   }
