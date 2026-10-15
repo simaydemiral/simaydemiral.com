@@ -106,9 +106,10 @@
       whatever window you choose.
     </p>
     <p>
-      <strong>Every category is editable.</strong> The rules get some merchants
-      wrong. Change one and it applies to that merchant everywhere — your whole
-      history and every import after it, not just the row you clicked.
+      <strong>Every category is editable.</strong> You can change a single
+      transaction’s category whenever you want, or apply the change to the
+      merchant as a whole — across your entire history and every import
+      after it.
     </p>
     <p>
       <strong>Refunds and pending charges are tracked too.</strong> You can tag a
@@ -138,34 +139,34 @@
       it stay empty.
     </p>
 
-    <h2 id="lessons">What I learned along the way</h2>
+    <h2 id="lessons">What I learned</h2>
     <p>
-      <strong>Bank files are messy, so the parser can’t blindly trust the
-      headers.</strong> One file had four summary lines, a blank row before the
-      real header, and a running balance next to the amount. The parser now
-      identifies columns based on the values and refuses to import anything it’s
-      unsure about.
+      <strong>Good categorization requires getting the merchant name right.</strong>
+      Banks turn merchants into strings like AMZN Mktp US*2X4RT1, so the parser
+      strips the noise back to something recognizable — Amazon. Throw too much
+      away and FRONTIER AI lands under software, when it is four flights on
+      Frontier Airlines.
     </p>
     <p>
-      <strong>Good categorization starts with getting the merchant name
-      right.</strong> Banks turn merchants into strings like <em>AMZN Mktp
-      US*2X4RT1</em>, so the parser strips the noise to recover a recognizable
-      merchant name. But it has to be careful not to strip too much —
-      <em>FRONTIER AI</em>, for example, is actually Frontier Airlines.
+      <strong>One category per merchant is not always enough.</strong> The rules
+      file Amazon under shopping, which is right for most of it and wrong for the
+      monitor I bought there. So a transaction can carry its own category —
+      change one transaction and only that one changes. Changing the merchant’s
+      category is also possible: it overrides the rule, applies across the whole
+      history, and holds for every import after.
     </p>
     <p>
-      <strong>The key design decision was to recompute categories instead of
-      storing them on each transaction.</strong> Merchant names and categories
-      are recalculated from the rules and my corrections every time the page
-      loads, so fixing one merchant updates my entire history and future imports.
-      Only the raw rows, corrections, and pending list are saved.
+      <strong>A month that is not over cannot be compared with months that
+      are.</strong> On the 10th of October it told me I was spending 73% less than
+      usual, which was true and useless. Any figure for the current month now says
+      how far through it is.
     </p>
     <p>
-      <strong>A dashboard is only useful if it shows meaningful insights you can
-      act on.</strong> Separating fixed commitments like rent and tuition from
-      day-to-day spending made the numbers much more meaningful. The goal isn’t
-      to show me that I spent $2,150 on rent — I already know that. It’s to
-      surface the spending patterns I can actually change.
+      <strong>Every bug worth finding, I found by using it myself or from friends
+      trying it.</strong> A dedupe pass was dropping one real transaction on every
+      reload. A refund I had split netted against the wrong category and erased a
+      $180 bar from the chart. A dashboard that is wrong looks exactly like a
+      dashboard that is right.
     </p>
 
     <h2 id="stack">Stack</h2>
