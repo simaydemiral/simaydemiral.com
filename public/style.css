@@ -2,13 +2,13 @@
    DESIGN TOKENS — change a value here, it applies site-wide.
    =============================================================== */
 :root {
-  --ground:   #cbb9a4;   /* the warm tone behind the sheet  */
-  --sheet:    #f5f1e8;   /* the cream sheet itself          */
-  --surface:  #ece6da;   /* cards inside the sheet          */
+  --ground:   #c4b19a;   /* the warm tone behind the sheet  */
+  --sheet:    #f0ebdd;   /* the cream sheet itself          */
+  --surface:  #e6dfcf;   /* cards inside the sheet          */
   --ink:      #1f1c18;   /* headlines                       */
   --body:     #6a6157;   /* body copy                       */
   --accent:   #c05a2a;   /* terracotta                      */
-  --rule:     #ddd4c4;
+  --rule:     #d6cbb7;
 
   --serif: "Cormorant Garamond", Georgia, "Times New Roman", serif;
   /* Headings. A geometric sans rather than the serif: the site is about things

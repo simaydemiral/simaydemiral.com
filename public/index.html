@@ -347,13 +347,32 @@
   var canvas = document.getElementById('sdHeroCanvas');
   if (!canvas) return;
   var ctx = canvas.getContext('2d');
+  function artIsDark() {
+    var set = document.documentElement.getAttribute('data-theme');
+    if (set) return set === 'dark';
+    return !!(window.matchMedia &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches);
+  }
+  function applyArtTheme() {
+    var p = artIsDark() ? DARK_ART : LIGHT_ART, k;
+    for (k in p) CFG[k] = p[k];
+  }
 
   /* ---------- tunable look & feel ---------- */
+  /* Two palettes, because the panel was painted dark whatever the page was
+     doing: on the cream sheet it sat there as a black rectangle. Light is not
+     the dark one inverted — the ground lifts, the bright points become ink,
+     and the accent deepens to the one the rest of the light page uses. */
+  var DARK_ART = { bgInner:'#201914', bgOuter:'#120d0b', accent:'#e8935a',
+                   cream:'#f5ebdd', webAlpha:0.06, vignette:'rgba(0,0,0,0.45)' };
+  var LIGHT_ART = { bgInner:'#ece0ca', bgOuter:'#d9c7ab', accent:'#b24f22',
+                    cream:'#2d241b', webAlpha:0.11, vignette:'rgba(104,72,42,0.20)' };
   var CFG = {
     bgInner: '#201914',
     bgOuter: '#120d0b',
     accent:  '#e8935a',          // peach-orange
     cream:   '#f5ebdd',
+    vignette:'rgba(0,0,0,0.45)',
     webParticles: 30,            // background constellation nodes
     webLinkDist: 120,
     webAlpha: 0.06,              // constellation faintness
@@ -593,8 +612,25 @@
 
     var v = ctx.createRadialGradient(CX, CY, Math.min(W, H) * 0.35, CX, CY, Math.max(W, H) * 0.75);
     v.addColorStop(0, 'rgba(0,0,0,0)');
-    v.addColorStop(1, 'rgba(0,0,0,0.45)');
+    v.addColorStop(1, CFG.vignette);
     ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+  }
+
+  applyArtTheme();
+  /* The toggle sets an attribute on <html>; the system setting can change
+     under a reader who never touched it. Either way the panel repaints. */
+  if (window.MutationObserver)
+    new MutationObserver(function () {
+      applyArtTheme();
+      if (reduceMotion) draw(CFG.breatheMs * 0.375);
+    }).observe(document.documentElement,
+               { attributes: true, attributeFilter: ['data-theme'] });
+  if (window.matchMedia) {
+    var mqArt = window.matchMedia('(prefers-color-scheme: dark)');
+    if (mqArt.addEventListener) mqArt.addEventListener('change', function () {
+      applyArtTheme();
+      if (reduceMotion) draw(CFG.breatheMs * 0.375);
+    });
   }
 
   if (reduceMotion) {
