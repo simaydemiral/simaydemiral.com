@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Dispatch — Friday, October 16, 2026</title>
+<meta name="description" content="AI, markets, the US and Turkey, and the fixtures worth getting up for — one page every morning, every time already in California time.">
+<link rel="icon" href="/favicon.svg">
+<meta name="theme-color" content="#171210">
+<meta property="og:title" content="The Dispatch">
+<meta property="og:description" content="AI, markets, the US and Turkey, and the fixtures worth getting up for — one page every morning, every time already in California time.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://simaydemiral.com/dispatch">
+<meta property="og:image" content="https://simaydemiral.com/img/og-home.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link href="https://api.fontshare.com/v2/css?f%5B%5D=switzer@400,500,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- ============================================================
+  THE DISPATCH — newsletter template (v3: one-at-a-time rails)
+  Each rail shows ONE card at a time (88% width) with the next
+  card peeking in from the right like a deck of pages. Drag,
+  swipe, or use the arrows to move to the next story. A progress
+  bar and an active-card glow track where you are.
+  Fonts: Switzer + IBM Plex Mono (matching simaydemiral.com),
+  with system fallbacks if offline.
+  DAILY UPDATE: keep the structure, swap the cards in each rail.
+============================================================ -->
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #171210;
+    color: #f5ebdd;
+    font-family: "Switzer", "Inter", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: 32px 16px 64px;
+    overflow-x: hidden;
+  }
+  .brief { max-width: 760px; margin: 0 auto; }
+
+  /* ---------- masthead ---------- */
+  .masthead {
+    text-align: center;
+    padding: 8px 0 28px;
+    border-bottom: 1px solid rgba(245, 235, 221, 0.15);
+    margin-bottom: 32px;
+  }
+  .masthead .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #e8935a;
+  }
+  .masthead h1 {
+    font-family: "Switzer", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    font-size: 52px;
+    line-height: 1.05;
+    margin: 12px 0 8px;
+  }
+  .masthead .dateline { font-size: 14px; color: rgba(245, 235, 221, 0.65); }
+  .masthead .tagline {
+    font-family: "Switzer", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 16px;
+    color: rgba(245, 235, 221, 0.75);
+    margin-top: 10px;
+  }
+
+  /* ---------- markets snapshot strip ---------- */
+  .markets-strip {
+    background: rgba(232, 147, 90, 0.12);
+    border: 1px solid rgba(232, 147, 90, 0.35);
+    border-left: 3px solid #e8935a;
+    border-radius: 12px;
+    padding: 14px 16px 12px;
+    margin-bottom: 32px;
+  }
+  .markets-strip-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .markets-strip-label {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #e8935a;
+  }
+  .markets-strip-asof {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: rgba(245, 235, 221, 0.65);
+  }
+  .markets-tiles {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .market-tile {
+    background: rgba(23, 18, 16, 0.38);
+    border: 1px solid rgba(232, 147, 90, 0.28);
+    border-radius: 10px;
+    padding: 12px 14px 11px;
+  }
+  .market-tile.down {
+    background: rgba(224, 135, 106, 0.16);
+    border-color: rgba(224, 135, 106, 0.45);
+  }
+  .market-tile.up {
+    background: rgba(150, 184, 119, 0.16);
+    border-color: rgba(150, 184, 119, 0.45);
+  }
+  .market-tile-label {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 500;
+    font-size: 10.5px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(245, 235, 221, 0.6);
+    margin-bottom: 6px;
+  }
+  .market-tile-value {
+    font-family: "Switzer", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: #fff;
+  }
+  .market-tile-delta {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    margin-top: 7px;
+  }
+  .market-tile-delta.down { color: #f0957a; }
+  .market-tile-delta.up { color: #a8cc8a; }
+  .market-tile-delta .arrow { font-size: 13px; }
+  @media (max-width: 560px) {
+    .markets-tiles { grid-template-columns: repeat(2, 1fr); }
+  }
+  .markets-strip-takeaway {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(232, 147, 90, 0.22);
+    font-size: 14px;
+    line-height: 1.5;
+    color: rgba(245, 235, 221, 0.92);
+  }
+  .markets-strip-takeaway strong { color: #e8935a; font-weight: 600; }
+
+  /* ---------- sections ---------- */
+  .section { margin-bottom: 44px; }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .section-head .num {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: #e8935a;
+  }
+  .section-head h2 {
+    font-family: "Switzer", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 500;
+    font-size: 26px;
+    letter-spacing: -0.03em;
+  }
+  .section-head .rule {
+    flex: 1;
+    border: none;
+    border-top: 1px solid rgba(245, 235, 221, 0.15);
+  }
+
+  /* ---------- AI & Tech: subtle circuit-board motif ---------- */
+  .section-ai { position: relative; }
+  .section-ai::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Cg fill='none' stroke='%23e8935a' stroke-width='1.2'%3E%3Cpath d='M24 64 H104 L140 100 H236'/%3E%3Cpath d='M64 276 V188 L100 152 V36'/%3E%3Cpath d='M276 220 H196 L160 184'/%3E%3Cpath d='M180 276 V240 L204 216'/%3E%3Cpath d='M252 36 V84 L276 108'/%3E%3Ccircle cx='236' cy='100' r='6'/%3E%3Ccircle cx='100' cy='36' r='6'/%3E%3C/g%3E%3Cg fill='%23e8935a'%3E%3Ccircle cx='236' cy='100' r='3'/%3E%3Ccircle cx='104' cy='64' r='2.5'/%3E%3Ccircle cx='100' cy='36' r='3'/%3E%3Ccircle cx='64' cy='188' r='2.5'/%3E%3Ccircle cx='196' cy='220' r='2.5'/%3E%3Ccircle cx='160' cy='184' r='3'/%3E%3Ccircle cx='204' cy='216' r='2.5'/%3E%3Ccircle cx='140' cy='100' r='2'/%3E%3Ccircle cx='276' cy='108' r='2.5'/%3E%3C/g%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 300px 300px;
+    opacity: 0.13;
+    pointer-events: none;
+  }
+  .section-ai > * { position: relative; }
+
+  /* ---------- rail nav ---------- */
+  .rail-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .drag-hint {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(245, 235, 221, 0.55);
+  }
+  .nav-btns { display: flex; gap: 8px; }
+  .nav-btn {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(245, 235, 221, 0.3);
+    background: transparent;
+    color: #f5ebdd;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .nav-btn:hover { background: #e8935a; border-color: #e8935a; color: #1d1512; }
+
+  /* ---------- horizontal rail: one card at a time + peek ---------- */
+  .rail {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 8px;
+    cursor: grab;
+    touch-action: pan-y;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .rail::-webkit-scrollbar { display: none; }
+  .rail.dragging { cursor: grabbing; scroll-snap-type: none; }
+  .rail.dragging a { pointer-events: none; }
+
+  /* ---------- progress bar ---------- */
+  .progress {
+    height: 3px;
+    background: rgba(245, 235, 221, 0.15);
+    border-radius: 2px;
+    margin-top: 12px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 33.333%;
+    background: #e8935a;
+    border-radius: 2px;
+    transition: width 0.25s ease;
+  }
+
+  /* ---------- cards ---------- */
+  .card {
+    flex: 0 0 88%;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    background: #f5ebdd;
+    color: #1d1512;
+    border-radius: 20px;
+    overflow: hidden;
+    text-decoration: none;
+    transition: transform 0.15s ease, box-shadow 0.3s ease;
+  }
+  .card:hover { transform: translateY(-3px); }
+  .card.active { box-shadow: 0 0 0 1px rgba(232, 147, 90, 0.55), 0 16px 40px rgba(0, 0, 0, 0.35); }
+  .card .thumb {
+    position: relative;
+    height: 75px;
+    display: flex;
+    align-items: flex-end;
+    padding: 14px 16px;
+    overflow: hidden;
+  }
+  .thumb-ai      { background: linear-gradient(135deg, #2b1a12 0%, #e8935a 130%); }
+  .thumb-markets  { background: linear-gradient(135deg, #20240f 0%, #a8b86a 130%); }
+  .thumb-turkey   { background: linear-gradient(135deg, #33161a 0%, #b03a3a 130%); }
+  .thumb-us       { background: linear-gradient(135deg, #101c2a 0%, #46688c 130%); }
+  .thumb-volley   { background: linear-gradient(135deg, #12262b 0%, #5aa39e 130%); }
+  .thumb .tag {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.85);
+  }
+  .card .body { padding: 20px 22px 18px; display: flex; flex-direction: column; flex: 1; }
+  .card .kicker {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #b06a35;
+    margin-bottom: 8px;
+  }
+  .card h3 {
+    font-family: "Switzer", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    font-size: 24px;
+    line-height: 1.25;
+    margin-bottom: 8px;
+  }
+  .card p {
+    font-size: 15px;
+    line-height: 1.6;
+    color: rgba(29, 21, 18, 0.78);
+  }
+  .key {
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: rgba(232, 147, 90, 0.12);
+    border-left: 2px solid #e8935a;
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    color: rgba(29, 21, 18, 0.85);
+  }
+  .card .meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: auto;
+    padding-top: 14px;
+    font-size: 12.5px;
+    color: rgba(29, 21, 18, 0.55);
+  }
+  .card .read { color: #b06a35; font-weight: 600; }
+
+  /* ---------- volleyball fixtures ---------- */
+  .fixture {
+    flex: 0 0 88%;
+    scroll-snap-align: start;
+    background: #241a15;
+    border: 1px solid rgba(232, 147, 90, 0.35);
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.3s ease;
+  }
+  .fixture.active { box-shadow: 0 0 0 1px rgba(232, 147, 90, 0.55), 0 16px 40px rgba(0, 0, 0, 0.35); }
+  .fixture .teams {
+    font-family: "Switzer", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    font-size: 21px;
+    line-height: 1.3;
+    padding: 20px 22px 0;
+  }
+  .fixture .teams span { color: #e8935a; }
+  .fixture .when {
+    margin-top: 10px;
+    padding: 0 22px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(245, 235, 221, 0.8);
+  }
+  .fixture .when b { color: #f5ebdd; }
+  .fixture .note {
+    margin-top: auto;
+    padding: 12px 22px 18px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: rgba(245, 235, 221, 0.6);
+  }
+  .fixture .actions { padding: 0 22px 20px; }
+  .cal-btn {
+    display: inline-block;
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #f5ebdd;
+    border: 1px solid rgba(245, 235, 221, 0.3);
+    border-radius: 999px;
+    padding: 9px 16px;
+    text-decoration: none;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .cal-btn:hover { background: #e8935a; border-color: #e8935a; color: #1d1512; }
+  .section-note {
+    font-size: 15px;
+    line-height: 1.6;
+    color: rgba(245, 235, 221, 0.75);
+    margin-bottom: 16px;
+  }
+
+  /* ---------- sports schedule ---------- */
+  .sport-tabs, .region-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .sport-tab, .region-tab {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #f5ebdd;
+    background: transparent;
+    border: 1px solid rgba(245, 235, 221, 0.3);
+    border-radius: 999px;
+    padding: 9px 16px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .sport-tab:hover, .region-tab:hover { border-color: #e8935a; color: #e8935a; }
+  .sport-tab.active, .region-tab.active { background: #e8935a; border-color: #e8935a; color: #1d1512; }
+  .sport-tab[hidden], .sport-panel[hidden], .hl-panel[hidden],
+  .region-tab[hidden], .region-panel[hidden] { display: none; }
+  .thumb-soccer { background: linear-gradient(135deg, #12240f 0%, #6aa84f 130%); }
+  .thumb-nba    { background: linear-gradient(135deg, #241009 0%, #c75b39 130%); }
+  .thumb-f1     { background: linear-gradient(135deg, #17090c 0%, #a31621 130%); }
+
+  /* ---------- key highlights ---------- */
+  .highlights { margin-top: 28px; }
+  .highlights-head {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #e8935a;
+    margin-bottom: 4px;
+  }
+  .highlights ul { list-style: none; }
+  .highlights li {
+    position: relative;
+    font-size: 15px;
+    line-height: 1.6;
+    color: rgba(245, 235, 221, 0.85);
+    padding: 10px 0 10px 18px;
+  }
+  .highlights li + li { border-top: 1px solid rgba(245, 235, 221, 0.12); }
+  .highlights li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 19px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #e8935a;
+  }
+  .highlights li a {
+    color: #f5ebdd;
+    text-decoration: underline;
+    text-decoration-color: rgba(232, 147, 90, 0.6);
+    text-underline-offset: 3px;
+  }
+  .highlights li a:hover { color: #e8935a; }
+
+  /* ---------- footer ---------- */
+  .footer {
+    text-align: center;
+    padding-top: 24px;
+    border-top: 1px solid rgba(245, 235, 221, 0.15);
+    font-size: 13px;
+    line-height: 1.7;
+    color: rgba(245, 235, 221, 0.55);
+  }
+  @media (max-width: 560px) {
+    .masthead h1 { font-size: 38px; }
+  }
+</style>
+</head>
+<body>
+<div class="brief">
+
+  <header class="masthead">
+    <div class="eyebrow">Simay&rsquo;s Dispatch</div>
+    <h1>The Dispatch</h1>
+    <div class="dateline">Friday, October 16, 2026 &middot; Bay Area edition</div>
+    <div class="tagline">AI, markets, Turkey &amp; volleyball &mdash; every morning, California time.</div>
+  </header>
+
+  <div class="markets-strip" aria-label="Markets snapshot">
+    <div class="markets-strip-head">
+      <span class="markets-strip-label">Markets Snapshot &middot; KEY</span>
+      <span class="markets-strip-asof">as of Fri Oct 16, ~3:30pm PT</span>
+    </div>
+    <div class="markets-tiles">
+      <div class="market-tile down">
+        <div class="market-tile-label">S&amp;P 500</div>
+        <div class="market-tile-value">7,735.85</div>
+        <div class="market-tile-delta down"><span class="arrow">&#9660;</span> &minus;0.11%</div>
+      </div>
+      <div class="market-tile down">
+        <div class="market-tile-label">NASDAQ</div>
+        <div class="market-tile-value">26,543.81</div>
+        <div class="market-tile-delta down"><span class="arrow">&#9660;</span> &minus;0.63%</div>
+      </div>
+      <div class="market-tile down">
+        <div class="market-tile-label">USD/TRY</div>
+        <div class="market-tile-value">49.51</div>
+        <div class="market-tile-delta down"><span class="arrow">&#9660;</span> &minus;0.03%</div>
+      </div>
+      <div class="market-tile down">
+        <div class="market-tile-label">BTC</div>
+        <div class="market-tile-value">$81,810</div>
+        <div class="market-tile-delta down"><span class="arrow">&#9660;</span> &minus;0.81%</div>
+      </div>
+    </div>
+    <div class="markets-strip-takeaway"><strong>Takeaway:</strong> AI selloff: Nasdaq slides while S&amp;P holds flat.</div>
+  </div>
+
+  <!-- TEMPLATE: SECTION 01 — AI & TECH. Replace cards daily. All cards same size. -->
+  <section class="section section-ai">
+    <div class="section-head">
+      <span class="num">01</span><h2>AI &amp; Tech</h2><hr class="rule">
+    </div>
+    <div class="rail-nav">
+      <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+      <span class="nav-btns">
+        <button class="nav-btn" data-dir="-1" aria-label="Previous story">&#8249;</button>
+        <button class="nav-btn" data-dir="1" aria-label="Next story">&#8250;</button>
+      </span>
+    </div>
+    <div class="rail">
+
+      <a class="card" href="https://lifestyle.quebecnewstribune.com/story/402943/open-source-ai-week-kicks-off-october-16-with-more-than-60-community-run-events-across-the-san-francisco-bay-area-2/">
+        <div class="thumb thumb-ai"><span class="tag">In the Bay Area</span></div>
+        <div class="body">
+          <div class="kicker">Starts today &middot; Oct 16&ndash;25</div>
+          <h3>Open Source AI Week kicks off with 60+ events across the Bay</h3>
+          <p>A ten-day, community-run celebration of open-source AI runs October 16&ndash;25, with more than 60 events from 200+ organizations &mdash; from startups and research labs to nonprofits and local meetups. Tonight&rsquo;s kickoff party is at The Midway in San Francisco at 6 PM, presented by Hugging Face. It&rsquo;s a decentralized week built on one idea: AI should be open, accessible, and built by everyone.</p>
+          <div class="key">KEY &nbsp; 60+ events &nbsp;&middot;&nbsp; 200+ orgs &nbsp;&middot;&nbsp; Oct 16&ndash;25 &nbsp;&middot;&nbsp; Kickoff 6 PM tonight</div>
+          <div class="meta"><span>Quebec News Tribune</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.reuters.com/legal/litigation/uss-ai-task-force-sets-path-study-reviews-leader-tells-cnbc-2026-10-16/">
+        <div class="thumb thumb-ai"><span class="tag">Washington</span></div>
+        <div class="body">
+          <div class="kicker">Policy</div>
+          <h3>White House &ldquo;Super Intelligence&rdquo; task force holds first meeting</h3>
+          <p>The new federal AI task force set protocols and launched a risk study at its inaugural meeting, and will operate for an initial 120 days with committees on critical infrastructure, law enforcement, and incident reporting.</p>
+          <div class="key">KEY &nbsp; 120 days &nbsp;&middot;&nbsp; 3 committees &nbsp;&middot;&nbsp; Risk study</div>
+          <div class="meta"><span>Reuters</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.chinapulse.com/data-news/2026/10/16/china-moves-to-curb-tech-exports-including-ai-citing-national-security-risks/">
+        <div class="thumb thumb-ai"><span class="tag">Geopolitics</span></div>
+        <div class="body">
+          <div class="kicker">Export controls</div>
+          <h3>China moves to curb tech exports, including AI</h3>
+          <p>Beijing published a draft plan to restrict or ban exports of 40 technologies spanning AI, chips, and solar, citing national security as the US&ndash;China technology race intensifies.</p>
+          <div class="key">KEY &nbsp; 40 technologies &nbsp;&middot;&nbsp; AI + chips + solar</div>
+          <div class="meta"><span>ChinaPulse</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+    </div>
+    <div class="progress"><div class="progress-fill"></div></div>
+  </section>
+
+  <!-- TEMPLATE: SECTION 02 — MARKETS & M&A. Replace cards daily. All cards same size. -->
+  <section class="section">
+    <div class="section-head">
+      <span class="num">02</span><h2>Markets &amp; M&amp;A</h2><hr class="rule">
+    </div>
+    <div class="rail-nav">
+      <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+      <span class="nav-btns">
+        <button class="nav-btn" data-dir="-1" aria-label="Previous story">&#8249;</button>
+        <button class="nav-btn" data-dir="1" aria-label="Next story">&#8250;</button>
+      </span>
+    </div>
+    <div class="rail">
+
+      <a class="card" href="https://www.globenewswire.com/news-release/2026/10/15/3382143/35374/en/proofpoint-to-acquire-varonis-in-a-6-3-billion-transaction.html?hsLang=en">
+        <div class="thumb thumb-markets"><span class="tag">Deal of the day</span></div>
+        <div class="body">
+          <div class="kicker">Cybersecurity &middot; All cash</div>
+          <h3>Proofpoint to acquire Varonis for $6.3 billion in cash</h3>
+          <p>Thoma Bravo-backed Proofpoint will pay $49.75 per share, a 52% premium to Varonis&rsquo; pre-rumor price. The combination creates one of the world&rsquo;s largest data and AI cybersecurity firms, serving more than 16,000 enterprises &mdash; a sign that tech M&amp;A is rebounding after the AI-driven software selloff earlier this year.</p>
+          <div class="key">KEY &nbsp; $6.3B all-cash &nbsp;&middot;&nbsp; $49.75/share &nbsp;&middot;&nbsp; 52% premium</div>
+          <div class="meta"><span>GlobeNewswire / Proofpoint</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.reuters.com/legal/transactional/why-coreweave-is-crosshairs-ai-scare-2026-10-16/">
+        <div class="thumb thumb-markets"><span class="tag">AI bubble watch</span></div>
+        <div class="body">
+          <div class="kicker">Markets</div>
+          <h3>CoreWeave in the crosshairs as AI-bubble fears hit markets</h3>
+          <p>Shares of the Nvidia-backed AI cloud firm fell more than 15% this week as investors questioned heavy debt loads and circular financing across the AI infrastructure trade.</p>
+          <div class="key">KEY &nbsp; Shares &minus;15% this week &nbsp;&middot;&nbsp; 2030 bond yields ~16%</div>
+          <div class="meta"><span>Reuters</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://intellizence.com/insights/merger-and-acquisition/largest-merger-acquisition-deals/">
+        <div class="thumb thumb-markets"><span class="tag">Spectrum</span></div>
+        <div class="body">
+          <div class="kicker">Reported deal</div>
+          <h3>SpaceX buys Grain&rsquo;s 800 MHz spectrum for a reported $8 billion</h3>
+          <p>The purchase would support Starlink Mobile&rsquo;s push to become a major US mobile carrier, in a week that also saw Cloudflare acquire the Deno runtime.</p>
+          <div class="key">KEY &nbsp; $8B reported &nbsp;&middot;&nbsp; 800 MHz spectrum</div>
+          <div class="meta"><span>Intellizence M&amp;A Tracker</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+    </div>
+    <div class="progress"><div class="progress-fill"></div></div>
+  </section>
+
+  <!-- TEMPLATE: SECTION 03 — US & TURKEY. Filter pills switch between the US
+       and Turkey rails; US is the default view. Replace cards daily. -->
+  <section class="section">
+    <div class="section-head">
+      <span class="num">03</span><h2>US &amp; Turkey</h2><hr class="rule">
+    </div>
+    <div class="region-tabs" role="tablist" aria-label="Filter stories by country">
+      <button class="region-tab active" data-region="us" role="tab">US</button>
+      <button class="region-tab" data-region="turkey" role="tab">Turkey</button>
+    </div>
+
+    <div class="region-panel" data-region="us">
+    <div class="rail-nav">
+      <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+      <span class="nav-btns">
+        <button class="nav-btn" data-dir="-1" aria-label="Previous story">&#8249;</button>
+        <button class="nav-btn" data-dir="1" aria-label="Next story">&#8250;</button>
+      </span>
+    </div>
+    <div class="rail">
+
+      <a class="card" href="https://www.reuters.com/world/us/police-seek-answers-after-children-killed-oregon-school-shooting-2026-10-16/" target="_blank" rel="noopener">
+        <div class="thumb thumb-us"><span class="tag">Oregon</span></div>
+        <div class="body">
+          <div class="kicker">School shooting</div>
+          <h3>Teen gunman kills 3 children and a teacher at Oregon elementary school</h3>
+          <p>A 16-year-old shot his way through locked doors at Silver Rail Elementary in Bend, Oregon, killing three children aged 5, 8 and 11 and a teacher. An armed bystander followed him in and shot him dead. A 7-year-old and another teacher were critically injured.</p>
+          <div class="key">KEY &nbsp; 4 killed &nbsp;&middot;&nbsp; Children ages 5, 8, 11 &nbsp;&middot;&nbsp; Shooter stopped by bystander</div>
+          <div class="meta"><span>Reuters</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.usatoday.com/story/news/politics/elections/2026/10/15/doj-sues-california-alleged-non-citizens-voter-rolls/92266960007/" target="_blank" rel="noopener">
+        <div class="thumb thumb-us"><span class="tag">California</span></div>
+        <div class="body">
+          <div class="kicker">Voter rolls</div>
+          <h3>Justice Department sues California over voter rolls</h3>
+          <p>The DOJ sued California, alleging more than 20,000 likely noncitizens are registered to vote, and asked a court to block counting mail ballots from flagged voters until citizenship is verified. Governor Newsom&rsquo;s office called the suit &rsquo;unfounded.&rsquo;</p>
+          <div class="key">KEY &nbsp; 20,000+ flagged voters &nbsp;&middot;&nbsp; Suit filed Oct 15 &nbsp;&middot;&nbsp; CA calls it &rsquo;unfounded&rsquo;</div>
+          <div class="meta"><span>USA Today</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.cnn.com/2026/10/15/politics/fort-hood-shooter-execution-livestream-called-off?cid=external-feeds_iluminar_meta" target="_blank" rel="noopener">
+        <div class="thumb thumb-us"><span class="tag">Washington</span></div>
+        <div class="body">
+          <div class="kicker">Fort Hood</div>
+          <h3>Trump calls off livestream of Fort Hood shooter&rsquo;s execution</h3>
+          <p>Trump reversed the Pentagon&rsquo;s plan to livestream the firing-squad execution of Nidal Hasan, convicted in the 2009 Fort Hood shooting. The execution goes ahead as scheduled on Dec 3, with victims&rsquo; families able to watch in person.</p>
+          <div class="key">KEY &nbsp; Execution Dec 3 &nbsp;&middot;&nbsp; 80% opposed livestream</div>
+          <div class="meta"><span>CNN</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+    </div>
+    <div class="progress"><div class="progress-fill"></div></div>
+    </div>
+
+    <div class="region-panel" data-region="turkey" hidden>
+    <div class="rail-nav">
+      <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+      <span class="nav-btns">
+        <button class="nav-btn" data-dir="-1" aria-label="Previous story">&#8249;</button>
+        <button class="nav-btn" data-dir="1" aria-label="Next story">&#8250;</button>
+      </span>
+    </div>
+    <div class="rail">
+
+      <a class="card" href="https://www.reuters.com/world/middle-east/turkey-floats-earlier-2028-vote-that-would-clear-way-erdogan-run-again-2026-10-15/">
+        <div class="thumb thumb-turkey"><span class="tag">Politics</span></div>
+        <div class="body">
+          <div class="kicker">2028 elections</div>
+          <h3>Erdo&#287;an adviser signals March or April 2028 elections</h3>
+          <p>A presidential adviser said the 2028 vote will likely move earlier than May &mdash; a shift that could let President Erdo&#287;an run again under constitutional rules, though it needs 360 of 600 parliamentary votes. The opposition also wants an early vote, but to challenge economic policy rather than to extend his tenure.</p>
+          <div class="key">KEY &nbsp; Mar/Apr 2028 &nbsp;&middot;&nbsp; Needs 360 of 600 votes</div>
+          <div class="meta"><span>Reuters</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.turkishminute.com/2026/10/16/turkey-fines-tv-stations-over-fund-scandal-coverage/">
+        <div class="thumb thumb-turkey"><span class="tag">Media</span></div>
+        <div class="body">
+          <div class="kicker">Fund scandal</div>
+          <h3>Turkey fines TV stations over fund scandal coverage</h3>
+          <p>The broadcasting regulator fined two stations over coverage questioning officials&rsquo; ties to a large investment fund scandal, as journalists reporting on the case face detention and a new repayment bill moves through parliament.</p>
+          <div class="key">KEY &nbsp; 2 stations fined &nbsp;&middot;&nbsp; Repayment cap &#8378;1M (~$20K)</div>
+          <div class="meta"><span>Turkish Minute</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.turkishminute.com/2026/10/16/turkey-detains-journalist-opposition-lawmakers-relatives-in-money-laundering-probe/">
+        <div class="thumb thumb-turkey"><span class="tag">Istanbul</span></div>
+        <div class="body">
+          <div class="kicker">Investigation</div>
+          <h3>Journalist and opposition lawmaker&rsquo;s relatives detained in money laundering probe</h3>
+          <p>Police detained five people, including relatives of an opposition lawmaker, in an investigation into suspected laundering involving transactions worth millions of euros, according to state media.</p>
+          <div class="key">KEY &nbsp; 5 detained &nbsp;&middot;&nbsp; &euro;100M transfer claim</div>
+          <div class="meta"><span>Turkish Minute</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+    </div>
+    <div class="progress"><div class="progress-fill"></div></div>
+    </div>
+  </section>
+
+  <!-- TEMPLATE: SECTION 04 — SPORTS SCHEDULE. Filter tabs switch between sports;
+       a sport with no fixtures loses its tab automatically (see script below).
+       Volleyball game times: convert Istanbul (TRT, UTC+3) to California (PDT, UTC-7).
+       Istanbul time minus 10 hours = California time. -->
+  <section class="section">
+    <div class="section-head">
+      <span class="num">04</span><h2>Sports Schedule</h2><hr class="rule">
+    </div>
+    <p class="section-note">
+      Champions League, Sultanlar Ligi, NBA opening week and the US Grand Prix &mdash;
+      upcoming fixtures, all in California time.
+    </p>
+    <div class="sport-tabs" role="tablist" aria-label="Filter fixtures by sport">
+      <button class="sport-tab active" data-sport="soccer" role="tab">Soccer</button>
+      <button class="sport-tab" data-sport="volleyball" role="tab">Volleyball</button>
+      <button class="sport-tab" data-sport="nba" role="tab">NBA</button>
+      <button class="sport-tab" data-sport="f1" role="tab">Formula 1</button>
+    </div>
+
+    <div class="sport-panel" data-sport="soccer">
+      <div class="rail-nav">
+        <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+        <span class="nav-btns">
+          <button class="nav-btn" data-dir="-1" aria-label="Previous fixture">&#8249;</button>
+          <button class="nav-btn" data-dir="1" aria-label="Next fixture">&#8250;</button>
+        </span>
+      </div>
+      <div class="rail">
+
+        <div class="fixture">
+          <div class="thumb thumb-soccer"><span class="tag">Champions League</span></div>
+          <div class="teams">Fenerbah&#231;e <span>vs</span> Slavia Praha</div>
+          <div class="when">
+            <b>Tuesday, Oct 20 &middot; 9:45 AM PDT</b><br>
+            UEFA Champions League &middot; Matchday 3
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Fenerbah%C3%A7e%20vs%20Slavia%20Praha%20%E2%80%94%20UEFA%20Champions%20League&amp;dates=20261020T164500Z/20261020T184500Z&amp;details=UEFA%20Champions%20League%20Matchday%203." target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-soccer"><span class="tag">Champions League</span></div>
+          <div class="teams">Paris Saint-Germain <span>vs</span> Barcelona</div>
+          <div class="when">
+            <b>Tuesday, Oct 20 &middot; 12:00 PM PDT</b><br>
+            UEFA Champions League &middot; Matchday 3
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Paris%20Saint-Germain%20vs%20Barcelona%20%E2%80%94%20UEFA%20Champions%20League&amp;dates=20261020T190000Z/20261020T210000Z&amp;details=UEFA%20Champions%20League%20Matchday%203." target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-soccer"><span class="tag">Champions League</span></div>
+          <div class="teams">Liverpool <span>vs</span> Villarreal</div>
+          <div class="when">
+            <b>Tuesday, Oct 20 &middot; 12:00 PM PDT</b><br>
+            UEFA Champions League &middot; Matchday 3
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Liverpool%20vs%20Villarreal%20%E2%80%94%20UEFA%20Champions%20League&amp;dates=20261020T190000Z/20261020T210000Z&amp;details=UEFA%20Champions%20League%20Matchday%203." target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-soccer"><span class="tag">Champions League</span></div>
+          <div class="teams">Lille <span>vs</span> Galatasaray</div>
+          <div class="when">
+            <b>Wednesday, Oct 21 &middot; 9:45 AM PDT</b><br>
+            UEFA Champions League &middot; Matchday 3
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Lille%20vs%20Galatasaray%20%E2%80%94%20UEFA%20Champions%20League&amp;dates=20261021T164500Z/20261021T184500Z&amp;details=UEFA%20Champions%20League%20Matchday%203." target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-soccer"><span class="tag">Champions League</span></div>
+          <div class="teams">Bayern M&uuml;nchen <span>vs</span> Arsenal</div>
+          <div class="when">
+            <b>Wednesday, Oct 21 &middot; 12:00 PM PDT</b><br>
+            UEFA Champions League &middot; Matchday 3
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Bayern%20M%C3%BCnchen%20vs%20Arsenal%20%E2%80%94%20UEFA%20Champions%20League&amp;dates=20261021T190000Z/20261021T210000Z&amp;details=UEFA%20Champions%20League%20Matchday%203." target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-soccer"><span class="tag">Champions League</span></div>
+          <div class="teams">Real Madrid <span>vs</span> RB Leipzig</div>
+          <div class="when">
+            <b>Wednesday, Oct 21 &middot; 12:00 PM PDT</b><br>
+            UEFA Champions League &middot; Matchday 3
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Real%20Madrid%20vs%20RB%20Leipzig%20%E2%80%94%20UEFA%20Champions%20League&amp;dates=20261021T190000Z/20261021T210000Z&amp;details=UEFA%20Champions%20League%20Matchday%203." target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+      </div>
+      <div class="progress"><div class="progress-fill"></div></div>
+    </div>
+
+    <div class="sport-panel" data-sport="volleyball" hidden>
+      <div class="rail-nav">
+        <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+        <span class="nav-btns">
+          <button class="nav-btn" data-dir="-1" aria-label="Previous fixture">&#8249;</button>
+          <button class="nav-btn" data-dir="1" aria-label="Next fixture">&#8250;</button>
+        </span>
+      </div>
+      <div class="rail">
+
+        <div class="fixture">
+          <div class="thumb thumb-volley"><span class="tag">Marquee matchup</span></div>
+          <div class="teams">Eczac&#305;ba&#351;&#305; <span>vs</span> Vak&#305;fBank</div>
+          <div class="when">
+            <b>Sunday, Oct 18 &middot; 8:00 AM PDT</b> &nbsp;(6:00 PM Istanbul)<br>
+            Sultanlar Ligi &middot; Round 4 &middot; Istanbul
+          </div>
+          <div class="note">The weekend&rsquo;s biggest fixture: two of the league&rsquo;s giants meet in Round 4.</div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Eczac%C4%B1ba%C5%9F%C4%B1%20vs%20Vak%C4%B1fBank%20%E2%80%94%20Sultanlar%20Ligi&amp;dates=20261018T150000Z/20261018T170000Z&amp;details=Sultanlar%20Ligi%20Round%204.%206%3A00%20PM%20Istanbul%20time." target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-volley"><span class="tag">Round 4</span></div>
+          <div class="teams">Galatasaray Daikin <span>vs</span> &#304;lbank</div>
+          <div class="when">
+            <b>Sunday, Oct 18 &middot; 9:00 AM PDT</b> &nbsp;(7:00 PM Istanbul)<br>
+            Sultanlar Ligi &middot; Round 4 &middot; Istanbul
+          </div>
+          <div class="note">Sunday morning, California time.</div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Galatasaray%20Daikin%20vs%20%C4%B0lbank%20%E2%80%94%20Sultanlar%20Ligi&amp;dates=20261018T160000Z/20261018T180000Z&amp;details=Sultanlar%20Ligi%20Round%204.%207%3A00%20PM%20Istanbul%20time." target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-volley"><span class="tag">Round 4</span></div>
+          <div class="teams">T&uuml;rk Hava Yollar&#305; <span>vs</span> Nil&uuml;fer Belediye Bursa</div>
+          <div class="when">
+            <b>Sunday, Oct 18 &middot; 6:00 AM PDT</b> &nbsp;(4:00 PM Istanbul)<br>
+            Sultanlar Ligi &middot; Round 4 &middot; Burhan Felek Sport Hall, Istanbul
+          </div>
+          <div class="note">Early one for California viewers.</div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=T%C3%BCrk%20Hava%20Yollar%C4%B1%20vs%20Nil%C3%BCfer%20Belediye%20Bursa%20%E2%80%94%20Sultanlar%20Ligi&amp;dates=20261018T130000Z/20261018T150000Z&amp;details=Sultanlar%20Ligi%20Round%204.%204%3A00%20PM%20Istanbul%20time." target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+      </div>
+      <div class="progress"><div class="progress-fill"></div></div>
+      <p style="font-size:13px; color:rgba(245,235,221,0.55); margin-top:12px;">
+        Fixtures: <a href="https://en.wikipedia.org/wiki/2026%E2%80%9327_Turkish_Women%27s_Volleyball_League" style="color:#e8935a;">2026&ndash;27 Sultanlar Ligi schedule</a>
+      </p>
+    </div>
+
+    <div class="sport-panel" data-sport="nba" hidden>
+      <div class="rail-nav">
+        <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+        <span class="nav-btns">
+          <button class="nav-btn" data-dir="-1" aria-label="Previous fixture">&#8249;</button>
+          <button class="nav-btn" data-dir="1" aria-label="Next fixture">&#8250;</button>
+        </span>
+      </div>
+      <div class="rail">
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">Opening Night</span></div>
+          <div class="teams">Boston Celtics <span>at</span> Detroit Pistons</div>
+          <div class="when">
+            <b>Tuesday, Oct 20 &middot; 12:00 PM PDT</b><br>
+            NBA &middot; Opening Night
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Boston%20Celtics%20at%20Detroit%20Pistons%20%E2%80%94%20NBA&amp;dates=20261020T190000Z/20261020T213000Z&amp;details=NBA%20Opening%20Night." target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">Opening Night</span></div>
+          <div class="teams">Philadelphia 76ers <span>at</span> New York Knicks</div>
+          <div class="when">
+            <b>Tuesday, Oct 20 &middot; 4:00 PM PDT</b><br>
+            NBA &middot; Opening Night
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Philadelphia%2076ers%20at%20New%20York%20Knicks%20%E2%80%94%20NBA&amp;dates=20261020T230000Z/20261021T013000Z&amp;details=NBA%20Opening%20Night." target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">Opening Night</span></div>
+          <div class="teams">Oklahoma City Thunder <span>at</span> San Antonio Spurs</div>
+          <div class="when">
+            <b>Tuesday, Oct 20 &middot; 6:30 PM PDT</b><br>
+            NBA &middot; Opening Night
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Oklahoma%20City%20Thunder%20at%20San%20Antonio%20Spurs%20%E2%80%94%20NBA&amp;dates=20261021T013000Z/20261021T040000Z&amp;details=NBA%20Opening%20Night." target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">Regular Season</span></div>
+          <div class="teams">Golden State Warriors <span>at</span> Los Angeles Lakers</div>
+          <div class="when">
+            <b>Wednesday, Oct 21 &middot; 7:00 PM PDT</b><br>
+            NBA &middot; Regular Season
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Golden%20State%20Warriors%20at%20Los%20Angeles%20Lakers%20%E2%80%94%20NBA&amp;dates=20261022T020000Z/20261022T043000Z&amp;details=NBA%20regular%20season." target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+      </div>
+      <div class="progress"><div class="progress-fill"></div></div>
+    </div>
+
+    <div class="sport-panel" data-sport="f1" hidden>
+      <div class="rail-nav">
+        <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+        <span class="nav-btns">
+          <button class="nav-btn" data-dir="-1" aria-label="Previous fixture">&#8249;</button>
+          <button class="nav-btn" data-dir="1" aria-label="Next fixture">&#8250;</button>
+        </span>
+      </div>
+      <div class="rail">
+
+        <div class="fixture">
+          <div class="thumb thumb-f1"><span class="tag">United States GP</span></div>
+          <div class="teams">Qualifying</div>
+          <div class="when">
+            <b>Saturday, Oct 24 &middot; 2:00 PM PDT</b><br>
+            United States Grand Prix &middot; Circuit of the Americas, Austin
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=United%20States%20Grand%20Prix%20%E2%80%94%20Qualifying&amp;dates=20261024T210000Z/20261024T220000Z&amp;details=United%20States%20Grand%20Prix%2C%20Circuit%20of%20the%20Americas." target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-f1"><span class="tag">United States GP</span></div>
+          <div class="teams">Race</div>
+          <div class="when">
+            <b>Sunday, Oct 25 &middot; 1:00 PM PDT</b><br>
+            United States Grand Prix &middot; Circuit of the Americas, Austin
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=United%20States%20Grand%20Prix%20%E2%80%94%20Race&amp;dates=20261025T200000Z/20261025T220000Z&amp;details=United%20States%20Grand%20Prix%2C%20Circuit%20of%20the%20Americas." target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+      </div>
+      <div class="progress"><div class="progress-fill"></div></div>
+    </div>
+
+    <div class="highlights">
+      <h3 class="highlights-head">Key Highlights</h3>
+
+      <div class="hl-panel" data-sport="soccer">
+        <ul>
+          <li><a href="https://www.uefa.com/uefachampionsleague/news/02aa-21d3f8c574f1-e140f41454d4-1000--champions-league-highlights-and-round-up-real-madrid-and-p/">Real Madrid stun Roma with three goals in the final minutes to win 4-3</a></li>
+          <li><a href="https://www.uefa.com/uefachampionsleague/news/02aa-21d1f3303cf3-f0d4f4701545-1000--champions-league-matchday-2-tuesday-highlights-and-round-u/">PSG beat Man City 4-2; Barcelona fight back to win 4-1 at Galatasaray</a></li>
+        </ul>
+      </div>
+
+      <div class="hl-panel" data-sport="volleyball" hidden>
+        <ul>
+          <li>Sultanlar Ligi Round 4 this Sunday, headlined by the Eczac&#305;ba&#351;&#305;&ndash;Vak&#305;fBank derby</li>
+        </ul>
+      </div>
+
+      <div class="hl-panel" data-sport="nba" hidden>
+        <ul>
+          <li><a href="https://www.eurohoops.net/en/nba-news/2021470/alperen-sengun-bogdan-bogdanovic-nba-preseason-european-recap/">Rockets close preseason with a 116&ndash;89 rout of Thunder &mdash; &#350;eng&uuml;n 14 pts, 7 reb, 5 ast; Bogdanovi&#263; hits 5 threes</a></li>
+          <li><a href="https://warriorswire.usatoday.com/story/sports/nba/warriors/2026/10/14/warriors-storm-back-for-second-half-comeback-in-preseason-win-vs-lakers-101-89/92248175007/">Warriors storm back from 20 down to beat Lakers 101-89 in preseason</a></li>
+        </ul>
+      </div>
+
+      <div class="hl-panel" data-sport="f1" hidden>
+        <ul>
+          <li><a href="https://www.reuters.com/sports/formula1/red-bull-extend-f1-boss-mekies-contract-through-2031-2026-10-14/">Verstappen has won two straight and goes for a third in Texas</a></li>
+          <li><a href="https://www.usatoday.com/story/sports/motor/formula1/2026/10/13/f1-returning-africa-race-deal-rwanda/92238183007/">F1 to return to Africa &mdash; Rwanda GP from the early 2030s</a></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    Updated every morning &middot; All times California (PDT) unless noted<br>
+    Every story links to its source &middot; The Dispatch, a Simay Demiral project<br>
+    <a href="/" style="color:#e8935a;text-decoration:none">&larr; simaydemiral.com</a>
+  </footer>
+
+</div>
+<script>
+(function () {
+  /* open all source links in a new tab */
+  document.querySelectorAll('a[href^="http"]').forEach(function (a) {
+    a.setAttribute('target', '_blank');
+    a.setAttribute('rel', 'noopener');
+  });
+
+  var rails = document.querySelectorAll('.rail');
+  rails.forEach(function (rail) {
+    var items = rail.querySelectorAll('.card, .fixture');
+    var progress = rail.nextElementSibling;
+    var fill = progress ? progress.querySelector('.progress-fill') : null;
+
+    /* progress bar + active-card glow track the visible card */
+    function update() {
+      if (!items.length) return;
+      var step = items[0].getBoundingClientRect().width + 16;
+      var idx = Math.round(rail.scrollLeft / step);
+      idx = Math.max(0, Math.min(items.length - 1, idx));
+      items.forEach(function (el, i) { el.classList.toggle('active', i === idx); });
+      if (fill) fill.style.width = ((idx + 1) / items.length * 100) + '%';
+    }
+    rail.addEventListener('scroll', function () { requestAnimationFrame(update); }, { passive: true });
+    update();
+
+    /* arrow buttons scroll one card at a time */
+    var nav = rail.previousElementSibling;
+    if (nav && nav.classList.contains('rail-nav')) {
+      nav.querySelectorAll('.nav-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var step = items[0].getBoundingClientRect().width + 16;
+          rail.scrollBy({ left: parseInt(btn.dataset.dir, 10) * step, behavior: 'smooth' });
+        });
+      });
+    }
+
+    /* mouse drag to scroll (touch swipe works natively) */
+    var down = false, startX = 0, startScroll = 0, moved = false;
+    rail.addEventListener('pointerdown', function (e) {
+      down = true; moved = false;
+      startX = e.clientX; startScroll = rail.scrollLeft;
+      rail.classList.add('dragging');
+    });
+    rail.addEventListener('pointermove', function (e) {
+      if (!down) return;
+      var dx = e.clientX - startX;
+      if (Math.abs(dx) > 10) moved = true;
+      rail.scrollLeft = startScroll - dx;
+    });
+    function up() { down = false; rail.classList.remove('dragging'); }
+    rail.addEventListener('pointerup', up);
+    rail.addEventListener('pointercancel', up);
+    /* don't follow links after a drag, only after a real click */
+    rail.addEventListener('click', function (e) {
+      if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; }
+    }, true);
+  });
+
+  /* ---------- section 03: US / Turkey filter ---------- */
+  var regionTabs = document.querySelectorAll('.region-tab');
+  var regionPanels = document.querySelectorAll('.region-panel');
+
+  function showRegion(region) {
+    regionTabs.forEach(function (tab) {
+      tab.classList.toggle('active', tab.getAttribute('data-region') === region);
+    });
+    regionPanels.forEach(function (panel) {
+      var isMatch = panel.getAttribute('data-region') === region;
+      panel.hidden = !isMatch;
+      if (isMatch) {
+        var rail = panel.querySelector('.rail');
+        if (rail) {
+          rail.scrollLeft = 0;
+          rail.dispatchEvent(new Event('scroll'));
+        }
+      }
+    });
+  }
+
+  regionTabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      showRegion(tab.getAttribute('data-region'));
+    });
+  });
+
+  /* ---------- sports schedule: filter tabs + per-sport highlights ---------- */
+  var sportTabs = document.querySelectorAll('.sport-tab');
+  var sportPanels = document.querySelectorAll('.sport-panel');
+  var hlPanels = document.querySelectorAll('.hl-panel');
+
+  function panelFor(list, sport) {
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].getAttribute('data-sport') === sport) return list[i];
+    }
+    return null;
+  }
+
+  /* a sport with no upcoming fixtures loses its tab entirely */
+  sportTabs.forEach(function (tab) {
+    var panel = panelFor(sportPanels, tab.getAttribute('data-sport'));
+    if (!panel || !panel.querySelector('.fixture')) tab.hidden = true;
+  });
+
+  function showSport(sport) {
+    sportTabs.forEach(function (tab) {
+      tab.classList.toggle('active', tab.getAttribute('data-sport') === sport);
+    });
+    sportPanels.forEach(function (panel) {
+      panel.hidden = panel.getAttribute('data-sport') !== sport;
+    });
+    hlPanels.forEach(function (panel) {
+      panel.hidden = panel.getAttribute('data-sport') !== sport;
+    });
+    var panel = panelFor(sportPanels, sport);
+    var rail = panel ? panel.querySelector('.rail') : null;
+    if (rail) {
+      rail.scrollLeft = 0;
+      rail.dispatchEvent(new Event('scroll'));
+    }
+  }
+
+  sportTabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      showSport(tab.getAttribute('data-sport'));
+    });
+  });
+
+  /* if the default tab was hidden as empty, open the first sport that has fixtures */
+  var defaultTab = document.querySelector('.sport-tab.active');
+  if (!defaultTab || defaultTab.hidden) {
+    for (var i = 0; i < sportTabs.length; i++) {
+      if (!sportTabs[i].hidden) { showSport(sportTabs[i].getAttribute('data-sport')); break; }
+    }
+  }
+})();
+</script>
+</body>
+</html>
