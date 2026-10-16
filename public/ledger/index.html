@@ -3675,7 +3675,15 @@ function demoFiles(){
   }
   card += "09/15/2026,NORDSTROM #0423,64.00\n"
         + "08/02/2026,UNITED AIRLINES 0162,-312.00\n"
-        + "07/19/2026,MARRIOTT SANTA CRUZ CA,-188.00\n";
+        + "07/19/2026,MARRIOTT SANTA CRUZ CA,-188.00\n"
+        /* Two charges that look doubled, because a statement nobody ever
+           charges twice is not a statement worth showing. A day apart
+           rather than the same day: same merchant, same amount, same
+           minute is how a split of one bill looks, and that is not what
+           this flag is for. */
+        + "09/15/2026,SWEETGREEN OAKLAND CA,-24.10\n"
+        + "09/24/2026,ALTA MEDICAL GROUP,-145.00\n"
+        + "09/23/2026,ALTA MEDICAL GROUP,-145.00\n";
   chk  += "09/10/2026,BKOFAMERICA ATM 09/10 #000001213 WITHDRWL SHATTUCK OAKLAND CA,-120.00\n"
         + "09/30/2026,TRADER JOE'S #186 OAKLAND CA,-41.80\n";
   return [
@@ -4016,7 +4024,40 @@ function demoStage(){
       cur.classList.remove("is-dragging");
     });
 
-    after(9360, function(){
+    /* The two charges that look doubled. Acknowledging them is the one thing
+       in here that changes what the page says, so it is worth watching: the
+       warning is meant to stay until a person has looked at it, and this is
+       a person looking at it. The second row is measured after the first has
+       gone, because removing one moves the other. */
+    function ackAt(n){
+      var b = document.querySelectorAll("#dups [data-dupok]")[n];
+      if(!b) return null;
+      var r = b.getBoundingClientRect();
+      return { el: b, x: r.left + r.width * 0.5, y: r.top + r.height * 0.62 };
+    }
+    after(9060, function(){
+      /* On a narrow stage the card can sit below the fold. Bring it up before
+         pointing at it rather than clicking somewhere nobody can see. */
+      var card = $("dups").getBoundingClientRect();
+      if(card.height && card.bottom > window.innerHeight - 12)
+        glide(window.pageYOffset + (card.bottom - window.innerHeight + 24), 700);
+    });
+    after(9810, function(){ var a = ackAt(0); if(a) at(cur, a.x, a.y); });
+    after(10360, function(){
+      var a = ackAt(0); if(!a) return;
+      cur.classList.add("is-press"); a.el.click();
+    });
+    after(10540, function(){ cur.classList.remove("is-press"); });
+    after(10840, function(){ var a = ackAt(0); if(a) at(cur, a.x, a.y); });
+    after(11390, function(){
+      var a = ackAt(0); if(!a) return;
+      cur.classList.add("is-press"); a.el.click();
+    });
+    after(11570, function(){ cur.classList.remove("is-press"); });
+    after(11870, function(){
+      if(window.pageYOffset) glide(0, 700);
+    });
+    after(12670, function(){
       cur.style.opacity = "0";
       /* The bar stays, and starts working: the page is theirs to look through,
          it just will not wander on its own. */
@@ -4027,7 +4068,7 @@ function demoStage(){
         timers.push(setTimeout(function(){ hint.classList.remove("on"); }, 3000));
       }
     });
-    after(9860, function(){ replay.classList.add("on"); });
+    after(13170, function(){ replay.classList.add("on"); });
   }
 
   replay.addEventListener("click", play);
