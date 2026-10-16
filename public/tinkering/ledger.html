@@ -325,7 +325,19 @@
     var w = frame.getBoundingClientRect().width;
     if (!w) return;
     var narrow = w < 560;
-    var design = narrow ? 420 : 1340, tall = narrow ? 680 : 900;
+    var design, tall;
+    if (narrow) {
+      /* Laid out at 420 the embed lands at 1:1 in the 27rem column, so its
+         text sits at full size beside prose set at 14px and reads as the
+         loudest thing on the page. Laying it out wider than the box scales
+         it down. It stays under 560 so the tool still uses its narrow
+         layout, and never below 420, which keeps a real phone at the size
+         it already was. */
+      design = Math.min(560, Math.max(420, Math.round(w / 0.78)));
+      tall = Math.round(design * 680 / 420);
+    } else {
+      design = 1340; tall = 900;
+    }
     frame.style.setProperty('--showcase-design', design + 'px');
     frame.style.setProperty('--showcase-tall', tall + 'px');
     frame.style.aspectRatio = design + ' / ' + tall;
