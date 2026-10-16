@@ -177,7 +177,7 @@ select.cat.own{box-shadow:inset 3px 0 0 var(--brand)}
 .fpct{color:var(--faint);font-size:11px;margin-left:5px}
 
 /* ---- tabs ---- */
-.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:-4px;flex-wrap:wrap}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:10px;flex-wrap:wrap}
 .tab{border:0;background:transparent;color:var(--muted);font-size:13.5px;font-weight:600;
   padding:9px 13px;border-bottom:2px solid transparent;margin-bottom:-1px}
 .tab[aria-selected="true"]{color:var(--brand);border-bottom-color:var(--brand)}
@@ -318,6 +318,7 @@ input[type=search],select.f{font:inherit;font-size:13px;padding:6px 9px;border:1
 input[type=search]{min-width:200px}
 
 /* ---- multi-select filter ---- */
+#fDir,#fMonth{width:150px}
 .multi{position:relative}
 .multi-btn{font:inherit;font-size:13px;padding:6px 9px;border:1px solid var(--line);
   border-radius:8px;background:var(--surface);color:var(--ink);text-align:left;
@@ -607,7 +608,7 @@ input[type=search]{min-width:200px}
                is where clicking a figure at the top puts you, and the line
                under the row says what it means while you are in it. Hidden
                from the list, still settable, still reads back. -->
-          <option value="spend" hidden>Counted in the figures above</option>
+          <option value="spend" hidden>Figures above</option>
         </select>
         <div class="amt">
           <div class="amt-wrap">
