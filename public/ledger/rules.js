@@ -64,6 +64,12 @@ var RULES = [
   { t: 1, c: "transfers", re: /\bBANKING (PAYMENT|TRANSFER) (TO|FROM)\b/ },
   { t: 1, c: "transfers", re: /\bONLINE BANKING TRANSFER\b/ },
   { t: 1, c: "transfers", re: /\bAGENT ASSISTED TRANSFER\b/ },
+  /* Chase words the same movements differently, and a card payment that does
+     not read as a transfer is the one error that counts a dollar twice:
+     "Payment to Chase card ending in 4471" out of the current account, and
+     "Payment Thank You" into the card. */
+  { t: 1, c: "transfers", re: /\bPAYMENT TO .{0,24}\bCARD ENDING\b/ },
+  { t: 1, c: "transfers", re: /\bCHASE CREDIT CRD\b/ },
   { t: 1, c: "transfers", re: /\b(PAYMENT\s?-?\s?THANK YOU|AUTOPAY|CARD PAYMENT)\b/ },
   { t: 1, c: "external", re: /\bZELLE\b/ },
   { t: 1, c: "external", re: /\b(VENMO|CASH APP|CASHAPP)\b/ },
