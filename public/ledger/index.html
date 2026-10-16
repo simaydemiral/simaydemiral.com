@@ -231,6 +231,8 @@ select.cat option[value="__new"]{color:var(--brand);font-weight:600}
   padding:14px 18px;margin-bottom:14px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
 .receipt b{color:var(--ink)}
 .receipt p{margin:0;font-size:13.5px;color:var(--muted);flex:1;min-width:260px;line-height:1.55}
+.btn-q:disabled{opacity:.42;cursor:default}
+.btn-q:disabled:hover{color:var(--ink-2);border-color:var(--line)}
 .flagcard{border-color:var(--warn);margin-bottom:14px}
 .flagcard h3{color:var(--warn)}
 /* The whole point of this card is the button, and a 520px table in a 420px
@@ -612,6 +614,7 @@ input[type=search]{min-width:200px}
           </div>
           <span class="amt-txt" id="amtTxt">Any amount</span>
         </div>
+        <button class="btn-q" id="fClear" type="button" disabled>Clear filters</button>
         <button class="btn-q" id="exp">Export CSV</button>
       </div>
       <div class="txnbar">
@@ -2097,6 +2100,22 @@ function catSelect(cat, id, anyLabel){
     + '>'+o+'</select>';
 }
 
+/* Six controls can each be narrowing the list, and after a few clicks it is
+   not obvious which of them is still on. This is the way back to everything,
+   and it reports whether there is anything to go back from. */
+function filtersOn(){
+  return !!($("q").value.trim() || $("fMonth").value || $("fDir").value
+            || MCat.values().length || MAcct.values().length || !amtFull());
+}
+function clearFilters(){
+  $("q").value = "";
+  $("fMonth").value = "";
+  $("fDir").value = "";
+  MCat.set([]); MAcct.set([]);
+  $("amtLo").value = 0; $("amtHi").value = 1000; amtDraw();
+  renderTxns();
+}
+
 function txnList(){
   var q = $("q").value.toLowerCase().trim(), fm = $("fMonth").value, fd = $("fDir").value;
   var aFull = amtFull(), aLo = amtAt(+$("amtLo").value), aHi = amtAt(+$("amtHi").value);
@@ -2179,6 +2198,10 @@ function payBackCtl(t){
 
 function renderTxns(){
   var list = txnList();
+  /* The button is always in the row, so the way out of a filtered list is
+     always in the same place; it just has nothing to do until something is
+     actually narrowing the view. */
+  var fc = $("fClear"); if(fc) fc.disabled = !filtersOn();
   /* The rule behind the option has never been on screen, so the label had to
      carry it alone and could not. It is shown exactly when it is in use. */
   /* Recomputed on every filter change, because it is only worth anything if
@@ -3591,6 +3614,12 @@ $("bakfile").addEventListener("change", function(){
     toast("Restored " + db.txns.length + " transactions.");
   };
   r.readAsText(f);
+});
+
+$("fClear").addEventListener("click", function(){
+  if(this.disabled) return;
+  clearFilters();
+  toast("Filters cleared.");
 });
 
 $("reset").addEventListener("click", function(){
