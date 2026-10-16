@@ -1146,6 +1146,12 @@ html { scroll-behavior: smooth; }
   }
 }
 
+/* In a write-up the frame is sized by script from the box it lands in, since
+   the same page puts it in a 27rem column on a wide screen and across the
+   full width on a narrower one. */
+.showcase--case { margin: 1.5rem 0 0; }
+.showcase--case .showcase-frame { max-height: none; }
+
 /* Text on the left, drawing on the right; stacks on narrow screens. */
 .item--illustrated {
   display: grid;

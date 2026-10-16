@@ -250,13 +250,18 @@
         is yours alone.
       </p>
 
-      <figure class="shot">
-        <img class="shot-light" src="/tinkering/img/ledger-light.png" alt="The Ledger dashboard: headline figures, a written summary, a category breakdown, a month-by-month trend and the biggest merchants.">
-        <img class="shot-dark"  src="/tinkering/img/ledger-dark.png"  alt="The Ledger dashboard: headline figures, a written summary, a category breakdown, a month-by-month trend and the biggest merchants.">
+      <figure class="showcase showcase--case">
+        <div class="showcase-frame">
+          <!-- The tool itself rather than a picture of it. A screenshot of a
+               thing you are still changing is wrong within a month; this one
+               cannot be. ?demo=1 keeps it away from the browser storage a
+               real visitor's ledger lives in. -->
+          <iframe src="/ledger/?demo=1" title="Ledger, running on sample data"></iframe>
+        </div>
         <figcaption>
-          What comes out: three months of statements, read in the browser and
-          never sent anywhere. Every name and number here is made up — this is
-          demo data, not mine.
+          Three months of statements, read in the browser and never sent
+          anywhere. Every name and number here is made up &mdash; this is demo
+          data, not mine. Scroll inside it to look around.
         </figcaption>
       </figure>
     </section>
@@ -305,6 +310,51 @@
     var follow = function () { label(); };
     if (mq.addEventListener) mq.addEventListener('change', follow);
   }
+})();
+</script>
+
+<script>
+/* The embed is laid out at a width that suits the box it lands in, not the
+   width of the window: in a wide window this sits in a 27rem column, where a
+   desktop dashboard scaled to a third is a picture of a dashboard rather than
+   one you can read. */
+(function () {
+  var frame = document.querySelector('.showcase--case .showcase-frame');
+  if (!frame) return;
+  function fit() {
+    var w = frame.getBoundingClientRect().width;
+    if (!w) return;
+    var narrow = w < 560;
+    var design = narrow ? 420 : 1340, tall = narrow ? 680 : 900;
+    frame.style.setProperty('--showcase-design', design + 'px');
+    frame.style.setProperty('--showcase-tall', tall + 'px');
+    frame.style.aspectRatio = design + ' / ' + tall;
+    frame.style.setProperty('--showcase-scale', (w / design).toFixed(4));
+    maybePlay();
+  }
+  var iframe = frame.querySelector('iframe'), ready = false, sent = false;
+  function onScreen() {
+    var r = frame.getBoundingClientRect();
+    var vh = window.innerHeight || document.documentElement.clientHeight;
+    return r.height > 0 && r.top < vh * 0.92 && r.bottom > vh * 0.08;
+  }
+  function maybePlay() {
+    if (sent || !ready || !iframe.contentWindow || !onScreen()) return;
+    sent = true;
+    iframe.contentWindow.postMessage('ledger:play', window.location.origin);
+  }
+  window.addEventListener('message', function (e) {
+    if (e.source === iframe.contentWindow && e.data === 'ledger:ready') {
+      ready = true; maybePlay();
+    }
+  });
+  iframe.addEventListener('load', function () { ready = true; maybePlay(); });
+  window.addEventListener('scroll', maybePlay, { passive: true });
+  window.addEventListener('resize', fit);
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(frame);
+  if (window.IntersectionObserver)
+    new IntersectionObserver(maybePlay, { threshold: [0, 0.3, 0.6] }).observe(frame);
+  fit();
 })();
 </script>
 </body>
