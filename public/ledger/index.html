@@ -233,6 +233,26 @@ select.cat option[value="__new"]{color:var(--brand);font-weight:600}
 .receipt p{margin:0;font-size:13.5px;color:var(--muted);flex:1;min-width:260px;line-height:1.55}
 .flagcard{border-color:var(--warn);margin-bottom:14px}
 .flagcard h3{color:var(--warn)}
+/* The whole point of this card is the button, and a 520px table in a 420px
+   frame put it off the right-hand edge behind a sideways scroll nobody
+   thinks to try. Narrow, the row stacks instead: merchant and amount, then
+   when and where, then the button across the bottom where it cannot hide. */
+@media (max-width:560px){
+  .flagcard .tscroll{overflow-x:visible}
+  .flagcard .tscroll table{min-width:0;width:100%}
+  .flagcard tbody tr{display:grid;grid-template-columns:1fr auto;
+    gap:2px 10px;padding:9px 0;border-bottom:1px solid var(--line-soft)}
+  .flagcard tbody tr:last-child{border-bottom:0}
+  .flagcard tbody td{display:block;border:0;padding:0;white-space:normal}
+  .flagcard .t-merch{grid-column:1;grid-row:1;font-weight:600}
+  .flagcard .t-amt{grid-column:2;grid-row:1;text-align:right}
+  .flagcard .t-date{grid-column:1;grid-row:2;color:var(--muted);font-size:12px}
+  .flagcard .t-acct{grid-column:2;grid-row:2;text-align:right;
+    color:var(--muted);font-size:12px}
+  .flagcard tbody td:last-child{grid-column:1/-1;grid-row:3;
+    text-align:left;margin-top:7px}
+  .flagcard tbody td:last-child .btn-q{width:100%}
+}
 
 /* ---- insights ---- */
 .ins{display:grid;grid-template-columns:86px 1fr;gap:12px;align-items:baseline;

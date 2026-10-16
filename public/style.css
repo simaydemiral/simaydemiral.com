@@ -611,13 +611,13 @@ html { scroll-behavior: smooth; }
 
 .case-body > p {
   color: var(--body);
-  font-size: 0.87rem;
+  font-size: 0.83rem;
   line-height: 1.75;
   margin: 0 0 1.05rem;
 }
 
 /* The opening line stays a little larger than the rest. */
-.case-body > .case-lede { font-size: 0.95rem; }
+.case-body > .case-lede { font-size: 0.9rem; }
 
 .case-body ul {
   margin: 0;
@@ -634,7 +634,7 @@ html { scroll-behavior: smooth; }
 /* Each paragraph opens with its own one-line headline. */
 .case-body > p strong { color: var(--ink); font-weight: 600; }
 
-.case-note { font-size: 0.8rem; color: var(--body); margin: 0.85rem 0 0; }
+.case-note { font-size: 0.75rem; color: var(--body); margin: 0.85rem 0 0; }
 .case-back { margin: 3.5rem 0 0; font-size: 0.9rem; }
 .case-back a { color: var(--accent); }
 
@@ -1114,7 +1114,7 @@ html { scroll-behavior: smooth; }
 
 .showcase figcaption {
   margin-top: 0.6rem;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   color: var(--muted);
 }
 
@@ -1206,7 +1206,7 @@ html { scroll-behavior: smooth; }
 
 .pipeline { margin-top: 4rem; }
 
-.sources-note { margin: 0 0 1.5rem; font-size: 0.85rem; color: var(--body); }
+.sources-note { margin: 0 0 1.5rem; font-size: 0.79rem; color: var(--body); }
 
 .pipe { display: block; }
 
@@ -1282,12 +1282,12 @@ html { scroll-behavior: smooth; }
 }
 .agent-title {
   margin: 0 0 0.35rem;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 620;
   letter-spacing: 0.04em;
   color: var(--accent);
 }
-.agent-sub { margin: 0; font-size: 0.8rem; line-height: 1.55; color: var(--body); }
+.agent-sub { margin: 0; font-size: 0.75rem; line-height: 1.55; color: var(--body); }
 
 .verbs {
   display: flex;
