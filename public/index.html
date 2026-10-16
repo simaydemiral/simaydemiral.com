@@ -348,10 +348,7 @@
   if (!canvas) return;
   var ctx = canvas.getContext('2d');
   function artIsDark() {
-    var set = document.documentElement.getAttribute('data-theme');
-    if (set) return set === 'dark';
-    return !!(window.matchMedia &&
-              window.matchMedia('(prefers-color-scheme: dark)').matches);
+    return document.documentElement.getAttribute('data-theme') !== 'light';
   }
   function applyArtTheme() {
     var p = artIsDark() ? DARK_ART : LIGHT_ART, k;
@@ -625,14 +622,6 @@
       if (reduceMotion) draw(CFG.breatheMs * 0.375);
     }).observe(document.documentElement,
                { attributes: true, attributeFilter: ['data-theme'] });
-  if (window.matchMedia) {
-    var mqArt = window.matchMedia('(prefers-color-scheme: dark)');
-    if (mqArt.addEventListener) mqArt.addEventListener('change', function () {
-      applyArtTheme();
-      if (reduceMotion) draw(CFG.breatheMs * 0.375);
-    });
-  }
-
   if (reduceMotion) {
     draw(CFG.breatheMs * 0.375);
   } else {
@@ -652,12 +641,10 @@
   try { saved = localStorage.getItem(KEY); } catch (e) {}
   if (saved === 'light' || saved === 'dark') root.setAttribute('data-theme', saved);
 
-  function systemDark() {
-    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  }
+  /* Dark unless they asked for light. The OS setting is not consulted: the
+     site has a look, and a reader who prefers otherwise has a button. */
   function isDark() {
-    var set = root.getAttribute('data-theme');
-    return set ? set === 'dark' : systemDark();
+    return root.getAttribute('data-theme') !== 'light';
   }
   function label() {
     var w = document.getElementById('themeWord');
@@ -674,12 +661,6 @@
     label();
   });
 
-  /* if they never chose, keep following the system when it changes */
-  if (!saved && window.matchMedia) {
-    var mq = window.matchMedia('(prefers-color-scheme: dark)');
-    var follow = function () { label(); };
-    if (mq.addEventListener) mq.addEventListener('change', follow);
-  }
 })();
 </script>
 </body>
