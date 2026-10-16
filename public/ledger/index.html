@@ -600,10 +600,14 @@ input[type=search]{min-width:200px}
         <div class="multi" id="fAcct"></div>
         <select class="f" id="fMonth"><option value="">All months</option></select>
         <select class="f" id="fDir" aria-label="Direction">
-          <option value="">In and out</option>
+          <option value="">All</option>
           <option value="out">Money out</option>
           <option value="in">Money in</option>
-          <option value="spend">What the month totals count</option>
+          <!-- Not a choice anyone has to understand before using the page: it
+               is where clicking a figure at the top puts you, and the line
+               under the row says what it means while you are in it. Hidden
+               from the list, still settable, still reads back. -->
+          <option value="spend" hidden>Counted in the figures above</option>
         </select>
         <div class="amt">
           <div class="amt-wrap">
@@ -2216,8 +2220,9 @@ function renderTxns(){
 
   var fn = $("fdirNote");
   if($("fDir").value === "spend"){
-    fn.textContent = "Everything going out, plus refunds from shops. Not money "
-      + "from a person, and not cash paid in.";
+    fn.textContent = "Showing the rows behind the figures at the top: everything "
+      + "going out, plus refunds from shops. Not money from a person, and not "
+      + "cash paid in.";
     fn.hidden = false;
   } else fn.hidden = true;
   $("nTx").textContent = V.length;
