@@ -1053,6 +1053,11 @@ html { scroll-behavior: smooth; }
 /* The Ledger card runs the tool rather than describing it: a visitor learns it
    is real software without clicking anything. The iframe is the same page the
    Try it button opens, in a mode that reads and writes no storage. */
+/* The card that carries both a drawing and the running tool: the drawing sits
+   beside the text like every other card, and the demo spans the full width
+   underneath rather than squeezing into one column of the grid. */
+.item--live .showcase { grid-column: 1 / -1; }
+
 .item--showcase { display: block; }
 .item--showcase .item-body p:last-of-type { max-width: none; }
 
