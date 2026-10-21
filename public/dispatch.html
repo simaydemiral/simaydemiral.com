@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The Dispatch — Sunday, October 18, 2026</title>
+<title>The Dispatch — Tuesday, October 20, 2026</title>
 <meta name="description" content="AI, markets, the US and Turkey, and the fixtures worth getting up for — one page every morning, every time already in California time.">
 <link rel="icon" href="/favicon.svg">
 <meta name="theme-color" content="#171210">
@@ -24,6 +24,12 @@
   Fonts: Switzer + IBM Plex Mono (matching simaydemiral.com),
   with system fallbacks if offline.
   DAILY UPDATE: keep the structure, swap the cards in each rail.
+  ARCHIVE: the page keeps the last three editions. Each edition is a
+  <div class="edition" data-edition="YYYY-MM-DD" data-title="...">
+  block switched by the .edition-nav pills at the top. On a daily
+  refresh, wrap the new edition the same way, unhide it, demote the
+  previous editions (add hidden), update the three nav pills, and
+  drop the oldest edition so only three remain.
 ============================================================ -->
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -422,7 +428,7 @@
   .sport-tab:hover, .region-tab:hover { border-color: #e8935a; color: #e8935a; }
   .sport-tab.active, .region-tab.active { background: #e8935a; border-color: #e8935a; color: #1d1512; }
   .sport-tab[hidden], .sport-panel[hidden], .hl-panel[hidden],
-  .region-tab[hidden], .region-panel[hidden] { display: none; }
+  .region-tab[hidden], .region-panel[hidden], .highlights[hidden] { display: none; }
   .thumb-soccer { background: linear-gradient(135deg, #12240f 0%, #6aa84f 130%); }
   .thumb-nba    { background: linear-gradient(135deg, #241009 0%, #c75b39 130%); }
   .thumb-f1     { background: linear-gradient(135deg, #17090c 0%, #a31621 130%); }
@@ -465,6 +471,34 @@
   }
   .highlights li a:hover { color: #e8935a; }
 
+  /* ---------- edition archive nav ---------- */
+  .edition[hidden] { display: none; }
+  .edition-nav {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 30px;
+  }
+  .edition-btn {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #f5ebdd;
+    background: transparent;
+    border: 1px solid rgba(245, 235, 221, 0.3);
+    border-radius: 999px;
+    padding: 10px 18px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .edition-btn:hover { border-color: #e8935a; color: #e8935a; }
+  .edition-btn.active { background: #e8935a; border-color: #e8935a; color: #1d1512; }
+  div.card { cursor: default; }
+  div.card:hover { transform: none; }
+
   /* ---------- footer ---------- */
   .footer {
     text-align: center;
@@ -482,41 +516,50 @@
 <body>
 <div class="brief">
 
+  <nav class="edition-nav" aria-label="Choose an edition">
+    <button class="edition-btn active" data-edition="2026-10-20">Today &middot; Tue, Oct 20</button>
+    <button class="edition-btn" data-edition="2026-10-19">Yesterday &middot; Mon, Oct 19</button>
+    <button class="edition-btn" data-edition="2026-10-18">Sun, Oct 18</button>
+  </nav>
+
+  <!-- ==================== EDITION: Tuesday, October 20, 2026 (today) ==================== -->
+  <div class="edition" data-edition="2026-10-20" data-title="The Dispatch — Tuesday, October 20, 2026">
+
   <header class="masthead">
     <div class="eyebrow">Simay&rsquo;s Dispatch</div>
     <h1>The Dispatch</h1>
-    <div class="dateline">Sunday, October 18, 2026 &middot; Bay Area edition</div>
+    <div class="dateline">Tuesday, October 20, 2026 &middot; Bay Area edition</div>
     <div class="tagline">AI, markets, Turkey &amp; volleyball &mdash; every morning, California time.</div>
   </header>
 
   <div class="markets-strip" aria-label="Markets snapshot">
     <div class="markets-strip-head">
       <span class="markets-strip-label">Markets Snapshot &middot; KEY</span>
-      <span class="markets-strip-asof">as of 8:10am PT</span>
+      <span class="markets-strip-asof">as of 7:50am PT</span>
     </div>
     <div class="markets-tiles">
-      <div class="market-tile down">
+      <div class="market-tile up">
         <div class="market-tile-label">S&amp;P 500</div>
-        <div class="market-tile-value">7,659.44</div>
-        <div class="market-tile-delta down"><span class="arrow">&#9660;</span> &minus;1.09%</div>
+        <div class="market-tile-value">7,690.73</div>
+        <div class="market-tile-delta up"><span class="arrow">&#9650;</span> +0.41%</div>
       </div>
-      <div class="market-tile down">
+      <div class="market-tile up">
         <div class="market-tile-label">NASDAQ</div>
-        <div class="market-tile-value">26,140.03</div>
-        <div class="market-tile-delta down"><span class="arrow">&#9660;</span> &minus;2.14%</div>
+        <div class="market-tile-value">26,430.89</div>
+        <div class="market-tile-delta up"><span class="arrow">&#9650;</span> +1.11%</div>
       </div>
-      <div class="market-tile down">
+      <div class="market-tile">
         <div class="market-tile-label">USD/TRY</div>
-        <div class="market-tile-value">49.51</div>
-        <div class="market-tile-delta down"><span class="arrow">&#9660;</span> &minus;0.03%</div>
+        <div class="market-tile-value">49.577</div>
+        <div class="market-tile-delta">&plusmn;0.00%</div>
       </div>
       <div class="market-tile down">
         <div class="market-tile-label">BTC</div>
-        <div class="market-tile-value">$81,103</div>
-        <div class="market-tile-delta down"><span class="arrow">&#9660;</span> &minus;0.6%</div>
+        <div class="market-tile-value">$81,463</div>
+        <div class="market-tile-delta down"><span class="arrow">&#9660;</span> &minus;0.5%</div>
       </div>
     </div>
-    <div class="markets-strip-takeaway"><strong>Takeaway:</strong> A tech-led rout capped Wall Street&rsquo;s worst week since June as AI-debt fears collided with $110 oil and hot inflation data &mdash; Brent settled at $109.86 while ~$1B in crypto liquidations followed.</div>
+    <div class="markets-strip-takeaway"><strong>Takeaway:</strong> Wall Street rose on Monday as chip and AI stocks recovered, while the lira hovered near record lows and bitcoin held above $81,000.</div>
   </div>
 
   <!-- TEMPLATE: SECTION 01 — AI & TECH. Replace cards daily. All cards same size. -->
@@ -533,69 +576,69 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://techcrunch.com/2026/10/16/elorians-first-ai-model-wants-to-reason-with-images-not-just-about-them/">
-        <div class="thumb thumb-ai"><span class="tag">Research</span></div>
+      <a class="card" href="https://www.pymnts.com/news/artificial-intelligence/2026/openai-racing-to-raise-30-billion-ahead-of-anthropic-listing/">
+        <div class="thumb thumb-ai"><span class="tag">Funding</span></div>
         <div class="body">
-          <div class="kicker">Visual reasoning</div>
-          <h3>Elorian&rsquo;s Glimpse wants AI to actually look</h3>
-          <p>A startup founded by a former DeepMind researcher has released Glimpse, a model that keeps returning to the source pixels mid-reasoning &mdash; cropping, pulling video frames, running code to measure what it sees &mdash; instead of converting an image to tokens once. It calls the mechanism a visual scratch space.</p>
-          <div class="key">KEY &nbsp; Today&rsquo;s frontier models still can&rsquo;t truly see &mdash; repeated visual inspection may beat single-pass tokenization on charts and video.</div>
+          <div class="kicker">Funding</div>
+          <h3>OpenAI races to raise $30B ahead of Anthropic&rsquo;s IPO</h3>
+          <p>OpenAI is working to lock in close to $30 billion in fresh funding at a valuation above roughly $1.4 trillion, with SoftBank and Abu Dhabi-based MGX said to be in talks to take part. The timing is aimed at securing investor commitments ahead of rival Anthropic&rsquo;s expected mid-November public listing.</p>
+          <div class="key">KEY &nbsp; A $30B round for the world&rsquo;s most valuable private AI company &mdash; racing Anthropic&rsquo;s IPO.</div>
+          <div class="meta"><span>PYMNTS</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.lapost.com/content/anthropic-commits-5-of-its-stock-to-a-new-public-benefit-fund">
+        <div class="thumb thumb-ai"><span class="tag">Policy</span></div>
+        <div class="body">
+          <div class="kicker">Public benefit fund</div>
+          <h3>Anthropic commits 5% of its stock to a new public benefit fund</h3>
+          <p>Anthropic will set aside 5% of its shares for the new Anthropic Public Benefit Fund, held in a wholly owned LLC barred from lobbying or political donations; the stake grows by 2% each time the valuation rises 50%, eventually reaching ~20% of shares reserved for public benefit. The fund could support direct payouts to people hit by AI-driven job losses.</p>
+          <div class="key">KEY &nbsp; A permanent public share of AI&rsquo;s gains &mdash; the fund&rsquo;s stake grows as the valuation does.</div>
+          <div class="meta"><span>Associated Press</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://947thebeast.com/2026/10/19/ai-chip-startup-tenstorrent-more-than-doubles-its-valuation-to-6-2-billion-in-funding-round/">
+        <div class="thumb thumb-ai"><span class="tag">Chips</span></div>
+        <div class="body">
+          <div class="kicker">Chip funding</div>
+          <h3>Tenstorrent raises $1.5B at a $6.2B valuation</h3>
+          <p>The Santa Clara-based RISC-V AI chip startup raised $1.5 billion in a Series E led by Trace Capital and Innovation X, lifting its valuation to $6.2 billion. New investors include ARK Invest, Sandisk, Morgan Stanley, T. Rowe Price and Tether; the money goes to scaling production of its Galaxy AI servers.</p>
+          <div class="key">KEY &nbsp; One of the year&rsquo;s biggest AI hardware rounds, for an open RISC-V alternative to Nvidia.</div>
+          <div class="meta"><span>Reuters</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://techcrunch.com/2026/10/19/hackers-hit-ai-coding-tool-opencode-running-up-charges-on-users-ai-accounts/">
+        <div class="thumb thumb-ai"><span class="tag">Security</span></div>
+        <div class="body">
+          <div class="kicker">Security breach</div>
+          <h3>Hackers hit AI coding tool OpenCode, running up thousands in charges on users&rsquo; accounts</h3>
+          <p>Attackers broke into a legacy system on OpenCode&rsquo;s hosted Console platform, affecting 1.4% of users. Exposed OpenAI, Anthropic and Google API keys led to hundreds to thousands of dollars in unauthorized charges per account; OpenCode describes it as a large-scale &lsquo;distillation attack&rsquo; aimed at copying model behavior. Anthropic and Google have blocked the keys, and refunds are under way.</p>
+          <div class="key">KEY &nbsp; API key theft &mdash; a new form of attack that leaves AI subscriptions open to plunder.</div>
           <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
-      <a class="card" href="https://techcrunch.com/2026/10/17/meta-removes-language-that-raised-scraping-and-ai-training-concerns/">
-        <div class="thumb thumb-ai"><span class="tag">Platforms</span></div>
+      <a class="card" href="https://teslanewswire.com/articles/deepseek-deepinfer-open-source-inference-engine-v4-1-flash-nvidia-huawei-ascend-950-oct-20-2026">
+        <div class="thumb thumb-ai"><span class="tag">Open Source</span></div>
         <div class="body">
-          <div class="kicker">Training data</div>
-          <h3>Meta strips AI-training clause after publisher backlash</h3>
-          <p>Legal experts flagged that Meta&rsquo;s updated commercial terms appeared to let it scrape business-account holders&rsquo; websites to train AI models. Meta said its crawling practices never changed &mdash; but after the outcry it removed the provision entirely.</p>
-          <div class="key">KEY &nbsp; A flashpoint in who owns the training-data pipeline; publishers scored a quick win, though Meta insists nothing functionally changed.</div>
-          <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
+          <div class="kicker">Open source</div>
+          <h3>DeepSeek open-sources its production inference engine, DeepInfer</h3>
+          <p>The Chinese AI lab has published the inference framework it says runs its own production services on GitHub under an Apache-2.0 license; the first release runs DeepSeek-V4.1-Flash offline on Nvidia SM100 GPUs and Huawei Ascend 950 chips. The move extends DeepSeek&rsquo;s push to build a China-suited software stack beyond Nvidia&rsquo;s CUDA ecosystem.</p>
+          <div class="key">KEY &nbsp; DeepSeek&rsquo;s inference engine is now open to everyone &mdash; and it runs on non-Nvidia chips too.</div>
+          <div class="meta"><span>Tesla News Wire</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
-      <a class="card" href="https://the-decoder.com/anthropic-consults-law-firms-to-set-fair-negotiation-norms-before-ai-agents-start-cutting-deals/">
-        <div class="thumb thumb-ai"><span class="tag">Industry</span></div>
+      <a class="card" href="https://www.ceotodaymagazine.com/2026/10/bytedance-alibaba-and-tencent-place-35bn-of-nvidia-chip-orders/">
+        <div class="thumb thumb-ai"><span class="tag">Chips</span></div>
         <div class="body">
-          <div class="kicker">Agent economy</div>
-          <h3>Anthropic hires lawyers to write the etiquette of deal-making AI</h3>
-          <p>Anthropic is consulting law firms on how AI agents should haggle, resolve complaints, and negotiate contracts &mdash; including against other agents &mdash; after its own tests showed stronger models cut better deals. It&rsquo;s also hiring lawyer Conceptual Reasoning Fellows at six-figure salaries.</p>
-          <div class="key">KEY &nbsp; The rules for autonomous negotiators are being drafted now &mdash; by lawyers, not engineers.</div>
-          <div class="meta"><span>The Decoder</span><span class="read">Read &rarr;</span></div>
-        </div>
-      </a>
-
-      <a class="card" href="https://www.engadget.com/2288580/open-ai-updates-chatgpt-extension-for-chrome/">
-        <div class="thumb thumb-ai"><span class="tag">Product</span></div>
-        <div class="body">
-          <div class="kicker">Agents</div>
-          <h3>OpenAI turns its Chrome extension into a full browser agent</h3>
-          <p>The upgraded ChatGPT extension for Chrome can now read open tabs to answer questions and directly operate them &mdash; filling forms, sending messages, downloading files, grouping tabs. A side panel with full chat history sits beside the page on any Chromium browser.</p>
-          <div class="key">KEY &nbsp; OpenAI is building its agent inside Google&rsquo;s browser &mdash; distribution beating product purity.</div>
-          <div class="meta"><span>Engadget</span><span class="read">Read &rarr;</span></div>
-        </div>
-      </a>
-
-      <a class="card" href="https://the-decoder.com/two-german-courts-now-hold-google-liable-for-what-its-ai-overviews-say/">
-        <div class="thumb thumb-ai"><span class="tag">Regulation</span></div>
-        <div class="body">
-          <div class="kicker">Liability</div>
-          <h3>Second German court holds Google liable for its AI Overviews</h3>
-          <p>A court in Aachen banned Google from repeating three false AI-generated claims about a doctor, ruling AI Overviews are Google&rsquo;s own words, not neutral search results. A Munich court ruled similarly in May; fines run up to &euro;250,000 per violation.</p>
-          <div class="key">KEY &nbsp; A consistent German legal view is forming &mdash; AI answers are the platform&rsquo;s speech, not an index &mdash; with EU-wide consequences.</div>
-          <div class="meta"><span>The Decoder</span><span class="read">Read &rarr;</span></div>
-        </div>
-      </a>
-
-      <a class="card" href="https://opentools.ai/news/meta-muse-spark-open-desktop-memory-requirements">
-        <div class="thumb thumb-ai"><span class="tag">Model release</span></div>
-        <div class="body">
-          <div class="kicker">Open weights</div>
-          <h3>Meta open-sources 816B-parameter Muse Spark for desktops</h3>
-          <p>Meta released the weights of Muse Spark Open, an 816-billion-parameter multimodal model with 1M-token context trained for long-running agent tasks. Quantization squeezes it onto high-end desktops &mdash; though the smallest setup still needs roughly 256&ndash;300GB of memory.</p>
-          <div class="key">KEY &nbsp; Frontier-scale open weights are downloadable for workstations now &mdash; democratization in theory, a datacenter bill in practice.</div>
-          <div class="meta"><span>OpenTools</span><span class="read">Read &rarr;</span></div>
+          <div class="kicker">Chip demand</div>
+          <h3>ByteDance, Alibaba and Tencent place $35B+ in Nvidia chip orders</h3>
+          <p>China&rsquo;s three tech giants have placed orders totaling more than $35 billion for Nvidia RTX PRO 5500 cards, mostly for AI inference workloads &mdash; a sign of how valuable access to Nvidia hardware remains under sanctions. Nvidia says early samples arrive in December, with commercial deliveries starting in Q1 2027; the bottleneck right now is supply.</p>
+          <div class="key">KEY &nbsp; Despite sanctions, China&rsquo;s appetite for Nvidia isn&rsquo;t fading &mdash; the only bottleneck now is supply.</div>
+          <div class="meta"><span>CEO Today</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
@@ -617,75 +660,76 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://eurasiabusinessnews.com/2026/10/17/stock-market-today-ai-selloff-sends-wall-street-to-worst-week-since-june/">
-        <div class="thumb thumb-markets"><span class="tag">Markets</span></div>
+      <a class="card" href="https://www.newsy-today.com/nasdaq-leads-wall-street-as-chip-stocks-rebound/">
+        <div class="thumb thumb-markets"><span class="tag">Equities</span></div>
         <div class="body">
-          <div class="kicker">Equities</div>
-          <h3>Wall Street&rsquo;s worst week since June as AI-debt fears bite</h3>
-          <p>The Nasdaq slid 2.1% Friday to 26,140.03, down 4.5% for the week, while the S&amp;P 500 lost 1.1% to 7,659.44. The debate shifted from AI demand to whether companies can earn returns on the borrowing funding it &mdash; CoreWeave&rsquo;s bonds pushed past 15% yields &mdash; though the Dow rose on the week as money rotated into staples and healthcare.</p>
-          <div class="key">KEY &nbsp; The AI trade is being interrogated on leverage now, not just growth.</div>
-          <div class="meta"><span>Eurasia Business News</span><span class="read">Read &rarr;</span></div>
+          <div class="kicker">Wall Street</div>
+          <h3>Monday rebound: Nasdaq climbs 1.11%</h3>
+          <p>The Nasdaq rose 1.11% on Monday to close at 26,430.89 and the S&amp;P 500 gained 0.41% to 7,690.73; the Philadelphia Semiconductor Index climbed 1.6%, ending an eight-day losing streak. Amazon jumped 5% after Morgan Stanley named it a top pick, and Tesla gained 3.8%. But the rebound was narrow: the Dow slipped 0.07% and decliners on the NYSE outnumbered advancers two to one.</p>
+          <div class="key">KEY &nbsp; Chip and AI stocks bounced back from Friday&rsquo;s debt-scare selloff &mdash; but the base was narrow.</div>
+          <div class="meta"><span>Newsy Today</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
-      <a class="card" href="https://www.investmentwatchblog.com/nasdaq-posts-worst-week-since-june-as-oil-hits-110-and-ai-stocks-sell-off/">
-        <div class="thumb thumb-markets"><span class="tag">Commodities</span></div>
+      <a class="card" href="https://www.fool.com/investing/2026/10/20/the-federal-reserve-just-warned-more-rate-hikes-ar/">
+        <div class="thumb thumb-markets"><span class="tag">Fed</span></div>
         <div class="body">
-          <div class="kicker">Energy</div>
-          <h3>Brent touches $110 for the first time since May</h3>
-          <p>Brent settled at $109.86 Friday, up 3.7% on the day, as Middle East tensions revived supply fears; WTI broke back above $100. The spike landed alongside hot September inflation &mdash; CPI at 3.7%, PPI up 6.3% year-over-year &mdash; reigniting talk of Fed hikes.</p>
-          <div class="key">KEY &nbsp; Energy is back as the inflation wild card &mdash; $110 oil turns a Fed hold story into a possible hike story.</div>
-          <div class="meta"><span>Investment Watch Blog</span><span class="read">Read &rarr;</span></div>
+          <div class="kicker">Central bank</div>
+          <h3>Fed signals an October pause; a December hike is priced in</h3>
+          <p>The Fed is expected to hold rates steady at its October 27&ndash;28 meeting; according to CME FedWatch, the odds of a December increase are above 88%. Chair Kevin Warsh sounded upbeat last week about the resilience of the US economy but gave no timing signal. Tech stocks are under pressure on concern that a December hike would make AI infrastructure financing more expensive.</p>
+          <div class="key">KEY &nbsp; Wait-and-see in October, with a December rate hike priced in at over 88%.</div>
+          <div class="meta"><span>The Motley Fool</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
-      <a class="card" href="https://softpower.ug/bank-of-uganda-raises-central-bank-rate-to-12-0/">
-        <div class="thumb thumb-markets"><span class="tag">Central banks</span></div>
-        <div class="body">
-          <div class="kicker">Emerging markets</div>
-          <h3>Bank of Uganda shocks with 225bp emergency hike to 12%</h3>
-          <p>Uganda&rsquo;s central bank raised its policy rate from 9.75% to 12.0% after a special meeting on Oct 14 and lifted the cash reserve requirement to 13.5%, blaming disrupted shipping routes and higher oil prices from the Middle East conflict. It projects 7&ndash;7.5% headline inflation over the next year.</p>
-          <div class="key">KEY &nbsp; Emerging markets are the canary &mdash; a 225bp emergency hike says global tightening is further from over than consensus assumes.</div>
-          <div class="meta"><span>SoftPower News</span><span class="read">Read &rarr;</span></div>
-        </div>
-      </a>
-
-      <a class="card" href="https://happycoin.news/en/neft-u-110-i-rasprodazha-ii-sektora-chto-dvigalo-rynkami-12-17-oktyabrya/">
-        <div class="thumb thumb-markets"><span class="tag">Markets</span></div>
-        <div class="body">
-          <div class="kicker">Crypto</div>
-          <h3>~$1B liquidated as crypto joins the risk-off rout</h3>
-          <p>Hot US inflation and Thursday&rsquo;s AI-stock rout forced roughly $1 billion in crypto liquidations; Bitcoin briefly fell below $80,000 before recovering toward $81,500 into the weekend. South Korea&rsquo;s KOSPI even tripped a circuit breaker with a 7% drop.</p>
-          <div class="key">KEY &nbsp; Crypto&rsquo;s uncorrelated-asset thesis keeps failing on macro risk-off days &mdash; it trades like high-beta Nasdaq, not digital gold.</div>
-          <div class="meta"><span>Happy Coin News</span><span class="read">Read &rarr;</span></div>
-        </div>
-      </a>
-
-      <a class="card" href="https://www.tradingview.com/news/reuters.com,2026:newsml_L4N464011:0-runjian-s-unit-signs-200-mln-deal-to-sell-ai-token-to-company-x-for-one-year/">
-        <div class="thumb thumb-markets"><span class="tag">Deals</span></div>
-        <div class="body">
-          <div class="kicker">Compute</div>
-          <h3>Runjian unit signs $200M deal to sell AI tokens to &lsquo;Company X&rsquo;</h3>
-          <p>Runjian Co said a subsidiary agreed to sell AI tokens to an unnamed Company X for $200 million over one year. Few details were disclosed &mdash; but the deal shows compute-token forward sales becoming a revenue line for Chinese AI infrastructure firms.</p>
-          <div class="key">KEY &nbsp; AI tokens are being sold like commodity contracts &mdash; compute itself is becoming a tradeable asset class.</div>
-          <div class="meta"><span>Reuters</span><span class="read">Read &rarr;</span></div>
-        </div>
-      </a>
-
-      <a class="card" href="https://flyzeu.com/lufthansa-tap-stake-portugal-deal-2026/">
+      <a class="card" href="https://www.tradingview.com/news/business_wire:4b1c2a9be0939:0-tradeweb-to-acquire-trumid-expanding-tradeweb-s-credit-capabilities-across-the-entire-bond-lifecycle-and-further-differentiating-its-multi-asset-class-platform/">
         <div class="thumb thumb-markets"><span class="tag">M&amp;A</span></div>
         <div class="body">
-          <div class="kicker">Aviation</div>
-          <h3>Portugal picks Lufthansa&rsquo;s bid for TAP stake</h3>
-          <p>Portugal selected Lufthansa&rsquo;s bid for a stake in national carrier TAP on October 14. The deal still needs approvals, so nothing changes for passengers or loyalty programs yet &mdash; a completed purchase is a discussion, not a done deal.</p>
-          <div class="key">KEY &nbsp; Europe&rsquo;s airline consolidation march continues, but TAP remains a political football.</div>
-          <div class="meta"><span>FlyZEu</span><span class="read">Read &rarr;</span></div>
+          <div class="kicker">Merger</div>
+          <h3>Tradeweb to acquire Trumid for $1.97B</h3>
+          <p>Tradeweb Markets will acquire Trumid, the US corporate bond electronic trading platform, for ~$1.97 billion: $1.75 billion in enterprise value plus $220 million in tax assets; ~$1.89 billion in cash and $82 million in stock. The combined platform will bring the entire bond lifecycle, from issuance to secondary trading, under one roof; closing is expected in the first half of 2027.</p>
+          <div class="key">KEY &nbsp; Billion-dollar consolidation in the corporate bond market &mdash; the whole trade lifecycle on one platform.</div>
+          <div class="meta"><span>BusinessWire</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://infotechlead.com/analytics/tech-ma-deals-tradeweb-trumid-maximus-agile-defense-ttm-technologies-ophir-optics-98995">
+        <div class="thumb thumb-markets"><span class="tag">M&amp;A</span></div>
+        <div class="body">
+          <div class="kicker">Defense tech</div>
+          <h3>Maximus to acquire Agile Defense for $660M</h3>
+          <p>Government services company Maximus is acquiring cybersecurity and defense technology firm Agile Defense for $660 million in cash, with a performance-based earn-out also possible. The company serves more than 50 federal agencies and has ~1,100 security-cleared employees; the deal expands Maximus&rsquo;s AI, cybersecurity and data analytics capabilities.</p>
+          <div class="key">KEY &nbsp; Government contracts + cybersecurity: a $660M defense tech buy aimed at AI capability.</div>
+          <div class="meta"><span>InfotechLead</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.morningstar.com/news/dow-jones/202610202643/oil-above-100-a-barrel-as-middle-east-risks-persist-2nd-update">
+        <div class="thumb thumb-markets"><span class="tag">Energy</span></div>
+        <div class="body">
+          <div class="kicker">Oil</div>
+          <h3>Oil above $100 a barrel: Brent climbs to $111</h3>
+          <p>Brent December futures rose 1.5% on Tuesday to $111.10, and WTI gained 2% to $100.59. Prices are supported by tanker attacks in the Strait of Hormuz and Houthi threats against Saudi energy facilities; according to Kpler, Gulf oil flows fell from 20 million barrels to 8.5 million in two weeks. On Friday, Trump signed an order suspending some sanctions and tariffs on Russian energy exports.</p>
+          <div class="key">KEY &nbsp; Supply fears in the Gulf have pushed oil above $100 &mdash; WTI and Brent climbing together.</div>
+          <div class="meta"><span>Dow Jones Newswires</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.coindesk.com/markets/2026/10/20/bitcoin-drops-to-usd81-400-as-asian-chip-stocks-tumble-options-traders-seek-downside-protection">
+        <div class="thumb thumb-markets"><span class="tag">Crypto</span></div>
+        <div class="body">
+          <div class="kicker">Crypto</div>
+          <h3>Bitcoin slips to $81,400 as spot ETFs log their biggest inflow in a month</h3>
+          <p>Bitcoin slipped to ~$81,400 on Tuesday; even so, US spot bitcoin ETFs took in $526.6 million on Monday &mdash; the biggest daily inflow in about a month. In Asia, the KOSPI fell 3.73%; on Deribit, put options drew more than twice the demand of calls as investors sought protection against a fall.</p>
+          <div class="key">KEY &nbsp; Price falls while ETFs gather money &mdash; institutional appetite and short-term fear are diverging.</div>
+          <div class="meta"><span>CoinDesk</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
     </div>
     <div class="progress"><div class="progress-fill"></div></div>
   </section>
+
 
   <!-- TEMPLATE: SECTION 03 — US & TURKEY. Filter pills switch between the US
        and Turkey rails; US is the default view. Replace cards daily. -->
@@ -708,69 +752,69 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://peopledaily.digital/news/trump-puts-new-russia-sanctions-passed-by-congress-on-hold-amid-deepening-row-with-ukraine" target="_blank" rel="noopener">
-        <div class="thumb thumb-us"><span class="tag">Foreign policy</span></div>
+      <a class="card" href="https://bworldonline.com/world/2026/10/20/788078/hegseth-discusses-iran-with-netanyahu-in-unannounced-visit-to-israel-officials-say/" target="_blank" rel="noopener">
+        <div class="thumb thumb-us"><span class="tag">Middle East</span></div>
         <div class="body">
-          <div class="kicker">White House</div>
-          <h3>Trump waives the Russia sanctions he signed weeks earlier</h3>
-          <p>Trump signed an executive order Friday waiving most of the new Russia sanctions and tariffs Congress passed last month with rare bipartisan support, telling Congress the pause is in the national interest. It comes a week after he struck a deal to import Russian diesel and amid open friction with Ukraine&rsquo;s Zelenskyy.</p>
-          <div class="key">KEY &nbsp; A bipartisan sanctions law is now an unused threat &mdash; markets and Moscow will price how little leverage it retains.</div>
-          <div class="meta"><span>The Guardian</span><span class="read">Read &rarr;</span></div>
-        </div>
-      </a>
-
-      <a class="card" href="https://www.krps.org/npr-news/2026-10-16/3-children-teacher-killed-in-shooting-at-oregon-elementary-school" target="_blank" rel="noopener">
-        <div class="thumb thumb-us"><span class="tag">Tragedy</span></div>
-        <div class="body">
-          <div class="kicker">Gun violence</div>
-          <h3>Four dead in Bend, Oregon elementary school shooting</h3>
-          <p>A 16-year-old shot his way through locked doors at Silver Rail Elementary in Bend on Thursday, killing three children ages 5, 8 and 11 and a teacher, before a bystander who followed him inside shot him dead. Another child and a teacher remain in critical condition; motive is still unclear.</p>
-          <div class="key">KEY &nbsp; The rare bystander-stop detail will dominate the gun-debate cycle; expect renewed scrutiny of school hardening in the midterms&rsquo; final weeks.</div>
-          <div class="meta"><span>NPR</span><span class="read">Read &rarr;</span></div>
-        </div>
-      </a>
-
-      <a class="card" href="https://qncnews.com/2026/10/18/katie-zacharia-out-as-white-house-press-secretary-after-one-week-in-the-role/" target="_blank" rel="noopener">
-        <div class="thumb thumb-us"><span class="tag">Politics</span></div>
-        <div class="body">
-          <div class="kicker">White House</div>
-          <h3>White House press secretary exits after five days</h3>
-          <p>Katie Zacharia left the press secretary job Friday after a five-day tenure &mdash; one of the shortest ever &mdash; following a shaky 14-minute debut briefing and questions about her claimed legal credentials. Trump said he had suggested she reconsider the role; the exact form of the departure is contested.</p>
-          <div class="key">KEY &nbsp; Another comms reset two-plus weeks before the Nov 3 midterms signals a White House struggling to steady its midterm message.</div>
-          <div class="meta"><span>QNC News</span><span class="read">Read &rarr;</span></div>
-        </div>
-      </a>
-
-      <a class="card" href="https://www.wrur.org/npr-news/2026-10-17/no-kings-draws-crowds-with-focus-on-early-voting" target="_blank" rel="noopener">
-        <div class="thumb thumb-us"><span class="tag">Politics</span></div>
-        <div class="body">
-          <div class="kicker">Midterms</div>
-          <h3>Fourth &lsquo;No Kings&rsquo; wave pivots from outrage to early voting</h3>
-          <p>Thousands joined 3,000+ No Kings: Vote Early events nationwide on Saturday, with organizers rebranding the anti-Trump movement as a turnout machine 17 days before the midterms. The White House dismissed it as a Democratic turnout operation; polls show Democrats poised to retake the House with the Senate a toss-up.</p>
-          <div class="key">KEY &nbsp; The pivot from protest to voter mobilization makes this the left&rsquo;s biggest single-day electoral action of the cycle.</div>
-          <div class="meta"><span>NPR</span><span class="read">Read &rarr;</span></div>
-        </div>
-      </a>
-
-      <a class="card" href="https://mymixfm.com/2026/10/18/rubio-heads-to-central-asia-while-other-us-officials-hit-foreign-policy-hot-spots/" target="_blank" rel="noopener">
-        <div class="thumb thumb-us"><span class="tag">Foreign policy</span></div>
-        <div class="body">
-          <div class="kicker">Diplomacy</div>
-          <h3>Rubio heads to Central Asia as top diplomats skip the hot spots</h3>
-          <p>Secretary of State Marco Rubio travels Sunday to Samarkand, Uzbekistan for a C5+1 meeting with Central Asian leaders, as US officials describe the resource-rich region as underprioritized. The trip fits a pattern of Rubio visiting peripheral regions while Vance and special envoys handle Iran, Ukraine and other front-burner crises.</p>
-          <div class="key">KEY &nbsp; The US is courting Central Asia as a China-Russia-Iran competition zone &mdash; even as Washington&rsquo;s heaviest diplomacy happens elsewhere.</div>
+          <div class="kicker">Middle East</div>
+          <h3>Hegseth&rsquo;s unannounced visit to Israel: Iran on the agenda</h3>
+          <p>US Defense Secretary Pete Hegseth traveled to Israel on Monday in an unannounced visit and met with Prime Minister Netanyahu; the agenda was the tension in the Strait of Hormuz and intensifying Houthi attacks on Saudi Arabia. The visit came a day after Trump endorsed Netanyahu ahead of Israel&rsquo;s October 27 elections; both sides are officially keeping the option of new strikes on Iran on the shelf until after the US midterms.</p>
+          <div class="key">KEY &nbsp; The Iran file is heating up ahead of the midterms &mdash; the Pentagon chief was in Tel Aviv.</div>
           <div class="meta"><span>Reuters</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
-      <a class="card" href="https://mix929.com/2026/10/15/exclusive-order-to-limit-starshield-for-ukraine-came-from-inside-white-house-sources-say" target="_blank" rel="noopener">
-        <div class="thumb thumb-us"><span class="tag">Exclusive</span></div>
+      <a class="card" href="https://bworldonline.com/world/2026/10/20/788045/trump-approval-falls-to-record-low-of-31-as-midterms-near-reuters-ipsos-poll-finds/" target="_blank" rel="noopener">
+        <div class="thumb thumb-us"><span class="tag">Polling</span></div>
         <div class="body">
-          <div class="kicker">Ukraine</div>
-          <h3>White House ordered Starshield slowdown for Ukraine, Reuters reports</h3>
-          <p>Two US officials and a Western official told Reuters that an order to throttle SpaceX&rsquo;s military-grade Starshield satellite service for Ukraine&rsquo;s military came from inside the White House, disrupting drone operations. A senior US official denied the president made the request; Ukraine was told only after complaints to Washington.</p>
-          <div class="key">KEY &nbsp; The dispute deepens the rift with Kyiv &mdash; Ukraine says it was not warned before missions failed.</div>
+          <div class="kicker">Polling</div>
+          <h3>Trump&rsquo;s approval hits a record-low 31%; Democrats lead by 12 points two weeks before the midterms</h3>
+          <p>According to the Reuters/Ipsos poll that closed on October 19, Trump&rsquo;s approval fell to 31%, the lowest of either term; Democrats lead the generic congressional ballot 47% to 35%, a 12-point edge ahead of the November 3 midterms. About 78% of Americans blame Trump&rsquo;s policies &mdash; tariffs and the Iran conflict &mdash; for prices rising faster than wages; 68% disapprove of his handling of the economy.</p>
+          <div class="key">KEY &nbsp; Voters are focused on the economy ahead of the midterms &mdash; the polls are sounding the alarm for the White House.</div>
           <div class="meta"><span>Reuters</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://worldrightnowlive.com/story/how-is-the-us-economy-really-doing-under-president-trump" target="_blank" rel="noopener">
+        <div class="thumb thumb-us"><span class="tag">Economy</span></div>
+        <div class="body">
+          <div class="kicker">Economy analysis</div>
+          <h3>BBC Verify: How is the US economy really doing?</h3>
+          <p>According to the BBC&rsquo;s review, growth is continuing at an annualized 2.2%, with AI data center spending ($5 billion in August) supporting output. But inflation is at 3.7%, diesel hit a record $6.52 a gallon in September, and average monthly job gains since Trump returned to office are just 43,000. Consumer sentiment is at the second-lowest level in the Michigan survey&rsquo;s 74-year history.</p>
+          <div class="key">KEY &nbsp; The gap between headline growth and wallet reality is widening.</div>
+          <div class="meta"><span>BBC</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.spinmagazine.com/2026/10/u2-netflix-nfl-halftime/" target="_blank" rel="noopener">
+        <div class="thumb thumb-us"><span class="tag">Entertainment</span></div>
+        <div class="body">
+          <div class="kicker">Media &amp; music</div>
+          <h3>U2 to headline Netflix&rsquo;s Thanksgiving Eve NFL halftime show</h3>
+          <p>U2 will perform at halftime of Netflix&rsquo;s Thanksgiving Eve NFL game on November 25, when the Green Bay Packers host the Los Angeles Rams at SoFi Stadium; the band is celebrating its 50th year. It continues Netflix&rsquo;s star-studded NFL run after Beyonc&eacute;&rsquo;s 2024 Christmas show and Snoop Dogg&rsquo;s 2025 holiday party.</p>
+          <div class="key">KEY &nbsp; Netflix&rsquo;s NFL push keeps growing &mdash; U2, in their 50th year, take the halftime stage.</div>
+          <div class="meta"><span>SPIN</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://newswiredelhi.com/index.php/2026/10/20/hollywoods-110-billion-merger-has-one-big-test-the-audience/" target="_blank" rel="noopener">
+        <div class="thumb thumb-us"><span class="tag">Hollywood</span></div>
+        <div class="body">
+          <div class="kicker">Hollywood</div>
+          <h3>The $110B Skydance&ndash;Warner Bros. merger faces its real test: the audience</h3>
+          <p>Paramount&rsquo;s $110 billion acquisition of Warner Bros. Discovery closed on October 6, giving birth to Skydance Corporation; now all eyes are on what the merger will bring audiences. Consolidation among media giants remains the biggest corporate story of 2026.</p>
+          <div class="key">KEY &nbsp; Hollywood&rsquo;s merger of the century is complete &mdash; now the content and subscriber test begins.</div>
+          <div class="meta"><span>NewsWire Delhi</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.tipranks.com/news/netflix-q3-earnings-are-today-heres-what-to-expect-from-nflx-stock" target="_blank" rel="noopener">
+        <div class="thumb thumb-us"><span class="tag">Earnings</span></div>
+        <div class="body">
+          <div class="kicker">Earnings season</div>
+          <h3>Netflix Q3 earnings land tonight: all eyes on ad revenue</h3>
+          <p>Netflix reports Q3 earnings after Tuesday&rsquo;s close: Wall Street expects ~$12.87 billion in revenue and $0.82 in earnings per share. The stock is down ~25% in 2026; investors will watch whether ad revenue (2026 target ~$3 billion) and a 33.2% operating margin can offset slowing growth.</p>
+          <div class="key">KEY &nbsp; Tonight&rsquo;s earnings &mdash; can the ad business be Netflix&rsquo;s growth engine?</div>
+          <div class="meta"><span>TipRanks</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
@@ -788,69 +832,69 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://nordicmonitor.com/2026/10/turkeys-20-billion-fund-scandal-sparks-media-crackdown-as-questions-mount-over-erdogans-inner-circle/">
-        <div class="thumb thumb-turkey"><span class="tag">Press freedom</span></div>
+      <a class="card" href="https://news.bloombergtax.com/financial-accounting/turkey-removes-market-regulator-chief-during-fund-crisis" target="_blank" rel="noopener">
+        <div class="thumb thumb-turkey"><span class="tag">Regulation</span></div>
         <div class="body">
-          <div class="kicker">Fund scandal</div>
-          <h3>Turkey&rsquo;s $20B fund scandal spreads into a media crackdown</h3>
-          <p>The collapse of investment funds involving roughly $20 billion has spilled from markets into politics and the press: journalists have been detained, hundreds of social media accounts blocked, and a TV station taken over. The latest detention came Oct 15 against a reporter covering disputed asset restrictions.</p>
-          <div class="key">KEY &nbsp; The scandal is morphing from a market failure into a press-freedom story &mdash; the riskiest kind for Ankara&rsquo;s image abroad.</div>
-          <div class="meta"><span>Nordic Monitor</span><span class="read">Read &rarr;</span></div>
+          <div class="kicker">SPK</div>
+          <h3>Market regulator chief removed in the middle of the fund crisis</h3>
+          <p>President Erdo&#287;an removed Capital Markets Board (SPK) chair Mahmut S&uuml;tc&uuml;, who had asked to resign citing health problems; S&uuml;tc&uuml; spent less than five months in the job. The removal came as the investment fund crisis &mdash; which prosecutors are investigating as a &lsquo;Ponzi-like&rsquo; scheme &mdash; continues; his predecessor is also within the scope of the investigation.</p>
+          <div class="key">KEY &nbsp; The capital markets regulator changed hands in under five months &mdash; the fund crisis is shaking Ankara.</div>
+          <div class="meta"><span>Bloomberg Tax</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
-      <a class="card" href="https://www.indonesianow.co/business-and-investment/8711877/not-just-indonesia-turkey-also-becomes-a-victim-of-msci?utm_campaign=detikcomsocmed&amp;utm_medium=oa&amp;utm_source=facebook&amp;utm_content=indonesianow">
-        <div class="thumb thumb-turkey"><span class="tag">Indexes</span></div>
+      <a class="card" href="https://www.bosphorusnews.com/article/turkiye-removes-market-regulator-chief-as-msci-freezes-index-changes" target="_blank" rel="noopener">
+        <div class="thumb thumb-turkey"><span class="tag">Markets</span></div>
         <div class="body">
-          <div class="kicker">Markets</div>
-          <h3>MSCI freezes Turkey index changes, warns of downgrade risk</h3>
-          <p>MSCI froze all expansions of Turkish representation in its indexes, effective immediately, citing the need to assess Turkey&rsquo;s market reforms and warning of an emerging-market downgrade if improvements aren&rsquo;t sufficient by mid-2027. The BIST 100 has now fallen five straight weeks.</p>
-          <div class="key">KEY &nbsp; Passive foreign money is pausing on Turkey &mdash; the freeze is a direct market vote of no confidence in reform follow-through.</div>
-          <div class="meta"><span>Reuters</span><span class="read">Read &rarr;</span></div>
+          <div class="kicker">MSCI</div>
+          <h3>MSCI freezes Turkey index changes; downgrade risk on the table</h3>
+          <p>On October 15, MSCI froze upward changes to its Turkey equity indexes: no new additions and no increases to the foreign inclusion factor. The reasons: concerns about coordinated trading in small-cap stocks and unreliable free-float pricing. MSCI will reassess in its 2027 review; it warned that if reforms stall by June 2027, it may open a consultation on downgrading Turkey to &lsquo;frontier market&rsquo; status.</p>
+          <div class="key">KEY &nbsp; Foreign investor confidence has been shaken &mdash; a clear warning to Turkey from MSCI.</div>
+          <div class="meta"><span>Bosphorus News</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
-      <a class="card" href="https://www.tradingview.com/news/reuters.com,2026:newsml_S8N41C0C0:0-turkey-sees-2027-budget-deficit-at-3-5-of-gdp-vp-yilmaz-says/">
+      <a class="card" href="https://www.gazetepencere.com/gundem/hazine-ve-maliye-bakan-yardimcisi-istifa-etti-719954h" target="_blank" rel="noopener">
+        <div class="thumb thumb-turkey"><span class="tag">Government</span></div>
+        <div class="body">
+          <div class="kicker">Treasury</div>
+          <h3>Deputy Treasury and Finance Minister &Ccedil;elik asks to retire</h3>
+          <p>Deputy Treasury and Finance Minister Osman &Ccedil;elik submitted his retirement request to Minister Mehmet &#350;im&#351;ek on October 19 &mdash; the same day as the SPK chair&rsquo;s resignation and the removal of Esenyurt&rsquo;s trustee mayor Can Aksoy; three departures in a single day. Press reports say his son-in-law &#304;skender Balc&#305; was detained in the fund investigation; no charges against &Ccedil;elik have been announced.</p>
+          <div class="key">KEY &nbsp; The fund crisis spreads in waves &mdash; three senior departures on the same day.</div>
+          <div class="meta"><span>Gazete Pencere</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.yenicaggazetesi.com/istanbulda-selde-son-kayip-kisinin-cesedi-bulundu-can-kaybi-10a-cikti-1083437h.htm" target="_blank" rel="noopener">
+        <div class="thumb thumb-turkey"><span class="tag">Istanbul</span></div>
+        <div class="body">
+          <div class="kicker">Istanbul</div>
+          <h3>Body of the last missing flood victim found: death toll rises to 10</h3>
+          <p>The body of Ahmet Derin, the last person missing from the October 14 floods, was found in the Golden Horn (Hali&ccedil;); the death toll in Istanbul and Kocaeli rose to 10. Rainfall of up to 240 kg per square meter on October 14 &mdash; among the highest recorded since 1985 &mdash; caused 1,277 floods and 15 landslides; a 14-year-old child in Fatih also lost their life.</p>
+          <div class="key">KEY &nbsp; October 14&rsquo;s record rainfall claimed 10 lives &mdash; the last missing person has now been found.</div>
+          <div class="meta"><span>Yeni&ccedil;a&#287;</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.turkishminute.com/2026/10/20/turkish-think-tank-urges-interest-rate-pause-amid-fund-crisis/" target="_blank" rel="noopener">
+        <div class="thumb thumb-turkey"><span class="tag">Central Bank</span></div>
+        <div class="body">
+          <div class="kicker">Central Bank</div>
+          <h3>TEPAV calls for a pause on rates: fund crisis and MSCI risk</h3>
+          <p>TEPAV recommended that the Central Bank of the Republic of Turkey hold its policy rate at 37% at Thursday&rsquo;s (October 22) meeting, citing new risks such as the fund crisis and the MSCI freeze. The think tank warned that inflation will overshoot the government&rsquo;s year-end target and criticized the conflicting 2027 targets &mdash; 21% for the government, 15% for the central bank &mdash; for weakening monetary policy credibility.</p>
+          <div class="key">KEY &nbsp; A clear message from the think tank ahead of Thursday&rsquo;s decision: don&rsquo;t cut this month.</div>
+          <div class="meta"><span>Turkish Minute</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://ekonomimasasi.com.tr/merkez-bankasi-22-ekim-faiz-karari-32-kurum-100-baz-puan-indirim-bekliyor/" target="_blank" rel="noopener">
         <div class="thumb thumb-turkey"><span class="tag">Economy</span></div>
         <div class="body">
-          <div class="kicker">Fiscal policy</div>
-          <h3>Turkey sees 2027 budget deficit at 3.5% of GDP</h3>
-          <p>Vice President Cevdet Y&#305;lmaz said Friday that Turkey expects a 2027 budget deficit of 3.5% of GDP &mdash; 2.8% excluding earthquake-related spending. The government earmarked 605 billion lira ($16 billion) for earthquake rebuilding.</p>
-          <div class="key">KEY &nbsp; Ankara is signaling fiscal discipline toward a sub-3% core deficit, keeping the disinflation program&rsquo;s credibility intact.</div>
-          <div class="meta"><span>Reuters</span><span class="read">Read &rarr;</span></div>
-        </div>
-      </a>
-
-      <a class="card" href="https://www.trncnews.com/2026/10/18/fund-swindle-bigger-than-the-disaster-of-the-century/">
-        <div class="thumb thumb-turkey"><span class="tag">Politics</span></div>
-        <div class="body">
-          <div class="kicker">Opposition</div>
-          <h3>Opposition leader &Ouml;zel rallies on the fund &lsquo;swindle&rsquo;</h3>
-          <p>Main opposition leader &Ouml;zg&uuml;r &Ouml;zel, speaking in Yozgat on Saturday, accused the government over the fund scandal &mdash; now estimated at up to $110 billion in economic damage by some experts &mdash; and framed the choice as autocracy or democracy. He targeted AKP patronage and pitched his party&rsquo;s congress as a grassroots reckoning.</p>
-          <div class="key">KEY &nbsp; The opposition is converting the financial scandal into its main narrative against Erdo&#287;an&rsquo;s party.</div>
-          <div class="meta"><span>TRNC News</span><span class="read">Read &rarr;</span></div>
-        </div>
-      </a>
-
-      <a class="card" href="https://floridianpress.com/2026/10/rick-scott-tells-president-erdogan-to-stop-the-invasion-of-cyprus/">
-        <div class="thumb thumb-turkey"><span class="tag">Diplomacy</span></div>
-        <div class="body">
-          <div class="kicker">NATO</div>
-          <h3>Sen. Rick Scott slams Turkey during Cyprus visit</h3>
-          <p>Sen. Rick Scott (R-Fla.) visited Nicosia on Friday, toured the UN buffer zone, and blamed Turkey and Erdo&#287;an for the Cyprus division, calling it an invasion of sovereignty. He questioned Turkey&rsquo;s NATO credentials and praised Cyprus as a strong US, Israeli and Greek ally &mdash; days after Rubio&rsquo;s own Athens trip.</p>
-          <div class="key">KEY &nbsp; A vocal US senator is turning up the pressure on Turkey within NATO&rsquo;s southeastern flank, complicating Ankara-Washington ties.</div>
-          <div class="meta"><span>The Floridian</span><span class="read">Read &rarr;</span></div>
-        </div>
-      </a>
-
-      <a class="card" href="https://247newsbulletins.com/economy/market-participants-survey-published-inflation-expectations-increased/">
-        <div class="thumb thumb-turkey"><span class="tag">Economy</span></div>
-        <div class="body">
-          <div class="kicker">Central bank</div>
-          <h3>Inflation expectations tick up ahead of Thursday&rsquo;s rate decision</h3>
-          <p>The central bank&rsquo;s October Market Participants Survey showed year-end inflation expectations rising to 29.63% and 12-month expectations to 23.89%, with growth trimmed to 2.9% and year-end USD/TRY seen at 51.55. Analysts expect a 100bp cut on Oct 22 to 36%, as September CPI fell below 30%.</p>
-          <div class="key">KEY &nbsp; Sticky expectations may force a cautious first cut &mdash; the real test of Turkey&rsquo;s disinflation path begins Thursday.</div>
-          <div class="meta"><span>247 News Bulletins</span><span class="read">Read &rarr;</span></div>
+          <div class="kicker">Market expectations</div>
+          <h3>Survey: 32 of 37 institutions expect a 100bp cut on Thursday</h3>
+          <p>In a survey of 37 institutions, 32 expect the central bank to cut its policy rate by 100 basis points on October 22, from 37% to 36%; 29 of 33 economists also expect a cut in December. The report also says a draft law allowing interim payments to investors in funds under liquidation is expected to reach Parliament this week.</p>
+          <div class="key">KEY &nbsp; The market is locked in on a cut &mdash; but TEPAV says the opposite.</div>
+          <div class="meta"><span>Ekonomi Masas&#305;</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
@@ -859,16 +903,15 @@
     </div>
   </section>
 
+
   <!-- TEMPLATE: SECTION 04 — SPORTS SCHEDULE. Filter tabs switch between sports;
-       a sport with no fixtures loses its tab automatically (see script below).
-       Volleyball game times: convert Istanbul (TRT, UTC+3) to California (PDT, UTC-7).
-       Istanbul time minus 10 hours = California time. -->
+       a sport with no fixtures loses its tab automatically (see script below). -->
   <section class="section">
     <div class="section-head">
       <span class="num">04</span><h2>Sports Schedule</h2><hr class="rule">
     </div>
     <p class="section-note">
-      Champions League, Sultanlar Ligi, NBA opening week and the US Grand Prix &mdash;
+      Champions League Matchday 3, NBA opening week, CEV Women&rsquo;s Champions League qualifiers and the US Grand Prix &mdash;
       upcoming fixtures, all in California time.
     </p>
     <div class="sport-tabs" role="tablist" aria-label="Filter fixtures by sport">
@@ -933,9 +976,9 @@
           <div class="teams">Bayern Munich <span>vs</span> Arsenal</div>
           <div class="when">
             <b>Wednesday, Oct 21 &middot; 12:00 PM PDT</b><br>
-            UEFA Champions League &middot; Matchday 3 &middot; Fu&szlig;ball Arena M&uuml;nchen, Munich
+            UEFA Champions League &middot; Matchday 3 &middot; Allianz Arena, Munich
           </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Bayern%20Munich%20vs%20Arsenal%20-%20Champions%20League&amp;dates=20261021T190000Z/20261021T210000Z&amp;location=Fussball%20Arena%20Munchen%2C%20Munich&amp;details=UEFA%20Champions%20League%20Matchday%203" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Bayern%20Munich%20vs%20Arsenal%20-%20Champions%20League&amp;dates=20261021T190000Z/20261021T210000Z&amp;location=Allianz%20Arena%2C%20Munich&amp;details=UEFA%20Champions%20League%20Matchday%203" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
         <div class="fixture">
@@ -963,32 +1006,47 @@
       <div class="rail">
 
         <div class="fixture">
-          <div class="thumb thumb-volley"><span class="tag">Marquee matchup</span></div>
-          <div class="teams">Eczac&#305;ba&#351;&#305; <span>vs</span> Vak&#305;fBank</div>
+          <div class="thumb thumb-volley"><span class="tag">CEV</span></div>
+          <div class="teams">Turan Tovuz <span>vs</span> Mladost Zagreb</div>
           <div class="when">
-            <b>Sunday, Oct 18 &middot; 8:00 AM PDT</b> &nbsp;(6:00 PM Istanbul)<br>
-            Sultanlar Ligi &middot; Round 4 &middot; Eczac&#305;ba&#351;&#305; Sports Hall, Istanbul
+            <b>Tuesday, Oct 20 &middot; 8:00 AM PDT</b><br>
+            CEV Women&rsquo;s Champions League &middot; qualification round 2, leg 1
           </div>
-          <div class="note">The Istanbul derby headlines Round 4.</div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Eczacibasi%20vs%20VakifBank%20-%20Sultanlar%20Ligi&amp;dates=20261018T150000Z/20261018T170000Z&amp;location=Eczacibasi%20Sports%20Hall%2C%20Istanbul&amp;details=Sultanlar%20Ligi%20Round%204" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Turan%20Tovuz%20vs%20Mladost%20Zagreb%20-%20CEV%20Champions%20League&amp;dates=20261020T150000Z/20261020T170000Z&amp;details=CEV%20Women%27s%20Champions%20League%20qualification%20round%202%2C%20leg%201" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
         <div class="fixture">
-          <div class="thumb thumb-volley"><span class="tag">Round 4</span></div>
-          <div class="teams">Galatasaray <span>vs</span> &#304;lbank SK Ankara</div>
+          <div class="thumb thumb-volley"><span class="tag">CEV</span></div>
+          <div class="teams">OK Herceg Novi <span>vs</span> Maritza Plovdiv</div>
           <div class="when">
-            <b>Sunday, Oct 18 &middot; 9:00 AM PDT</b> &nbsp;(7:00 PM Istanbul)<br>
-            Sultanlar Ligi &middot; Round 4 &middot; Burhan Felek Sports Hall, Istanbul
+            <b>Wednesday, Oct 21 &middot; 10:00 AM PDT</b><br>
+            CEV Women&rsquo;s Champions League &middot; qualification round 2, leg 1
           </div>
-          <div class="note">Sunday morning, California time.</div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Galatasaray%20vs%20Ilbank%20SK%20Ankara%20-%20Sultanlar%20Ligi&amp;dates=20261018T160000Z/20261018T180000Z&amp;location=Burhan%20Felek%20Sports%20Hall%2C%20Istanbul&amp;details=Sultanlar%20Ligi%20Round%204" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=OK%20Herceg%20Novi%20vs%20Maritza%20Plovdiv%20-%20CEV%20Champions%20League&amp;dates=20261021T170000Z/20261021T190000Z&amp;details=CEV%20Women%27s%20Champions%20League%20qualification%20round%202%2C%20leg%201" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-volley"><span class="tag">CEV</span></div>
+          <div class="teams">Asterix Avo Beveren <span>vs</span> OTP Banka Branik Maribor</div>
+          <div class="when">
+            <b>Wednesday, Oct 21 &middot; 10:30 AM PDT</b><br>
+            CEV Women&rsquo;s Champions League &middot; qualification round 2, leg 1
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Asterix%20Avo%20Beveren%20vs%20Branik%20Maribor%20-%20CEV%20Champions%20League&amp;dates=20261021T173000Z/20261021T193000Z&amp;details=CEV%20Women%27s%20Champions%20League%20qualification%20round%202%2C%20leg%201" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-volley"><span class="tag">CEV</span></div>
+          <div class="teams">FC Porto <span>vs</span> Fundaci&oacute;n Cajasol Andaluc&iacute;a</div>
+          <div class="when">
+            <b>Thursday, Oct 22 &middot; 12:00 PM PDT</b><br>
+            CEV Women&rsquo;s Champions League &middot; qualification round 2, leg 1
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=FC%20Porto%20vs%20Fundacion%20Cajasol%20Andalucia%20-%20CEV%20Champions%20League&amp;dates=20261022T190000Z/20261022T210000Z&amp;details=CEV%20Women%27s%20Champions%20League%20qualification%20round%202%2C%20leg%201" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
       </div>
       <div class="progress"><div class="progress-fill"></div></div>
-      <p style="font-size:13px; color:rgba(245,235,221,0.55); margin-top:12px;">
-        Fixtures: <a href="https://en.wikipedia.org/wiki/2026%E2%80%9327_Turkish_Women%27s_Volleyball_League" style="color:#e8935a;">2026&ndash;27 Sultanlar Ligi schedule</a>
-      </p>
     </div>
 
     <div class="sport-panel" data-sport="nba" hidden>
@@ -1002,63 +1060,63 @@
       <div class="rail">
 
         <div class="fixture">
-          <div class="thumb thumb-nba"><span class="tag">Opening Night</span></div>
-          <div class="teams">Boston Celtics <span>at</span> Detroit Pistons</div>
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Celtics <span>at</span> Pistons</div>
           <div class="when">
             <b>Tuesday, Oct 20 &middot; 12:00 PM PDT</b><br>
-            NBA &middot; Opening Night &middot; Little Caesars Arena, Detroit
+            NBA 2026-27 regular season &middot; Little Caesars Arena, Detroit
           </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Boston%20Celtics%20at%20Detroit%20Pistons%20-%20NBA&amp;dates=20261020T190000Z/20261020T213000Z&amp;location=Little%20Caesars%20Arena%2C%20Detroit&amp;details=NBA%20opening%20night" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Celtics%20at%20Pistons%20-%20NBA&amp;dates=20261020T190000Z/20261020T210000Z&amp;location=Little%20Caesars%20Arena%2C%20Detroit&amp;details=NBA%202026-27%20regular%20season" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
         <div class="fixture">
-          <div class="thumb thumb-nba"><span class="tag">Opening Night</span></div>
-          <div class="teams">Philadelphia 76ers <span>at</span> New York Knicks</div>
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">76ers <span>at</span> Knicks</div>
           <div class="when">
             <b>Tuesday, Oct 20 &middot; 4:00 PM PDT</b><br>
-            NBA &middot; Opening Night &mdash; Knicks banner night &middot; Madison Square Garden, New York
+            NBA 2026-27 regular season &middot; Madison Square Garden, New York &middot; ring/banner night
           </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Philadelphia%2076ers%20at%20New%20York%20Knicks%20-%20NBA&amp;dates=20261020T230000Z/20261021T013000Z&amp;location=Madison%20Square%20Garden%2C%20New%20York&amp;details=NBA%20opening%20night%20-%20Knicks%20banner%20night" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=76ers%20at%20Knicks%20-%20NBA&amp;dates=20261020T230000Z/20261021T010000Z&amp;location=Madison%20Square%20Garden%2C%20New%20York&amp;details=NBA%202026-27%20regular%20season%20-%20ring%2Fbanner%20night" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
         <div class="fixture">
-          <div class="thumb thumb-nba"><span class="tag">Opening Night</span></div>
-          <div class="teams">Oklahoma City Thunder <span>at</span> San Antonio Spurs</div>
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Thunder <span>at</span> Spurs</div>
           <div class="when">
             <b>Tuesday, Oct 20 &middot; 6:30 PM PDT</b><br>
-            NBA &middot; Opening Night &mdash; Western Conference Finals rematch &middot; Frost Bank Center, San Antonio
+            NBA 2026-27 regular season &middot; Frost Bank Center, San Antonio &middot; West Finals rematch
           </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Oklahoma%20City%20Thunder%20at%20San%20Antonio%20Spurs%20-%20NBA&amp;dates=20261021T013000Z/20261021T040000Z&amp;location=Frost%20Bank%20Center%2C%20San%20Antonio&amp;details=NBA%20opening%20night%20-%20Western%20Conference%20Finals%20rematch" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Thunder%20at%20Spurs%20-%20NBA&amp;dates=20261021T013000Z/20261021T033000Z&amp;location=Frost%20Bank%20Center%2C%20San%20Antonio&amp;details=NBA%202026-27%20regular%20season%20-%20West%20Finals%20rematch" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
         <div class="fixture">
-          <div class="thumb thumb-nba"><span class="tag">Opening Week</span></div>
-          <div class="teams">Minnesota Timberwolves <span>at</span> Miami Heat</div>
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Timberwolves <span>at</span> Heat</div>
           <div class="when">
             <b>Wednesday, Oct 21 &middot; 4:30 PM PDT</b><br>
-            NBA &middot; Opening Week &mdash; Giannis&rsquo;s Heat debut &middot; Kaseya Center, Miami
+            NBA 2026-27 regular season &middot; Miami &middot; Giannis&rsquo; Heat debut
           </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Minnesota%20Timberwolves%20at%20Miami%20Heat%20-%20NBA&amp;dates=20261021T233000Z/20261022T020000Z&amp;location=Kaseya%20Center%2C%20Miami&amp;details=NBA%20opening%20week%20-%20Giannis%27s%20Heat%20debut" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Timberwolves%20at%20Heat%20-%20NBA&amp;dates=20261021T233000Z/20261022T013000Z&amp;location=Miami&amp;details=NBA%202026-27%20regular%20season%20-%20Giannis%27%20Heat%20debut" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
         <div class="fixture">
-          <div class="thumb thumb-nba"><span class="tag">Opening Week</span></div>
-          <div class="teams">Golden State Warriors <span>at</span> Los Angeles Lakers</div>
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Warriors <span>at</span> Lakers</div>
           <div class="when">
             <b>Wednesday, Oct 21 &middot; 7:00 PM PDT</b><br>
-            NBA &middot; Opening Week &middot; Crypto.com Arena, Los Angeles
+            NBA 2026-27 regular season &middot; Los Angeles &middot; Don&#269;i&#263; hosts Curry
           </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Golden%20State%20Warriors%20at%20Los%20Angeles%20Lakers%20-%20NBA&amp;dates=20261022T020000Z/20261022T043000Z&amp;location=Crypto.com%20Arena%2C%20Los%20Angeles&amp;details=NBA%20opening%20week" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Warriors%20at%20Lakers%20-%20NBA&amp;dates=20261022T020000Z/20261022T040000Z&amp;location=Los%20Angeles&amp;details=NBA%202026-27%20regular%20season" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
         <div class="fixture">
-          <div class="thumb thumb-nba"><span class="tag">Opening Week</span></div>
-          <div class="teams">Cleveland Cavaliers <span>at</span> Philadelphia 76ers</div>
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Cavaliers <span>at</span> 76ers</div>
           <div class="when">
             <b>Thursday, Oct 22 &middot; 4:00 PM PDT</b><br>
-            NBA &middot; Opening Week &mdash; LeBron&rsquo;s Philadelphia home debut &middot; Xfinity Mobile Arena, Philadelphia
+            NBA 2026-27 regular season &middot; Philadelphia &middot; LeBron&rsquo;s Philly home debut
           </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Cleveland%20Cavaliers%20at%20Philadelphia%2076ers%20-%20NBA&amp;dates=20261022T230000Z/20261023T013000Z&amp;location=Xfinity%20Mobile%20Arena%2C%20Philadelphia&amp;details=NBA%20opening%20week%20-%20LeBron%27s%20Philadelphia%20home%20debut" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Cavaliers%20at%2076ers%20-%20NBA&amp;dates=20261022T230000Z/20261023T010000Z&amp;location=Philadelphia&amp;details=NBA%202026-27%20regular%20season%20-%20LeBron%27s%20Philly%20home%20debut" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
       </div>
@@ -1076,33 +1134,23 @@
       <div class="rail">
 
         <div class="fixture">
-          <div class="thumb thumb-f1"><span class="tag">United States GP</span></div>
-          <div class="teams">Practice 1</div>
-          <div class="when">
-            <b>Friday, Oct 23 &middot; 10:30 AM PDT</b><br>
-            United States Grand Prix &middot; Circuit of the Americas, Austin
-          </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=F1%20US%20Grand%20Prix%20-%20Practice%201&amp;dates=20261023T173000Z/20261023T183000Z&amp;location=Circuit%20of%20the%20Americas%2C%20Austin&amp;details=Formula%201%20United%20States%20Grand%20Prix" target="_blank" rel="noopener">Add to Calendar</a></div>
-        </div>
-
-        <div class="fixture">
-          <div class="thumb thumb-f1"><span class="tag">United States GP</span></div>
+          <div class="thumb thumb-f1"><span class="tag">Formula 1</span></div>
           <div class="teams">Qualifying</div>
           <div class="when">
             <b>Saturday, Oct 24 &middot; 2:00 PM PDT</b><br>
             United States Grand Prix &middot; Circuit of the Americas, Austin
           </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=F1%20US%20Grand%20Prix%20-%20Qualifying&amp;dates=20261024T210000Z/20261024T220000Z&amp;location=Circuit%20of%20the%20Americas%2C%20Austin&amp;details=Formula%201%20United%20States%20Grand%20Prix" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=F1%20US%20GP%20-%20Qualifying&amp;dates=20261024T210000Z/20261024T220000Z&amp;location=Circuit%20of%20the%20Americas%2C%20Austin&amp;details=Formula%201%20United%20States%20Grand%20Prix" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
         <div class="fixture">
-          <div class="thumb thumb-f1"><span class="tag">United States GP</span></div>
+          <div class="thumb thumb-f1"><span class="tag">Formula 1</span></div>
           <div class="teams">Race</div>
           <div class="when">
             <b>Sunday, Oct 25 &middot; 1:00 PM PDT</b><br>
             United States Grand Prix &middot; Circuit of the Americas, Austin
           </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=F1%20US%20Grand%20Prix%20-%20Race&amp;dates=20261025T200000Z/20261025T220000Z&amp;location=Circuit%20of%20the%20Americas%2C%20Austin&amp;details=Formula%201%20United%20States%20Grand%20Prix" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=F1%20US%20Grand%20Prix%20-%20Race&amp;dates=20261025T200000Z/20261025T230000Z&amp;location=Circuit%20of%20the%20Americas%2C%20Austin&amp;details=Formula%201%20United%20States%20Grand%20Prix" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
       </div>
@@ -1114,37 +1162,42 @@
 
       <div class="hl-panel" data-sport="soccer">
         <ul>
-          <li>PSG vs Barcelona is the tie of Matchday 3 &mdash; both sit perfect on 6 points; PSG lead the 36-team table after beating Man City 4-2. <a href="https://www.sportsmole.co.uk/football/psg/champions-league/preview/psg-vs-barcelona-prediction-team-news-lineups_607152.html" target="_blank" rel="noopener">Source</a></li>
-          <li>A monster European week runs into Sunday&rsquo;s El Cl&aacute;sico at Camp Nou &mdash; Bar&ccedil;a face PSG Tuesday, then Real Madrid. <a href="https://thefalse9.com/2026/10/champions-league-matchday-3-fixtures-kick-off-times.html" target="_blank" rel="noopener">Source</a></li>
-          <li>Bayern vs Arsenal tops Wednesday night; Fenerbah&#231;e hosts Slavia and Galatasaray visits Lille &mdash; a big week for Turkish clubs. <a href="https://www.nbcsports.com/soccer/news/uefa-champions-league-2026-27-league-phase-schedule-scores-how-to-watch-live" target="_blank" rel="noopener">Source</a></li>
+          <li>PSG beat Manchester City 4-2 at the Etihad on October 14 &mdash; the club&rsquo;s first-ever win at the stadium; Matchday 2 of the Champions League set a tournament record with 78 goals. <a href="https://www.sportsnet.ca/champions-league/article/champions-league-roundup-liverpool-routs-lask-feyenoord-fights-back/" target="_blank" rel="noopener">Source</a></li>
+          <li>PSG are unbeaten in 12 Champions League matches and top the league-phase table with 10 goals in two games. <a href="https://www.psg.fr/en/content/stats-facts-manchester-city-fc-paris-saint-germain-uefa-champions-league-2026-2027" target="_blank" rel="noopener">Source</a></li>
+          <li>Real Madrid came back to beat Roma 4-3 on October 14 &mdash; a last-minute goal from R&uuml;diger; Mbapp&eacute; became the youngest player, at 27, to reach 100 Champions League appearances. <a href="https://orbitprimenews.com/ucl-round-up-psg-sink-manchester-city-jose-mourinhos-real-madrid-stage-late-comeback-on-record-breaking-night-football-news/" target="_blank" rel="noopener">Source</a></li>
         </ul>
       </div>
 
       <div class="hl-panel" data-sport="volleyball" hidden>
         <ul>
-          <li>The Istanbul derby headlines today &mdash; Eczac&#305;ba&#351;&#305; vs Vak&#305;fBank at 6pm TRT; Vak&#305;fBank won the Turkish Super Cup 3-2 over Eczac&#305;ba&#351;&#305; earlier this month. <a href="https://worldofvolley.com/tag/vakifbank" target="_blank" rel="noopener">Source</a></li>
-          <li>Galatasaray hosts &#304;lbank to close out Round 4. <a href="https://worldofvolley.com/tag/turkiye-2" target="_blank" rel="noopener">Source</a></li>
-          <li>Fenerbah&#231;e traveled to Zeren Spor earlier today after a 3-2 comeback over Be&#351;ikta&#351;. <a href="https://worldofvolley.com/tag/turkiye-2" target="_blank" rel="noopener">Source</a></li>
+          <li>Vak&#305;fBank are perfect in the group stage &mdash; 4 from 4, top of Group A with 12 points; they beat Alba Blaj 3-0 in Istanbul (25-19, 25-13, 25-20), with Chiaka Ogbogu the MVP. <a href="http://championsleague.cev.eu/en/articles/cev-champions-league-volley-2026/vakifbank-scandicci-developres-vero-volley-and-zeren-march-on-with-new-wins-in-clvolleyw/" target="_blank" rel="noopener">Source</a></li>
+          <li>Last week&rsquo;s drama: Novara beat Benfica 3-0 with the third set finishing 31-29; Developres Rzesz&oacute;w won a five-setter behind Julita Piasecka&rsquo;s 28 points. <a href="http://championsleague.cev.eu/en/articles/cev-champions-league-volley-2026/vakifbank-olympiacos-developres-volero-and-novara-victorious-on-a-thrilling-clvolleyw-night/" target="_blank" rel="noopener">Source</a></li>
+          <li>At the CEV Trendyol EuroVolley 2026 women&rsquo;s tournament, France beat hosts Sweden 3-1 to finish second in Group D &mdash; a result that shapes the play-off matchups. <a href="http://www.cev.eu/articles/volleyball/france-second-sweden-third-and-croatia-fourth-in-goeteborg/" target="_blank" rel="noopener">Source</a></li>
         </ul>
       </div>
 
       <div class="hl-panel" data-sport="nba" hidden>
         <ul>
-          <li>The Knicks raise their first championship banner since 1973 on Tuesday before hosting the new-look 76ers. <a href="https://piratasdelbasket.net/en/nba-2026-27-schedule-knicks-open-with-championship-ring-lebron-debuts-with-sixer" target="_blank" rel="noopener">Source</a></li>
-          <li>LeBron makes his Philadelphia home debut Thursday vs Cleveland &mdash; the franchise where it all started in 2016. <a href="https://blackculturalnews.com/nba-2026-27-season-preview-opening-night-how-to-watch/" target="_blank" rel="noopener">Source</a></li>
-          <li>Giannis debuts for Miami and LaMelo Ball for Minnesota on Wednesday; Thunder&ndash;Spurs renews the Western Conference Finals rivalry. <a href="https://www.nextstamina.com/2026/10/16/how-to-watch-the-2026-27-nba-season-channels-where-to-stream-games-schedule-and-more/" target="_blank" rel="noopener">Source</a></li>
+          <li>The defending champion Knicks raise their first title banner since 1973 at MSG tonight &mdash; facing LeBron James, who opens his 24th season in a 76ers jersey. <a href="https://sportsnewsreport.com/stories/lebron-james-opens-24th-nba-season-with-76ers-at-knicks-mvgr1n0v-inrc" target="_blank" rel="noopener">Source</a></li>
+          <li>Giannis Antetokounmpo makes his regular-season debut for the Miami Heat against Minnesota on Wednesday; ESPN opens the season with Wednesday&ndash;Thursday doubleheaders. <a href="https://espnpressroom.com/press-release/espn-nba-full-court-press-espn-tips-off-its-coverage-of-the-2026-27-season-with-back-to-back-doubleheaders-on-wednesday-and-thursday/" target="_blank" rel="noopener">Source</a></li>
+          <li>Opening-night rosters feature 125 international players from 43 countries &mdash; a record; the MVP award has gone to an international star for the eighth straight year. <a href="https://www.eurohoops.net/en/nba-news/2023386/nikola-jokic-giannis-antetokounmpo-nba-international-players-2026-27-season-preview/" target="_blank" rel="noopener">Source</a></li>
         </ul>
       </div>
 
       <div class="hl-panel" data-sport="f1" hidden>
         <ul>
-          <li>Antonelli can clinch his first title at 20 in Austin &mdash; a win with Russell P9 or lower and Hamilton P5 or lower makes him F1&rsquo;s youngest champion. <a href="https://vantage97.design/f1-austin-2026-schedule/" target="_blank" rel="noopener">Source</a></li>
-          <li>The first US Grand Prix of the Apple TV broadcast era under the 2026 regulations &mdash; COTA&rsquo;s fast Esses are the new-package litmus test. <a href="https://worldofspeed.org/news/us-grand-prix-2026-austin-start-time-how-to-watch-title-implications/" target="_blank" rel="noopener">Source</a></li>
-          <li>Rain could crash the party &mdash; ~50% chance of rain during Sunday&rsquo;s race. <a href="https://www.skysports.com/f1/news/13599576/united-states-gp-2026-dates-schedule-austin-weather-uk-start-time-and-how-to-watch-or-stream-f1-race-at-cota-live-on-sky-sports" target="_blank" rel="noopener">Source</a></li>
+          <li>Kimi Antonelli can clinch the drivers&rsquo; world championship at COTA in his second season; Mercedes&rsquo;s upgrade has raised questions while Red Bull have won the last two races. <a href="https://www.f1oversteer.com/races/united-states-grand-prix-2026-how-to-watch-f1-race-time-and-what-kimi-antonelli-needs-to-win-title/" target="_blank" rel="noopener">Source</a></li>
+          <li>In the US, F1 airs only on Apple TV in 2026 &mdash; every practice session, qualifying and race on Apple&rsquo;s dedicated F1 channel. <a href="https://f1headline.com/how-to-watch-the-united-states-gp-live/" target="_blank" rel="noopener">Source</a></li>
+          <li>The US GP kicks off the second of three season-closing triple-headers: Mexico City (November 1) and S&atilde;o Paulo (November 8) are next, followed by Las Vegas, Qatar and Abu Dhabi. <a href="https://www.crash.net/id/node/1107273" target="_blank" rel="noopener">Source</a></li>
         </ul>
       </div>
     </div>
   </section>
+
+  </div><!-- /edition 2026-10-20 -->
+
+  <!-- ==================== EDITION: Monday, October 19, 2026 ==================== -->
+  <div class="edition" data-edition="2026-10-19" data-title="The Dispatch — Monday, October 19, 2026" hidden>
 
   <footer class="footer">
     Updated every morning &middot; All times California (PDT) unless noted<br>
@@ -1227,82 +1280,128 @@
     }, true);
   });
 
-  /* ---------- section 03: US / Turkey filter ---------- */
-  var regionTabs = document.querySelectorAll('.region-tab');
-  var regionPanels = document.querySelectorAll('.region-panel');
+  /* ---------- section 03: US / Turkey filter (scoped per section,
+     so each archived edition keeps its own working tabs) ---------- */
+  document.querySelectorAll('.section').forEach(function (section) {
+    var tabs = section.querySelectorAll('.region-tab');
+    if (!tabs.length) return;
+    var panels = section.querySelectorAll('.region-panel');
 
-  function showRegion(region) {
-    regionTabs.forEach(function (tab) {
-      tab.classList.toggle('active', tab.getAttribute('data-region') === region);
-    });
-    regionPanels.forEach(function (panel) {
-      var isMatch = panel.getAttribute('data-region') === region;
-      panel.hidden = !isMatch;
-      if (isMatch) {
-        var rail = panel.querySelector('.rail');
-        if (rail) {
-          rail.scrollLeft = 0;
-          rail.dispatchEvent(new Event('scroll'));
+    function showRegion(region) {
+      tabs.forEach(function (tab) {
+        tab.classList.toggle('active', tab.getAttribute('data-region') === region);
+      });
+      panels.forEach(function (panel) {
+        var isMatch = panel.getAttribute('data-region') === region;
+        panel.hidden = !isMatch;
+        if (isMatch) {
+          var rail = panel.querySelector('.rail');
+          if (rail) {
+            rail.scrollLeft = 0;
+            rail.dispatchEvent(new Event('scroll'));
+          }
         }
+      });
+    }
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        showRegion(tab.getAttribute('data-region'));
+      });
+    });
+  });
+
+  /* ---------- sports schedule: filter tabs + per-sport highlights
+     (scoped per section, one instance per edition) ---------- */
+  document.querySelectorAll('.section').forEach(function (section) {
+    var tabs = section.querySelectorAll('.sport-tab');
+    if (!tabs.length) return;
+    var panels = section.querySelectorAll('.sport-panel');
+    var hlPanels = section.querySelectorAll('.hl-panel');
+
+    function panelFor(list, sport) {
+      for (var i = 0; i < list.length; i++) {
+        if (list[i].getAttribute('data-sport') === sport) return list[i];
       }
-    });
-  }
+      return null;
+    }
 
-  regionTabs.forEach(function (tab) {
-    tab.addEventListener('click', function () {
-      showRegion(tab.getAttribute('data-region'));
+    /* a sport with no upcoming fixtures loses its tab entirely */
+    tabs.forEach(function (tab) {
+      var panel = panelFor(panels, tab.getAttribute('data-sport'));
+      if (!panel || !panel.querySelector('.fixture')) tab.hidden = true;
     });
+
+    function showSport(sport) {
+      tabs.forEach(function (tab) {
+        tab.classList.toggle('active', tab.getAttribute('data-sport') === sport);
+      });
+      panels.forEach(function (panel) {
+        panel.hidden = panel.getAttribute('data-sport') !== sport;
+      });
+      var hlMatch = panelFor(hlPanels, sport);
+      hlPanels.forEach(function (panel) {
+        panel.hidden = panel.getAttribute('data-sport') !== sport;
+      });
+      /* hide the whole highlights block when this sport has none */
+      var hlBlock = section.querySelector('.highlights');
+      if (hlBlock) hlBlock.hidden = !hlMatch;
+      var panel = panelFor(panels, sport);
+      var rail = panel ? panel.querySelector('.rail') : null;
+      if (rail) {
+        rail.scrollLeft = 0;
+        rail.dispatchEvent(new Event('scroll'));
+      }
+    }
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        showSport(tab.getAttribute('data-sport'));
+      });
+    });
+
+    /* sync panels + highlights with the active tab; if the default tab
+       was hidden as empty, open the first sport that has fixtures */
+    var active = section.querySelector('.sport-tab.active');
+    if (!active || active.hidden) {
+      for (var i = 0; i < tabs.length; i++) {
+        if (!tabs[i].hidden) { active = tabs[i]; break; }
+      }
+    }
+    if (active) showSport(active.getAttribute('data-sport'));
   });
 
-  /* ---------- sports schedule: filter tabs + per-sport highlights ---------- */
-  var sportTabs = document.querySelectorAll('.sport-tab');
-  var sportPanels = document.querySelectorAll('.sport-panel');
-  var hlPanels = document.querySelectorAll('.hl-panel');
+  /* ---------- edition archive: switch between kept editions ---------- */
+  var editionBtns = document.querySelectorAll('.edition-btn');
+  var editions = document.querySelectorAll('.edition');
 
-  function panelFor(list, sport) {
-    for (var i = 0; i < list.length; i++) {
-      if (list[i].getAttribute('data-sport') === sport) return list[i];
+  function showEdition(id) {
+    var current = null;
+    editions.forEach(function (ed) {
+      var match = ed.getAttribute('data-edition') === id;
+      ed.hidden = !match;
+      if (match) current = ed;
+    });
+    editionBtns.forEach(function (btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-edition') === id);
+    });
+    if (current) {
+      var title = current.getAttribute('data-title');
+      if (title) document.title = title;
+      /* rails inside a hidden edition measure 0 wide; refresh their
+         progress bars and active-card glow now that they are visible */
+      current.querySelectorAll('.rail').forEach(function (rail) {
+        rail.dispatchEvent(new Event('scroll'));
+      });
     }
-    return null;
+    window.scrollTo(0, 0);
   }
 
-  /* a sport with no upcoming fixtures loses its tab entirely */
-  sportTabs.forEach(function (tab) {
-    var panel = panelFor(sportPanels, tab.getAttribute('data-sport'));
-    if (!panel || !panel.querySelector('.fixture')) tab.hidden = true;
-  });
-
-  function showSport(sport) {
-    sportTabs.forEach(function (tab) {
-      tab.classList.toggle('active', tab.getAttribute('data-sport') === sport);
-    });
-    sportPanels.forEach(function (panel) {
-      panel.hidden = panel.getAttribute('data-sport') !== sport;
-    });
-    hlPanels.forEach(function (panel) {
-      panel.hidden = panel.getAttribute('data-sport') !== sport;
-    });
-    var panel = panelFor(sportPanels, sport);
-    var rail = panel ? panel.querySelector('.rail') : null;
-    if (rail) {
-      rail.scrollLeft = 0;
-      rail.dispatchEvent(new Event('scroll'));
-    }
-  }
-
-  sportTabs.forEach(function (tab) {
-    tab.addEventListener('click', function () {
-      showSport(tab.getAttribute('data-sport'));
+  editionBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      showEdition(btn.getAttribute('data-edition'));
     });
   });
-
-  /* if the default tab was hidden as empty, open the first sport that has fixtures */
-  var defaultTab = document.querySelector('.sport-tab.active');
-  if (!defaultTab || defaultTab.hidden) {
-    for (var i = 0; i < sportTabs.length; i++) {
-      if (!sportTabs[i].hidden) { showSport(sportTabs[i].getAttribute('data-sport')); break; }
-    }
-  }
 })();
 </script>
 </body>
