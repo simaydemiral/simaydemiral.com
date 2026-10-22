@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Dispatch — Wednesday, October 21, 2026</title>
+<link href="https://api.fontshare.com/v2/css?f%5B%5D=switzer@400,500,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #171210;
+    color: #f5ebdd;
+    font-family: "Switzer", "Inter", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: 32px 16px 64px;
+    overflow-x: hidden;
+  }
+  .brief { max-width: 760px; margin: 0 auto; }
+
+  /* ---------- masthead ---------- */
+  .masthead {
+    text-align: center;
+    padding: 8px 0 28px;
+    border-bottom: 1px solid rgba(245, 235, 221, 0.15);
+    margin-bottom: 32px;
+  }
+  .masthead .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #e8935a;
+  }
+  .masthead h1 {
+    font-family: "Switzer", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    font-size: 52px;
+    line-height: 1.05;
+    margin: 12px 0 8px;
+  }
+  .masthead .dateline { font-size: 14px; color: rgba(245, 235, 221, 0.65); }
+  .masthead .tagline {
+    font-family: "Switzer", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 16px;
+    color: rgba(245, 235, 221, 0.75);
+    margin-top: 10px;
+  }
+
+  /* ---------- markets snapshot strip ---------- */
+  .markets-strip {
+    background: rgba(232, 147, 90, 0.12);
+    border: 1px solid rgba(232, 147, 90, 0.35);
+    border-left: 3px solid #e8935a;
+    border-radius: 12px;
+    padding: 14px 16px 12px;
+    margin-bottom: 32px;
+  }
+  .markets-strip-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .markets-strip-label {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #e8935a;
+  }
+  .markets-strip-asof {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: rgba(245, 235, 221, 0.65);
+  }
+  .markets-tiles {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .market-tile {
+    background: rgba(23, 18, 16, 0.38);
+    border: 1px solid rgba(232, 147, 90, 0.28);
+    border-radius: 10px;
+    padding: 12px 14px 11px;
+  }
+  .market-tile.down {
+    background: rgba(224, 135, 106, 0.16);
+    border-color: rgba(224, 135, 106, 0.45);
+  }
+  .market-tile.up {
+    background: rgba(150, 184, 119, 0.16);
+    border-color: rgba(150, 184, 119, 0.45);
+  }
+  .market-tile-label {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 500;
+    font-size: 10.5px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(245, 235, 221, 0.6);
+    margin-bottom: 6px;
+  }
+  .market-tile-value {
+    font-family: "Switzer", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: #fff;
+  }
+  .market-tile-delta {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    margin-top: 7px;
+  }
+  .market-tile-delta.down { color: #f0957a; }
+  .market-tile-delta.up { color: #a8cc8a; }
+  .market-tile-delta .arrow { font-size: 13px; }
+  @media (max-width: 560px) {
+    .markets-tiles { grid-template-columns: repeat(2, 1fr); }
+  }
+  .markets-strip-takeaway {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(232, 147, 90, 0.22);
+    font-size: 14px;
+    line-height: 1.5;
+    color: rgba(245, 235, 221, 0.92);
+  }
+  .markets-strip-takeaway strong { color: #e8935a; font-weight: 600; }
+
+  /* ---------- edition nav: today, and the two before it ---------- */
+  .edition-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin: -14px 0 30px;
+  }
+  .edition-nav a, .edition-nav span {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: #f5ebdd;
+    border: 1px solid rgba(245, 235, 221, 0.3);
+    border-radius: 999px;
+    padding: 8px 15px;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .edition-nav a:hover { border-color: #e8935a; color: #e8935a; }
+  .edition-nav .is-current {
+    background: #e8935a;
+    border-color: #e8935a;
+    color: #1d1512;
+  }
+
+  /* ---------- sections ---------- */
+  .section { margin-bottom: 44px; }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .section-head .num {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: #e8935a;
+  }
+  .section-head h2 {
+    font-family: "Switzer", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 500;
+    font-size: 26px;
+    letter-spacing: -0.03em;
+  }
+  .section-head .rule {
+    flex: 1;
+    border: none;
+    border-top: 1px solid rgba(245, 235, 221, 0.15);
+  }
+
+  /* ---------- AI & Tech: subtle circuit-board motif ---------- */
+  .section-ai { position: relative; }
+  .section-ai::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Cg fill='none' stroke='%23e8935a' stroke-width='1.2'%3E%3Cpath d='M24 64 H104 L140 100 H236'/%3E%3Cpath d='M64 276 V188 L100 152 V36'/%3E%3Cpath d='M276 220 H196 L160 184'/%3E%3Cpath d='M180 276 V240 L204 216'/%3E%3Cpath d='M252 36 V84 L276 108'/%3E%3Ccircle cx='236' cy='100' r='6'/%3E%3Ccircle cx='100' cy='36' r='6'/%3E%3C/g%3E%3Cg fill='%23e8935a'%3E%3Ccircle cx='236' cy='100' r='3'/%3E%3Ccircle cx='104' cy='64' r='2.5'/%3E%3Ccircle cx='100' cy='36' r='3'/%3E%3Ccircle cx='64' cy='188' r='2.5'/%3E%3Ccircle cx='196' cy='220' r='2.5'/%3E%3Ccircle cx='160' cy='184' r='3'/%3E%3Ccircle cx='204' cy='216' r='2.5'/%3E%3Ccircle cx='140' cy='100' r='2'/%3E%3Ccircle cx='276' cy='108' r='2.5'/%3E%3C/g%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 300px 300px;
+    opacity: 0.13;
+    pointer-events: none;
+  }
+  .section-ai > * { position: relative; }
+
+  /* ---------- rail nav ---------- */
+  .rail-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .drag-hint {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(245, 235, 221, 0.55);
+  }
+  .nav-btns { display: flex; gap: 8px; }
+  .nav-btn {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(245, 235, 221, 0.3);
+    background: transparent;
+    color: #f5ebdd;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .nav-btn:hover { background: #e8935a; border-color: #e8935a; color: #1d1512; }
+
+  /* ---------- horizontal rail: one card at a time + peek ---------- */
+  .rail {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 8px;
+    cursor: grab;
+    touch-action: pan-y;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .rail::-webkit-scrollbar { display: none; }
+  .rail.dragging { cursor: grabbing; scroll-snap-type: none; }
+  .rail.dragging a { pointer-events: none; }
+
+  /* ---------- progress bar ---------- */
+  .progress {
+    height: 3px;
+    background: rgba(245, 235, 221, 0.15);
+    border-radius: 2px;
+    margin-top: 12px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 33.333%;
+    background: #e8935a;
+    border-radius: 2px;
+    transition: width 0.25s ease;
+  }
+
+  /* ---------- cards ---------- */
+  .card {
+    flex: 0 0 88%;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    background: #f5ebdd;
+    color: #1d1512;
+    border-radius: 20px;
+    overflow: hidden;
+    text-decoration: none;
+    transition: transform 0.15s ease, box-shadow 0.3s ease;
+  }
+  .card:hover { transform: translateY(-3px); }
+  .card.active { box-shadow: 0 0 0 1px rgba(232, 147, 90, 0.55), 0 16px 40px rgba(0, 0, 0, 0.35); }
+  .card .thumb {
+    position: relative;
+    height: 75px;
+    display: flex;
+    align-items: flex-end;
+    padding: 14px 16px;
+    overflow: hidden;
+  }
+  .thumb-ai      { background: linear-gradient(135deg, #2b1a12 0%, #e8935a 130%); }
+  .thumb-markets  { background: linear-gradient(135deg, #20240f 0%, #a8b86a 130%); }
+  .thumb-turkey   { background: linear-gradient(135deg, #33161a 0%, #b03a3a 130%); }
+  .thumb-us       { background: linear-gradient(135deg, #101c2a 0%, #46688c 130%); }
+  .thumb-volley   { background: linear-gradient(135deg, #12262b 0%, #5aa39e 130%); }
+  .thumb .tag {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.85);
+  }
+  .card .body { padding: 20px 22px 18px; display: flex; flex-direction: column; flex: 1; }
+  .card .kicker {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #b06a35;
+    margin-bottom: 8px;
+  }
+  .card h3 {
+    font-family: "Switzer", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    font-size: 24px;
+    line-height: 1.25;
+    margin-bottom: 8px;
+  }
+  .card p {
+    font-size: 15px;
+    line-height: 1.6;
+    color: rgba(29, 21, 18, 0.78);
+  }
+  .key {
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: rgba(232, 147, 90, 0.12);
+    border-left: 2px solid #e8935a;
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    color: rgba(29, 21, 18, 0.85);
+  }
+  .card .meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: auto;
+    padding-top: 14px;
+    font-size: 12.5px;
+    color: rgba(29, 21, 18, 0.55);
+  }
+  .card .read { color: #b06a35; font-weight: 600; }
+
+  /* ---------- volleyball fixtures ---------- */
+  .fixture {
+    flex: 0 0 88%;
+    scroll-snap-align: start;
+    background: #241a15;
+    border: 1px solid rgba(232, 147, 90, 0.35);
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.3s ease;
+  }
+  .fixture.active { box-shadow: 0 0 0 1px rgba(232, 147, 90, 0.55), 0 16px 40px rgba(0, 0, 0, 0.35); }
+  .fixture .teams {
+    font-family: "Switzer", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    font-size: 21px;
+    line-height: 1.3;
+    padding: 20px 22px 0;
+  }
+  .fixture .teams span { color: #e8935a; }
+  .fixture .when {
+    margin-top: 10px;
+    padding: 0 22px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(245, 235, 221, 0.8);
+  }
+  .fixture .when b { color: #f5ebdd; }
+  .fixture .note {
+    margin-top: auto;
+    padding: 12px 22px 18px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: rgba(245, 235, 221, 0.6);
+  }
+  .fixture .actions { padding: 0 22px 20px; }
+  .cal-btn {
+    display: inline-block;
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #f5ebdd;
+    border: 1px solid rgba(245, 235, 221, 0.3);
+    border-radius: 999px;
+    padding: 9px 16px;
+    text-decoration: none;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .cal-btn:hover { background: #e8935a; border-color: #e8935a; color: #1d1512; }
+  .section-note {
+    font-size: 15px;
+    line-height: 1.6;
+    color: rgba(245, 235, 221, 0.75);
+    margin-bottom: 16px;
+  }
+
+  /* ---------- sports schedule ---------- */
+  .sport-tabs, .region-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .sport-tab, .region-tab {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #f5ebdd;
+    background: transparent;
+    border: 1px solid rgba(245, 235, 221, 0.3);
+    border-radius: 999px;
+    padding: 9px 16px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .sport-tab:hover, .region-tab:hover { border-color: #e8935a; color: #e8935a; }
+  .sport-tab.active, .region-tab.active { background: #e8935a; border-color: #e8935a; color: #1d1512; }
+  .sport-tab[hidden], .sport-panel[hidden], .hl-panel[hidden],
+  .region-tab[hidden], .region-panel[hidden], .highlights[hidden] { display: none; }
+  .thumb-soccer { background: linear-gradient(135deg, #12240f 0%, #6aa84f 130%); }
+  .thumb-nba    { background: linear-gradient(135deg, #241009 0%, #c75b39 130%); }
+  .thumb-f1     { background: linear-gradient(135deg, #17090c 0%, #a31621 130%); }
+
+  /* ---------- key highlights ---------- */
+  .highlights { margin-top: 28px; }
+  .highlights-head {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #e8935a;
+    margin-bottom: 4px;
+  }
+  .highlights ul { list-style: none; }
+  .highlights li {
+    position: relative;
+    font-size: 15px;
+    line-height: 1.6;
+    color: rgba(245, 235, 221, 0.85);
+    padding: 10px 0 10px 18px;
+  }
+  .highlights li + li { border-top: 1px solid rgba(245, 235, 221, 0.12); }
+  .highlights li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 19px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #e8935a;
+  }
+  .highlights li a {
+    color: #f5ebdd;
+    text-decoration: underline;
+    text-decoration-color: rgba(232, 147, 90, 0.6);
+    text-underline-offset: 3px;
+  }
+  .highlights li a:hover { color: #e8935a; }
+
+  /* ---------- edition archive nav ---------- */
+  .edition[hidden] { display: none; }
+  .edition-nav {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 30px;
+  }
+  .edition-btn {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #f5ebdd;
+    background: transparent;
+    border: 1px solid rgba(245, 235, 221, 0.3);
+    border-radius: 999px;
+    padding: 10px 18px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .edition-btn:hover { border-color: #e8935a; color: #e8935a; }
+  .edition-btn.active { background: #e8935a; border-color: #e8935a; color: #1d1512; }
+  div.card { cursor: default; }
+  div.card:hover { transform: none; }
+
+  /* ---------- footer ---------- */
+  .footer {
+    text-align: center;
+    padding-top: 24px;
+    border-top: 1px solid rgba(245, 235, 221, 0.15);
+    font-size: 13px;
+    line-height: 1.7;
+    color: rgba(245, 235, 221, 0.55);
+  }
+  @media (max-width: 560px) {
+    .masthead h1 { font-size: 38px; }
+  }
+</style>
+</head>
+<body>
+<div class="brief">
+  <header class="masthead">
+    <div class="eyebrow">Simay&rsquo;s Dispatch</div>
+    <h1>The Dispatch</h1>
+    <div class="dateline">Wednesday, October 21, 2026</div>
+    <div class="tagline">Istanbul and the Bay, before breakfast.</div>
+  </header>
+
+  <nav class="edition-nav" aria-label="Earlier editions">
+    <a href="/dispatch">Today</a>
+    <span class="is-current">Yesterday</span>
+  </nav>
+
+  <div class="markets-strip" aria-label="Markets snapshot">
+    <div class="markets-strip-head">
+      <span class="markets-strip-label">Markets Snapshot &middot; KEY</span>
+      <span class="markets-strip-asof">as of 7:45pm pt</span>
+    </div>
+    <div class="markets-tiles">
+      <div class="market-tile up">
+        <div class="market-tile-label">S&amp;P 500</div>
+        <div class="market-tile-value">7,757.17</div>
+        <div class="market-tile-delta up"><span class="arrow">&#9650;</span> +0.58%</div>
+      </div>
+      <div class="market-tile up">
+        <div class="market-tile-label">NASDAQ</div>
+        <div class="market-tile-value">26,702</div>
+        <div class="market-tile-delta up"><span class="arrow">&#9650;</span> +1.05%</div>
+      </div>
+      <div class="market-tile down">
+        <div class="market-tile-label">USD/TRY</div>
+        <div class="market-tile-value">49.60</div>
+        <div class="market-tile-delta down"><span class="arrow">&#9650;</span> +0.05%</div>
+      </div>
+      <div class="market-tile up">
+        <div class="market-tile-label">BTC</div>
+        <div class="market-tile-value">$82,825</div>
+        <div class="market-tile-delta up"><span class="arrow">&#9650;</span> +1.20%</div>
+      </div>
+    </div>
+    <div class="markets-strip-takeaway"><strong>Takeaway:</strong> Both US indices higher: S&amp;P +0.58%, Nasdaq +1.05%.</div>
+  </div>
+
+  <section class="section section-ai">
+    <div class="section-head">
+      <span class="num">01</span><h2>AI &amp; Tech</h2><hr class="rule">
+    </div>
+    <div class="rail-nav">
+      <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+      <span class="nav-btns">
+        <button class="nav-btn" data-dir="-1" aria-label="Previous story">&#8249;</button>
+        <button class="nav-btn" data-dir="1" aria-label="Next story">&#8250;</button>
+      </span>
+    </div>
+    <div class="rail">
+
+      <a class="card" href="https://www.theverge.com/tech/1015799/meta-shares-class-ai-q3-2026-earnings">
+        <div class="thumb thumb-ai"><span class="tag">The Verge</span></div>
+        <div class="body">
+          <div class="kicker">Ai</div>
+          <h3>Meta adds non-voting share class to fund AI</h3>
+          <p>In its third-quarter earnings report, Meta said it will issue a new class of non-voting stock — trading from 2027 — to fund AI initiatives, potential acquisitions and employee compensation. CFO Susan Li said on the earnings call that the shares would expand the company&#x27;s funding tools and add flexibility, and Meta raised the floor of its capital expenditure guidance for this year.</p>
+          <div class="key">KEY &nbsp; trading begins 2027 &middot; capex expected $135B–$145B this year, up from $130B–$145B &middot; Muse reached 10 million US downloads this week</div>
+          <div class="meta"><span>The Verge</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://techcrunch.com/2026/10/21/legal-ai-startup-legora-raises-550m-series-e-at-8-8b-valuation/">
+        <div class="thumb thumb-ai"><span class="tag">TechCrunch</span></div>
+        <div class="body">
+          <div class="kicker">Ai</div>
+          <h3>Legora raises $550M at $8.8 billion valuation</h3>
+          <p>The legal AI startup said Wednesday it closed a $550 million Series E led by Atreides Management, valuing it at $8.8 billion, and plans to spend the money expanding across North America. It said annual recurring revenue now exceeds $200 million, double the figure reported in April, while larger rival Harvey raised the same amount a month ago at nearly twice the valuation.</p>
+          <div class="key">KEY &nbsp; $550M Series E &middot; $8.8B valuation &middot; ARR over $200M, up from $100M in April &middot; prior Series D $550M plus $50M extension at $5.6B &middot; Harvey $550M at $15.5B</div>
+          <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://techcrunch.com/2026/10/21/recursive-launches-flint-a-laptop-coding-model-it-says-was-largely-built-by-ai/">
+        <div class="thumb thumb-ai"><span class="tag">TechCrunch</span></div>
+        <div class="body">
+          <div class="kicker">Ai</div>
+          <h3>Recursive releases laptop coding model built largely by AI</h3>
+          <p>Recursive released Flint, a free open-source coding model small enough to run on a laptop, which the company says its automated &quot;Eureka Machine&quot; research system helped build at nearly every step, letting a small team finish it in under four months. The company presents it as an early, human-supervised test of recursive self-improvement, and acknowledged Flint needs more guidance than the large paid coding assistants.</p>
+          <div class="key">KEY &nbsp; 40B parameters total, 2.5B active per task &middot; about 131 tokens/sec on an M4 Pro MacBook Pro vs 58–69 for comparable models &middot; over 150 tokens/sec on Nvidia RTX Spark &middot; $650M raised at $4.65B valuation &middot; Apache 2.0 license on Hugging Face</div>
+          <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+    </div>
+    <div class="progress"><div class="progress-fill"></div></div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <span class="num">02</span><h2>Markets &amp; M&amp;A</h2><hr class="rule">
+    </div>
+    <div class="rail-nav">
+      <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+      <span class="nav-btns">
+        <button class="nav-btn" data-dir="-1" aria-label="Previous story">&#8249;</button>
+        <button class="nav-btn" data-dir="1" aria-label="Next story">&#8250;</button>
+      </span>
+    </div>
+    <div class="rail">
+
+      <a class="card" href="https://www.cnbc.com/2026/10/21/spacex-spcx-stock-musk-merger-tesla.html">
+        <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
+        <div class="body">
+          <div class="kicker">Markets</div>
+          <h3>SpaceX revenue up 161%; Musk floats Tesla merger</h3>
+          <p>SpaceX shares rose 10% Wednesday after it reported third-quarter revenue of $14.6 billion, up 161% from a year earlier and above LSEG consensus, with its Super Intelligence unit now its largest business segment. On the earnings call Musk said he is considering a combination with Tesla — which the report notes would be the largest merger in history — and that both boards have formed committees to discuss consolidation.</p>
+          <div class="key">KEY &nbsp; shares +10% &middot; Q3 revenue $14.6B vs $12.72B LSEG consensus &middot; +161% y/y &middot; operating income $2.8B &middot; net income $4.4B vs year-ago net loss $1.05B &middot; SI revenue $7.56B vs $813M &middot; Q1 2027 revenue forecast $33B–$37B vs $22.2B estimate</div>
+          <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.cnbc.com/2026/10/21/goldman-sachs-jpmorgan-morgan-stanley-ai-trading.html">
+        <div class="thumb thumb-markets"><span class="tag">CNBC Finance</span></div>
+        <div class="body">
+          <div class="kicker">Markets</div>
+          <h3>Big Three banks take most of equities trading boom</h3>
+          <p>The five largest investment banks have generated about $67 billion in equities revenue through Sept. 30, roughly $7 billion more than in all of 2025, according to company filings, with Goldman Sachs, JPMorgan and Morgan Stanley accounting for nearly 80% of the total. Bank executives and Wells Fargo analyst Mike Mayo attribute the lead to prime brokerage lending to hedge funds levering up on AI hardware, hyperscalers and chip suppliers, plus balance sheets big enough to absorb single-trade risks smaller rivals must decline.</p>
+          <div class="key">KEY &nbsp; ~$67B equities revenue through Sept. 30 &middot; $7B above full-year 2025 record &middot; Big Three combined $52B &middot; nearly 80% share &middot; Goldman equities financing +96% in Q3 to record $3.37B &middot; single-trade losses of $100M absorbable</div>
+          <div class="meta"><span>CNBC Finance</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.cnbc.com/2026/10/22/james-talarico-elon-musk-ken-paxton-texas-senate-race.html">
+        <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
+        <div class="body">
+          <div class="kicker">Markets</div>
+          <h3>Talarico responds to Musk spending in Texas Senate race</h3>
+          <p>Democratic Senate nominee James Talarico replied to an Elon Musk post on X about him by writing that the political system allows &quot;one trillionaire to buy his own personal U.S. Senator,&quot; after telling a University of Houston campaign audience that Musk is behind attack ads, mailers and texts targeting him. The exchange came five days after news that Musk donated $158 million in September to the Senate Leadership Fund, money that reached a group backing Republican nominee Ken Paxton, the state attorney general, whose campaign did not immediately respond to a request for comment.</p>
+          <div class="key">KEY &nbsp; $158M to Senate Leadership Fund in September &middot; $10M to Lone Star Liberty PAC &middot; Talarico Q3 fundraising $64M vs Paxton $18M &middot; election Nov. 3</div>
+          <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+    </div>
+    <div class="progress"><div class="progress-fill"></div></div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <span class="num">03</span><h2>US &amp; Turkey</h2><hr class="rule">
+    </div>
+    <div class="region-tabs" role="tablist" aria-label="Filter stories by country">
+      <button class="region-tab active" data-region="us" role="tab">US</button>
+      <button class="region-tab" data-region="turkey" role="tab">Turkey</button>
+    </div>
+
+    <div class="region-panel" data-region="us">
+    <div class="rail-nav">
+      <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+      <span class="nav-btns">
+        <button class="nav-btn" data-dir="-1" aria-label="Previous story">&#8249;</button>
+        <button class="nav-btn" data-dir="1" aria-label="Next story">&#8250;</button>
+      </span>
+    </div>
+    <div class="rail">
+
+      <a class="card" href="https://www.bbc.co.uk/news/articles/cqdr8zxrr3dxo?at_medium=RSS&amp;at_campaign=rss">
+        <div class="thumb thumb-us"><span class="tag">BBC News</span></div>
+        <div class="body">
+          <div class="kicker">United States</div>
+          <h3>Judge orders Meta to pay $25bn over data claims</h3>
+          <p>A New Mexico judge fined Meta $25bn after a two-week trial in which a jury found the company had misled the public for years about how Facebook user data was handled and shared. Meta&#x27;s head lawyer, CJ Mahoney, said the ruling makes it &quot;all but impossible to do business&quot; in the state and the company intends to appeal; Meta disputed the accusations about hate-speech enforcement.</p>
+          <div class="key">KEY &nbsp; $25bn fine &middot; jury found 40m+ violations &middot; $219bn calculated before reduction &middot; state sought up to $40bn &middot; Meta argued $3.4bn cap &middot; conduct spanned 2010–2021 &middot; ~2m state residents &middot; $5bn FTC fine in 2019 &middot; $18bn California child-safety deal</div>
+          <div class="meta"><span>BBC News</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.npr.org/2026/10/21/nx-s1-6011179/poll-democrats-republicans-trump-approval">
+        <div class="thumb thumb-us"><span class="tag">NPR</span></div>
+        <div class="body">
+          <div class="kicker">United States</div>
+          <h3>Poll finds voters favor Democrats by double digits</h3>
+          <p>A Strength In Numbers/Verasight poll shared with NPR finds voters would prefer a Democrat over a Republican for Congress by double digits, with Trump&#x27;s approval near second-term lows and prices cited as the top problem. Pollster G. Elliott Morris said Trump&#x27;s ratings hit new lows on seven of the 10 issues tracked since May 2025 and that he is now underwater on every issue surveyed.</p>
+          <div class="key">KEY &nbsp; 52%–41% registered voters &middot; 54%–42% likely voters &middot; 2,028 respondents, Oct 13–19 &middot; ±2.2 points &middot; 34% approve, 62% disapprove, 50% strongly &middot; 63% name prices in top three, 39% first &middot; Democrats lead 47–35 on voters&#x27; top issue &middot; ~1 in 10 regret 2024 vote, ~15% of Trump voters</div>
+          <div class="meta"><span>NPR</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.npr.org/2026/10/21/nx-s1-6009896/justice-department-monitors">
+        <div class="thumb thumb-us"><span class="tag">NPR</span></div>
+        <div class="body">
+          <div class="kicker">United States</div>
+          <h3>Justice Department notifies counties for Election Day monitoring</h3>
+          <p>The Justice Department this week began telling counties in Colorado, Florida, Minnesota, Texas and Washington that it wants to monitor them on Election Day, with the list apparently still growing and the department saying details will come closer to the election. Officials in three states told NPR they were not notified alongside counties as in past cycles, and Wyoming&#x27;s Republican governor and Laramie County&#x27;s Republican clerk had earlier described August primary monitors as &quot;aggressive&quot; and &quot;irregular&quot; — characterizations a DOJ spokesperson disputed.</p>
+          <div class="key">KEY &nbsp; 1,000 observers planned nationwide, per Harmeet Dhillon &middot; 5 states notified so far &middot; 64 jurisdictions in 24 states monitored in 2022</div>
+          <div class="meta"><span>NPR</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+    </div>
+    <div class="progress"><div class="progress-fill"></div></div>
+    </div>
+
+    <div class="region-panel" data-region="turkey" hidden>
+    <div class="rail-nav">
+      <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+      <span class="nav-btns">
+        <button class="nav-btn" data-dir="-1" aria-label="Previous story">&#8249;</button>
+        <button class="nav-btn" data-dir="1" aria-label="Next story">&#8250;</button>
+      </span>
+    </div>
+    <div class="rail">
+
+      <a class="card" href="https://bianet.org/haber/erdogan-s-party-wins-over-106-opposition-mayors-since-2024-election-as-32-remain-jailed-324681">
+        <div class="thumb thumb-turkey"><span class="tag">Bianet</span></div>
+        <div class="body">
+          <div class="kicker">Turkey</div>
+          <h3>Opposition says 106 mayors have joined AKP since 2024</h3>
+          <p>Gökhan Günaydın of the New Party said 106 mayors elected on opposition tickets in 2024 have since joined the AKP while 32 remain in pretrial detention, which he attributed to a government &quot;carrot and stick approach&quot; of legal pressure and political incentives. He said municipalities were effectively transferred to the AKP through arrests and the installation of acting mayors, including in Bursa and several İstanbul districts.</p>
+          <div class="key">KEY &nbsp; 106 mayors switched &middot; 32 in pretrial detention &middot; 41 from New Welfare, 36 CHP, 11 İYİ, 18 other &middot; 11 municipalities gained via acting-mayor votes &middot; CHP won 420 of 1,400+ municipalities and 35 of 81 provinces in 2024 &middot; 91 of 135 CHP deputies joined New Party &middot; İmamoğlu jailed since March 2025</div>
+          <div class="meta"><span>Bianet</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.dailysabah.com/business/defense/turkiye-qatar-pakistan-indonesia-sign-badr-defense-co-op-accord">
+        <div class="thumb thumb-turkey"><span class="tag">Daily Sabah</span></div>
+        <div class="body">
+          <div class="kicker">Turkey</div>
+          <h3>Turkey, Qatar, Pakistan, Indonesia sign Badr defense accord</h3>
+          <p>The Turkish Defense Ministry said the four countries signed the &quot;Badr Memorandum of Understanding&quot; in Doha on Wednesday to expand defense cooperation, joint exercises, training and R&amp;D, and said the agreement holds substantial economic importance for their defense industries. SSB chair Haluk Görgün described it as the basis of a strategic cooperation on joint production and technology sharing rather than off-the-shelf procurement.</p>
+          <div class="key">KEY &nbsp; 4 signatories &middot; signed Wednesday in Doha &middot; Mecca Joint Defense Agreement signed with Pakistan and Saudi Arabia in August &middot; NATO&#x27;s second-largest army &middot; Bayraktar TB2 drones, armored vehicles and assault boats in Qatar&#x27;s inventory &middot; BARQ joint venture by Aselsan and Barzan</div>
+          <div class="meta"><span>Daily Sabah</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+    </div>
+    <div class="progress"><div class="progress-fill"></div></div>
+    </div>
+
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <span class="num">04</span><h2>Sports Schedule</h2><hr class="rule">
+    </div>
+    <p class="section-note">Upcoming fixtures, all in California time.</p>
+    <div class="sport-tabs" role="tablist" aria-label="Filter fixtures by sport">
+      <button class="sport-tab active" data-sport="soccer" role="tab">Soccer</button>
+      <button class="sport-tab" data-sport="volleyball" role="tab">Volleyball</button>
+      <button class="sport-tab" data-sport="nba" role="tab">NBA</button>
+      <button class="sport-tab" data-sport="f1" role="tab">Formula 1</button>
+    </div>
+
+    <div class="sport-panel" data-sport="soccer">
+      <div class="rail-nav">
+        <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+        <span class="nav-btns">
+          <button class="nav-btn" data-dir="-1" aria-label="Previous fixture">&#8249;</button>
+          <button class="nav-btn" data-dir="1" aria-label="Next fixture">&#8250;</button>
+        </span>
+      </div>
+      <div class="rail">
+
+        <div class="fixture">
+          <div class="thumb thumb-soccer"><span class="tag">Süper Lig</span></div>
+          <div class="teams">Galatasaray <span>vs</span> Fenerbahce</div>
+          <div class="when">
+            <b>Monday, Oct 26 · 11:30 AM PDT</b> &nbsp;(9:30 PM Istanbul)<br>
+            Süper Lig
+          </div>
+        <div class="note">One of hers</div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Galatasaray+vs+Fenerbahce+%E2%80%94+S%C3%BCper+Lig&amp;dates=20261026T183000Z%2F20261026T203000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-soccer"><span class="tag">Champions League</span></div>
+          <div class="teams">Galatasaray <span>vs</span> VfB Stuttgart</div>
+          <div class="when">
+            <b>Tuesday, Nov 3 · 9:45 AM PST</b> &nbsp;(8:45 PM Istanbul)<br>
+            Champions League
+          </div>
+        <div class="note">One of hers</div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Galatasaray+vs+VfB+Stuttgart+%E2%80%94+Champions+League&amp;dates=20261103T174500Z%2F20261103T194500Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-soccer"><span class="tag">Champions League</span></div>
+          <div class="teams">Shakhtar Donetsk <span>vs</span> Sporting CP</div>
+          <div class="when">
+            <b>Tuesday, Nov 3 · 9:45 AM PST</b> &nbsp;(8:45 PM Istanbul)<br>
+            Champions League
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Shakhtar+Donetsk+vs+Sporting+CP+%E2%80%94+Champions+League&amp;dates=20261103T174500Z%2F20261103T194500Z&amp;details=Champions+League" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-soccer"><span class="tag">Champions League</span></div>
+          <div class="teams">Fenerbahce <span>vs</span> Liverpool</div>
+          <div class="when">
+            <b>Wednesday, Nov 4 · 9:45 AM PST</b> &nbsp;(8:45 PM Istanbul)<br>
+            Champions League
+          </div>
+        <div class="note">One of hers</div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Fenerbahce+vs+Liverpool+%E2%80%94+Champions+League&amp;dates=20261104T174500Z%2F20261104T194500Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-soccer"><span class="tag">Champions League</span></div>
+          <div class="teams">AEK Athens <span>vs</span> Real Madrid</div>
+          <div class="when">
+            <b>Wednesday, Nov 4 · 9:45 AM PST</b> &nbsp;(8:45 PM Istanbul)<br>
+            Champions League
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=AEK+Athens+vs+Real+Madrid+%E2%80%94+Champions+League&amp;dates=20261104T174500Z%2F20261104T194500Z&amp;details=Champions+League" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+      </div>
+      <div class="progress"><div class="progress-fill"></div></div>
+    </div>
+
+    <div class="sport-panel" data-sport="volleyball" hidden>
+      <div class="rail-nav">
+        <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+        <span class="nav-btns">
+          <button class="nav-btn" data-dir="-1" aria-label="Previous fixture">&#8249;</button>
+          <button class="nav-btn" data-dir="1" aria-label="Next fixture">&#8250;</button>
+        </span>
+      </div>
+      <div class="rail">
+
+        <div class="fixture">
+          <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
+          <div class="teams">VakıfBank <span>vs</span> Galatasaray Daikin</div>
+          <div class="when">
+            <b>Sunday, Oct 25 · 4:00 AM PDT</b> &nbsp;(2:00 PM Istanbul)<br>
+            Sultanlar Ligi
+          </div>
+        <div class="note">One of hers</div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Vak%C4%B1fBank+vs+Galatasaray+Daikin+%E2%80%94+Sultanlar+Ligi&amp;dates=20261025T110000Z%2F20261025T130000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
+          <div class="teams">Aras Kargo <span>vs</span> Türk Hava Yolları</div>
+          <div class="when">
+            <b>Sunday, Oct 25 · 6:00 AM PDT</b> &nbsp;(4:00 PM Istanbul)<br>
+            Sultanlar Ligi
+          </div>
+        <div class="note">One of hers</div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Aras+Kargo+vs+T%C3%BCrk+Hava+Yollar%C4%B1+%E2%80%94+Sultanlar+Ligi&amp;dates=20261025T130000Z%2F20261025T150000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
+          <div class="teams">Fenerbahçe Medicana <span>vs</span> Eczacıbaşı Peron İstanbul</div>
+          <div class="when">
+            <b>Sunday, Oct 25 · 9:00 AM PDT</b> &nbsp;(7:00 PM Istanbul)<br>
+            Sultanlar Ligi
+          </div>
+        <div class="note">One of hers</div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Fenerbah%C3%A7e+Medicana+vs+Eczac%C4%B1ba%C5%9F%C4%B1+Peron+%C4%B0stanbul+%E2%80%94+Sultanlar+Ligi&amp;dates=20261025T160000Z%2F20261025T180000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
+          <div class="teams">Beşiktaş <span>vs</span> Göztepe</div>
+          <div class="when">
+            <b>Sunday, Oct 25 · 3:00 AM PDT</b> &nbsp;(1:00 PM Istanbul)<br>
+            Sultanlar Ligi
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Be%C5%9Fikta%C5%9F+vs+G%C3%B6ztepe+%E2%80%94+Sultanlar+Ligi&amp;dates=20261025T100000Z%2F20261025T120000Z&amp;details=Sultanlar+Ligi" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
+          <div class="teams">Kuzeyboru <span>vs</span> Nilüfer Bld.</div>
+          <div class="when">
+            <b>Sunday, Oct 25 · 4:00 AM PDT</b> &nbsp;(2:00 PM Istanbul)<br>
+            Sultanlar Ligi
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Kuzeyboru+vs+Nil%C3%BCfer+Bld.+%E2%80%94+Sultanlar+Ligi&amp;dates=20261025T110000Z%2F20261025T130000Z&amp;details=Sultanlar+Ligi" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
+          <div class="teams">Manisa BB <span>vs</span> Zeren Spor</div>
+          <div class="when">
+            <b>Sunday, Oct 25 · 6:00 AM PDT</b> &nbsp;(4:00 PM Istanbul)<br>
+            Sultanlar Ligi
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Manisa+BB+vs+Zeren+Spor+%E2%80%94+Sultanlar+Ligi&amp;dates=20261025T130000Z%2F20261025T150000Z&amp;details=Sultanlar+Ligi" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
+          <div class="teams">İlbank <span>vs</span> Afyon Bld.</div>
+          <div class="when">
+            <b>Sunday, Oct 25 · 6:00 AM PDT</b> &nbsp;(4:00 PM Istanbul)<br>
+            Sultanlar Ligi
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=%C4%B0lbank+vs+Afyon+Bld.+%E2%80%94+Sultanlar+Ligi&amp;dates=20261025T130000Z%2F20261025T150000Z&amp;details=Sultanlar+Ligi" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+      </div>
+      <div class="progress"><div class="progress-fill"></div></div>
+    </div>
+
+    <div class="sport-panel" data-sport="nba" hidden>
+      <div class="rail-nav">
+        <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+        <span class="nav-btns">
+          <button class="nav-btn" data-dir="-1" aria-label="Previous fixture">&#8249;</button>
+          <button class="nav-btn" data-dir="1" aria-label="Next fixture">&#8250;</button>
+        </span>
+      </div>
+      <div class="rail">
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Philadelphia 76ers <span>at</span> Cleveland Cavaliers</div>
+          <div class="when">
+            <b>Thursday, Oct 22 · 4:00 PM PDT</b><br>
+            NBA
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Philadelphia+76ers+at+Cleveland+Cavaliers+%E2%80%94+NBA&amp;dates=20261022T230000Z%2F20261023T010000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Oklahoma City Thunder <span>at</span> Denver Nuggets</div>
+          <div class="when">
+            <b>Thursday, Oct 22 · 6:30 PM PDT</b><br>
+            NBA
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Oklahoma+City+Thunder+at+Denver+Nuggets+%E2%80%94+NBA&amp;dates=20261023T013000Z%2F20261023T033000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Milwaukee Bucks <span>at</span> Chicago Bulls</div>
+          <div class="when">
+            <b>Friday, Oct 23 · 1:00 PM PDT</b><br>
+            NBA
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Milwaukee+Bucks+at+Chicago+Bulls+%E2%80%94+NBA&amp;dates=20261023T200000Z%2F20261023T220000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Boston Celtics <span>at</span> New York Knicks</div>
+          <div class="when">
+            <b>Friday, Oct 23 · 4:00 PM PDT</b><br>
+            NBA
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Boston+Celtics+at+New+York+Knicks+%E2%80%94+NBA&amp;dates=20261023T230000Z%2F20261024T010000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Miami Heat <span>at</span> Detroit Pistons</div>
+          <div class="when">
+            <b>Friday, Oct 23 · 5:00 PM PDT</b><br>
+            NBA
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Miami+Heat+at+Detroit+Pistons+%E2%80%94+NBA&amp;dates=20261024T000000Z%2F20261024T020000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">San Antonio Spurs <span>at</span> Houston Rockets</div>
+          <div class="when">
+            <b>Friday, Oct 23 · 6:30 PM PDT</b><br>
+            NBA
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=San+Antonio+Spurs+at+Houston+Rockets+%E2%80%94+NBA&amp;dates=20261024T013000Z%2F20261024T033000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Utah Jazz <span>at</span> New Orleans Pelicans</div>
+          <div class="when">
+            <b>Friday, Oct 23 · 6:30 PM PDT</b><br>
+            NBA
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Utah+Jazz+at+New+Orleans+Pelicans+%E2%80%94+NBA&amp;dates=20261024T013000Z%2F20261024T033000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Chicago Bulls <span>at</span> Washington Wizards</div>
+          <div class="when">
+            <b>Saturday, Oct 24 · 5:00 PM PDT</b><br>
+            NBA
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Chicago+Bulls+at+Washington+Wizards+%E2%80%94+NBA&amp;dates=20261025T000000Z%2F20261025T020000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Dallas Mavericks <span>at</span> San Antonio Spurs</div>
+          <div class="when">
+            <b>Saturday, Oct 24 · 5:00 PM PDT</b><br>
+            NBA
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Dallas+Mavericks+at+San+Antonio+Spurs+%E2%80%94+NBA&amp;dates=20261025T000000Z%2F20261025T020000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+      </div>
+      <div class="progress"><div class="progress-fill"></div></div>
+    </div>
+
+    <div class="sport-panel" data-sport="f1" hidden>
+      <div class="rail-nav">
+        <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+        <span class="nav-btns">
+          <button class="nav-btn" data-dir="-1" aria-label="Previous fixture">&#8249;</button>
+          <button class="nav-btn" data-dir="1" aria-label="Next fixture">&#8250;</button>
+        </span>
+      </div>
+      <div class="rail">
+
+        <div class="fixture">
+          <div class="thumb thumb-f1"><span class="tag">Formula 1</span></div>
+          <div class="teams">MSC Cruises United States Grand Prix </div>
+          <div class="when">
+            <b>Friday, Oct 23 · 10:30 AM PDT</b><br>
+            Formula 1
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=MSC+Cruises+United+States+Grand+Prix+++%E2%80%94+Formula+1&amp;dates=20261023T173000Z%2F20261023T193000Z&amp;details=Formula+1" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+      </div>
+      <div class="progress"><div class="progress-fill"></div></div>
+    </div>
+
+  </section>
+
+  <footer class="footer">
+    Updated every morning &middot; All times California (PDT) unless noted<br>
+    Every story links to its source &middot; The Dispatch, a Simay Demiral project<br>
+    <a href="/" style="color:#e8935a;text-decoration:none">&larr; simaydemiral.com</a>
+  </footer>
+</div>
+<script>
+(function () {
+  /* open all source links in a new tab */
+  document.querySelectorAll('a[href^="http"]').forEach(function (a) {
+    a.setAttribute('target', '_blank');
+    a.setAttribute('rel', 'noopener');
+  });
+
+  var rails = document.querySelectorAll('.rail');
+  rails.forEach(function (rail) {
+    var items = rail.querySelectorAll('.card, .fixture');
+    var progress = rail.nextElementSibling;
+    var fill = progress ? progress.querySelector('.progress-fill') : null;
+
+    /* progress bar + active-card glow track the visible card */
+    function update() {
+      if (!items.length) return;
+      var step = items[0].getBoundingClientRect().width + 16;
+      var idx = Math.round(rail.scrollLeft / step);
+      idx = Math.max(0, Math.min(items.length - 1, idx));
+      items.forEach(function (el, i) { el.classList.toggle('active', i === idx); });
+      if (fill) fill.style.width = ((idx + 1) / items.length * 100) + '%';
+    }
+    rail.addEventListener('scroll', function () { requestAnimationFrame(update); }, { passive: true });
+    update();
+
+    /* arrow buttons scroll one card at a time */
+    var nav = rail.previousElementSibling;
+    if (nav && nav.classList.contains('rail-nav')) {
+      nav.querySelectorAll('.nav-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var step = items[0].getBoundingClientRect().width + 16;
+          rail.scrollBy({ left: parseInt(btn.dataset.dir, 10) * step, behavior: 'smooth' });
+        });
+      });
+    }
+
+    /* drag to scroll (touch-safe): a dead zone swallows the tiny jitter of
+       a finger tap, so a tap never scrolls the rail nor counts as a drag;
+       a click is suppressed only when the rail actually scrolled */
+    var down = false, startX = 0, startScroll = 0, moved = false;
+    var DEAD_ZONE = 10;        /* px of pointer travel ignored before a drag starts */
+    var SCROLL_THRESHOLD = 6;  /* px the rail must actually move to count as a drag */
+    rail.addEventListener('pointerdown', function (e) {
+      down = true; moved = false;
+      startX = e.clientX; startScroll = rail.scrollLeft;
+    });
+    rail.addEventListener('pointermove', function (e) {
+      if (!down) return;
+      var dx = e.clientX - startX;
+      if (!moved && Math.abs(dx) <= DEAD_ZONE) return; /* still in the dead zone */
+      moved = true;
+      rail.classList.add('dragging');
+      rail.scrollLeft = startScroll - (dx - Math.sign(dx) * DEAD_ZONE);
+    });
+    function up() {
+      down = false;
+      rail.classList.remove('dragging');
+      /* did this gesture really scroll the rail? */
+      moved = Math.abs(rail.scrollLeft - startScroll) > SCROLL_THRESHOLD;
+      if (moved) {
+        /* the click event fires right after pointerup, so reset the flag
+           just after it has had its chance to be suppressed */
+        setTimeout(function () { moved = false; }, 0);
+      }
+    }
+    rail.addEventListener('pointerup', up);
+    rail.addEventListener('pointercancel', up);
+    /* don't follow links after a real drag, only after a real click */
+    rail.addEventListener('click', function (e) {
+      if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; }
+    }, true);
+  });
+
+  /* ---------- section 03: US / Turkey filter (scoped per section,
+     so each archived edition keeps its own working tabs) ---------- */
+  document.querySelectorAll('.section').forEach(function (section) {
+    var tabs = section.querySelectorAll('.region-tab');
+    if (!tabs.length) return;
+    var panels = section.querySelectorAll('.region-panel');
+
+    function showRegion(region) {
+      tabs.forEach(function (tab) {
+        tab.classList.toggle('active', tab.getAttribute('data-region') === region);
+      });
+      panels.forEach(function (panel) {
+        var isMatch = panel.getAttribute('data-region') === region;
+        panel.hidden = !isMatch;
+        if (isMatch) {
+          var rail = panel.querySelector('.rail');
+          if (rail) {
+            rail.scrollLeft = 0;
+            rail.dispatchEvent(new Event('scroll'));
+          }
+        }
+      });
+    }
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        showRegion(tab.getAttribute('data-region'));
+      });
+    });
+  });
+
+  /* ---------- sports schedule: filter tabs + per-sport highlights
+     (scoped per section, one instance per edition) ---------- */
+  document.querySelectorAll('.section').forEach(function (section) {
+    var tabs = section.querySelectorAll('.sport-tab');
+    if (!tabs.length) return;
+    var panels = section.querySelectorAll('.sport-panel');
+    var hlPanels = section.querySelectorAll('.hl-panel');
+
+    function panelFor(list, sport) {
+      for (var i = 0; i < list.length; i++) {
+        if (list[i].getAttribute('data-sport') === sport) return list[i];
+      }
+      return null;
+    }
+
+    /* a sport with no upcoming fixtures loses its tab entirely */
+    tabs.forEach(function (tab) {
+      var panel = panelFor(panels, tab.getAttribute('data-sport'));
+      if (!panel || !panel.querySelector('.fixture')) tab.hidden = true;
+    });
+
+    function showSport(sport) {
+      tabs.forEach(function (tab) {
+        tab.classList.toggle('active', tab.getAttribute('data-sport') === sport);
+      });
+      panels.forEach(function (panel) {
+        panel.hidden = panel.getAttribute('data-sport') !== sport;
+      });
+      var hlMatch = panelFor(hlPanels, sport);
+      hlPanels.forEach(function (panel) {
+        panel.hidden = panel.getAttribute('data-sport') !== sport;
+      });
+      /* hide the whole highlights block when this sport has none */
+      var hlBlock = section.querySelector('.highlights');
+      if (hlBlock) hlBlock.hidden = !hlMatch;
+      var panel = panelFor(panels, sport);
+      var rail = panel ? panel.querySelector('.rail') : null;
+      if (rail) {
+        rail.scrollLeft = 0;
+        rail.dispatchEvent(new Event('scroll'));
+      }
+    }
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        showSport(tab.getAttribute('data-sport'));
+      });
+    });
+
+    /* sync panels + highlights with the active tab; if the default tab
+       was hidden as empty, open the first sport that has fixtures */
+    var active = section.querySelector('.sport-tab.active');
+    if (!active || active.hidden) {
+      for (var i = 0; i < tabs.length; i++) {
+        if (!tabs[i].hidden) { active = tabs[i]; break; }
+      }
+    }
+    if (active) showSport(active.getAttribute('data-sport'));
+  });
+
+  /* ---------- edition archive: switch between kept editions ---------- */
+  var editionBtns = document.querySelectorAll('.edition-btn');
+  var editions = document.querySelectorAll('.edition');
+
+  function showEdition(id) {
+    var current = null;
+    editions.forEach(function (ed) {
+      var match = ed.getAttribute('data-edition') === id;
+      ed.hidden = !match;
+      if (match) current = ed;
+    });
+    editionBtns.forEach(function (btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-edition') === id);
+    });
+    if (current) {
+      var title = current.getAttribute('data-title');
+      if (title) document.title = title;
+      /* rails inside a hidden edition measure 0 wide; refresh their
+         progress bars and active-card glow now that they are visible */
+      current.querySelectorAll('.rail').forEach(function (rail) {
+        rail.dispatchEvent(new Event('scroll'));
+      });
+    }
+    window.scrollTo(0, 0);
+  }
+
+  editionBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      showEdition(btn.getAttribute('data-edition'));
+    });
+  });
+})();
+</script>
+</body>
+</html>

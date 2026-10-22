@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Dispatch — Thursday, October 22, 2026</title>
+<link href="https://api.fontshare.com/v2/css?f%5B%5D=switzer@400,500,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #171210;
+    color: #f5ebdd;
+    font-family: "Switzer", "Inter", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: 32px 16px 64px;
+    overflow-x: hidden;
+  }
+  .brief { max-width: 760px; margin: 0 auto; }
+
+  /* ---------- masthead ---------- */
+  .masthead {
+    text-align: center;
+    padding: 8px 0 28px;
+    border-bottom: 1px solid rgba(245, 235, 221, 0.15);
+    margin-bottom: 32px;
+  }
+  .masthead .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #e8935a;
+  }
+  .masthead h1 {
+    font-family: "Switzer", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    font-size: 52px;
+    line-height: 1.05;
+    margin: 12px 0 8px;
+  }
+  .masthead .dateline { font-size: 14px; color: rgba(245, 235, 221, 0.65); }
+  .masthead .tagline {
+    font-family: "Switzer", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 16px;
+    color: rgba(245, 235, 221, 0.75);
+    margin-top: 10px;
+  }
+
+  /* ---------- markets snapshot strip ---------- */
+  .markets-strip {
+    background: rgba(232, 147, 90, 0.12);
+    border: 1px solid rgba(232, 147, 90, 0.35);
+    border-left: 3px solid #e8935a;
+    border-radius: 12px;
+    padding: 14px 16px 12px;
+    margin-bottom: 32px;
+  }
+  .markets-strip-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .markets-strip-label {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #e8935a;
+  }
+  .markets-strip-asof {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: rgba(245, 235, 221, 0.65);
+  }
+  .markets-tiles {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .market-tile {
+    background: rgba(23, 18, 16, 0.38);
+    border: 1px solid rgba(232, 147, 90, 0.28);
+    border-radius: 10px;
+    padding: 12px 14px 11px;
+  }
+  .market-tile.down {
+    background: rgba(224, 135, 106, 0.16);
+    border-color: rgba(224, 135, 106, 0.45);
+  }
+  .market-tile.up {
+    background: rgba(150, 184, 119, 0.16);
+    border-color: rgba(150, 184, 119, 0.45);
+  }
+  .market-tile-label {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 500;
+    font-size: 10.5px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(245, 235, 221, 0.6);
+    margin-bottom: 6px;
+  }
+  .market-tile-value {
+    font-family: "Switzer", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: #fff;
+  }
+  .market-tile-delta {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    margin-top: 7px;
+  }
+  .market-tile-delta.down { color: #f0957a; }
+  .market-tile-delta.up { color: #a8cc8a; }
+  .market-tile-delta .arrow { font-size: 13px; }
+  @media (max-width: 560px) {
+    .markets-tiles { grid-template-columns: repeat(2, 1fr); }
+  }
+  .markets-strip-takeaway {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(232, 147, 90, 0.22);
+    font-size: 14px;
+    line-height: 1.5;
+    color: rgba(245, 235, 221, 0.92);
+  }
+  .markets-strip-takeaway strong { color: #e8935a; font-weight: 600; }
+
+  /* ---------- edition nav: today, and the two before it ---------- */
+  .edition-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin: -14px 0 30px;
+  }
+  .edition-nav a, .edition-nav span {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: #f5ebdd;
+    border: 1px solid rgba(245, 235, 221, 0.3);
+    border-radius: 999px;
+    padding: 8px 15px;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .edition-nav a:hover { border-color: #e8935a; color: #e8935a; }
+  .edition-nav .is-current {
+    background: #e8935a;
+    border-color: #e8935a;
+    color: #1d1512;
+  }
+
+  /* ---------- sections ---------- */
+  .section { margin-bottom: 44px; }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .section-head .num {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: #e8935a;
+  }
+  .section-head h2 {
+    font-family: "Switzer", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 500;
+    font-size: 26px;
+    letter-spacing: -0.03em;
+  }
+  .section-head .rule {
+    flex: 1;
+    border: none;
+    border-top: 1px solid rgba(245, 235, 221, 0.15);
+  }
+
+  /* ---------- AI & Tech: subtle circuit-board motif ---------- */
+  .section-ai { position: relative; }
+  .section-ai::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Cg fill='none' stroke='%23e8935a' stroke-width='1.2'%3E%3Cpath d='M24 64 H104 L140 100 H236'/%3E%3Cpath d='M64 276 V188 L100 152 V36'/%3E%3Cpath d='M276 220 H196 L160 184'/%3E%3Cpath d='M180 276 V240 L204 216'/%3E%3Cpath d='M252 36 V84 L276 108'/%3E%3Ccircle cx='236' cy='100' r='6'/%3E%3Ccircle cx='100' cy='36' r='6'/%3E%3C/g%3E%3Cg fill='%23e8935a'%3E%3Ccircle cx='236' cy='100' r='3'/%3E%3Ccircle cx='104' cy='64' r='2.5'/%3E%3Ccircle cx='100' cy='36' r='3'/%3E%3Ccircle cx='64' cy='188' r='2.5'/%3E%3Ccircle cx='196' cy='220' r='2.5'/%3E%3Ccircle cx='160' cy='184' r='3'/%3E%3Ccircle cx='204' cy='216' r='2.5'/%3E%3Ccircle cx='140' cy='100' r='2'/%3E%3Ccircle cx='276' cy='108' r='2.5'/%3E%3C/g%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 300px 300px;
+    opacity: 0.13;
+    pointer-events: none;
+  }
+  .section-ai > * { position: relative; }
+
+  /* ---------- rail nav ---------- */
+  .rail-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .drag-hint {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(245, 235, 221, 0.55);
+  }
+  .nav-btns { display: flex; gap: 8px; }
+  .nav-btn {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(245, 235, 221, 0.3);
+    background: transparent;
+    color: #f5ebdd;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .nav-btn:hover { background: #e8935a; border-color: #e8935a; color: #1d1512; }
+
+  /* ---------- horizontal rail: one card at a time + peek ---------- */
+  .rail {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 8px;
+    cursor: grab;
+    touch-action: pan-y;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .rail::-webkit-scrollbar { display: none; }
+  .rail.dragging { cursor: grabbing; scroll-snap-type: none; }
+  .rail.dragging a { pointer-events: none; }
+
+  /* ---------- progress bar ---------- */
+  .progress {
+    height: 3px;
+    background: rgba(245, 235, 221, 0.15);
+    border-radius: 2px;
+    margin-top: 12px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 33.333%;
+    background: #e8935a;
+    border-radius: 2px;
+    transition: width 0.25s ease;
+  }
+
+  /* ---------- cards ---------- */
+  .card {
+    flex: 0 0 88%;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    background: #f5ebdd;
+    color: #1d1512;
+    border-radius: 20px;
+    overflow: hidden;
+    text-decoration: none;
+    transition: transform 0.15s ease, box-shadow 0.3s ease;
+  }
+  .card:hover { transform: translateY(-3px); }
+  .card.active { box-shadow: 0 0 0 1px rgba(232, 147, 90, 0.55), 0 16px 40px rgba(0, 0, 0, 0.35); }
+  .card .thumb {
+    position: relative;
+    height: 75px;
+    display: flex;
+    align-items: flex-end;
+    padding: 14px 16px;
+    overflow: hidden;
+  }
+  .thumb-ai      { background: linear-gradient(135deg, #2b1a12 0%, #e8935a 130%); }
+  .thumb-markets  { background: linear-gradient(135deg, #20240f 0%, #a8b86a 130%); }
+  .thumb-turkey   { background: linear-gradient(135deg, #33161a 0%, #b03a3a 130%); }
+  .thumb-us       { background: linear-gradient(135deg, #101c2a 0%, #46688c 130%); }
+  .thumb-volley   { background: linear-gradient(135deg, #12262b 0%, #5aa39e 130%); }
+  .thumb .tag {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.85);
+  }
+  .card .body { padding: 20px 22px 18px; display: flex; flex-direction: column; flex: 1; }
+  .card .kicker {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #b06a35;
+    margin-bottom: 8px;
+  }
+  .card h3 {
+    font-family: "Switzer", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    font-size: 24px;
+    line-height: 1.25;
+    margin-bottom: 8px;
+  }
+  .card p {
+    font-size: 15px;
+    line-height: 1.6;
+    color: rgba(29, 21, 18, 0.78);
+  }
+  .key {
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: rgba(232, 147, 90, 0.12);
+    border-left: 2px solid #e8935a;
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    color: rgba(29, 21, 18, 0.85);
+  }
+  .card .meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: auto;
+    padding-top: 14px;
+    font-size: 12.5px;
+    color: rgba(29, 21, 18, 0.55);
+  }
+  .card .read { color: #b06a35; font-weight: 600; }
+
+  /* ---------- volleyball fixtures ---------- */
+  .fixture {
+    flex: 0 0 88%;
+    scroll-snap-align: start;
+    background: #241a15;
+    border: 1px solid rgba(232, 147, 90, 0.35);
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.3s ease;
+  }
+  .fixture.active { box-shadow: 0 0 0 1px rgba(232, 147, 90, 0.55), 0 16px 40px rgba(0, 0, 0, 0.35); }
+  .fixture .teams {
+    font-family: "Switzer", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    font-size: 21px;
+    line-height: 1.3;
+    padding: 20px 22px 0;
+  }
+  .fixture .teams span { color: #e8935a; }
+  .fixture .when {
+    margin-top: 10px;
+    padding: 0 22px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(245, 235, 221, 0.8);
+  }
+  .fixture .when b { color: #f5ebdd; }
+  .fixture .note {
+    margin-top: auto;
+    padding: 12px 22px 18px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: rgba(245, 235, 221, 0.6);
+  }
+  .fixture .actions { padding: 0 22px 20px; }
+  .cal-btn {
+    display: inline-block;
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #f5ebdd;
+    border: 1px solid rgba(245, 235, 221, 0.3);
+    border-radius: 999px;
+    padding: 9px 16px;
+    text-decoration: none;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .cal-btn:hover { background: #e8935a; border-color: #e8935a; color: #1d1512; }
+  .section-note {
+    font-size: 15px;
+    line-height: 1.6;
+    color: rgba(245, 235, 221, 0.75);
+    margin-bottom: 16px;
+  }
+
+  /* ---------- sports schedule ---------- */
+  .sport-tabs, .region-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .sport-tab, .region-tab {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #f5ebdd;
+    background: transparent;
+    border: 1px solid rgba(245, 235, 221, 0.3);
+    border-radius: 999px;
+    padding: 9px 16px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .sport-tab:hover, .region-tab:hover { border-color: #e8935a; color: #e8935a; }
+  .sport-tab.active, .region-tab.active { background: #e8935a; border-color: #e8935a; color: #1d1512; }
+  .sport-tab[hidden], .sport-panel[hidden], .hl-panel[hidden],
+  .region-tab[hidden], .region-panel[hidden], .highlights[hidden] { display: none; }
+  .thumb-soccer { background: linear-gradient(135deg, #12240f 0%, #6aa84f 130%); }
+  .thumb-nba    { background: linear-gradient(135deg, #241009 0%, #c75b39 130%); }
+  .thumb-f1     { background: linear-gradient(135deg, #17090c 0%, #a31621 130%); }
+
+  /* ---------- key highlights ---------- */
+  .highlights { margin-top: 28px; }
+  .highlights-head {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #e8935a;
+    margin-bottom: 4px;
+  }
+  .highlights ul { list-style: none; }
+  .highlights li {
+    position: relative;
+    font-size: 15px;
+    line-height: 1.6;
+    color: rgba(245, 235, 221, 0.85);
+    padding: 10px 0 10px 18px;
+  }
+  .highlights li + li { border-top: 1px solid rgba(245, 235, 221, 0.12); }
+  .highlights li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 19px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #e8935a;
+  }
+  .highlights li a {
+    color: #f5ebdd;
+    text-decoration: underline;
+    text-decoration-color: rgba(232, 147, 90, 0.6);
+    text-underline-offset: 3px;
+  }
+  .highlights li a:hover { color: #e8935a; }
+
+  /* ---------- edition archive nav ---------- */
+  .edition[hidden] { display: none; }
+  .edition-nav {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 30px;
+  }
+  .edition-btn {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #f5ebdd;
+    background: transparent;
+    border: 1px solid rgba(245, 235, 221, 0.3);
+    border-radius: 999px;
+    padding: 10px 18px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .edition-btn:hover { border-color: #e8935a; color: #e8935a; }
+  .edition-btn.active { background: #e8935a; border-color: #e8935a; color: #1d1512; }
+  div.card { cursor: default; }
+  div.card:hover { transform: none; }
+
+  /* ---------- footer ---------- */
+  .footer {
+    text-align: center;
+    padding-top: 24px;
+    border-top: 1px solid rgba(245, 235, 221, 0.15);
+    font-size: 13px;
+    line-height: 1.7;
+    color: rgba(245, 235, 221, 0.55);
+  }
+  @media (max-width: 560px) {
+    .masthead h1 { font-size: 38px; }
+  }
+</style>
+</head>
+<body>
+<div class="brief">
+  <header class="masthead">
+    <div class="eyebrow">Simay&rsquo;s Dispatch</div>
+    <h1>The Dispatch</h1>
+    <div class="dateline">Thursday, October 22, 2026</div>
+    <div class="tagline">Istanbul and the Bay, before breakfast.</div>
+  </header>
+
+  <nav class="edition-nav" aria-label="Earlier editions">
+    <span class="is-current">Today</span>
+    <a href="/dispatch/2026-10-21">Yesterday</a>
+  </nav>
+
+  <div class="markets-strip" aria-label="Markets snapshot">
+    <div class="markets-strip-head">
+      <span class="markets-strip-label">Markets Snapshot &middot; KEY</span>
+      <span class="markets-strip-asof">as of 10:02am pt</span>
+    </div>
+    <div class="markets-tiles">
+      <div class="market-tile down">
+        <div class="market-tile-label">S&amp;P 500</div>
+        <div class="market-tile-value">7,657.71</div>
+        <div class="market-tile-delta down"><span class="arrow">&#9660;</span> -1.28%</div>
+      </div>
+      <div class="market-tile down">
+        <div class="market-tile-label">NASDAQ</div>
+        <div class="market-tile-value">26,060</div>
+        <div class="market-tile-delta down"><span class="arrow">&#9660;</span> -2.41%</div>
+      </div>
+      <div class="market-tile down">
+        <div class="market-tile-label">USD/TRY</div>
+        <div class="market-tile-value">49.63</div>
+        <div class="market-tile-delta down"><span class="arrow">&#9650;</span> +0.05%</div>
+      </div>
+      <div class="market-tile down">
+        <div class="market-tile-label">BTC</div>
+        <div class="market-tile-value">$81,178</div>
+        <div class="market-tile-delta down"><span class="arrow">&#9660;</span> -2.12%</div>
+      </div>
+    </div>
+    <div class="markets-strip-takeaway"><strong>Takeaway:</strong> Both US indices lower: S&amp;P -1.28%, Nasdaq -2.41%.</div>
+  </div>
+
+  <section class="section section-ai">
+    <div class="section-head">
+      <span class="num">01</span><h2>AI &amp; Tech</h2><hr class="rule">
+    </div>
+    <div class="rail-nav">
+      <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+      <span class="nav-btns">
+        <button class="nav-btn" data-dir="-1" aria-label="Previous story">&#8249;</button>
+        <button class="nav-btn" data-dir="1" aria-label="Next story">&#8250;</button>
+      </span>
+    </div>
+    <div class="rail">
+
+      <a class="card" href="https://arstechnica.com/ai/2026/10/the-15-billion-ad-powered-ai-startup-your-doctor-may-already-be-using/">
+        <div class="thumb thumb-ai"><span class="tag">Ars Technica</span></div>
+        <div class="body">
+          <div class="kicker">Ai</div>
+          <h3>Doctor-facing AI search engine valued at $15 billion</h3>
+          <p>OpenEvidence, founded in 2022 by Daniel Nadler, says physicians ran more than 42 million prompts on its medical chatbot last month, and it is now embedded in electronic health records at systems including Mount Sinai and NYU Langone. The ad-funded model and the accuracy of its results have drawn scrutiny from researchers, even as OpenAI and Anthropic move into the same space.</p>
+          <div class="key">KEY &nbsp; $15B valuation &middot; $250M round in September &middot; nearly $1B raised in 18 months &middot; 42M prompts last month &middot; nearly two-thirds of US doctors &middot; ~1M US physicians &middot; $100M in ad buys booked &middot; $400M–$500M ad revenue projected by end of 2026</div>
+          <div class="meta"><span>Ars Technica</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://techcrunch.com/2026/10/22/chinese-hackers-spied-on-thousands-of-companies-after-breaching-it-giant-connectwise/">
+        <div class="thumb thumb-ai"><span class="tag">TechCrunch</span></div>
+        <div class="body">
+          <div class="kicker">Ai</div>
+          <h3>Microsoft ties ConnectWise breach to AI-driven mass hacking</h3>
+          <p>Microsoft researchers say China state-aligned hackers broke into ConnectWise&#x27;s cloud backup service and stole application credentials, letting them sign in to customers&#x27; Microsoft-hosted environments as authorized users and read emails and files. Microsoft attributes the speed to AI agents running ARTEX, an open-source framework also used in a recent compromise of South Korean financial systems; ConnectWise has paused the service and is investigating.</p>
+          <div class="key">KEY &nbsp; ~2,250 organizations affected &middot; almost 3,000 attempted sign-ins per minute</div>
+          <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://techcrunch.com/2026/10/22/spotifys-current-ai-bet-is-about-being-the-music-service-that-agents-choose/">
+        <div class="thumb thumb-ai"><span class="tag">TechCrunch</span></div>
+        <div class="body">
+          <div class="kicker">Ai</div>
+          <h3>Spotify positions itself as the service AI agents pick</h3>
+          <p>Spotify reported 788 million monthly active users and nearly €5 billion in third-quarter revenue, but co-CEO Gustav Söderström used the earnings call to argue the company stands to gain from AI agents because people do not want chores taken out of entertainment. Spotify already integrates with Meta&#x27;s Muse, ChatGPT and Claude, though the article notes friction ahead: Amazon has blocked Muse from shopping on its platform.</p>
+          <div class="key">KEY &nbsp; 788M monthly active users &middot; nearly €5B (~$5.6B) quarterly revenue &middot; listening history back to 2008</div>
+          <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.theverge.com/policy/1016585/openai-anthropic-nvidia-lobbying-records">
+        <div class="thumb thumb-ai"><span class="tag">The Verge</span></div>
+        <div class="body">
+          <div class="kicker">Ai</div>
+          <h3>OpenAI, Anthropic and Nvidia post record lobbying quarters</h3>
+          <p>Federal disclosures show each of the three AI companies spent more on lobbying between July and September than in any prior quarter, with topics ranging from cybersecurity evaluations for frontier models to export controls and data-center energy costs. The sums still trail long-established Big Tech spending, and come ahead of midterm elections in which Democrats are expected to win back at least some control of Congress.</p>
+          <div class="key">KEY &nbsp; Nvidia $2.2M &middot; Anthropic $2.1M &middot; OpenAI $1.5M &middot; nearly $6M combined &middot; Apple $3.1M record quarter &middot; Google regularly over $3M &middot; Microsoft at least $2M a quarter since 2021</div>
+          <div class="meta"><span>The Verge</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://arstechnica.com/information-technology/2026/10/300-tor-exit-nodes-hijacked-to-intercept-ssh-traffic-and-retrieve-plaintext-email/">
+        <div class="thumb thumb-ai"><span class="tag">Ars Technica</span></div>
+        <div class="body">
+          <div class="kicker">Ai</div>
+          <h3>Hundreds of Tor exit nodes reconfigured to intercept traffic</h3>
+          <p>A Tor volunteer writing as Kaba reported that unknown attackers used a reused password to reach a Tor management server, installed the Ebury Linux backdoor, and ultimately reconfigured 333 exit relays to redirect SSH sessions through servers they controlled and to block ports used for encrypted email. Investigators have not established how the attackers gained control of all the underlying servers, and it is unclear whether any email downgrade attempts succeeded.</p>
+          <div class="key">KEY &nbsp; 333 exit relays involved &middot; 12 interception servers &middot; interception October 2–5 &middot; access began late August &middot; ~3,000 Tor exit nodes polled &middot; ports 25, 465, 587, 993, 995 blocked &middot; Ebury discovered 12 years ago</div>
+          <div class="meta"><span>Ars Technica</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://arstechnica.com/cars/2026/10/forget-malaise-2-0-gm-says-its-still-all-in-on-evs-and-autonomy/">
+        <div class="thumb thumb-ai"><span class="tag">Ars Technica</span></div>
+        <div class="body">
+          <div class="kicker">Ai</div>
+          <h3>GM says electrification and autonomy plans still stand</h3>
+          <p>At its GM Forward event, the automaker said its hands-off, eyes-off Super Cruise system will expand to nearly every vehicle in its lineup, including pickups and crossovers rather than only the Escalade IQ. Product head Sterling Anderson said the company is testing the technology across virtual and real-world miles and repeatedly framed customer trust as the gating factor for its new OnStar AI assistant.</p>
+          <div class="key">KEY &nbsp; 1 million test miles (1.6 million km) per month</div>
+          <div class="meta"><span>Ars Technica</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+    </div>
+    <div class="progress"><div class="progress-fill"></div></div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <span class="num">02</span><h2>Markets &amp; M&amp;A</h2><hr class="rule">
+    </div>
+    <div class="rail-nav">
+      <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+      <span class="nav-btns">
+        <button class="nav-btn" data-dir="-1" aria-label="Previous story">&#8249;</button>
+        <button class="nav-btn" data-dir="1" aria-label="Next story">&#8250;</button>
+      </span>
+    </div>
+    <div class="rail">
+
+      <a class="card" href="https://fortune.com/2026/10/21/zuckerberg-meta-california-wealth-tax-billions-class-c-stock/">
+        <div class="thumb thumb-markets"><span class="tag">Fortune</span></div>
+        <div class="body">
+          <div class="kicker">Markets</div>
+          <h3>Meta adds nonvoting stock to preserve Zuckerberg&#x27;s control</h3>
+          <p>Meta said it will issue a new nonvoting Class C share class as a one-for-one stock dividend to all shareholders, letting it pay employees, fund acquisitions and raise capital without diluting Mark Zuckerberg&#x27;s majority voting power. An SEC filing says the structure, negotiated over months with board members in talks that grew contentious at times, also lets Zuckerberg sell shares to meet Chan Zuckerberg Initiative pledges and to pay billions to California if a proposed wealth tax passes in November.</p>
+          <div class="key">KEY &nbsp; 60.6% of voting control &middot; 13.4% economic stake &middot; Class B carries 10 votes &middot; Q3 revenue +26% to $64.6B &middot; capex $34.9B &middot; free cash flow -$2.1B vs +$10.6B a year ago &middot; 2026 capex guided $135B–$140B &middot; Q4 revenue guided $73B–$76B &middot; $26.3B of Class A buybacks in 2025, none in four quarters &middot; $21B stock comp in first nine months</div>
+          <div class="meta"><span>Fortune</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.cnbc.com/2026/10/21/tesla-tsla-q3-2026-earnings-report.html">
+        <div class="thumb thumb-markets"><span class="tag">CNBC Earnings</span></div>
+        <div class="body">
+          <div class="kicker">Markets</div>
+          <h3>Tesla tops estimates while automotive revenue declines</h3>
+          <p>Tesla reported better-than-expected third-quarter results, though automotive and energy revenue both fell and profit dropped on heavy spending for Optimus humanoid robots and other AI work; the company pointed to lower average selling prices and difficulty securing battery supply. The report came a day after Elon Musk told SpaceX investors a merger of the two companies would be a &quot;good idea,&quot; saying both boards have formed special committees to discuss a possible tie-up.</p>
+          <div class="key">KEY &nbsp; automotive revenue -3% to $20.56B &middot; energy -16% to $2.88B &middot; services and other +33% to $4.61B &middot; net income -29% to $787M, or 22 cents a share, from $1.11B, or 32 cents &middot; capex more than doubled to $3.73B &middot; free cash flow -62% to $1.53B &middot; FSD subscriptions +67% to 1.74M at $99 per month &middot; 362 Model Y Robotaxi and 449 Cybercab authorized for driverless use in Texas &middot; stock -3% after hours</div>
+          <div class="meta"><span>CNBC Earnings</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.cnbc.com/2026/10/22/norges-bank-nbim-wealth-fund-q3-results.html">
+        <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
+        <div class="body">
+          <div class="kicker">Markets</div>
+          <h3>Norway&#x27;s $2.3 trillion fund posts $30 billion quarterly loss</h3>
+          <p>Norges Bank Investment Management said its portfolio lost about $30 billion in the third quarter, with Deputy CEO Trond Grande attributing the near-flat, slightly negative return mainly to rising interest rates weighing on fixed income. Equities were close to zero overall, with energy the strongest sector and rate-sensitive utilities and real estate falling; last month the fund said it wanted to cut its U.S. Treasury holdings.</p>
+          <div class="key">KEY &nbsp; loss of 278 billion kroner ($29.7B) &middot; $2.3T under management &middot; fixed income -3.5%, just over a quarter of the portfolio &middot; equities +0.5%, 72% of investments &middot; 1,664 bonds across 51 countries &middot; stakes in about 7,100 companies, 1.5% of all listed firms &middot; $65.4B Nvidia stake &middot; real estate +0.4%, renewable infrastructure +7.5% &middot; H1 return 12.95% and near-$185B profit</div>
+          <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.cnbc.com/2026/10/22/trump-economic-approval-rating-midterms-poll.html">
+        <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
+        <div class="body">
+          <div class="kicker">Markets</div>
+          <h3>Trump&#x27;s economic approval at term low ahead of midterms</h3>
+          <p>CNBC&#x27;s All-America Economic Survey found President Trump&#x27;s economic approval rating at the lowest point of either of his terms, with eight in 10 Americans rating the economy fair or poor and respondents favoring Democratic control of Congress. Republican pollster Micah Roberts said the shift came from Republicans turning more negative rather than independents or Democrats, while Democratic pollster Jay Campbell said the movement would make him &quot;very nervous&quot; running Republican campaigns in the final two weeks.</p>
+          <div class="key">KEY &nbsp; economic approval 34% (from 38% in July), disapproval 65% (from 60%), net -31 &middot; overall approval 40% to 59%, net -19 vs -8 a year ago &middot; 63% pessimistic, including 35% of Republicans, up 6 points &middot; Democrats preferred 52% to 45%, a 7-point edge, up 3 from July &middot; independents 49% to 33% &middot; 72% of Democrats vs 62% of Republicans highly interested in the Nov. 3 vote &middot; +4 Democratic margin in eight competitive Senate states Trump carried by 10 in 2024 &middot; 1,000 registered voters, margin of error ±3.1%</div>
+          <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.cnbc.com/2026/10/22/bill-ackman-talks-meta-and-markets-with-cnbc.html">
+        <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
+        <div class="body">
+          <div class="kicker">Markets</div>
+          <h3>Ackman expects strong 2027 as wars and inflation ease</h3>
+          <p>Pershing Square&#x27;s Bill Ackman told CNBC that the Ukraine-Russia and Iran conflicts, along with elevated inflation and interest rates, are holding back what he called an otherwise booming market, and that energy prices could come down once the wars end. He said Netflix&#x27;s valuation is among the lowest in its history and called Meta an undervalued core holding, arguing its AI spending is necessary and that one-day post-earnings moves should be discounted.</p>
+          <div class="key">KEY &nbsp; U.S. oil +72% in 2026 &middot; Brent +83% &middot; September CPI +3.7% year over year vs the Fed&#x27;s 2% target &middot; gasoline accounted for over half the latest CPI increase &middot; Netflix at 18 times earnings, with mid- to high-teens expected earnings growth &middot; Netflix -5% Wednesday, +3% Thursday &middot; Meta -6% Thursday</div>
+          <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+    </div>
+    <div class="progress"><div class="progress-fill"></div></div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <span class="num">03</span><h2>US &amp; Turkey</h2><hr class="rule">
+    </div>
+    <div class="region-tabs" role="tablist" aria-label="Filter stories by country">
+      <button class="region-tab active" data-region="us" role="tab">US</button>
+      <button class="region-tab" data-region="turkey" role="tab">Turkey</button>
+    </div>
+
+    <div class="region-panel" data-region="us">
+    <div class="rail-nav">
+      <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+      <span class="nav-btns">
+        <button class="nav-btn" data-dir="-1" aria-label="Previous story">&#8249;</button>
+        <button class="nav-btn" data-dir="1" aria-label="Next story">&#8250;</button>
+      </span>
+    </div>
+    <div class="rail">
+
+      <a class="card" href="https://www.npr.org/2026/10/22/g-s1-149315/up-first-newsletter-midterm-campaign-israel-iran-elon-musk-spacex-tesla">
+        <div class="thumb thumb-us"><span class="tag">NPR</span></div>
+        <div class="body">
+          <div class="kicker">United States</div>
+          <h3>Reported Iran strike plans; Tesla and SpaceX weigh merger</h3>
+          <p>A person briefed on the matter, speaking anonymously, told NPR that the U.S. and Israel are preparing plans for a possible attack on Iran early next month, after the U.S. midterms and Israel&#x27;s elections next week. Separately, Elon Musk&#x27;s Tesla and SpaceX are exploring a merger that would create one of the world&#x27;s largest companies.</p>
+          <div class="key">KEY &nbsp; combined market cap approximately $3.7 trillion &middot; about 80 people detained in the occupied West Bank &middot; more than a dozen American rabbis among them</div>
+          <div class="meta"><span>NPR</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.npr.org/2026/10/22/nx-s1-6002928/republican-congress-midterms-medicaid-cuts-david-valadao-california">
+        <div class="thumb thumb-us"><span class="tag">NPR</span></div>
+        <div class="body">
+          <div class="kicker">United States</div>
+          <h3>Medicaid vote tests Republican in Central Valley tossup</h3>
+          <p>Rep. David Valadao&#x27;s vote for the One Big Beautiful Bill Act has become central to his reelection fight in a district where roughly 6 in 10 constituents are enrolled in Medicaid, with challenger Randy Villegas saying the vote will strip healthcare from Valley families. Valadao said during an Oct. 6 televised debate that &quot;there are no actual cuts&quot; to Medicaid, while new work requirements and twice-yearly eligibility checks are set to begin after the midterms.</p>
+          <div class="key">KEY &nbsp; law expected to reduce Medicaid spending by more than $900 billion through 2034 &middot; an estimated 60,000 more district residents could lack coverage by 2034, per the Center for American Progress &middot; more than 2 million Californians estimated to lose coverage &middot; California stands to lose about $30 billion a year &middot; Valadao has won six of seven elections since 2012</div>
+          <div class="meta"><span>NPR</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.bbc.co.uk/news/articles/cm75p1kxryl5o?at_medium=RSS&amp;at_campaign=rss">
+        <div class="thumb thumb-us"><span class="tag">BBC News</span></div>
+        <div class="body">
+          <div class="kicker">United States</div>
+          <h3>Omar says she will leave home after federal search</h3>
+          <p>Rep. Ilhan Omar said she can no longer live in her Washington DC home after Homeland Security Investigations agents searched it on 12 October, citing death threats and concern her address is now exposed. The government has said only that the search was part of an ongoing federal criminal investigation; Omar called it an abuse of power and weaponisation of law enforcement, while President Trump has denied involvement.</p>
+          <div class="key">KEY &nbsp; search began around 06:00 EDT on 12 October &middot; an estimated 15 to 25 agents &middot; roughly five hours &middot; 17 items seized &middot; more than a dozen subpoenas to family members &middot; US citizenship received in 2000 &middot; in office since 2018</div>
+          <div class="meta"><span>BBC News</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.bbc.co.uk/news/articles/cmn06g29522lo?at_medium=RSS&amp;at_campaign=rss">
+        <div class="thumb thumb-us"><span class="tag">BBC News</span></div>
+        <div class="body">
+          <div class="kicker">United States</div>
+          <h3>US embassy accuses Canada of midterm election interference</h3>
+          <p>A US Embassy fact sheet released Wednesday alleges Canadian ministers and premiers have openly described plans to influence American politics, citing meetings with Democrats and calls for retaliatory tariffs. Prime Minister Mark Carney, Industry Minister Mélanie Joly and Ontario Premier Doug Ford all rejected the claims, with Carney noting the US initiated the trade actions Canada responded to.</p>
+          <div class="key">KEY &nbsp; aid package of nearly C$9bn ($6.2bn) announced in response to US tariffs &middot; petition to remove US Ambassador Pete Hoekstra has more than 280,000 signatures</div>
+          <div class="meta"><span>BBC News</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+    </div>
+    <div class="progress"><div class="progress-fill"></div></div>
+    </div>
+
+    <div class="region-panel" data-region="turkey" hidden>
+    <div class="rail-nav">
+      <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+      <span class="nav-btns">
+        <button class="nav-btn" data-dir="-1" aria-label="Previous story">&#8249;</button>
+        <button class="nav-btn" data-dir="1" aria-label="Next story">&#8250;</button>
+      </span>
+    </div>
+    <div class="rail">
+
+      <a class="card" href="https://www.dailysabah.com/business/economy/turkish-central-bank-cuts-interest-rates-amid-easing-inflation">
+        <div class="thumb thumb-turkey"><span class="tag">Daily Sabah</span></div>
+        <div class="body">
+          <div class="kicker">Turkey</div>
+          <h3>Central bank cuts policy rate to 36%</h3>
+          <p>The Central Bank of the Republic of Türkiye lowered its benchmark rate by 100 basis points on Thursday, its first move after five meetings on hold while it watched the effects of the U.S.-Iran war. The bank said recent data confirm a deceleration in the underlying inflation trend and that domestic demand remains weak, but flagged elevated energy prices as an upside risk and said tight policy will be maintained until price stability is achieved.</p>
+          <div class="key">KEY &nbsp; 100 bps cut &middot; policy rate 36% &middot; overnight lending 40% to 39% &middot; overnight borrowing 35.5% to 34.5% &middot; September inflation 29.73% &middot; lira about 49.63/dollar &middot; five meetings unchanged &middot; last cut January 2026</div>
+          <div class="meta"><span>Daily Sabah</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.turkishminute.com/2026/10/22/former-erdogan-aide-among-5-more-detained-in-turkeys-fund-scandal/">
+        <div class="thumb thumb-turkey"><span class="tag">Turkish Minute</span></div>
+        <div class="body">
+          <div class="kicker">Turkey</div>
+          <h3>Former Erdoğan adviser detained in investment fund probe</h3>
+          <p>Police on Thursday detained Ertan Aydın, a former political adviser to President Erdoğan and ex-AKP lawmaker, along with four others in the investment fund investigation, according to the BirGün daily. The operation concerns suspected manipulation of shares in four companies following complaints from the Capital Markets Board, and investigators are examining allegations that fund managers artificially inflated investment values before prices fell.</p>
+          <div class="key">KEY &nbsp; 5 detained Thursday &middot; 26 detained Wednesday &middot; 31 this week &middot; 88 jailed pending trial &middot; about 455,000 people affected &middot; 131 funds ordered liquidated &middot; 4 companies &middot; first 5 articles of payout bill approved</div>
+          <div class="meta"><span>Turkish Minute</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.dailysabah.com/business/economy/turkiye-canada-launch-strategic-partnership-eye-10b-trade-target">
+        <div class="thumb thumb-turkey"><span class="tag">Daily Sabah</span></div>
+        <div class="body">
+          <div class="kicker">Turkey</div>
+          <h3>Turkey and Canada open strategic partnership, eye trade deal</h3>
+          <p>Erdoğan and Canadian Prime Minister Mark Carney announced a strategic partnership in Ankara covering trade and investment, defense and security, energy and people-to-people ties, backed by a three-year action plan. Carney said negotiators will meet in Ankara next month for a first round of free trade talks, and ministers signed accords on energy, defense and air transport, with cooperation planned on LNG, nuclear energy and critical minerals.</p>
+          <div class="key">KEY &nbsp; trade about $3B now &middot; $5B initial target &middot; $10B eventual target &middot; 4 focus areas &middot; 3-year action plan &middot; first FTA round next month &middot; Canada lifted some military export controls in 2024</div>
+          <div class="meta"><span>Daily Sabah</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://bianet.org/haber/erdogan-s-party-wins-over-106-opposition-mayors-since-2024-election-as-32-remain-jailed-324681">
+        <div class="thumb thumb-turkey"><span class="tag">Bianet</span></div>
+        <div class="body">
+          <div class="kicker">Turkey</div>
+          <h3>Opposition deputy says 106 mayors have joined AKP</h3>
+          <p>Gökhan Günaydın, deputy parliamentary group chair of the main opposition New Party, told a press conference in parliament that 106 mayors elected on opposition tickets in 2024 have since joined the AKP, while 32 mayors remain in pretrial detention. He accused the government of combining legal pressure with political incentives in what he called a &quot;carrot and stick approach,&quot; and said arrests followed by acting-mayor votes transferred municipalities to the ruling party.</p>
+          <div class="key">KEY &nbsp; 106 mayors switched &middot; 41 New Welfare &middot; 36 CHP &middot; 11 İYİ &middot; 18 other parties &middot; 32 in pretrial detention &middot; 11 municipalities via acting-mayor votes &middot; 91 of 135 CHP deputies joined New Party &middot; CHP won 420 of 1,400+ municipalities and 35 of 81 provinces in 2024</div>
+          <div class="meta"><span>Bianet</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.turkishminute.com/2026/10/22/turkeys-education-ministry-plans-to-sue-meta-over-child-safety/">
+        <div class="thumb thumb-turkey"><span class="tag">Turkish Minute</span></div>
+        <div class="body">
+          <div class="kicker">Turkey</div>
+          <h3>Education ministry preparing lawsuit against Meta over minors</h3>
+          <p>Education Minister Yusuf Tekin said Thursday that his ministry is preparing to sue Meta over allegations that content on Facebook and Instagram harms children&#x27;s education and development, citing legal action in the United States and European Union as precedents. He argued that school phone restrictions cannot protect students who use social media at home, and urged platforms to block minors&#x27; access to harmful content.</p>
+          <div class="key">KEY &nbsp; up to $17.1B Meta payment under August agreement with U.S. state attorneys general, subject to court approval &middot; European Commission preliminary Digital Services Act findings in July</div>
+          <div class="meta"><span>Turkish Minute</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+    </div>
+    <div class="progress"><div class="progress-fill"></div></div>
+    </div>
+
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <span class="num">04</span><h2>Sports Schedule</h2><hr class="rule">
+    </div>
+    <p class="section-note">Upcoming fixtures, all in California time.</p>
+    <div class="sport-tabs" role="tablist" aria-label="Filter fixtures by sport">
+      <button class="sport-tab active" data-sport="soccer" role="tab">Soccer</button>
+      <button class="sport-tab" data-sport="volleyball" role="tab">Volleyball</button>
+      <button class="sport-tab" data-sport="nba" role="tab">NBA</button>
+      <button class="sport-tab" data-sport="f1" role="tab">Formula 1</button>
+    </div>
+
+    <div class="sport-panel" data-sport="soccer">
+      <div class="rail-nav">
+        <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+        <span class="nav-btns">
+          <button class="nav-btn" data-dir="-1" aria-label="Previous fixture">&#8249;</button>
+          <button class="nav-btn" data-dir="1" aria-label="Next fixture">&#8250;</button>
+        </span>
+      </div>
+      <div class="rail">
+
+        <div class="fixture">
+          <div class="thumb thumb-soccer"><span class="tag">Süper Lig</span></div>
+          <div class="teams">Galatasaray <span>vs</span> Fenerbahce</div>
+          <div class="when">
+            <b>Monday, Oct 26 · 11:30 AM PDT</b> &nbsp;(9:30 PM Istanbul)<br>
+            Süper Lig
+          </div>
+        <div class="note">One of hers</div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Galatasaray+vs+Fenerbahce+%E2%80%94+S%C3%BCper+Lig&amp;dates=20261026T183000Z%2F20261026T203000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-soccer"><span class="tag">Champions League</span></div>
+          <div class="teams">Galatasaray <span>vs</span> VfB Stuttgart</div>
+          <div class="when">
+            <b>Tuesday, Nov 3 · 9:45 AM PST</b> &nbsp;(8:45 PM Istanbul)<br>
+            Champions League
+          </div>
+        <div class="note">One of hers</div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Galatasaray+vs+VfB+Stuttgart+%E2%80%94+Champions+League&amp;dates=20261103T174500Z%2F20261103T194500Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-soccer"><span class="tag">Champions League</span></div>
+          <div class="teams">Shakhtar Donetsk <span>vs</span> Sporting CP</div>
+          <div class="when">
+            <b>Tuesday, Nov 3 · 9:45 AM PST</b> &nbsp;(8:45 PM Istanbul)<br>
+            Champions League
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Shakhtar+Donetsk+vs+Sporting+CP+%E2%80%94+Champions+League&amp;dates=20261103T174500Z%2F20261103T194500Z&amp;details=Champions+League" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-soccer"><span class="tag">Champions League</span></div>
+          <div class="teams">Fenerbahce <span>vs</span> Liverpool</div>
+          <div class="when">
+            <b>Wednesday, Nov 4 · 9:45 AM PST</b> &nbsp;(8:45 PM Istanbul)<br>
+            Champions League
+          </div>
+        <div class="note">One of hers</div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Fenerbahce+vs+Liverpool+%E2%80%94+Champions+League&amp;dates=20261104T174500Z%2F20261104T194500Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-soccer"><span class="tag">Champions League</span></div>
+          <div class="teams">AEK Athens <span>vs</span> Real Madrid</div>
+          <div class="when">
+            <b>Wednesday, Nov 4 · 9:45 AM PST</b> &nbsp;(8:45 PM Istanbul)<br>
+            Champions League
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=AEK+Athens+vs+Real+Madrid+%E2%80%94+Champions+League&amp;dates=20261104T174500Z%2F20261104T194500Z&amp;details=Champions+League" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+      </div>
+      <div class="progress"><div class="progress-fill"></div></div>
+    </div>
+
+    <div class="sport-panel" data-sport="volleyball" hidden>
+      <div class="rail-nav">
+        <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+        <span class="nav-btns">
+          <button class="nav-btn" data-dir="-1" aria-label="Previous fixture">&#8249;</button>
+          <button class="nav-btn" data-dir="1" aria-label="Next fixture">&#8250;</button>
+        </span>
+      </div>
+      <div class="rail">
+
+        <div class="fixture">
+          <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
+          <div class="teams">VakıfBank <span>vs</span> Galatasaray Daikin</div>
+          <div class="when">
+            <b>Sunday, Oct 25 · 4:00 AM PDT</b> &nbsp;(2:00 PM Istanbul)<br>
+            Sultanlar Ligi
+          </div>
+        <div class="note">One of hers</div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Vak%C4%B1fBank+vs+Galatasaray+Daikin+%E2%80%94+Sultanlar+Ligi&amp;dates=20261025T110000Z%2F20261025T130000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
+          <div class="teams">Aras Kargo <span>vs</span> Türk Hava Yolları</div>
+          <div class="when">
+            <b>Sunday, Oct 25 · 6:00 AM PDT</b> &nbsp;(4:00 PM Istanbul)<br>
+            Sultanlar Ligi
+          </div>
+        <div class="note">One of hers</div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Aras+Kargo+vs+T%C3%BCrk+Hava+Yollar%C4%B1+%E2%80%94+Sultanlar+Ligi&amp;dates=20261025T130000Z%2F20261025T150000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
+          <div class="teams">Fenerbahçe Medicana <span>vs</span> Eczacıbaşı Peron İstanbul</div>
+          <div class="when">
+            <b>Sunday, Oct 25 · 9:00 AM PDT</b> &nbsp;(7:00 PM Istanbul)<br>
+            Sultanlar Ligi
+          </div>
+        <div class="note">One of hers</div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Fenerbah%C3%A7e+Medicana+vs+Eczac%C4%B1ba%C5%9F%C4%B1+Peron+%C4%B0stanbul+%E2%80%94+Sultanlar+Ligi&amp;dates=20261025T160000Z%2F20261025T180000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
+          <div class="teams">Beşiktaş <span>vs</span> Göztepe</div>
+          <div class="when">
+            <b>Sunday, Oct 25 · 3:00 AM PDT</b> &nbsp;(1:00 PM Istanbul)<br>
+            Sultanlar Ligi
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Be%C5%9Fikta%C5%9F+vs+G%C3%B6ztepe+%E2%80%94+Sultanlar+Ligi&amp;dates=20261025T100000Z%2F20261025T120000Z&amp;details=Sultanlar+Ligi" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
+          <div class="teams">Kuzeyboru <span>vs</span> Nilüfer Bld.</div>
+          <div class="when">
+            <b>Sunday, Oct 25 · 4:00 AM PDT</b> &nbsp;(2:00 PM Istanbul)<br>
+            Sultanlar Ligi
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Kuzeyboru+vs+Nil%C3%BCfer+Bld.+%E2%80%94+Sultanlar+Ligi&amp;dates=20261025T110000Z%2F20261025T130000Z&amp;details=Sultanlar+Ligi" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
+          <div class="teams">Manisa BB <span>vs</span> Zeren Spor</div>
+          <div class="when">
+            <b>Sunday, Oct 25 · 6:00 AM PDT</b> &nbsp;(4:00 PM Istanbul)<br>
+            Sultanlar Ligi
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Manisa+BB+vs+Zeren+Spor+%E2%80%94+Sultanlar+Ligi&amp;dates=20261025T130000Z%2F20261025T150000Z&amp;details=Sultanlar+Ligi" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
+          <div class="teams">İlbank <span>vs</span> Afyon Bld.</div>
+          <div class="when">
+            <b>Sunday, Oct 25 · 6:00 AM PDT</b> &nbsp;(4:00 PM Istanbul)<br>
+            Sultanlar Ligi
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=%C4%B0lbank+vs+Afyon+Bld.+%E2%80%94+Sultanlar+Ligi&amp;dates=20261025T130000Z%2F20261025T150000Z&amp;details=Sultanlar+Ligi" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
+          <div class="teams">Afyon Bld. <span>vs</span> VakıfBank</div>
+          <div class="when">
+            <b>Sunday, Nov 1 · 4:00 AM PST</b> &nbsp;(3:00 PM Istanbul)<br>
+            Sultanlar Ligi
+          </div>
+        <div class="note">One of hers</div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Afyon+Bld.+vs+Vak%C4%B1fBank+%E2%80%94+Sultanlar+Ligi&amp;dates=20261101T120000Z%2F20261101T140000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
+          <div class="teams">Türk Hava Yolları <span>vs</span> İlbank</div>
+          <div class="when">
+            <b>Sunday, Nov 1 · 5:00 AM PST</b> &nbsp;(4:00 PM Istanbul)<br>
+            Sultanlar Ligi
+          </div>
+        <div class="note">One of hers</div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=T%C3%BCrk+Hava+Yollar%C4%B1+vs+%C4%B0lbank+%E2%80%94+Sultanlar+Ligi&amp;dates=20261101T130000Z%2F20261101T150000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
+          <div class="teams">Eczacıbaşı Peron İstanbul <span>vs</span> Manisa BB</div>
+          <div class="when">
+            <b>Sunday, Nov 1 · 5:00 AM PST</b> &nbsp;(4:00 PM Istanbul)<br>
+            Sultanlar Ligi
+          </div>
+        <div class="note">One of hers</div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Eczac%C4%B1ba%C5%9F%C4%B1+Peron+%C4%B0stanbul+vs+Manisa+BB+%E2%80%94+Sultanlar+Ligi&amp;dates=20261101T130000Z%2F20261101T150000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+      </div>
+      <div class="progress"><div class="progress-fill"></div></div>
+    </div>
+
+    <div class="sport-panel" data-sport="nba" hidden>
+      <div class="rail-nav">
+        <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+        <span class="nav-btns">
+          <button class="nav-btn" data-dir="-1" aria-label="Previous fixture">&#8249;</button>
+          <button class="nav-btn" data-dir="1" aria-label="Next fixture">&#8250;</button>
+        </span>
+      </div>
+      <div class="rail">
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Philadelphia 76ers <span>at</span> Cleveland Cavaliers</div>
+          <div class="when">
+            <b>Thursday, Oct 22 · 4:00 PM PDT</b><br>
+            NBA
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Philadelphia+76ers+at+Cleveland+Cavaliers+%E2%80%94+NBA&amp;dates=20261022T230000Z%2F20261023T010000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Oklahoma City Thunder <span>at</span> Denver Nuggets</div>
+          <div class="when">
+            <b>Thursday, Oct 22 · 6:30 PM PDT</b><br>
+            NBA
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Oklahoma+City+Thunder+at+Denver+Nuggets+%E2%80%94+NBA&amp;dates=20261023T013000Z%2F20261023T033000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Milwaukee Bucks <span>at</span> Chicago Bulls</div>
+          <div class="when">
+            <b>Friday, Oct 23 · 1:00 PM PDT</b><br>
+            NBA
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Milwaukee+Bucks+at+Chicago+Bulls+%E2%80%94+NBA&amp;dates=20261023T200000Z%2F20261023T220000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Boston Celtics <span>at</span> New York Knicks</div>
+          <div class="when">
+            <b>Friday, Oct 23 · 4:00 PM PDT</b><br>
+            NBA
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Boston+Celtics+at+New+York+Knicks+%E2%80%94+NBA&amp;dates=20261023T230000Z%2F20261024T010000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Miami Heat <span>at</span> Detroit Pistons</div>
+          <div class="when">
+            <b>Friday, Oct 23 · 5:00 PM PDT</b><br>
+            NBA
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Miami+Heat+at+Detroit+Pistons+%E2%80%94+NBA&amp;dates=20261024T000000Z%2F20261024T020000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">San Antonio Spurs <span>at</span> Houston Rockets</div>
+          <div class="when">
+            <b>Friday, Oct 23 · 6:30 PM PDT</b><br>
+            NBA
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=San+Antonio+Spurs+at+Houston+Rockets+%E2%80%94+NBA&amp;dates=20261024T013000Z%2F20261024T033000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Utah Jazz <span>at</span> New Orleans Pelicans</div>
+          <div class="when">
+            <b>Friday, Oct 23 · 6:30 PM PDT</b><br>
+            NBA
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Utah+Jazz+at+New+Orleans+Pelicans+%E2%80%94+NBA&amp;dates=20261024T013000Z%2F20261024T033000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Chicago Bulls <span>at</span> Washington Wizards</div>
+          <div class="when">
+            <b>Saturday, Oct 24 · 5:00 PM PDT</b><br>
+            NBA
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Chicago+Bulls+at+Washington+Wizards+%E2%80%94+NBA&amp;dates=20261025T000000Z%2F20261025T020000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Dallas Mavericks <span>at</span> San Antonio Spurs</div>
+          <div class="when">
+            <b>Saturday, Oct 24 · 5:00 PM PDT</b><br>
+            NBA
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Dallas+Mavericks+at+San+Antonio+Spurs+%E2%80%94+NBA&amp;dates=20261025T000000Z%2F20261025T020000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+      </div>
+      <div class="progress"><div class="progress-fill"></div></div>
+    </div>
+
+    <div class="sport-panel" data-sport="f1" hidden>
+      <div class="rail-nav">
+        <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+        <span class="nav-btns">
+          <button class="nav-btn" data-dir="-1" aria-label="Previous fixture">&#8249;</button>
+          <button class="nav-btn" data-dir="1" aria-label="Next fixture">&#8250;</button>
+        </span>
+      </div>
+      <div class="rail">
+
+        <div class="fixture">
+          <div class="thumb thumb-f1"><span class="tag">Formula 1</span></div>
+          <div class="teams">MSC Cruises United States Grand Prix </div>
+          <div class="when">
+            <b>Friday, Oct 23 · 10:30 AM PDT</b><br>
+            Formula 1
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=MSC+Cruises+United+States+Grand+Prix+++%E2%80%94+Formula+1&amp;dates=20261023T173000Z%2F20261023T193000Z&amp;details=Formula+1" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+      </div>
+      <div class="progress"><div class="progress-fill"></div></div>
+    </div>
+
+  </section>
+
+  <footer class="footer">
+    Updated every morning &middot; All times California (PDT) unless noted<br>
+    Every story links to its source &middot; The Dispatch, a Simay Demiral project<br>
+    <a href="/" style="color:#e8935a;text-decoration:none">&larr; simaydemiral.com</a>
+  </footer>
+</div>
+<script>
+(function () {
+  /* open all source links in a new tab */
+  document.querySelectorAll('a[href^="http"]').forEach(function (a) {
+    a.setAttribute('target', '_blank');
+    a.setAttribute('rel', 'noopener');
+  });
+
+  var rails = document.querySelectorAll('.rail');
+  rails.forEach(function (rail) {
+    var items = rail.querySelectorAll('.card, .fixture');
+    var progress = rail.nextElementSibling;
+    var fill = progress ? progress.querySelector('.progress-fill') : null;
+
+    /* progress bar + active-card glow track the visible card */
+    function update() {
+      if (!items.length) return;
+      var step = items[0].getBoundingClientRect().width + 16;
+      var idx = Math.round(rail.scrollLeft / step);
+      idx = Math.max(0, Math.min(items.length - 1, idx));
+      items.forEach(function (el, i) { el.classList.toggle('active', i === idx); });
+      if (fill) fill.style.width = ((idx + 1) / items.length * 100) + '%';
+    }
+    rail.addEventListener('scroll', function () { requestAnimationFrame(update); }, { passive: true });
+    update();
+
+    /* arrow buttons scroll one card at a time */
+    var nav = rail.previousElementSibling;
+    if (nav && nav.classList.contains('rail-nav')) {
+      nav.querySelectorAll('.nav-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var step = items[0].getBoundingClientRect().width + 16;
+          rail.scrollBy({ left: parseInt(btn.dataset.dir, 10) * step, behavior: 'smooth' });
+        });
+      });
+    }
+
+    /* drag to scroll (touch-safe): a dead zone swallows the tiny jitter of
+       a finger tap, so a tap never scrolls the rail nor counts as a drag;
+       a click is suppressed only when the rail actually scrolled */
+    var down = false, startX = 0, startScroll = 0, moved = false;
+    var DEAD_ZONE = 10;        /* px of pointer travel ignored before a drag starts */
+    var SCROLL_THRESHOLD = 6;  /* px the rail must actually move to count as a drag */
+    rail.addEventListener('pointerdown', function (e) {
+      down = true; moved = false;
+      startX = e.clientX; startScroll = rail.scrollLeft;
+    });
+    rail.addEventListener('pointermove', function (e) {
+      if (!down) return;
+      var dx = e.clientX - startX;
+      if (!moved && Math.abs(dx) <= DEAD_ZONE) return; /* still in the dead zone */
+      moved = true;
+      rail.classList.add('dragging');
+      rail.scrollLeft = startScroll - (dx - Math.sign(dx) * DEAD_ZONE);
+    });
+    function up() {
+      down = false;
+      rail.classList.remove('dragging');
+      /* did this gesture really scroll the rail? */
+      moved = Math.abs(rail.scrollLeft - startScroll) > SCROLL_THRESHOLD;
+      if (moved) {
+        /* the click event fires right after pointerup, so reset the flag
+           just after it has had its chance to be suppressed */
+        setTimeout(function () { moved = false; }, 0);
+      }
+    }
+    rail.addEventListener('pointerup', up);
+    rail.addEventListener('pointercancel', up);
+    /* don't follow links after a real drag, only after a real click */
+    rail.addEventListener('click', function (e) {
+      if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; }
+    }, true);
+  });
+
+  /* ---------- section 03: US / Turkey filter (scoped per section,
+     so each archived edition keeps its own working tabs) ---------- */
+  document.querySelectorAll('.section').forEach(function (section) {
+    var tabs = section.querySelectorAll('.region-tab');
+    if (!tabs.length) return;
+    var panels = section.querySelectorAll('.region-panel');
+
+    function showRegion(region) {
+      tabs.forEach(function (tab) {
+        tab.classList.toggle('active', tab.getAttribute('data-region') === region);
+      });
+      panels.forEach(function (panel) {
+        var isMatch = panel.getAttribute('data-region') === region;
+        panel.hidden = !isMatch;
+        if (isMatch) {
+          var rail = panel.querySelector('.rail');
+          if (rail) {
+            rail.scrollLeft = 0;
+            rail.dispatchEvent(new Event('scroll'));
+          }
+        }
+      });
+    }
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        showRegion(tab.getAttribute('data-region'));
+      });
+    });
+  });
+
+  /* ---------- sports schedule: filter tabs + per-sport highlights
+     (scoped per section, one instance per edition) ---------- */
+  document.querySelectorAll('.section').forEach(function (section) {
+    var tabs = section.querySelectorAll('.sport-tab');
+    if (!tabs.length) return;
+    var panels = section.querySelectorAll('.sport-panel');
+    var hlPanels = section.querySelectorAll('.hl-panel');
+
+    function panelFor(list, sport) {
+      for (var i = 0; i < list.length; i++) {
+        if (list[i].getAttribute('data-sport') === sport) return list[i];
+      }
+      return null;
+    }
+
+    /* a sport with no upcoming fixtures loses its tab entirely */
+    tabs.forEach(function (tab) {
+      var panel = panelFor(panels, tab.getAttribute('data-sport'));
+      if (!panel || !panel.querySelector('.fixture')) tab.hidden = true;
+    });
+
+    function showSport(sport) {
+      tabs.forEach(function (tab) {
+        tab.classList.toggle('active', tab.getAttribute('data-sport') === sport);
+      });
+      panels.forEach(function (panel) {
+        panel.hidden = panel.getAttribute('data-sport') !== sport;
+      });
+      var hlMatch = panelFor(hlPanels, sport);
+      hlPanels.forEach(function (panel) {
+        panel.hidden = panel.getAttribute('data-sport') !== sport;
+      });
+      /* hide the whole highlights block when this sport has none */
+      var hlBlock = section.querySelector('.highlights');
+      if (hlBlock) hlBlock.hidden = !hlMatch;
+      var panel = panelFor(panels, sport);
+      var rail = panel ? panel.querySelector('.rail') : null;
+      if (rail) {
+        rail.scrollLeft = 0;
+        rail.dispatchEvent(new Event('scroll'));
+      }
+    }
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        showSport(tab.getAttribute('data-sport'));
+      });
+    });
+
+    /* sync panels + highlights with the active tab; if the default tab
+       was hidden as empty, open the first sport that has fixtures */
+    var active = section.querySelector('.sport-tab.active');
+    if (!active || active.hidden) {
+      for (var i = 0; i < tabs.length; i++) {
+        if (!tabs[i].hidden) { active = tabs[i]; break; }
+      }
+    }
+    if (active) showSport(active.getAttribute('data-sport'));
+  });
+
+  /* ---------- edition archive: switch between kept editions ---------- */
+  var editionBtns = document.querySelectorAll('.edition-btn');
+  var editions = document.querySelectorAll('.edition');
+
+  function showEdition(id) {
+    var current = null;
+    editions.forEach(function (ed) {
+      var match = ed.getAttribute('data-edition') === id;
+      ed.hidden = !match;
+      if (match) current = ed;
+    });
+    editionBtns.forEach(function (btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-edition') === id);
+    });
+    if (current) {
+      var title = current.getAttribute('data-title');
+      if (title) document.title = title;
+      /* rails inside a hidden edition measure 0 wide; refresh their
+         progress bars and active-card glow now that they are visible */
+      current.querySelectorAll('.rail').forEach(function (rail) {
+        rail.dispatchEvent(new Event('scroll'));
+      });
+    }
+    window.scrollTo(0, 0);
+  }
+
+  editionBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      showEdition(btn.getAttribute('data-edition'));
+    });
+  });
+})();
+</script>
+</body>
+</html>

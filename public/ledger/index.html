@@ -4146,6 +4146,25 @@ function demoStage(){
      starts moving. Without it the answer arrives before the question lands. */
   var started = false;
   function once(){ if(started) return; started = true; setTimeout(play, 1500); }
+
+  /* Is the frame actually in front of the reader?
+     The parent says so by postMessage, but the fallback used to be a blind
+     twelve-second timer: open the homepage, read the top of it for longer
+     than that, and the demo played to an empty room and was finished before
+     anyone scrolled down to it. The embed is same-origin, so rather than
+     guess it can measure its own position in the page that holds it. */
+  function onScreenInParent(){
+    try{
+      var el = window.frameElement;
+      if(!el) return true;
+      var r = el.getBoundingClientRect();
+      var vh = window.parent.innerHeight || window.parent.document.documentElement.clientHeight;
+      if(!vh) return true;      /* cannot measure: do not refuse to ever play */
+      return r.height > 0 && r.top < vh * 0.92 && r.bottom > vh * 0.08;
+    }catch(e){
+      return true;            /* cross-origin one day: trust the parent's cue */
+    }
+  }
   /* Whatever else tries to scroll — a focus ring, a browser restoring a
      position — the locked crop stays where it is. */
   window.addEventListener("scroll", function(){
@@ -4161,7 +4180,15 @@ function demoStage(){
        parent often decides it is visible before this script exists and its one
        cue lands on nothing. The parent answers a ready with a play. */
     try{ window.parent.postMessage("ledger:ready", "*"); }catch(e){}
-    after(12000, once);         /* only if the parent never speaks at all */
+    /* If the parent's cue never arrives, watch for the frame coming into view
+       and start then — not on a timer that cannot see the page. */
+    var watch = setInterval(function(){
+      if(started){ clearInterval(watch); return; }
+      if(onScreenInParent()) { clearInterval(watch); once(); }
+    }, 400);
+    /* Last resort, long enough that nobody reading the top of the page hits
+       it: better a demo that played unseen than one that never plays. */
+    after(90000, function(){ clearInterval(watch); once(); });
   } else {
     after(400, once);
   }
