@@ -102,6 +102,8 @@
   .back{text-align:left;align-items:stretch;justify-content:flex-start;
         cursor:default}
   .back .term{font-size:25px;text-align:left;margin-bottom:2px}
+  .via{margin-top:9px;font:500 11px/1 var(--f-mono);letter-spacing:.08em;
+       color:var(--faint)}
   .sense{margin:10px 0 0;padding-left:0}
   .pos{font:500 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;
        color:var(--brand);margin-bottom:3px}
@@ -290,6 +292,24 @@
      ------------------------------------------------------------------ */
   var WIKT = "https://en.wiktionary.org/api/rest_v1/page/definition/";
   var DICT = "https://api.dictionaryapi.dev/api/v2/entries/en/";
+  var WIKI = "https://en.wikipedia.org/api/rest_v1/page/summary/";
+
+  /* Wiktionary files words the way a dictionary does, not the way you meet
+     them. "Evals" is capitalised and plural, so it 404s; "evals" answers
+     "plural of eval", and "eval" answers "Abbreviation of evaluation" — two
+     pointers and still no meaning. These are the pointers worth following. */
+  var POINTER = new RegExp(
+    "^(plural|abbreviation|initialism|acronym|clipping|alternative form|" +
+    "alternative spelling|present participle|gerund|past tense|past participle|" +
+    "third-person singular|simple past|comparative|superlative|synonym|" +
+    "misspelling|inflection|form)\\b[^.]*?\\bof\\s+([A-Za-z][A-Za-z'\\u2019-]*)", "i");
+
+  /* Wiktionary's own placeholder, and empty senses it sometimes emits. */
+  function usable(text) {
+    if (!text || text.length < 3) return false;
+    if (/^this term needs a definition/i.test(text)) return false;
+    return true;
+  }
 
   function stripTags(s) {
     return String(s || "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
@@ -321,9 +341,7 @@
       var defs = langs[i].definitions || [];
       for (j = 0; j < defs.length && out.length < 3; j++) {
         var text = firstSentence(stripTags(defs[j].definition));
-        /* "Alternative spelling of x" is a pointer, not a meaning */
-        if (!text || text.length < 3) continue;
-        if (/^(alternative|obsolete|archaic) (spelling|form) of/i.test(text) && defs.length > 1) continue;
+        if (!usable(text)) continue;
         var eg = "";
         if (defs[j].parsedExamples && defs[j].parsedExamples.length) {
           eg = stripTags(defs[j].parsedExamples[0].example);
@@ -361,16 +379,78 @@
     });
   }
 
+  function wiktionary(term) {
+    var slug = encodeURIComponent(String(term).trim().replace(/\s+/g, "_"));
+    return getJSON(WIKT + slug).then(fromWiktionary).catch(function () { return []; });
+  }
+
+  /* A sense that is only a pointer: "plural of eval" and nothing else. One
+     that explains as well as points — "Initialism of retrieval-augmented
+     generation: a method of…" — is already an answer and is left alone. */
+  function pointsTo(sense) {
+    var m = POINTER.exec(sense.text);
+    if (!m) return "";
+    var after = sense.text.slice(m[0].length).replace(/[\s.,;:]+/g, "");
+    return after.length > 18 ? "" : m[2];
+  }
+
+  /* Try the word as written, then lower case, then follow where it points —
+     twice at most, which is enough for evals → eval → evaluation. */
+  function viaWiktionary(term, trail, hops) {
+    trail = trail || [term];
+    hops = hops || 0;
+    return wiktionary(term).then(function (senses) {
+      if (!senses.length && term !== term.toLowerCase() && hops === 0) {
+        return viaWiktionary(term.toLowerCase(), trail, hops);
+      }
+      if (!senses.length) return { senses: [], trail: trail };
+      var next = "";
+      for (var i = 0; i < senses.length && !next; i++) next = pointsTo(senses[i]);
+      if (next && hops < 2 && trail.indexOf(next) < 0) {
+        trail = trail.concat([next]);
+        return viaWiktionary(next, trail, hops + 1).then(function (r) {
+          return r.senses.length ? r : { senses: senses, trail: trail };
+        });
+      }
+      return { senses: senses, trail: trail };
+    });
+  }
+
+  /* Last resort for jargon and proper nouns no dictionary carries: an
+     encyclopaedia does. "Evals" is not a dictionary word; "RAG" is not
+     either, but both have an article. */
+  function viaWikipedia(term) {
+    var slug = encodeURIComponent(String(term).trim().replace(/\s+/g, "_"));
+    return getJSON(WIKI + slug).then(function (d) {
+      if (!d || !d.extract || d.type === "disambiguation") return [];
+      return [{ pos: "Wikipedia", text: firstSentence(d.extract), example: "" }];
+    }).catch(function () { return []; });
+  }
+
   /* Returns a promise for the senses; never rejects — a word nobody
      knows is kept as it is rather than guessed at. */
   function lookup(term) {
-    var slug = encodeURIComponent(term.trim().replace(/\s+/g, "_"));
-    return getJSON(WIKT + slug)
-      .then(fromWiktionary)
-      .catch(function () { return []; })
+    return viaWiktionary(term.trim())
+      .then(function (r) {
+        if (r.senses.length) {
+          if (r.trail.length > 1) r.senses.via = r.trail.join(" \u2192 ");
+          return r.senses;
+        }
+        return viaWikipedia(term).then(function (w) {
+          if (w.length) return w;
+          /* one more: the singular, for plurals no dictionary lists */
+          var sing = term.trim().replace(/ies$/i, "y").replace(/(ses|xes|zes|ches|shes)$/i, "")
+                         .replace(/s$/i, "");
+          if (sing && sing.toLowerCase() !== term.trim().toLowerCase() && sing.length > 2) {
+            return viaWikipedia(sing);
+          }
+          return [];
+        });
+      })
       .then(function (senses) {
         var needsExample = !senses.length || !senses.some(function (s) { return s.example; });
         if (!needsExample) return senses;
+        if (senses.length && senses[0].pos === "Wikipedia") return senses;
         /* one word only: the second source does not do phrases */
         if (/\s/.test(term.trim())) return senses;
         return getJSON(DICT + encodeURIComponent(term.trim()))
@@ -394,6 +474,9 @@
     lookup(w.term).then(function (senses) {
       delete looking[w.id];
       w.senses = senses;
+      /* a custom property on an array does not survive JSON, so the trail
+         lives on the word */
+      w.via = senses.via || "";
       w.looked = true;
       save();
       if (after) after();
@@ -487,6 +570,9 @@
         html += '<p class="def" style="margin-top:12px;color:var(--warn)">'
               + 'No definition found &mdash; neither dictionary knows this one.</p>';
       } else {
+        if (w.via) {
+          html += '<div class="via">' + esc(w.via) + '</div>';
+        }
         for (var i = 0; i < w.senses.length; i++) {
           var s = w.senses[i];
           html += '<div class="sense">'
