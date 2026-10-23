@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vocabulary</title>
+<meta name="description" content="Save a word from any page you are reading, and study it later.">
+<meta name="theme-color" content="#d9cfbe">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23171210'/%3E%3Crect x='14' y='16' width='36' height='26' rx='4' fill='none' stroke='%23e8935a' stroke-width='3'/%3E%3Cpath d='M22 50h20' stroke='%23e8935a' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M32 42v8' stroke='%23e8935a' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+<!-- ============================================================
+  VOCABULARY
+
+  Two halves. A bookmarklet captures a word from whatever page she is
+  reading, along with the sentence it sat in. This page studies them.
+
+  Her list lives in this browser and goes nowhere. The one thing that
+  does leave is a single word, sent to Wiktionary to ask what it means
+  — said plainly on the page rather than glossed over, because the
+  Ledger's "nothing leaves your computer" is not true here and should
+  not be implied.
+============================================================ -->
+<style>
+  :root{
+    /* lifted from simaydemiral.com, same as the Ledger, so they read as
+       one person's work */
+    --ground:#d9cfbe; --surface:#f2ede2; --sunken:#e7e0d1;
+    --ink:#1f1c18; --ink-2:#4b443c; --muted:#6a6157; --faint:#938a7d;
+    --line:#d6cbb8; --line-soft:#e2dacb;
+    --brand:#c05a2a; --brand-wash:#f7e9e0;
+    --go:#4f7a52; --go-wash:#e6efe4;
+    --warn:#b07a28; --warn-wash:#f8eeda;
+    --f-body:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    --f-serif:Georgia,"Times New Roman",serif;
+    --f-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --shadow:0 1px 2px rgba(31,28,24,.05),0 8px 24px rgba(31,28,24,.07);
+    --radius:12px;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#1f1a15; --surface:#2b241d; --sunken:#352d24;
+      --ink:#f6f1e9; --ink-2:#e2d9cc; --muted:#d4cabc; --faint:#9b9183;
+      --line:#423830; --line-soft:#372f27;
+      --brand:#e08b52; --brand-wash:#33230f;
+      --go:#7fb384; --go-wash:#15251a;
+      --warn:#dba85a; --warn-wash:#33260f;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#1f1a15; --surface:#2b241d; --sunken:#352d24;
+    --ink:#f6f1e9; --ink-2:#e2d9cc; --muted:#d4cabc; --faint:#9b9183;
+    --line:#423830; --line-soft:#372f27;
+    --brand:#e08b52; --brand-wash:#33230f;
+    --go:#7fb384; --go-wash:#15251a;
+    --warn:#dba85a; --warn-wash:#33260f;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);
+       font:15px/1.55 var(--f-body);-webkit-font-smoothing:antialiased}
+  .shell{max-width:860px;margin:0 auto;padding:24px 20px 72px;
+         display:flex;flex-direction:column;gap:16px}
+
+  .head{display:flex;justify-content:space-between;align-items:flex-start;
+        gap:16px;flex-wrap:wrap}
+  h1{font:400 30px/1.1 var(--f-serif);margin:0;letter-spacing:-.01em}
+  .sub{margin:4px 0 0;font-size:14px;color:var(--muted);max-width:46ch}
+  .head-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+  .btn,.btn-q{font:inherit;font-size:13px;border-radius:8px;cursor:pointer;
+    padding:7px 13px;border:1px solid var(--line);background:var(--surface);
+    color:var(--ink);transition:border-color .15s,background .15s,color .15s}
+  .btn{background:var(--ink);color:var(--surface);border-color:var(--ink);font-weight:600}
+  .btn:hover{opacity:.9}
+  .btn-q:hover{border-color:var(--brand);color:var(--brand)}
+  .btn:disabled,.btn-q:disabled{opacity:.42;cursor:default}
+
+  .tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);
+        margin-bottom:10px;flex-wrap:wrap}
+  .tab{border:0;background:transparent;color:var(--muted);font-size:13.5px;
+       font-weight:600;padding:9px 13px;border-bottom:2px solid transparent;
+       margin-bottom:-1px;cursor:pointer;font-family:inherit}
+  .tab[aria-selected="true"]{color:var(--brand);border-bottom-color:var(--brand)}
+  .tab-n{font:500 11px/1 var(--f-mono);color:var(--faint);margin-left:5px}
+
+  .card{background:var(--surface);border:1px solid var(--line);
+        border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 18px}
+  .empty{color:var(--muted);text-align:center;padding:34px 10px;margin:0}
+  .empty b{color:var(--ink);display:block;font-size:17px;margin-bottom:6px}
+
+  /* ---------- the flashcard ---------- */
+  .study{display:flex;flex-direction:column;align-items:center;gap:14px}
+  .face{width:100%;min-height:230px;background:var(--surface);
+        border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);
+        padding:28px 24px;display:flex;flex-direction:column;
+        align-items:center;justify-content:center;text-align:center;
+        cursor:pointer;user-select:none}
+  .face:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+  .term{font:400 34px/1.15 var(--f-serif);letter-spacing:-.01em;
+        word-break:break-word}
+  .tap{margin-top:14px;font-size:12px;color:var(--faint);
+       text-transform:uppercase;letter-spacing:.14em;font-family:var(--f-mono)}
+  .back{text-align:left;align-items:stretch;justify-content:flex-start;
+        cursor:default}
+  .back .term{font-size:25px;text-align:left;margin-bottom:2px}
+  .sense{margin:10px 0 0;padding-left:0}
+  .pos{font:500 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;
+       color:var(--brand);margin-bottom:3px}
+  .def{margin:0 0 2px;color:var(--ink-2)}
+  .eg{margin:3px 0 0;font-style:italic;color:var(--muted);font-size:14px}
+  .ctx{margin-top:14px;padding:10px 12px;background:var(--brand-wash);
+       border-left:2px solid var(--brand);border-radius:0 6px 6px 0;
+       font-size:14px;line-height:1.55;color:var(--ink-2)}
+  .ctx b{display:block;font:500 10.5px/1 var(--f-mono);letter-spacing:.14em;
+         text-transform:uppercase;color:var(--brand);margin-bottom:5px}
+  .ctx a{color:inherit}
+  .grade{display:flex;gap:10px;width:100%}
+  .grade button{flex:1;padding:12px;font-size:14px;font-weight:600;
+                border-radius:10px;cursor:pointer;font-family:inherit;border:1px solid}
+  .no{background:var(--surface);border-color:var(--line);color:var(--ink)}
+  .no:hover{border-color:var(--warn);color:var(--warn)}
+  .yes{background:var(--go-wash);border-color:var(--go);color:var(--go)}
+  .yes:hover{opacity:.85}
+  .progress{font-size:12.5px;color:var(--muted);font-family:var(--f-mono)}
+
+  /* ---------- lists ---------- */
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th{text-align:left;font:500 10.5px/1 var(--f-mono);letter-spacing:.14em;
+     text-transform:uppercase;color:var(--faint);padding:8px 8px;
+     border-bottom:1px solid var(--line)}
+  td{padding:9px 8px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+  tr:last-child td{border-bottom:0}
+  .w-term{font-weight:600}
+  .w-def{color:var(--muted);font-size:13px;display:block;margin-top:2px}
+  .w-when{font-family:var(--f-mono);font-size:12px;color:var(--faint);white-space:nowrap}
+  select.f{font:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--line);
+           border-radius:8px;background:var(--surface);color:var(--ink)}
+  .filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+  .pill{display:inline-block;font:500 11px/1 var(--f-mono);letter-spacing:.1em;
+        text-transform:uppercase;padding:4px 8px;border-radius:999px;
+        background:var(--sunken);color:var(--muted)}
+  .box-n{font-family:var(--f-mono);font-size:12px;color:var(--faint)}
+
+  textarea{width:100%;min-height:120px;font:inherit;font-size:14px;padding:11px;
+           border:1px solid var(--line);border-radius:8px;resize:vertical;
+           background:var(--surface);color:var(--ink)}
+  .mark{display:inline-block;padding:9px 15px;border:1px dashed var(--brand);
+        border-radius:8px;color:var(--brand);font-weight:600;text-decoration:none;
+        background:var(--brand-wash);cursor:grab}
+  .step{margin:0 0 6px;color:var(--ink-2)}
+  code{font-family:var(--f-mono);font-size:12.5px;background:var(--sunken);
+       padding:1px 5px;border-radius:4px}
+
+  #toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,16px);
+         background:var(--ink);color:var(--ground);padding:10px 16px;
+         border-radius:9px;font-size:13.5px;opacity:0;pointer-events:none;
+         transition:opacity .18s,transform .18s;z-index:50}
+  #toast.on{opacity:1;transform:translate(-50%,0)}
+
+  @media (max-width:560px){
+    .shell{padding:18px 14px 60px}
+    h1{font-size:26px}
+    .term{font-size:28px}
+    .face{min-height:190px;padding:22px 18px}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <div class="head">
+    <div>
+      <h1>Vocabulary</h1>
+      <p class="sub">Save a word from whatever you are reading. Study it later,
+        with the sentence you found it in.</p>
+    </div>
+    <div class="head-actions">
+      <button class="btn-q" id="theme">Theme</button>
+      <button class="btn-q" id="export">Export</button>
+      <button class="btn-q" id="wipe">Clear all</button>
+    </div>
+  </div>
+
+  <div class="tabs" role="tablist" id="tabs">
+    <button class="tab" role="tab" aria-selected="true" data-tab="due">Study <span class="tab-n" id="nDue">0</span></button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="all">All words <span class="tab-n" id="nAll">0</span></button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="decks">Decks <span class="tab-n" id="nDecks">0</span></button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="add">Add</button>
+  </div>
+
+  <section id="p-due"></section>
+
+  <section id="p-all" hidden>
+    <div class="filters">
+      <select class="f" id="fDeck"></select>
+      <select class="f" id="fSort">
+        <option value="added">Newest first</option>
+        <option value="term">A to Z</option>
+        <option value="due">Due soonest</option>
+        <option value="box">Least known</option>
+      </select>
+      <span class="box-n" id="allNote"></span>
+    </div>
+    <div class="card" style="padding:4px 10px"><div id="tbl"></div></div>
+  </section>
+
+  <section id="p-decks" hidden></section>
+
+  <section id="p-add" hidden></section>
+
+</div>
+<div id="toast"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var $ = function (id) { return document.getElementById(id); };
+  var KEY = "vocab.v1";
+  var DEMO = /[?&]demo=1\b/.test(location.search);
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function toast(m) {
+    var t = $("toast");
+    t.textContent = m;
+    t.className = "on";
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function () { t.className = ""; }, 2600);
+  }
+
+  /* ------------------------------------------------------------------
+     Store. Same habits as the Ledger: never let a shape written by an
+     older version stop the page booting, and never let blocked storage
+     throw.
+     ------------------------------------------------------------------ */
+  var db = { v: 1, words: [] };
+
+  function load() {
+    if (DEMO) { db = demoData(); return; }
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return;
+      var d = JSON.parse(raw);
+      if (d && d.words) {
+        db = d;
+        db.words = db.words || [];
+        for (var i = 0; i < db.words.length; i++) {
+          var w = db.words[i];
+          w.senses = w.senses || [];
+          w.deck = w.deck || "Inbox";
+          w.box = w.box || 1;
+          w.due = w.due || today();
+          w.src = w.src || {};
+        }
+      }
+    } catch (e) {
+      /* corrupt or blocked storage — start empty rather than break */
+    }
+  }
+
+  function save() {
+    if (DEMO) return;
+    try { localStorage.setItem(KEY, JSON.stringify(db)); }
+    catch (e) { toast("Could not save — browser storage is full or blocked."); }
+  }
+
+  function today() { return new Date().toISOString().slice(0, 10); }
+
+  function plus(days) {
+    var d = new Date();
+    d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0, 10);
+  }
+
+  function idOf(term) {
+    var s = term.toLowerCase(), h = 5381, i;
+    for (i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0;
+    return h.toString(36);
+  }
+
+  /* ------------------------------------------------------------------
+     Looking a word up. Wiktionary first: it knows phrases, which the
+     other one does not — "due diligence" and "hedge fund" both fail
+     there — and it ranks senses better. The second is asked only for
+     an example sentence when Wiktionary has none.
+     ------------------------------------------------------------------ */
+  var WIKT = "https://en.wiktionary.org/api/rest_v1/page/definition/";
+  var DICT = "https://api.dictionaryapi.dev/api/v2/entries/en/";
+
+  function stripTags(s) {
+    return String(s || "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+  }
+
+  /* Wiktionary sometimes runs a citation straight onto the end of a
+     definition — "Depicted in a leaping posture. Gules, a reindeer salient
+     or (arms of Vagaa)." The first sentence is the meaning; the rest is
+     provenance. Keep a second sentence only when the first is too short to
+     stand alone. */
+  function firstSentence(text) {
+    /* No lookbehind: an older Safari cannot parse it, and a regex it cannot
+       parse takes the whole script down, not just this line. */
+    var m = /^([\s\S]*?[.!?])\s+[A-Z("\u2018\u201c]/.exec(text);
+    if (!m) return text;
+    var out = m[1];
+    if (out.length < 28) {
+      var rest = text.slice(m[1].length).trim();
+      var m2 = /^([\s\S]*?[.!?])\s+[A-Z("\u2018\u201c]/.exec(rest);
+      out += " " + (m2 ? m2[1] : rest);
+    }
+    return out.trim();
+  }
+
+  function fromWiktionary(json) {
+    var out = [], langs = json && json.en, i, j;
+    if (!langs) return out;
+    for (i = 0; i < langs.length && out.length < 3; i++) {
+      var defs = langs[i].definitions || [];
+      for (j = 0; j < defs.length && out.length < 3; j++) {
+        var text = firstSentence(stripTags(defs[j].definition));
+        /* "Alternative spelling of x" is a pointer, not a meaning */
+        if (!text || text.length < 3) continue;
+        if (/^(alternative|obsolete|archaic) (spelling|form) of/i.test(text) && defs.length > 1) continue;
+        var eg = "";
+        if (defs[j].parsedExamples && defs[j].parsedExamples.length) {
+          eg = stripTags(defs[j].parsedExamples[0].example);
+        } else if (defs[j].examples && defs[j].examples.length) {
+          eg = stripTags(defs[j].examples[0]);
+        }
+        out.push({ pos: stripTags(langs[i].partOfSpeech) || "", text: text, example: eg });
+      }
+    }
+    return out;
+  }
+
+  function fromDictionaryApi(json) {
+    var out = [], i, j;
+    if (!json || !json.length) return out;
+    var ms = json[0].meanings || [];
+    for (i = 0; i < ms.length && out.length < 3; i++) {
+      var defs = ms[i].definitions || [];
+      for (j = 0; j < defs.length && out.length < 3; j++) {
+        if (!defs[j].definition) continue;
+        out.push({
+          pos: ms[i].partOfSpeech || "",
+          text: defs[j].definition,
+          example: defs[j].example || ""
+        });
+      }
+    }
+    return out;
+  }
+
+  function getJSON(url) {
+    return fetch(url, { mode: "cors" }).then(function (r) {
+      if (!r.ok) throw new Error(r.status);
+      return r.json();
+    });
+  }
+
+  /* Returns a promise for the senses; never rejects — a word nobody
+     knows is kept as it is rather than guessed at. */
+  function lookup(term) {
+    var slug = encodeURIComponent(term.trim().replace(/\s+/g, "_"));
+    return getJSON(WIKT + slug)
+      .then(fromWiktionary)
+      .catch(function () { return []; })
+      .then(function (senses) {
+        var needsExample = !senses.length || !senses.some(function (s) { return s.example; });
+        if (!needsExample) return senses;
+        /* one word only: the second source does not do phrases */
+        if (/\s/.test(term.trim())) return senses;
+        return getJSON(DICT + encodeURIComponent(term.trim()))
+          .then(fromDictionaryApi)
+          .then(function (more) {
+            if (!senses.length) return more;
+            /* keep Wiktionary's wording, borrow an example */
+            var eg = "";
+            for (var i = 0; i < more.length; i++) { if (more[i].example) { eg = more[i].example; break; } }
+            if (eg) senses[0].example = senses[0].example || eg;
+            return senses;
+          })
+          .catch(function () { return senses; });
+      });
+  }
+
+  var looking = {};
+  function ensureLooked(w, after) {
+    if (w.looked || looking[w.id]) { if (after) after(); return; }
+    looking[w.id] = 1;
+    lookup(w.term).then(function (senses) {
+      delete looking[w.id];
+      w.senses = senses;
+      w.looked = true;
+      save();
+      if (after) after();
+    });
+  }
+
+  /* ------------------------------------------------------------------
+     Spacing. Leitner boxes: knew it moves up, missed it goes back to
+     the start. Deliberately not SM-2 — five intervals is enough for a
+     few hundred words and can be explained in one line.
+     ------------------------------------------------------------------ */
+  var DAYS = [1, 3, 7, 16, 35];
+
+  function grade(w, knew) {
+    w.box = knew ? Math.min(DAYS.length, (w.box || 1) + 1) : 1;
+    w.due = plus(DAYS[w.box - 1]);
+    w.seen = (w.seen || 0) + 1;
+    save();
+  }
+
+  function dueNow() {
+    var t = today();
+    return db.words.filter(function (w) { return (w.due || t) <= t; });
+  }
+
+  function decks() {
+    var seen = {}, out = [];
+    db.words.forEach(function (w) {
+      var d = w.deck || "Inbox";
+      if (!seen[d]) { seen[d] = 0; out.push(d); }
+      seen[d]++;
+    });
+    out.sort();
+    return out.map(function (d) { return { name: d, n: seen[d] }; });
+  }
+
+  /* ------------------------------------------------------------------
+     Study
+     ------------------------------------------------------------------ */
+  var session = [], flipped = false, done = 0;
+
+  function startSession() {
+    session = dueNow().slice(0, 30);
+    done = 0;
+    flipped = false;
+    renderDue();
+  }
+
+  function renderDue() {
+    var el = $("p-due");
+
+    if (!db.words.length) {
+      el.innerHTML = '<div class="card"><p class="empty"><b>No words yet</b>'
+        + 'Add one from the <b style="display:inline">Add</b> tab, or install the '
+        + 'bookmarklet and save a word straight from whatever you are reading.</p></div>';
+      return;
+    }
+    if (!session.length) {
+      var nd = dueNow().length;
+      el.innerHTML = '<div class="card"><p class="empty"><b>'
+        + (nd ? "Ready when you are" : "Nothing due today")
+        + '</b>' + (nd
+            ? nd + ' word' + (nd === 1 ? '' : 's') + ' waiting.'
+            : 'You have studied everything that came up. '
+              + db.words.length + ' word' + (db.words.length === 1 ? '' : 's') + ' in total.')
+        + '</p>'
+        + (nd ? '<div style="text-align:center;padding-bottom:18px">'
+                + '<button class="btn" id="go">Start</button></div>' : '')
+        + '</div>';
+      if ($("go")) $("go").addEventListener("click", startSession);
+      return;
+    }
+
+    var w = session[0];
+    var html = '<div class="study">'
+      + '<div class="progress">' + (done + 1) + ' of ' + (done + session.length) + '</div>';
+
+    if (!flipped) {
+      html += '<div class="face" id="face" tabindex="0" role="button" '
+            + 'aria-label="Show the meaning">'
+            + '<div class="term">' + esc(w.term) + '</div>'
+            + '<div class="tap">Tap to see the meaning</div></div>';
+    } else {
+      html += '<div class="face back">'
+            + '<div class="term">' + esc(w.term) + '</div>'
+            + '<div class="pill" style="align-self:flex-start;margin-top:2px">'
+            + esc(w.deck || "Inbox") + '</div>';
+      if (!w.looked && !w.senses.length) {
+        html += '<p class="def" style="margin-top:12px;color:var(--muted)">Looking it up&hellip;</p>';
+      } else if (!w.senses.length) {
+        html += '<p class="def" style="margin-top:12px;color:var(--warn)">'
+              + 'No definition found &mdash; neither dictionary knows this one.</p>';
+      } else {
+        for (var i = 0; i < w.senses.length; i++) {
+          var s = w.senses[i];
+          html += '<div class="sense">'
+                + (s.pos ? '<div class="pos">' + esc(s.pos) + '</div>' : '')
+                + '<p class="def">' + esc(s.text) + '</p>'
+                + (s.example ? '<p class="eg">&ldquo;' + esc(s.example) + '&rdquo;</p>' : '')
+                + '</div>';
+        }
+      }
+      if (w.src && w.src.sentence) {
+        html += '<div class="ctx"><b>Where you found it</b>'
+              + esc(w.src.sentence)
+              + (w.src.url ? '<br><a href="' + esc(w.src.url) + '" target="_blank" rel="noopener">'
+                           + esc(w.src.title || w.src.url).slice(0, 70) + ' &rarr;</a>' : '')
+              + '</div>';
+      }
+      html += '</div>'
+            + '<div class="grade">'
+            + '<button class="no" id="gNo">Not yet</button>'
+            + '<button class="yes" id="gYes">Knew it</button>'
+            + '</div>';
+    }
+    html += '</div>';
+    el.innerHTML = html;
+
+    if (!flipped) {
+      var f = $("face");
+      f.addEventListener("click", flip);
+      f.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); }
+      });
+      /* fetch while she is still looking at the front, so the back is
+         ready by the time she turns it over */
+      ensureLooked(w, function () { if (flipped) renderDue(); });
+    } else {
+      $("gNo").addEventListener("click", function () { answer(false); });
+      $("gYes").addEventListener("click", function () { answer(true); });
+    }
+  }
+
+  function flip() {
+    flipped = true;
+    renderDue();
+  }
+
+  function answer(knew) {
+    var w = session.shift();
+    grade(w, knew);
+    done++;
+    flipped = false;
+    counts();
+    renderDue();
+  }
+
+  /* ------------------------------------------------------------------
+     All words
+     ------------------------------------------------------------------ */
+  function renderAll() {
+    var deck = $("fDeck").value, sort = $("fSort").value;
+    var rows = db.words.filter(function (w) { return !deck || (w.deck || "Inbox") === deck; });
+
+    rows.sort(function (a, b) {
+      if (sort === "term") return a.term.toLowerCase() < b.term.toLowerCase() ? -1 : 1;
+      if (sort === "due") return (a.due || "") < (b.due || "") ? -1 : 1;
+      if (sort === "box") return (a.box || 1) - (b.box || 1);
+      return (a.added || "") < (b.added || "") ? 1 : -1;
+    });
+
+    $("allNote").textContent = rows.length + (rows.length === 1 ? " word" : " words");
+
+    if (!rows.length) {
+      $("tbl").innerHTML = '<p class="empty">Nothing here yet.</p>';
+      return;
+    }
+
+    var h = '<table><thead><tr><th>Word</th><th>Deck</th><th>Box</th>'
+          + '<th>Due</th><th></th></tr></thead><tbody>';
+    for (var i = 0; i < rows.length; i++) {
+      var w = rows[i];
+      var first = w.senses && w.senses.length ? w.senses[0].text : "";
+      h += '<tr>'
+         + '<td><span class="w-term">' + esc(w.term) + '</span>'
+         + (first ? '<span class="w-def">' + esc(first).slice(0, 110) + '</span>' : '')
+         + '</td>'
+         + '<td>' + deckSelect(w) + '</td>'
+         + '<td class="box-n">' + (w.box || 1) + '/5</td>'
+         + '<td class="w-when">' + esc(w.due || "") + '</td>'
+         + '<td style="text-align:right"><button class="btn-q" data-del="' + esc(w.id)
+         + '" title="Remove this word">Remove</button></td>'
+         + '</tr>';
+    }
+    $("tbl").innerHTML = h + '</tbody></table>';
+  }
+
+  function deckSelect(w) {
+    var list = decks(), cur = w.deck || "Inbox", o = "", i;
+    var names = list.map(function (d) { return d.name; });
+    if (names.indexOf(cur) < 0) names.push(cur);
+    if (names.indexOf("Inbox") < 0) names.push("Inbox");
+    for (i = 0; i < names.length; i++) {
+      o += '<option' + (names[i] === cur ? ' selected' : '') + '>' + esc(names[i]) + '</option>';
+    }
+    o += '<option value="__new">New deck…</option>';
+    return '<select class="f" data-deck="' + esc(w.id) + '">' + o + '</select>';
+  }
+
+  /* ------------------------------------------------------------------
+     Decks
+     ------------------------------------------------------------------ */
+  function renderDecks() {
+    var list = decks();
+    if (!list.length) {
+      $("p-decks").innerHTML = '<div class="card"><p class="empty">'
+        + 'Decks appear once you have words. Every word starts in <b style="display:inline">Inbox</b>.</p></div>';
+      return;
+    }
+    var h = '<div class="card"><table><thead><tr><th>Deck</th><th>Words</th>'
+          + '<th>Due today</th><th></th></tr></thead><tbody>';
+    var t = today();
+    for (var i = 0; i < list.length; i++) {
+      var d = list[i];
+      var due = db.words.filter(function (w) {
+        return (w.deck || "Inbox") === d.name && (w.due || t) <= t;
+      }).length;
+      h += '<tr><td class="w-term">' + esc(d.name) + '</td>'
+         + '<td>' + d.n + '</td>'
+         + '<td class="box-n">' + (due || "—") + '</td>'
+         + '<td style="text-align:right">'
+         + '<button class="btn-q" data-rename="' + esc(d.name) + '">Rename</button>'
+         + '</td></tr>';
+    }
+    $("p-decks").innerHTML = h + '</tbody></table></div>';
+  }
+
+  /* ------------------------------------------------------------------
+     Add — by hand, by paste, and the bookmarklet
+     ------------------------------------------------------------------ */
+  /* The bookmarklet. Kept readable here and joined into one javascript: URL.
+
+     Sentence boundaries are not just "a full stop": the decimal point in
+     "$1.25 trillion" was being read as one, and the captured sentence began
+     halfway through a number. A boundary is a stop followed by a space and
+     not preceded by a digit or a lone capital. */
+  var MARKLET = [
+    "javascript:(function(){",
+    "var s=window.getSelection(),t=(s?s.toString():'').trim();",
+    "if(!t){alert('Select a word first, then click this.');return;}",
+    "var sent='';try{",
+    "var n=s.anchorNode,e=n&&(n.nodeType===1?n:n.parentElement);",
+    "while(e&&e.textContent.length<40&&e.parentElement)e=e.parentElement;",
+    "var x=(e?e.textContent:'').replace(/\\s+/g,' '),i=x.indexOf(t);",
+    "var stop=function(k){var c=x.charAt(k);",
+    "if(c!=='.'&&c!=='!'&&c!=='?')return false;",
+    "if(!/\\s|$/.test(x.charAt(k+1)||' '))return false;",
+    "var p=x.charAt(k-1);return !/[0-9]/.test(p)&&!/^[A-Z]$/.test(p);};",
+    "if(i>-1){var a=0,k;",
+    "for(k=i-1;k>0;k--){if(stop(k)){a=k+1;break;}}",
+    "var b=x.length;",
+    "for(k=i+t.length;k<x.length;k++){if(stop(k)){b=k+1;break;}}",
+    "sent=x.slice(a,b).trim();}",
+    "}catch(err){}",
+    "window.open('", "ORIGIN", "/vocab/add#w='+encodeURIComponent(t)",
+    "+'&s='+encodeURIComponent(sent.slice(0,400))",
+    "+'&u='+encodeURIComponent(location.href)",
+    "+'&t='+encodeURIComponent(document.title),'vocab','width=430,height=250');",
+    "})()"
+  ].join("");
+
+  function marklet() {
+    return MARKLET.replace("ORIGIN", location.origin);
+  }
+
+  function renderAdd() {
+    $("p-add").innerHTML =
+      '<div class="card">'
+      + '<h2 style="margin:0 0 4px;font:400 19px/1.2 var(--f-serif)">Save a word from anywhere</h2>'
+      + '<p class="step" style="font-size:14px;color:var(--muted)">'
+      + 'Drag this to your bookmarks bar. Then on any page: select a word and click it. '
+      + 'Works in Chrome and Safari.</p>'
+      + '<p style="margin:12px 0 4px"><a class="mark" id="mark" href="#">+ Save to Vocabulary</a></p>'
+      + '<p class="step" style="font-size:13px;color:var(--faint);margin-top:10px">'
+      + 'Safari hides the bookmarks bar by default &mdash; View › Show Favourites Bar.</p>'
+      + '</div>'
+
+      + '<div class="card" style="margin-top:14px">'
+      + '<h2 style="margin:0 0 4px;font:400 19px/1.2 var(--f-serif)">Or type them in</h2>'
+      + '<p class="step" style="font-size:14px;color:var(--muted)">'
+      + 'One word or phrase per line. Paste a list from anywhere.</p>'
+      + '<textarea id="paste" placeholder="salient&#10;due diligence&#10;ubiquitous"></textarea>'
+      + '<div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">'
+      + '<select class="f" id="pasteDeck"></select>'
+      + '<button class="btn" id="pasteGo">Add them</button>'
+      + '</div></div>'
+
+      + '<div class="card" style="margin-top:14px">'
+      + '<h2 style="margin:0 0 4px;font:400 19px/1.2 var(--f-serif)">Where your words live</h2>'
+      + '<p class="step" style="font-size:14px;color:var(--muted);margin:0">'
+      + 'In this browser, on this device. There is no account and no server holding them. '
+      + 'The one thing that leaves is a single word at a time, sent to Wiktionary to ask '
+      + 'what it means &mdash; your list, your sentences and the pages you took them from '
+      + 'are never sent anywhere.</p>'
+      + '</div>';
+
+    var a = $("mark");
+    a.setAttribute("href", marklet());
+    a.addEventListener("click", function (e) {
+      e.preventDefault();
+      toast("Drag it to your bookmarks bar — clicking it here does nothing.");
+    });
+
+    fillDeckSelect($("pasteDeck"), "Inbox", true);
+    $("pasteGo").addEventListener("click", addPasted);
+  }
+
+  function addPasted() {
+    var lines = $("paste").value.split("\n");
+    var deck = $("pasteDeck").value || "Inbox";
+    if (deck === "__new") {
+      deck = (prompt("Name the new deck") || "").trim() || "Inbox";
+    }
+    var added = 0, dup = 0, i;
+    for (i = 0; i < lines.length; i++) {
+      var term = lines[i].trim().replace(/\s+/g, " ");
+      if (!term || term.length > 80) continue;
+      if (addWord(term, deck, {})) added++; else dup++;
+    }
+    if (!added && !dup) { toast("Nothing to add."); return; }
+    save();
+    $("paste").value = "";
+    counts(); renderAll(); renderDecks(); renderDue();
+    toast(added + " added" + (dup ? ", " + dup + " already there" : "") + ".");
+  }
+
+  function addWord(term, deck, src) {
+    var id = idOf(term), i;
+    for (i = 0; i < db.words.length; i++) if (db.words[i].id === id) return false;
+    db.words.unshift({
+      id: id, term: term, added: new Date().toISOString(),
+      deck: deck || "Inbox", box: 1, due: today(),
+      src: src || {}, senses: [], looked: false, note: ""
+    });
+    return true;
+  }
+
+  function fillDeckSelect(sel, current, withNew) {
+    var list = decks(), names = list.map(function (d) { return d.name; });
+    if (names.indexOf("Inbox") < 0) names.unshift("Inbox");
+    var o = "", i;
+    for (i = 0; i < names.length; i++) {
+      o += '<option' + (names[i] === current ? ' selected' : '') + '>' + esc(names[i]) + '</option>';
+    }
+    if (withNew) o += '<option value="__new">New deck…</option>';
+    sel.innerHTML = o;
+  }
+
+  /* ------------------------------------------------------------------
+     Chrome
+     ------------------------------------------------------------------ */
+  function counts() {
+    $("nDue").textContent = dueNow().length;
+    $("nAll").textContent = db.words.length;
+    $("nDecks").textContent = decks().length;
+  }
+
+  function fillFilter() {
+    var cur = $("fDeck").value;
+    var list = decks(), o = '<option value="">All decks</option>', i;
+    for (i = 0; i < list.length; i++) {
+      o += '<option' + (list[i].name === cur ? ' selected' : '') + '>'
+         + esc(list[i].name) + ' (' + list[i].n + ')</option>';
+    }
+    $("fDeck").innerHTML = o;
+  }
+
+  $("tabs").addEventListener("click", function (e) {
+    var b = e.target.closest ? e.target.closest(".tab") : null;
+    if (!b) return;
+    var k = b.getAttribute("data-tab"), keys = ["due", "all", "decks", "add"], i;
+    for (i = 0; i < keys.length; i++) {
+      var on = keys[i] === k;
+      document.querySelector('.tab[data-tab="' + keys[i] + '"]').setAttribute("aria-selected", on ? "true" : "false");
+      $("p-" + keys[i]).hidden = !on;
+    }
+    if (k === "all") { fillFilter(); renderAll(); }
+    if (k === "decks") renderDecks();
+    if (k === "add") renderAdd();
+    if (k === "due") renderDue();
+  });
+
+  $("fDeck").addEventListener("change", renderAll);
+  $("fSort").addEventListener("change", renderAll);
+
+  document.addEventListener("click", function (e) {
+    var del = e.target.getAttribute && e.target.getAttribute("data-del");
+    if (del) {
+      db.words = db.words.filter(function (w) { return w.id !== del; });
+      session = session.filter(function (w) { return w.id !== del; });
+      save(); counts(); fillFilter(); renderAll(); renderDecks();
+      toast("Removed.");
+      return;
+    }
+    var ren = e.target.getAttribute && e.target.getAttribute("data-rename");
+    if (ren) {
+      var name = (prompt("Rename “" + ren + "” to", ren) || "").trim();
+      if (!name || name === ren) return;
+      db.words.forEach(function (w) { if ((w.deck || "Inbox") === ren) w.deck = name; });
+      save(); renderDecks(); fillFilter(); renderAll();
+      toast("Renamed.");
+    }
+  });
+
+  document.addEventListener("change", function (e) {
+    var id = e.target.getAttribute && e.target.getAttribute("data-deck");
+    if (!id) return;
+    var v = e.target.value;
+    if (v === "__new") {
+      v = (prompt("Name the new deck") || "").trim();
+      if (!v) { renderAll(); return; }
+    }
+    db.words.forEach(function (w) { if (w.id === id) w.deck = v; });
+    save(); fillFilter(); renderAll(); renderDecks(); counts();
+    toast("Moved to " + v + ".");
+  });
+
+  $("theme").addEventListener("click", function () {
+    var r = document.documentElement;
+    var now = r.getAttribute("data-theme");
+    var sysDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var next = now ? (now === "dark" ? "light" : "dark") : (sysDark ? "light" : "dark");
+    r.setAttribute("data-theme", next);
+    try { localStorage.setItem("vocab.theme", next); } catch (e) {}
+  });
+
+  $("export").addEventListener("click", function () {
+    if (!db.words.length) { toast("Nothing to export yet."); return; }
+    var blob = new Blob([JSON.stringify(db, null, 1)], { type: "application/json" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "vocabulary-" + today() + ".json";
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+  });
+
+  $("wipe").addEventListener("click", function () {
+    if (!confirm("Delete every word stored in this browser?")) return;
+    db = { v: 1, words: [] };
+    try { localStorage.removeItem(KEY); } catch (e) {}
+    session = []; flipped = false;
+    counts(); fillFilter(); renderAll(); renderDecks(); renderDue();
+    toast("Cleared.");
+  });
+
+  /* ------------------------------------------------------------------
+     Demo: invented words so the homepage card shows the real thing
+     working. Writes nothing.
+     ------------------------------------------------------------------ */
+  function demoData() {
+    var w = [
+      ["salient", "Reading", "The report is not exhaustive, but it covers the salient points.",
+       "https://example.com", "A note on strategy"],
+      ["due diligence", "Finance", "The buyer walked away after due diligence turned up the lawsuit.",
+       "https://example.com", "Deal memo"],
+      ["ubiquitous", "Reading", "Screens are now ubiquitous in classrooms.",
+       "https://example.com", "An essay on attention"],
+      ["hedge", "Finance", "The fund used options to hedge against a fall in the lira.",
+       "https://example.com", "Markets weekly"]
+    ];
+    var out = { v: 1, words: [] };
+    for (var i = 0; i < w.length; i++) {
+      out.words.push({
+        id: idOf(w[i][0]), term: w[i][0],
+        added: new Date(Date.now() - i * 86400000).toISOString(),
+        deck: w[i][1], box: 1, due: today(),
+        src: { sentence: w[i][2], url: w[i][3], title: w[i][4] },
+        senses: [], looked: false, note: ""
+      });
+    }
+    return out;
+  }
+
+  /* ------------------------------------------------------------------
+     Boot
+     ------------------------------------------------------------------ */
+  try {
+    var saved = localStorage.getItem("vocab.theme");
+    if (saved === "dark" || saved === "light") {
+      document.documentElement.setAttribute("data-theme", saved);
+    }
+  } catch (e) {}
+
+  load();
+  counts();
+  fillFilter();
+  startSession();
+})();
+</script>
+</body>
+</html>
