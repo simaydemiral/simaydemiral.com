@@ -516,12 +516,14 @@
   /* ------------------------------------------------------------------
      Study
      ------------------------------------------------------------------ */
-  var session = [], flipped = false, done = 0;
+  var session = [], flipped = false, done = 0, total = 0;
 
   function startSession() {
     session = dueNow().slice(0, 30);
+    total = session.length;
     done = 0;
     flipped = false;
+    for (var i = 0; i < session.length; i++) session[i]._miss = 0;
     renderDue();
   }
 
@@ -551,8 +553,13 @@
     }
 
     var w = session[0];
+    /* "Not yet" puts the card back on the end of the queue rather than
+       taking it away, so the ones she is getting wrong are the ones she
+       keeps seeing. The count is done-and-left rather than "3 of 7",
+       because a card coming round again makes that arithmetic a lie. */
     var html = '<div class="study">'
-      + '<div class="progress">' + (done + 1) + ' of ' + (done + session.length) + '</div>';
+      + '<div class="progress">' + done + ' done \u00b7 ' + session.length + ' left'
+      + (w._miss ? ' \u00b7 again' : '') + '</div>';
 
     if (!flipped) {
       html += '<div class="face" id="face" tabindex="0" role="button" '
@@ -621,7 +628,14 @@
   function answer(knew) {
     var w = session.shift();
     grade(w, knew);
-    done++;
+    if (knew) {
+      done++;
+    } else {
+      w._miss = (w._miss || 0) + 1;
+      /* Three times round is enough. It is already scheduled for tomorrow,
+         and a card that cannot be escaped is a trap rather than a drill. */
+      if (w._miss < 3) session.push(w); else done++;
+    }
     flipped = false;
     counts();
     renderDue();
