@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+  <link href="https://api.fontshare.com/v2/css?f%5B%5D=switzer@400,500,600&display=swap" rel="stylesheet">
 <title>Vocabulary</title>
 <meta name="description" content="Save a word from any page you are reading, and study it later.">
 <meta name="theme-color" content="#d9cfbe">
@@ -30,7 +32,9 @@
     --go:#4f7a52; --go-wash:#e6efe4;
     --warn:#b07a28; --warn-wash:#f8eeda;
     --f-body:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-    --f-serif:Georgia,"Times New Roman",serif;
+    /* Headings, matching the homepage. The serif above stays, for the word
+       on the card itself. */
+    --f-display:"Switzer","Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,sans-serif;
     --f-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
     --shadow:0 1px 2px rgba(31,28,24,.05),0 8px 24px rgba(31,28,24,.07);
     --radius:12px;
@@ -62,7 +66,7 @@
 
   .head{display:flex;justify-content:space-between;align-items:flex-start;
         gap:16px;flex-wrap:wrap}
-  h1{font:400 30px/1.1 var(--f-serif);margin:0;letter-spacing:-.01em}
+  h1{font:500 30px/1.1 var(--f-display);margin:0;letter-spacing:-.03em}
   .sub{margin:4px 0 0;font-size:14px;color:var(--muted);max-width:46ch}
   .head-actions{display:flex;gap:8px;flex-wrap:wrap}
 
@@ -95,7 +99,7 @@
         align-items:center;justify-content:center;text-align:center;
         cursor:pointer;user-select:none}
   .face:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
-  .term{font:400 34px/1.15 var(--f-serif);letter-spacing:-.01em;
+  .term{font:500 34px/1.15 var(--f-display);letter-spacing:-.03em;
         word-break:break-word}
   .tap{margin-top:14px;font-size:12px;color:var(--faint);
        text-transform:uppercase;letter-spacing:.14em;font-family:var(--f-mono)}
@@ -104,6 +108,10 @@
   .back .term{font-size:25px;text-align:left;margin-bottom:2px}
   .via{margin-top:9px;font:500 11px/1 var(--f-mono);letter-spacing:.08em;
        color:var(--faint)}
+  .seenas{margin-top:10px;font:500 11px/1 var(--f-mono);letter-spacing:.08em;
+          color:var(--faint)}
+  .w-form{margin-left:7px;font:500 11px/1 var(--f-mono);letter-spacing:.06em;
+          color:var(--faint)}
   .sense{margin:10px 0 0;padding-left:0}
   .pos{font:500 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;
        color:var(--brand);margin-bottom:3px}
@@ -158,11 +166,70 @@
          transition:opacity .18s,transform .18s;z-index:50}
   #toast.on{opacity:1;transform:translate(-50%,0)}
 
+  .tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .keys{text-align:center;font:500 11px/1 var(--f-mono);letter-spacing:.1em;
+        text-transform:uppercase;color:var(--faint);padding:2px 0 14px}
+  .lbl-tiny{display:none}
+  .termrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .say{display:flex;align-items:center;gap:8px}
+  .speak{display:inline-flex;align-items:center;justify-content:center;
+         width:30px;height:30px;padding:0;border:1px solid var(--line);
+         border-radius:999px;background:var(--surface);color:var(--brand);
+         font-size:11px;cursor:pointer;flex:0 0 auto;line-height:1}
+  .speak:hover{border-color:var(--brand);background:var(--brand-wash)}
+  .speak.sm{width:21px;height:21px;font-size:8px;vertical-align:middle;
+            margin-left:5px}
+  .ipa{font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+  .ipa.sm{font-size:11.5px;margin-left:7px}
+  .yournote.tr b{color:var(--brand)}
+  .trline{padding:4px 0}
+  .trline + .trline{border-top:1px solid var(--line-soft);margin-top:2px}
+  .trwords{display:block;font-size:15.5px;font-weight:600}
+  .trsense{display:block;font-size:12.5px;color:var(--muted);margin-top:1px}
+  .trfrom{margin-top:7px;font:500 10.5px/1 var(--f-mono);letter-spacing:.12em;
+          text-transform:uppercase;color:var(--faint)}
+  .w-note{display:block;margin-top:3px;font-size:12.5px;color:var(--muted);
+          border-left:2px solid var(--brand);padding-left:7px}
+  .yournote{margin-top:14px;padding:11px 13px;background:var(--sunken);
+            border-radius:9px;font-size:14px}
+  .yournote b{display:block;font:500 10.5px/1 var(--f-mono);letter-spacing:.14em;
+              text-transform:uppercase;color:var(--faint);margin-bottom:6px}
+  .yournote .notetext{white-space:pre-wrap}
+  .yournote textarea,tr.noterow textarea{width:100%;min-height:70px;font:inherit;
+            font-size:14px;padding:9px;border:1px solid var(--line);border-radius:8px;
+            background:var(--surface);color:var(--ink);resize:vertical}
+  .noteacts{display:flex;gap:6px;margin-top:8px}
+  tr.noterow td{background:var(--sunken)}
+
   @media (max-width:560px){
     .shell{padding:18px 14px 60px}
     h1{font-size:26px}
     .term{font-size:28px}
     .face{min-height:190px;padding:22px 18px}
+    /* On a phone the five columns overflowed the viewport and took Remove
+       off-screen with them. Drop Box — it is on the card anyway — and let
+       what is left scroll within its own box rather than moving the page. */
+    .col-box{display:none}
+    .tab{padding:9px 10px;font-size:13px}
+    .tab-n{margin-left:4px}
+    table{font-size:13px}
+    td,th{padding:8px 6px}
+    select.f{font-size:12.5px;padding:4px 6px;max-width:96px}
+    /* so the whole row — word, deck, Note, Remove — fits 375px */
+    #tbl .btn-q{padding:6px 9px;font-size:12.5px}
+    .lbl-full{display:none}
+    .lbl-tiny{display:inline}
+    /* The note row sits inside a table wider than the screen. Pin it to the
+       left edge and size the box to the viewport, so writing a note on a
+       phone does not mean scrolling the table sideways to find the box. */
+    tr.noterow td{position:sticky;left:0}
+    tr.noterow textarea{max-width:calc(100vw - 56px)}
+    /* Three columns' worth of room on a phone: the word, where it lives, and
+       what you can do to it. The definition preview and the due date are both
+       on the card itself, and keeping them here squeezed the word to a stub. */
+    .col-due{display:none}
+    .w-def{display:none}
+    #tbl td:first-child{min-width:118px}
   }
 </style>
 </head>
@@ -178,6 +245,8 @@
     <div class="head-actions">
       <button class="btn-q" id="theme">Theme</button>
       <button class="btn-q" id="export">Export</button>
+      <button class="btn-q" id="import">Import</button>
+      <input type="file" id="file" accept="application/json,.json" hidden>
       <button class="btn-q" id="wipe">Clear all</button>
     </div>
   </div>
@@ -241,23 +310,82 @@
      ------------------------------------------------------------------ */
   var db = { v: 1, words: [] };
 
+  /* Everything that comes from outside this session goes through here —
+     storage written by an older build, and an imported file, which is just
+     a text file someone could have edited. Drop what is not a word record,
+     fill in what is missing, and distrust the source URL. */
+  function normalize(list) {
+    if (!Array.isArray(list)) return [];
+    var out = [], i, w, src;
+    for (i = 0; i < list.length; i++) {
+      w = list[i];
+      if (!w || typeof w !== "object") continue;
+      if (typeof w.term !== "string" || !w.term.trim()) continue;
+      w.term = w.term.trim().replace(/\s+/g, " ").slice(0, 80);
+      /* Recompute rather than trust: the id is a hash of the term, and a
+         hand-edited file whose id does not match would defeat deduping. */
+      w.id = idOf(w.term);
+      w.senses = Array.isArray(w.senses) ? w.senses : [];
+      /* Forms arrive in a file someone could have hand-edited: strings only,
+         and not an unbounded number of them. */
+      w.plain = Array.isArray(w.plain) ? w.plain : null;
+      w.forms = formsOf(w)
+        .filter(function (x) { return typeof x === "string" && x.trim(); })
+        .map(function (x) { return x.trim().replace(/\s+/g, " ").slice(0, 80); })
+        .slice(0, 12);
+      w.deck = (typeof w.deck === "string" && w.deck.trim()) ? w.deck.trim() : "Inbox";
+      w.box = Math.min(DAYS.length + 1, Math.max(1, Number(w.box) || 1));
+      /* A due date is compared as a string, so a malformed one is never
+         less than today and the word would wait forever. */
+      w.due = /^\d{4}-\d{2}-\d{2}$/.test(w.due) ? w.due : today();
+      w.note = typeof w.note === "string" ? w.note.slice(0, 2000) : "";
+      /* An audio URL from a file is a URL like any other: http(s) only. */
+      if (w.say && typeof w.say === "object") {
+        w.say = { audio: safeUrl(w.say.audio).slice(0, 400),
+                  ipa: typeof w.say.ipa === "string" ? w.say.ipa.slice(0, 80) : "",
+                  us: !!w.say.us };
+      } else { delete w.say; }
+      if (w.tr && typeof w.tr === "object") {
+        var tb = Array.isArray(w.tr.blocks) ? w.tr.blocks : [];
+        w.tr = {
+          blocks: tb.filter(function (b) {
+            return b && typeof b === "object" && Array.isArray(b.words) && b.words.length;
+          }).slice(0, 4).map(function (b) {
+            return { sense: String(b.sense || "").slice(0, 160),
+                     words: b.words.filter(function (x) { return typeof x === "string"; })
+                                   .slice(0, 6).map(function (x) { return x.slice(0, 60); }) };
+          }),
+          one: typeof w.tr.one === "string" ? w.tr.one.slice(0, 120) : "",
+          from: typeof w.tr.from === "string" ? w.tr.from.slice(0, 20) : ""
+        };
+      } else { delete w.tr; }
+      src = (w.src && typeof w.src === "object") ? w.src : {};
+      w.src = {
+        url: safeUrl(src.url).slice(0, 400),
+        title: typeof src.title === "string" ? src.title.slice(0, 200) : "",
+        sentence: typeof src.sentence === "string" ? src.sentence.slice(0, 400) : ""
+      };
+      delete w._miss;   /* session state an earlier build saved; not data */
+      out.push(w);
+    }
+    return out;
+  }
+
   function load() {
     if (DEMO) { db = demoData(); return; }
     try {
       var raw = localStorage.getItem(KEY);
       if (!raw) return;
       var d = JSON.parse(raw);
-      if (d && d.words) {
+      /* An array, specifically. A truthy non-array ("words":"oops") used to
+         pass this gate and then render neither cards nor an empty state. */
+      if (d && Array.isArray(d.words)) {
         db = d;
-        db.words = db.words || [];
-        for (var i = 0; i < db.words.length; i++) {
-          var w = db.words[i];
-          w.senses = w.senses || [];
-          w.deck = w.deck || "Inbox";
-          w.box = w.box || 1;
-          w.due = w.due || today();
-          w.src = w.src || {};
-        }
+        db.words = normalize(db.words);
+        /* Written back, or storage keeps the pair and every load folds them
+           again -- harmless, but it leaves the file disagreeing with what is
+           on screen. */
+        if (foldDuplicates()) save();
       }
     } catch (e) {
       /* corrupt or blocked storage — start empty rather than break */
@@ -270,18 +398,122 @@
     catch (e) { toast("Could not save — browser storage is full or blocked."); }
   }
 
-  function today() { return new Date().toISOString().slice(0, 10); }
+  /* Dates are local, not UTC. toISOString() would roll over at 5pm in
+     California, so a card promoted by one day in the morning came back due
+     the same evening. */
+  function ymd(d) {
+    var m = d.getMonth() + 1, day = d.getDate();
+    return d.getFullYear() + "-" + (m < 10 ? "0" : "") + m
+                           + "-" + (day < 10 ? "0" : "") + day;
+  }
+
+  function today() { return ymd(new Date()); }
 
   function plus(days) {
     var d = new Date();
     d.setDate(d.getDate() + days);
-    return d.toISOString().slice(0, 10);
+    return ymd(d);
+  }
+
+  /* Only http(s) becomes a link. A captured "u=javascript:..." would
+     otherwise run script in this origin, with the attacker choosing the
+     link text too. esc() escapes the characters, not the scheme. */
+  function safeUrl(u) {
+    var t = String(u == null ? "" : u).trim();
+    return /^https?:\/\//i.test(t) ? t : "";
   }
 
   function idOf(term) {
     var s = term.toLowerCase(), h = 5381, i;
     for (i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0;
     return h.toString(36);
+  }
+
+  /* ------------------------------------------------------------------
+     Word forms. She meets "plunged" in a case and highlights that, but the
+     word worth learning is "plunge". So the headword on a card is the lemma,
+     and every form she has actually met is kept beside it: either spelling
+     finds the card, and neither one makes a second card asking the same
+     question.
+     ------------------------------------------------------------------ */
+  function formsOf(w) {
+    return Array.isArray(w.forms) ? w.forms : [];
+  }
+
+  function hasForm(w, term) {
+    var t = String(term || "").trim().toLowerCase(), f = formsOf(w), i;
+    if (!t) return false;
+    for (i = 0; i < f.length; i++) if (f[i].toLowerCase() === t) return true;
+    return false;
+  }
+
+  function addForm(w, form) {
+    var f = String(form || "").trim().replace(/\s+/g, " ").slice(0, 80);
+    if (!f || hasForm(w, f)) return;
+    w.forms = formsOf(w);
+    if (w.forms.length < 12) w.forms.push(f);
+  }
+
+  /* Everything except the headword, which is what "met as" shows. */
+  function otherForms(w) {
+    var t = String(w.term || "").toLowerCase(), f = formsOf(w), out = [], i;
+    for (i = 0; i < f.length; i++) if (f[i].toLowerCase() !== t) out.push(f[i]);
+    return out;
+  }
+
+  function seenAsLine(w) {
+    var f = otherForms(w);
+    return f.length ? '<div class="seenas">met as ' + esc(f.join(", ")) + '</div>' : "";
+  }
+
+  /* Wiktionary files "plunged" as nothing but "past tense of plunge", so the
+     card should ask "plunge" and remember she met it as "plunged". A form
+     that earns its own definition is left alone: "whopping" is an adjective
+     in its own right, so pointsTo() refuses to follow it and the trail comes
+     back empty. This renames only -- folding two cards into one waits for a
+     moment when no card is on screen. Returns true if the headword changed. */
+  function relemma(w) {
+    if (!w.via) return false;
+    var hops = String(w.via).split("\u2192");
+    var lemma = (hops[hops.length - 1] || "").trim();
+    var was = String(w.term || "").trim();
+    if (!lemma || lemma.toLowerCase() === was.toLowerCase()) return false;
+    addForm(w, was);
+    addForm(w, lemma);
+    w.term = lemma;
+    w.id = idOf(lemma);
+    /* The recording and the IPA were fetched for the form she met, so a card
+       that now reads "deem" would have shown /di:md/ and said "deemed".
+       Dropping them has the pair fetched again for the headword. */
+    w.say = null;
+    /* Looked up under the old form, so it answered the wrong headword. */
+    w.plain = null;
+    return true;
+  }
+
+  /* Two cards asking the same word, which happens when "plunged" was added
+     before "plunge" had been looked up. The card added first wins: it keeps
+     its box and due date, so no progress is thrown away, and it inherits the
+     other's forms, source, note and -- if it has none of its own -- senses. */
+  function foldDuplicates() {
+    var seen = {}, keep = [], i, k, o, w, f;
+    for (i = db.words.length - 1; i >= 0; i--) {   /* oldest first */
+      w = db.words[i];
+      o = seen[w.id];
+      if (!o) { seen[w.id] = w; keep.unshift(w); continue; }
+      f = formsOf(w);
+      for (k = 0; k < f.length; k++) addForm(o, f[k]);
+      addForm(o, w.term);
+      if (w.src && w.src.s && !(o.src && o.src.s)) o.src = w.src;
+      if (w.note && !o.note) o.note = w.note;
+      if (!o.senses.length && w.senses.length) {
+        o.senses = w.senses; o.via = w.via || ""; o.looked = true;
+      }
+    }
+    if (keep.length === db.words.length) return false;
+    db.words = keep;
+    session = session.filter(function (x) { return db.words.indexOf(x) >= 0; });
+    return true;
   }
 
   /* ------------------------------------------------------------------
@@ -372,6 +604,170 @@
     return out;
   }
 
+  /* ------------------------------------------------------------------
+     How it sounds.
+
+     The same dictionary that supplies an example also carries recordings and
+     an IPA spelling. The recordings are named by accent — salient-us.mp3,
+     salient-uk.mp3 — so the American one is picked by its suffix and the
+     others are only a fallback. A word with no recording at all is still
+     spoken, by the browser's own voice, which every machine has.
+     ------------------------------------------------------------------ */
+  function fromPhonetics(json) {
+    if (!json || !json.length) return null;
+    var us = "", any = "", ipa = "", i, j, ps;
+    for (i = 0; i < json.length; i++) {
+      if (!ipa && json[i].phonetic) ipa = json[i].phonetic;
+      ps = json[i].phonetics || [];
+      for (j = 0; j < ps.length; j++) {
+        if (!ipa && ps[j].text) ipa = ps[j].text;
+        var a = ps[j].audio || "";
+        if (!a) continue;
+        if (/-us\.mp3$/i.test(a)) { if (!us) us = a; }
+        else if (!any) any = a;
+      }
+    }
+    var src = us || any;
+    if (!src && !ipa) return null;
+    return { audio: src, ipa: ipa, us: !!us };
+  }
+
+  /* ------------------------------------------------------------------
+     Turkish.
+
+     Wiktionary keeps translation tables written by people, one per sense, so
+     "prudent" gives ihtiyatlı for the careful sense and tutumlu for the
+     thrifty one — the pairing is the useful part and it is free. Where there
+     is no table, Wikipedia's language links name the Turkish article for the
+     same thing, which is how a term like "hedge fund" gets an answer.
+
+     Machine translation was tried and rejected: it returned çekirdek for
+     quorum and ubikuitöz for ubiquitous. A wrong answer in a vocabulary tool
+     is worse than no answer, so where neither source knows, it says so.
+     ------------------------------------------------------------------ */
+  var WIKT_RAW = "https://en.wiktionary.org/w/api.php?action=parse&prop=wikitext"
+               + "&format=json&origin=*&redirects=1&page=";
+  var WIKI_LL  = "https://en.wikipedia.org/w/api.php?action=query&prop=langlinks"
+               + "&lllang=tr&format=json&origin=*&redirects=1&titles=";
+
+  function trBlocks(wikitext) {
+    var out = [], re = /\{\{trans-top\|([^}]*)\}\}([\s\S]*?)\{\{trans-bottom\}\}/g, m;
+    while ((m = re.exec(wikitext))) {
+      var sense = m[1].replace(/^id=[^|]*\|/, "").trim();
+      var inner = m[2], t = /\{\{t\+?\|tr\|([^}|]+)/g, hit, seen = {}, words = [];
+      while ((hit = t.exec(inner))) {
+        var word = hit[1].trim();
+        if (word && !seen[word]) { seen[word] = 1; words.push(word); }
+      }
+      if (words.length) out.push({ sense: sense, words: words.slice(0, 6) });
+      if (out.length >= 4) break;
+    }
+    return out;
+  }
+
+  function viaTurkish(term) {
+    return getJSON(WIKT_RAW + encodeURIComponent(term))
+      .then(function (j) {
+        var wt = j && j.parse && j.parse.wikitext ? j.parse.wikitext["*"] : "";
+        return trBlocks(wt || "");
+      })
+      .catch(function () { return []; })
+      .then(function (blocks) {
+        if (blocks.length) return { blocks: blocks, one: "", from: "Wiktionary" };
+        return getJSON(WIKI_LL + encodeURIComponent(term))
+          .then(function (j) {
+            var pages = (j && j.query && j.query.pages) || {}, k, p;
+            for (k in pages) { p = pages[k]; break; }
+            var ll = p && p.langlinks && p.langlinks[0] && p.langlinks[0]["*"];
+            return ll ? { blocks: [], one: ll, from: "Wikipedia" }
+                      : { blocks: [], one: "", from: "" };
+          })
+          .catch(function () { return { blocks: [], one: "", from: "" }; });
+      });
+  }
+
+  var translating = {};
+
+  function ensureTurkish(w, after) {
+    if (w.tr || translating[w.id]) return;
+    translating[w.id] = 1;
+    /* The word the dictionary actually settled on: "Evals" resolves through
+       eval to evaluation, and that is the one with a translation table. */
+    var term = w.term;
+    if (w.via) {
+      var hops = w.via.split("\u2192");
+      term = hops[hops.length - 1].trim() || w.term;
+    }
+    viaTurkish(term.toLowerCase()).then(function (tr) {
+      delete translating[w.id];
+      w.tr = tr;
+      save();
+      if (after) after();
+    });
+  }
+
+  var saying = {};
+
+  /* Kept apart from the definition lookup on purpose: words saved before this
+     existed are already marked looked-up, so asking there would have left all
+     of them silent for good. */
+  function ensureSay(w, after) {
+    /* Settled already, or still in flight: nothing changed, so do not call
+       back. The callback redraws, the redraw asks again, and an answer that
+       arrives instantly turns that into a loop with no end. */
+    if (w.say || saying[w.id]) return;
+    /* The dictionary has no entry for a phrase, so there is no recording to
+       fetch — but it still gets a settled answer, or the guard above never
+       becomes true and every redraw asks again. The browser can still say it. */
+    if (/\s/.test(w.term)) {
+      w.say = { audio: "", ipa: "", us: false };
+      save();
+      if (after) after();
+      return;
+    }
+    saying[w.id] = 1;
+    getJSON(DICT + encodeURIComponent(w.term.trim().toLowerCase()))
+      .then(fromPhonetics)
+      .catch(function () { return null; })
+      .then(function (say) {
+        delete saying[w.id];
+        w.say = say || { audio: "", ipa: "", us: false };
+        save();
+        if (after) after();
+      });
+  }
+
+  var player = null;
+
+  function speak(w) {
+    var src = w.say && w.say.audio;
+    if (src) {
+      try {
+        if (player) player.pause();
+        player = new Audio(src);
+        player.play().catch(function () { voice(w.term); });
+        return;
+      } catch (e) { /* fall through to the browser's voice */ }
+    }
+    voice(w.term);
+  }
+
+  /* No recording: say it with the browser. Prefer an American voice, since
+     that is the one she is listening for. */
+  function voice(term) {
+    try {
+      if (!window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(term);
+      u.lang = "en-US";
+      var vs = window.speechSynthesis.getVoices() || [];
+      for (var i = 0; i < vs.length; i++) {
+        if (vs[i].lang === "en-US") { u.voice = vs[i]; break; }
+      }
+      window.speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+
   function getJSON(url) {
     return fetch(url, { mode: "cors" }).then(function (r) {
       if (!r.ok) throw new Error(r.status);
@@ -382,6 +778,75 @@
   function wiktionary(term) {
     var slug = encodeURIComponent(String(term).trim().replace(/\s+/g, "_"));
     return getJSON(WIKT + slug).then(fromWiktionary).catch(function () { return []; });
+  }
+
+  /* ------------------------------------------------------------------
+     Plain English. The full dictionary explains "deem" as "to adjudge as a
+     conclusion", which is no help at all to someone meeting both words for
+     the first time. Simple English Wiktionary writes for learners -- "If you
+     deem something safe, necessary, important, etc., you judge it to be that
+     way" -- and throws in example sentences.
+
+     Its REST definition endpoint is not deployed there (501), so this goes
+     through the action API, whose extract is plain text: a "== Verb =="
+     heading, a definition, then any number of examples using the word. A
+     line opening with a usage label in brackets, or with one of the frames
+     these entries are written in, starts a new sense; the line after a
+     definition is its example. Matching on "The" or "A" would have read
+     "The FBI vets all nominees" as a definition of its own.
+     ------------------------------------------------------------------ */
+  var SIMPLE = "https://simple.wiktionary.org/w/api.php?action=query&prop=extracts"
+             + "&explaintext=1&format=json&origin=*&titles=";
+
+  var POS_HEAD = new RegExp("^==\\s*(Noun|Verb|Adjective|Adverb|Interjection|"
+               + "Preposition|Conjunction|Pronoun|Determiner|Phrase|Idiom)\\s*==$", "i");
+  var FRAME = /^(if |when |you use )/i;
+  var ASIDE = /^(synonyms?|antonyms?|related words?|usage|other words?|notes?)\s*:/i;
+
+  function fromSimple(extract) {
+    var lines = String(extract || "").split("\n"), out = [], pos = "", last = null, i, t, m;
+    for (i = 0; i < lines.length; i++) {
+      t = lines[i].trim();
+      if (!t) continue;
+      m = POS_HEAD.exec(t);
+      if (m) { pos = m[1]; last = null; continue; }
+      /* any other heading -- Pronunciation, Etymology -- ends the section */
+      if (t.charAt(0) === "=") { pos = ""; last = null; continue; }
+      if (!pos || ASIDE.test(t)) continue;
+      if (!last || t.charAt(0) === "(" || FRAME.test(t)) {
+        last = { pos: pos, text: t, example: "" };
+        out.push(last);
+      } else if (!last.example) {
+        last.example = t;
+      }
+    }
+    return out;
+  }
+
+  function viaSimple(term) {
+    var slug = encodeURIComponent(String(term).trim().replace(/\s+/g, "_"));
+    return getJSON(SIMPLE + slug).then(function (d) {
+      var pages = d && d.query && d.query.pages, k, p = null;
+      for (k in pages) {
+        if (Object.prototype.hasOwnProperty.call(pages, k)) { p = pages[k]; break; }
+      }
+      return (p && p.extract) ? fromSimple(p.extract) : [];
+    }).catch(function () { return []; });
+  }
+
+  /* Asked for once the headword has settled, so "plunged" is looked up as
+     "plunge". An empty array means asked and not found, which is why the
+     guard tests for the property rather than its length. */
+  var plaining = {};
+  function ensurePlain(w, after) {
+    if (w.plain || plaining[w.id]) return;
+    plaining[w.id] = 1;
+    viaSimple(w.term).then(function (senses) {
+      delete plaining[w.id];
+      w.plain = senses;
+      save();
+      if (after) after();
+    });
   }
 
   /* A sense that is only a pointer: "plural of eval" and nothing else. One
@@ -404,12 +869,25 @@
         return viaWiktionary(term.toLowerCase(), trail, hops);
       }
       if (!senses.length) return { senses: [], trail: trail };
-      var next = "";
-      for (var i = 0; i < senses.length && !next; i++) next = pointsTo(senses[i]);
+      /* Wiktionary lists the primary sense first, and only that one decides.
+         "Deemed" leads with "simple past and past participle of deem", so
+         the road to a meaning runs through "deem". "Mere" leads with "Just,
+         only; no more than" -- a meaning in its own right -- so the dialect
+         sense nine places down reading "Synonym of inlet, an arm of the sea"
+         is left where it is. Reading the whole list instead of just the head
+         answered a different word entirely. */
+      var next = pointsTo(senses[0]);
       if (next && hops < 2 && trail.indexOf(next) < 0) {
         trail = trail.concat([next]);
         return viaWiktionary(next, trail, hops + 1).then(function (r) {
-          return r.senses.length ? r : { senses: senses, trail: trail };
+          if (!r.senses.length) return { senses: senses, trail: trail };
+          /* Whatever the form means in its own right is kept after what it
+             points at: "vetted" points at "vet" and also carries "having
+             undergone an investigation and been approved", worth having on
+             the card. Pure pointers are dropped -- "simple past of vet"
+             says nothing once "vet" itself is there. */
+          var own = senses.filter(function (x) { return !pointsTo(x); });
+          return { senses: r.senses.concat(own), trail: trail };
         });
       }
       return { senses: senses, trail: trail };
@@ -430,8 +908,12 @@
   /* Returns a promise for the senses; never rejects — a word nobody
      knows is kept as it is rather than guessed at. */
   function lookup(term) {
+    /* Where the pointer chain ended up: "Evals" resolves to "evaluation", and
+       the second dictionary should be asked about that, not the original. */
+    var resolved = term.trim();
     return viaWiktionary(term.trim())
       .then(function (r) {
+        if (r.trail && r.trail.length) resolved = r.trail[r.trail.length - 1];
         if (r.senses.length) {
           if (r.trail.length > 1) r.senses.via = r.trail.join(" \u2192 ");
           return r.senses;
@@ -453,7 +935,7 @@
         if (senses.length && senses[0].pos === "Wikipedia") return senses;
         /* one word only: the second source does not do phrases */
         if (/\s/.test(term.trim())) return senses;
-        return getJSON(DICT + encodeURIComponent(term.trim()))
+        return getJSON(DICT + encodeURIComponent(resolved))
           .then(fromDictionaryApi)
           .then(function (more) {
             if (!senses.length) return more;
@@ -478,8 +960,12 @@
          lives on the word */
       w.via = senses.via || "";
       w.looked = true;
+      var renamed = relemma(w);
+      /* Folding takes a card away, so it waits until none is on screen. */
+      var folded = (renamed && !session.length) ? foldDuplicates() : false;
       save();
       if (after) after();
+      if (renamed || folded) { counts(); renderAll(); renderDecks(); }
     });
   }
 
@@ -491,8 +977,11 @@
   var DAYS = [1, 3, 7, 16, 35];
 
   function grade(w, knew) {
-    w.box = knew ? Math.min(DAYS.length, (w.box || 1) + 1) : 1;
-    w.due = plus(DAYS[w.box - 1]);
+    /* Box 1 is "new or just missed". Boxes 2..6 carry the five intervals, so
+       the first word you know comes back in a day and the ladder is actually
+       1, 3, 7, 16, 35 rather than starting at 3. */
+    w.box = knew ? Math.min(DAYS.length + 1, (w.box || 1) + 1) : 1;
+    w.due = plus(knew ? DAYS[w.box - 2] : DAYS[0]);
     w.seen = (w.seen || 0) + 1;
     save();
   }
@@ -517,13 +1006,31 @@
      Study
      ------------------------------------------------------------------ */
   var session = [], flipped = false, done = 0, total = 0;
+  /* Each answer rebuilds the card, which throws away whatever was
+     focused. Keep the keyboard where she left it. */
+  var keyboarding = false;
+  /* How many times a card has come round this sitting. Kept beside the words
+     rather than on them, so it never reaches storage or an export. */
+  var misses = {};
+  var CAP = 30;
+  /* Whether the note editor is open — on the card, and on a row of the list.
+     A word neither dictionary knows was always kept and marked, but until now
+     there was nowhere to write what it actually means. */
+  var noteOpen = false;
+  var editingNote = null;
+  var trOpen = false;        /* is the Turkish showing on this card? */
+  var fullOpen = false;      /* the precise senses instead of the plain ones */
 
   function startSession() {
-    session = dueNow().slice(0, 30);
+    /* A word renamed to its lemma may now ask the same question as one
+       already here, and this is the one moment with no card on screen. */
+    if (foldDuplicates()) save();
+    session = dueNow().slice(0, CAP);
     total = session.length;
     done = 0;
     flipped = false;
-    for (var i = 0; i < session.length; i++) session[i]._miss = 0;
+    misses = {};
+    counts();      /* the badge mirrors the sitting, so it changes on Start */
     renderDue();
   }
 
@@ -541,7 +1048,8 @@
       el.innerHTML = '<div class="card"><p class="empty"><b>'
         + (nd ? "Ready when you are" : "Nothing due today")
         + '</b>' + (nd
-            ? nd + ' word' + (nd === 1 ? '' : 's') + ' waiting.'
+            ? nd + ' word' + (nd === 1 ? '' : 's') + ' waiting'
+              + (nd > CAP ? ' \u2014 ' + CAP + ' in this sitting.' : '.')
             : 'You have studied everything that came up. '
               + db.words.length + ' word' + (db.words.length === 1 ? '' : 's') + ' in total.')
         + '</p>'
@@ -559,16 +1067,24 @@
        because a card coming round again makes that arithmetic a lie. */
     var html = '<div class="study">'
       + '<div class="progress">' + done + ' done \u00b7 ' + session.length + ' left'
-      + (w._miss ? ' \u00b7 again' : '') + '</div>';
+      + (misses[w.id] ? ' \u00b7 again' : '') + '</div>';
 
     if (!flipped) {
       html += '<div class="face" id="face" tabindex="0" role="button" '
             + 'aria-label="Show the meaning">'
+            + '<div class="termrow">'
             + '<div class="term">' + esc(w.term) + '</div>'
-            + '<div class="tap">Tap to see the meaning</div></div>';
+            + sayBtn(w)
+            + '</div>'
+            + seenAsLine(w)
+            + '<div class="tap">Tap, or press space, to see the meaning</div></div>';
     } else {
-      html += '<div class="face back">'
+      html += '<div class="face back" id="back" tabindex="0" role="button" '
+            + 'aria-label="Turn the card back to the word">'
+            + '<div class="termrow">'
             + '<div class="term">' + esc(w.term) + '</div>'
+            + sayBtn(w)
+            + '</div>'
             + '<div class="pill" style="align-self:flex-start;margin-top:2px">'
             + esc(w.deck || "Inbox") + '</div>';
       if (!w.looked && !w.senses.length) {
@@ -580,49 +1096,245 @@
         if (w.via) {
           html += '<div class="via">' + esc(w.via) + '</div>';
         }
-        for (var i = 0; i < w.senses.length; i++) {
-          var s = w.senses[i];
+        /* Plain English when there is any, the precise senses when she asks
+           for them or when Simple Wiktionary has never heard of the word. */
+        var plain = Array.isArray(w.plain) ? w.plain : [];
+        var shown = (plain.length && !fullOpen) ? plain : w.senses;
+        for (var i = 0; i < shown.length; i++) {
+          var s = shown[i];
           html += '<div class="sense">'
                 + (s.pos ? '<div class="pos">' + esc(s.pos) + '</div>' : '')
                 + '<p class="def">' + esc(s.text) + '</p>'
                 + (s.example ? '<p class="eg">&ldquo;' + esc(s.example) + '&rdquo;</p>' : '')
                 + '</div>';
         }
+        if (plain.length) {
+          html += '<div class="trfrom">'
+                + (fullOpen ? 'Wiktionary' : 'Plain English \u00b7 Simple Wiktionary')
+                + '</div>';
+        }
+      }
+      if (trOpen) {
+        html += '<div class="yournote tr"><b>T\u00fcrk\u00e7e</b>';
+        if (!w.tr) {
+          html += '<span class="notetext" style="color:var(--muted)">'
+                + 'Bak\u0131l\u0131yor\u2026</span>';
+        } else if (w.tr.blocks && w.tr.blocks.length) {
+          for (var ti = 0; ti < w.tr.blocks.length; ti++) {
+            var tb = w.tr.blocks[ti];
+            html += '<div class="trline"><span class="trwords">'
+                  + esc(tb.words.join(", ")) + '</span>'
+                  + (tb.sense ? '<span class="trsense">' + esc(tb.sense) + '</span>' : '')
+                  + '</div>';
+          }
+          html += '<div class="trfrom">Wiktionary</div>';
+        } else if (w.tr.one) {
+          html += '<div class="trline"><span class="trwords">' + esc(w.tr.one) + '</span>'
+                + '<span class="trsense">the Turkish article for the same thing</span></div>'
+                + '<div class="trfrom">Wikipedia</div>';
+        } else {
+          html += '<span class="notetext" style="color:var(--warn)">'
+                + 'Neither Wiktionary nor Wikipedia has a Turkish entry for this '
+                + 'one. Nothing invented \u2014 write your own below.</span>';
+        }
+        html += '</div>';
+      }
+
+      if (noteOpen) {
+        html += '<div class="yournote"><b>Your note</b>'
+              + '<textarea id="noteBox" placeholder="What it means in your own '
+              + 'words, a way to remember it, the Turkish for it\u2026">'
+              + esc(w.note || "") + '</textarea>'
+              + '<div class="noteacts">'
+              + '<button class="btn-q" id="noteSave">Save</button>'
+              + '<button class="btn-q" id="noteCancel">Cancel</button></div></div>';
+      } else if (w.note) {
+        html += '<div class="yournote"><b>Your note</b>'
+              + '<span class="notetext">' + esc(w.note) + '</span>'
+              + '<div class="noteacts"><button class="btn-q" id="noteBtn">Edit note</button>'
+              + trButton(w) + fullButton(w) + '</div>'
+              + '</div>';
+      } else {
+        html += '<div class="noteacts" style="margin-top:12px">'
+              + '<button class="btn-q" id="noteBtn">Add a note</button>'
+              + trButton(w) + fullButton(w) + '</div>';
       }
       if (w.src && w.src.sentence) {
+        var link = safeUrl(w.src.url);
         html += '<div class="ctx"><b>Where you found it</b>'
               + esc(w.src.sentence)
-              + (w.src.url ? '<br><a href="' + esc(w.src.url) + '" target="_blank" rel="noopener">'
-                           + esc(w.src.title || w.src.url).slice(0, 70) + ' &rarr;</a>' : '')
+              + (link ? '<br><a href="' + esc(link) + '" target="_blank" rel="noopener">'
+                      + esc(w.src.title || link).slice(0, 70) + ' &rarr;</a>' : '')
               + '</div>';
       }
       html += '</div>'
             + '<div class="grade">'
             + '<button class="no" id="gNo">Not yet</button>'
             + '<button class="yes" id="gYes">Knew it</button>'
-            + '</div>';
+            + '</div>'
+            + '<div class="keys">1 not yet \u00b7 2 knew it</div>';
     }
     html += '</div>';
     el.innerHTML = html;
 
     if (!flipped) {
       var f = $("face");
-      f.addEventListener("click", flip);
-      f.addEventListener("keydown", function (e) {
-        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); }
+      f.addEventListener("click", function (e) {
+        /* the speaker is on this face too now, and pressing it is not an
+           answer — hearing a word is part of trying to remember it */
+        if (e.target.closest && e.target.closest("button")) return;
+        flip();
       });
+      f.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+          /* Stop here. The document handler reads `flipped` to decide what a
+             key means, and by the time the event reached it this flip had
+             already changed that answer — so the one press turned the card
+             over and straight back again. */
+          e.preventDefault(); e.stopPropagation();
+          keyboarding = true; flip();
+        }
+      });
+      if (keyboarding) f.focus();
       /* fetch while she is still looking at the front, so the back is
          ready by the time she turns it over */
       ensureLooked(w, function () { if (flipped) renderDue(); });
+      /* and the recording, so the speaker on this face works straight away.
+         Redrawn only once, when the answer lands: by then w.say is set, so
+         the next pass does not ask again. */
+      if (!w.say) {
+        ensureSay(w, function () {
+          if (!flipped && session[0] === w) renderDue();
+        });
+      }
     } else {
       $("gNo").addEventListener("click", function () { answer(false); });
       $("gYes").addEventListener("click", function () { answer(true); });
+
+      /* Turning it back. Not from the note editor, a link, or any button —
+         those are things she came to the back of the card to use. */
+      $("back").addEventListener("click", function (e) {
+        if (e.target.closest("button, a, textarea, select, input")) return;
+        unflip();
+      });
+      $("back").addEventListener("keydown", function (e) {
+        if (e.target !== this) return;
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault(); e.stopPropagation();
+          keyboarding = true; unflip();
+        }
+      });
+
+      /* Fetched when the back is shown, so a word saved long before this
+         existed gets its recording the first time she turns it over. Guarded
+         the way ensureLooked is: without the guard the callback fires at once
+         for a word that already has one, redraws the back, and asks again —
+         a redraw that never ends. */
+      if (!w.say) ensureSay(w, function () { if (flipped) renderDue(); });
+      /* Only once the headword has settled, or it asks about "plunged". */
+      if (w.looked && !w.plain) {
+        ensurePlain(w, function () { if (flipped) renderDue(); });
+      }
+      if ($("fullBtn")) {
+        $("fullBtn").addEventListener("click", function () {
+          fullOpen = !fullOpen; renderDue();
+        });
+      }
+      if ($("noteBtn")) {
+        $("noteBtn").addEventListener("click", function () { noteOpen = true; renderDue(); });
+      }
+      if ($("trBtn")) {
+        $("trBtn").addEventListener("click", function () {
+          trOpen = !trOpen;
+          renderDue();
+          /* Fetched on the press, not on every flip: most cards are turned
+             over without ever wanting it. Cached afterwards, so the second
+             press is instant. */
+          if (trOpen && !w.tr) {
+            ensureTurkish(w, function () { if (flipped && trOpen) renderDue(); });
+          }
+        });
+      }
+      if ($("noteSave")) {
+        $("noteSave").addEventListener("click", function () {
+          w.note = $("noteBox").value.trim().slice(0, 2000);
+          save(); noteOpen = false; renderDue(); renderAll();
+          toast(w.note ? "Note saved." : "Note cleared.");
+        });
+        $("noteCancel").addEventListener("click", function () {
+          noteOpen = false; renderDue();
+        });
+        $("noteBox").focus();
+      }
+      /* Do not pull focus out of the note she is typing. */
+      if (keyboarding && !noteOpen) $("gYes").focus();
     }
   }
 
   function flip() {
     flipped = true;
+    noteOpen = false;
+    trOpen = false;
+    fullOpen = false;
     renderDue();
+  }
+
+  function unflip() {
+    flipped = false;
+    noteOpen = false;
+    trOpen = false;
+    fullOpen = false;
+    renderDue();
+  }
+
+  /* Studying without the mouse. Tabbing to the card meant passing Theme,
+     Export, Clear all and four tabs first, and there was no way at all to
+     grade from the keyboard. */
+  document.addEventListener("keydown", function (e) {
+    var t = e.target.tagName;
+    if (t === "INPUT" || t === "TEXTAREA" || t === "SELECT" || t === "BUTTON") return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (!session.length) return;
+
+    if (!flipped) {
+      /* the card's own handler covers it when the card itself has focus */
+      if (e.target.id === "face") return;
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault(); keyboarding = true; flip();
+      }
+      return;
+    }
+    if (e.target.id === "back") return;     /* its own handler has it */
+    if (e.key === " ") { e.preventDefault(); keyboarding = true; unflip(); return; }
+    if (e.key === "1" || e.key === "ArrowLeft") {
+      e.preventDefault(); keyboarding = true; answer(false);
+    } else if (e.key === "2" || e.key === "ArrowRight" || e.key === "Enter") {
+      e.preventDefault(); keyboarding = true; answer(true);
+    }
+  });
+
+  /* The speaker, and the IPA beside it when the dictionary gave one. Its own
+     button rather than a click on the word, because the word itself now turns
+     the card back over. */
+  function trButton(w) {
+    return '<button class="btn-q' + (trOpen ? ' is-on' : '') + '" id="trBtn">'
+         + (trOpen ? 'Hide T\u00fcrk\u00e7e' : 'T\u00fcrk\u00e7e') + '</button>';
+  }
+
+  /* Only offered when there is a choice to make: no plain entry means the
+     precise senses are already what is on the card. */
+  function fullButton(w) {
+    if (!(Array.isArray(w.plain) && w.plain.length)) return '';
+    return '<button class="btn-q' + (fullOpen ? ' is-on' : '') + '" id="fullBtn">'
+         + (fullOpen ? 'Plain English' : 'Full dictionary') + '</button>';
+  }
+
+  function sayBtn(w) {
+    var ipa = w.say && w.say.ipa ? '<span class="ipa">' + esc(w.say.ipa) + '</span>' : '';
+    return '<div class="say">'
+         + '<button class="speak" data-say="' + esc(w.id) + '" '
+         + 'aria-label="Hear ' + esc(w.term) + '" title="Hear it">'
+         + '<span aria-hidden="true">\u25b6</span></button>' + ipa + '</div>';
   }
 
   function answer(knew) {
@@ -631,12 +1343,15 @@
     if (knew) {
       done++;
     } else {
-      w._miss = (w._miss || 0) + 1;
+      misses[w.id] = (misses[w.id] || 0) + 1;
       /* Three times round is enough. It is already scheduled for tomorrow,
          and a card that cannot be escaped is a trap rather than a drill. */
-      if (w._miss < 3) session.push(w); else done++;
+      if (misses[w.id] < 3) session.push(w); else done++;
     }
     flipped = false;
+    noteOpen = false;
+    trOpen = false;
+    fullOpen = false;
     counts();
     renderDue();
   }
@@ -648,11 +1363,22 @@
     var deck = $("fDeck").value, sort = $("fSort").value;
     var rows = db.words.filter(function (w) { return !deck || (w.deck || "Inbox") === deck; });
 
+    /* Newest first, and always as the tiebreak: a comparator that never
+       returns 0 leaves equal rows in whatever order the engine happens to
+       produce, which looks like a shuffle. localeCompare so that naive and
+       naïve sit together rather than ï sorting after z. */
+    function newest(a, b) {
+      var x = a.added || "", y = b.added || "";
+      return x < y ? 1 : x > y ? -1 : 0;
+    }
     rows.sort(function (a, b) {
-      if (sort === "term") return a.term.toLowerCase() < b.term.toLowerCase() ? -1 : 1;
-      if (sort === "due") return (a.due || "") < (b.due || "") ? -1 : 1;
-      if (sort === "box") return (a.box || 1) - (b.box || 1);
-      return (a.added || "") < (b.added || "") ? 1 : -1;
+      var r = 0;
+      if (sort === "term") r = a.term.localeCompare(b.term, undefined, { sensitivity: "base" });
+      else if (sort === "due") {
+        var p = a.due || "", q = b.due || "";
+        r = p < q ? -1 : p > q ? 1 : 0;
+      } else if (sort === "box") r = (a.box || 1) - (b.box || 1);
+      return r || newest(a, b);
     });
 
     $("allNote").textContent = rows.length + (rows.length === 1 ? " word" : " words");
@@ -662,32 +1388,61 @@
       return;
     }
 
-    var h = '<table><thead><tr><th>Word</th><th>Deck</th><th>Box</th>'
-          + '<th>Due</th><th></th></tr></thead><tbody>';
+    var deckNames = decks().map(function (d) { return d.name; });
+    if (deckNames.indexOf("Inbox") < 0) deckNames.push("Inbox");
+
+    var h = '<div class="tblwrap"><table><thead><tr><th>Word</th><th>Deck</th>'
+          + '<th class="col-box">Box</th><th class="col-due">Due</th>'
+          + '<th></th></tr></thead><tbody>';
     for (var i = 0; i < rows.length; i++) {
       var w = rows[i];
       var first = w.senses && w.senses.length ? w.senses[0].text : "";
       h += '<tr>'
          + '<td><span class="w-term">' + esc(w.term) + '</span>'
-         + (first ? '<span class="w-def">' + esc(first).slice(0, 110) + '</span>' : '')
+         + ' <button class="speak sm" data-say="' + esc(w.id) + '" '
+         + 'aria-label="Hear ' + esc(w.term) + '" title="Hear it">'
+         + '<span aria-hidden="true">\u25b6</span></button>'
+         + (w.say && w.say.ipa ? '<span class="ipa sm">' + esc(w.say.ipa) + '</span>' : '')
+         + (otherForms(w).length
+             ? '<span class="w-form">' + esc(otherForms(w).join(", ")) + '</span>' : '')
+         /* slice before escaping, or a 110th character lands mid-entity */
+         + (first ? '<span class="w-def">' + esc(String(first).slice(0, 110)) + '</span>' : '')
+         + (w.note ? '<span class="w-note">' + esc(String(w.note).slice(0, 110)) + '</span>' : '')
          + '</td>'
-         + '<td>' + deckSelect(w) + '</td>'
-         + '<td class="box-n">' + (w.box || 1) + '/5</td>'
-         + '<td class="w-when">' + esc(w.due || "") + '</td>'
-         + '<td style="text-align:right"><button class="btn-q" data-del="' + esc(w.id)
-         + '" title="Remove this word">Remove</button></td>'
+         + '<td>' + deckSelect(w, deckNames) + '</td>'
+         + '<td class="box-n col-box">' + (w.box || 1) + '/6</td>'
+         + '<td class="w-when col-due">' + esc(w.due || "") + '</td>'
+         + '<td style="text-align:right;white-space:nowrap">'
+         + '<button class="btn-q" data-note="' + esc(w.id) + '" title="Write a note">'
+         + (w.note ? 'Note \u00b7' : 'Note') + '</button> '
+         + '<button class="btn-q" data-del="' + esc(w.id)
+         + '" title="Remove this word" aria-label="Remove this word">'
+         + '<span class="lbl-full">Remove</span>'
+         + '<span class="lbl-tiny" aria-hidden="true">\u2715</span></button></td>'
          + '</tr>';
+
+      if (editingNote === w.id) {
+        h += '<tr class="noterow"><td colspan="5">'
+           + '<textarea id="rowNote" placeholder="What it means in your own '
+           + 'words, a way to remember it, the Turkish for it\u2026">'
+           + esc(w.note || "") + '</textarea>'
+           + '<div class="noteacts">'
+           + '<button class="btn-q" data-note-save="' + esc(w.id) + '">Save</button>'
+           + '<button class="btn-q" data-note-cancel="1">Cancel</button></div></td></tr>';
+      }
     }
-    $("tbl").innerHTML = h + '</tbody></table>';
+    $("tbl").innerHTML = h + '</tbody></table></div>';
   }
 
-  function deckSelect(w) {
-    var list = decks(), cur = w.deck || "Inbox", o = "", i;
-    var names = list.map(function (d) { return d.name; });
-    if (names.indexOf(cur) < 0) names.push(cur);
-    if (names.indexOf("Inbox") < 0) names.push("Inbox");
+  /* The deck list is passed in, not recomputed: decks() walks every word, and
+     calling it once per row made this quadratic — a second and a quarter of
+     frozen page at a few hundred words. */
+  function deckSelect(w, names) {
+    var cur = w.deck || "Inbox", o = "", i;
+    if (names.indexOf(cur) < 0) names = names.concat([cur]);
     for (i = 0; i < names.length; i++) {
-      o += '<option' + (names[i] === cur ? ' selected' : '') + '>' + esc(names[i]) + '</option>';
+      o += '<option value="' + esc(names[i]) + '"'
+         + (names[i] === cur ? ' selected' : '') + '>' + esc(names[i]) + '</option>';
     }
     o += '<option value="__new">New deck…</option>';
     return '<select class="f" data-deck="' + esc(w.id) + '">' + o + '</select>';
@@ -762,7 +1517,7 @@
   function renderAdd() {
     $("p-add").innerHTML =
       '<div class="card">'
-      + '<h2 style="margin:0 0 4px;font:400 19px/1.2 var(--f-serif)">Save a word from anywhere</h2>'
+      + '<h2 style="margin:0 0 4px;font:500 19px/1.2 var(--f-display)">Save a word from anywhere</h2>'
       + '<p class="step" style="font-size:14px;color:var(--muted)">'
       + 'Drag this to your bookmarks bar. Then on any page: select a word and click it. '
       + 'Works in Chrome and Safari.</p>'
@@ -772,7 +1527,7 @@
       + '</div>'
 
       + '<div class="card" style="margin-top:14px">'
-      + '<h2 style="margin:0 0 4px;font:400 19px/1.2 var(--f-serif)">Or type them in</h2>'
+      + '<h2 style="margin:0 0 4px;font:500 19px/1.2 var(--f-display)">Or type them in</h2>'
       + '<p class="step" style="font-size:14px;color:var(--muted)">'
       + 'One word or phrase per line. Paste a list from anywhere.</p>'
       + '<textarea id="paste" placeholder="salient&#10;due diligence&#10;ubiquitous"></textarea>'
@@ -782,7 +1537,7 @@
       + '</div></div>'
 
       + '<div class="card" style="margin-top:14px">'
-      + '<h2 style="margin:0 0 4px;font:400 19px/1.2 var(--f-serif)">Where your words live</h2>'
+      + '<h2 style="margin:0 0 4px;font:500 19px/1.2 var(--f-display)">Where your words live</h2>'
       + '<p class="step" style="font-size:14px;color:var(--muted);margin:0">'
       + 'In this browser, on this device. There is no account and no server holding them. '
       + 'The one thing that leaves is a single word at a time, sent to Wiktionary to ask '
@@ -807,28 +1562,44 @@
     if (deck === "__new") {
       deck = (prompt("Name the new deck") || "").trim() || "Inbox";
     }
-    var added = 0, dup = 0, i;
+    var added = 0, dup = 0, long = 0, junk = 0, i;
     for (i = 0; i < lines.length; i++) {
       var term = lines[i].trim().replace(/\s+/g, " ");
-      if (!term || term.length > 80) continue;
-      if (addWord(term, deck, {})) added++; else dup++;
+      if (!term) continue;
+      /* A whole sentence is not a vocabulary word. Say so rather than
+         dropping the line without a word about it. */
+      if (term.length > 80) { long++; continue; }
+      var r = addWord(term, deck, {});
+      if (r === "added") added++;
+      else if (r === "junk") junk++;
+      else dup++;
     }
-    if (!added && !dup) { toast("Nothing to add."); return; }
+    if (!added && !dup && !long && !junk) { toast("Nothing to add."); return; }
     save();
     $("paste").value = "";
     counts(); renderAll(); renderDecks(); renderDue();
-    toast(added + " added" + (dup ? ", " + dup + " already there" : "") + ".");
+    toast(added + " added" + (dup ? ", " + dup + " already there" : "")
+        + (long ? ", " + long + " too long to be a word" : "")
+        + (junk ? ", " + junk + " with no letters in" : "") + ".");
   }
 
+  /* Returns "added", "dup" or "junk" — the caller counts them separately, so
+     a rejected line is not reported as one she already had. */
   function addWord(term, deck, src) {
+    /* "???" is not a word, and Wiktionary will cheerfully define it. */
+    if (!/[A-Za-z\u00C0-\u024F]/.test(term)) return "junk";
     var id = idOf(term), i;
-    for (i = 0; i < db.words.length; i++) if (db.words[i].id === id) return false;
+    /* Either spelling finds the card: "plunged" is already a form of the
+       "plunge" card here, so it is a duplicate rather than a new word. */
+    for (i = 0; i < db.words.length; i++) {
+      if (db.words[i].id === id || hasForm(db.words[i], term)) return "dup";
+    }
     db.words.unshift({
       id: id, term: term, added: new Date().toISOString(),
       deck: deck || "Inbox", box: 1, due: today(),
-      src: src || {}, senses: [], looked: false, note: ""
+      src: src || {}, senses: [], looked: false, note: "", forms: [term]
     });
-    return true;
+    return "added";
   }
 
   function fillDeckSelect(sel, current, withNew) {
@@ -836,7 +1607,8 @@
     if (names.indexOf("Inbox") < 0) names.unshift("Inbox");
     var o = "", i;
     for (i = 0; i < names.length; i++) {
-      o += '<option' + (names[i] === current ? ' selected' : '') + '>' + esc(names[i]) + '</option>';
+      o += '<option value="' + esc(names[i]) + '"'
+         + (names[i] === current ? ' selected' : '') + '>' + esc(names[i]) + '</option>';
     }
     if (withNew) o += '<option value="__new">New deck…</option>';
     sel.innerHTML = o;
@@ -846,7 +1618,10 @@
      Chrome
      ------------------------------------------------------------------ */
   function counts() {
-    $("nDue").textContent = dueNow().length;
+    /* While a sitting is live the honest answer to "is there anything to do"
+       is what is left in it — not the day's total, which over-promises at the
+       start and reads as "finished" while a card is still on screen. */
+    $("nDue").textContent = session.length || dueNow().length;
     $("nAll").textContent = db.words.length;
     $("nDecks").textContent = decks().length;
   }
@@ -855,7 +1630,11 @@
     var cur = $("fDeck").value;
     var list = decks(), o = '<option value="">All decks</option>', i;
     for (i = 0; i < list.length; i++) {
-      o += '<option' + (list[i].name === cur ? ' selected' : '') + '>'
+      /* The value must be the deck name, not the label: the label carries a
+         count, and a select with no value attribute reports its own text —
+         so filtering compared "Inbox (8)" against "Inbox" and found nothing. */
+      o += '<option value="' + esc(list[i].name) + '"'
+         + (list[i].name === cur ? ' selected' : '') + '>'
          + esc(list[i].name) + ' (' + list[i].n + ')</option>';
     }
     $("fDeck").innerHTML = o;
@@ -880,21 +1659,77 @@
   $("fSort").addEventListener("change", renderAll);
 
   document.addEventListener("click", function (e) {
-    var del = e.target.getAttribute && e.target.getAttribute("data-del");
+    /* closest, not the target itself: a button with a span inside it would
+       otherwise swallow the click, because the span carries no attribute. */
+    var get = function (k) {
+      var el = e.target.closest ? e.target.closest("[" + k + "]") : null;
+      return el ? el.getAttribute(k) : null;
+    };
+
+    var sayId = get("data-say");
+    if (sayId) {
+      for (var si = 0; si < db.words.length; si++) {
+        if (db.words[si].id === sayId) {
+          var sw = db.words[si];
+          /* Nothing fetched yet — get it, then play it, so the first press
+             works rather than teaching her the button is broken. */
+          if (!sw.say) ensureSay(sw, function () { speak(sw); renderAll(); renderDue(); });
+          else speak(sw);
+          break;
+        }
+      }
+      return;
+    }
+
+    var noteId = get("data-note");
+    if (noteId) {
+      editingNote = (editingNote === noteId) ? null : noteId;
+      renderAll();
+      if (editingNote && $("rowNote")) $("rowNote").focus();
+      return;
+    }
+    var saveId = get("data-note-save");
+    if (saveId) {
+      var box = $("rowNote"), k;
+      for (k = 0; k < db.words.length; k++) {
+        if (db.words[k].id === saveId) {
+          db.words[k].note = box ? box.value.trim().slice(0, 2000) : "";
+          toast(db.words[k].note ? "Note saved." : "Note cleared.");
+        }
+      }
+      save(); editingNote = null; renderAll(); renderDue();
+      return;
+    }
+    if (get("data-note-cancel")) { editingNote = null; renderAll(); return; }
+
+    var del = get("data-del");
     if (del) {
       db.words = db.words.filter(function (w) { return w.id !== del; });
       session = session.filter(function (w) { return w.id !== del; });
-      save(); counts(); fillFilter(); renderAll(); renderDecks();
+      if (editingNote === del) editingNote = null;
+      /* Turn the study card back over. Leaving it flipped showed the next
+         word's back, and the lookup only fires from the front, so that
+         card sat on "Looking it up..." for good. */
+      flipped = false;
+      save(); counts(); fillFilter(); renderAll(); renderDecks(); renderDue();
       toast("Removed.");
       return;
     }
-    var ren = e.target.getAttribute && e.target.getAttribute("data-rename");
+    var ren = get("data-rename");
     if (ren) {
       var name = (prompt("Rename “" + ren + "” to", ren) || "").trim();
       if (!name || name === ren) return;
+      /* Renaming onto a name that exists merges the two decks, and there is
+         no undo. Ask rather than let it happen quietly. */
+      var taken = false, dl = decks(), di;
+      for (di = 0; di < dl.length; di++) if (dl[di].name === name) taken = true;
+      var moving = 0;
+      db.words.forEach(function (w) { if ((w.deck || "Inbox") === ren) moving++; });
+      if (taken && !confirm('“' + name + '” already exists. Merge '
+            + moving + ' word' + (moving === 1 ? '' : 's') + ' into it?')) return;
       db.words.forEach(function (w) { if ((w.deck || "Inbox") === ren) w.deck = name; });
-      save(); renderDecks(); fillFilter(); renderAll();
-      toast("Renamed.");
+      save(); renderDecks(); fillFilter(); renderAll(); counts();
+      toast(taken ? "Merged." : "Renamed.");
     }
   });
 
@@ -930,7 +1765,63 @@
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
   });
 
+  /* The other half of Export. Everything lives in one browser, so without
+     this the export file is a dead end and a cleared browser loses the lot.
+     Nothing already here is overwritten: an import can only add. */
+  $("import").addEventListener("click", function () {
+    if (DEMO) { toast("This is the demo \u2014 import is off here."); return; }
+    $("file").click();
+  });
+
+  $("file").addEventListener("change", function (e) {
+    var f = e.target.files && e.target.files[0];
+    e.target.value = "";                 /* so the same file can be picked twice */
+    if (!f) return;
+    if (f.size > 8 * 1024 * 1024) { toast("That file is too big to be a word list."); return; }
+
+    var r = new FileReader();
+    r.onerror = function () { toast("Could not read that file."); };
+    r.onload = function () {
+      var parsed;
+      try { parsed = JSON.parse(String(r.result)); }
+      catch (err) { toast("That is not a vocabulary export \u2014 it is not JSON."); return; }
+
+      var list = normalize(parsed && parsed.words);
+      if (!list.length) { toast("No words in that file."); return; }
+
+      var have = {}, i, ff, k;
+      for (i = 0; i < db.words.length; i++) {
+        have[db.words[i].id] = 1;
+        /* an imported "plunged" is already here as a form of "plunge" */
+        ff = formsOf(db.words[i]);
+        for (k = 0; k < ff.length; k++) have[idOf(ff[k])] = 1;
+      }
+
+      var added = 0, skipped = 0;
+      for (i = 0; i < list.length; i++) {
+        if (have[list[i].id]) { skipped++; continue; }
+        have[list[i].id] = 1;
+        db.words.unshift(list[i]);
+        added++;
+      }
+
+      if (!added) {
+        toast("Nothing new \u2014 all " + skipped + " of those are already here.");
+        return;
+      }
+      save();
+      counts(); fillFilter(); renderAll(); renderDecks(); renderDue();
+      toast(added + " word" + (added === 1 ? "" : "s") + " imported"
+          + (skipped ? ", " + skipped + " already here and left alone" : "") + ".");
+    };
+    r.readAsText(f);
+  });
+
   $("wipe").addEventListener("click", function () {
+    /* The demo is embedded on the homepage. It writes nothing, so it has no
+       business deleting anything either — and what it would delete is the
+       visitor's own list, which cannot be got back. */
+    if (DEMO) { toast("This is the demo \u2014 nothing here to clear."); return; }
     if (!confirm("Delete every word stored in this browser?")) return;
     db = { v: 1, words: [] };
     try { localStorage.removeItem(KEY); } catch (e) {}
@@ -980,7 +1871,12 @@
   load();
   counts();
   fillFilter();
-  startSession();
+  /* One way in: the Start screen, which says how many are waiting and how
+     many this sitting will hold. Starting automatically here meant a reload
+     dropped you straight onto a card while adding a word showed Start —
+     the same situation with two different screens. The demo still opens on
+     a card, because that is what the homepage is showing off. */
+  if (DEMO) startSession(); else renderDue();
 })();
 </script>
 </body>
