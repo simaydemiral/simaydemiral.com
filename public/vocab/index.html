@@ -504,7 +504,7 @@
       f = formsOf(w);
       for (k = 0; k < f.length; k++) addForm(o, f[k]);
       addForm(o, w.term);
-      if (w.src && w.src.s && !(o.src && o.src.s)) o.src = w.src;
+      if (w.src && w.src.sentence && !(o.src && o.src.sentence)) o.src = w.src;
       if (w.note && !o.note) o.note = w.note;
       if (!o.senses.length && w.senses.length) {
         o.senses = w.senses; o.via = w.via || ""; o.looked = true;
