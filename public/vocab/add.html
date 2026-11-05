@@ -64,6 +64,13 @@
     return h.toString(36);
   }
 
+  /* Only http(s) is kept. A "u=javascript:..." saved here would become a
+     live link on the study page, running script in this origin. */
+  function safeUrl(u){
+    var t = String(u == null ? "" : u).trim();
+    return /^https?:\/\//i.test(t) ? t : "";
+  }
+
   function param(hash, k){
     var m = new RegExp("(?:^|&)" + k + "=([^&]*)").exec(hash);
     if (!m) return "";
@@ -95,9 +102,15 @@
     added: new Date().toISOString(),
     deck: "Inbox",
     box: 1,
-    due: new Date().toISOString().slice(0, 10),
+    /* Local date, matching the study page: a UTC date would make a word
+       captured after 5pm in California wait until tomorrow. */
+    due: (function (d) {
+      var m = d.getMonth() + 1, day = d.getDate();
+      return d.getFullYear() + "-" + (m < 10 ? "0" : "") + m
+                             + "-" + (day < 10 ? "0" : "") + day;
+    })(new Date()),
     src: {
-      url: param(hash, "u").slice(0, 400),
+      url: safeUrl(param(hash, "u")).slice(0, 400),
       title: param(hash, "t").slice(0, 200),
       sentence: param(hash, "s").slice(0, 400)
     },
@@ -110,7 +123,7 @@
   try {
     db = JSON.parse(localStorage.getItem(KEY) || "null") || {};
   } catch (e) { db = {}; }
-  if (!db.words) db = { v: 1, words: [] };
+  if (!Array.isArray(db.words)) db = { v: 1, words: [] };
 
   var existing = -1, i;
   for (i = 0; i < db.words.length; i++) {
@@ -143,9 +156,12 @@
      + (db.words.length === 1 ? "" : "s") + ' · '
      + '<a href="/vocab/">open the list</a></div>');
 
-  /* Close the popup it was opened in. If someone opened this page directly
-     there is nothing to close, so the message simply stays up. */
-  setTimeout(function () { try { window.close(); } catch (e) {} }, 700);
+  /* Close the popup it was opened in — but only if it really is one. Chrome
+     will close a tab navigated here directly, which shut the whole tab before
+     the confirmation could be read. 700ms was too short for it anyway. */
+  if (window.opener) {
+    setTimeout(function () { try { window.close(); } catch (e) {} }, 1500);
+  }
 })();
 </script>
 </body>
