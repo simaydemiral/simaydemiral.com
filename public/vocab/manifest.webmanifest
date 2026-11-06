@@ -1,0 +1,21 @@
+{
+  "name": "Vocabulary",
+  "short_name": "Vocab",
+  "description": "Save a word from any page you are reading, and study it later.",
+  "start_url": "/vocab/",
+  "scope": "/vocab/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#171210",
+  "theme_color": "#171210",
+  "icons": [
+    { "src": "/vocab/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/vocab/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/vocab/icon-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "share_target": {
+    "action": "/vocab/add",
+    "method": "GET",
+    "params": { "title": "t", "text": "w", "url": "u" }
+  }
+}

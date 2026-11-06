@@ -8,6 +8,15 @@
 <title>Vocabulary</title>
 <meta name="description" content="Save a word from any page you are reading, and study it later.">
 <meta name="theme-color" content="#d9cfbe">
+<!-- Installable: Add to Home Screen gives it its own icon and opens it
+     without Safari's chrome. The scope is /vocab/ so the app is the tool,
+     not the whole site. -->
+<link rel="manifest" href="/vocab/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/vocab/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Vocab">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23171210'/%3E%3Crect x='14' y='16' width='36' height='26' rx='4' fill='none' stroke='%23e8935a' stroke-width='3'/%3E%3Cpath d='M22 50h20' stroke='%23e8935a' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M32 42v8' stroke='%23e8935a' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
 <!-- ============================================================
   VOCABULARY
@@ -2384,6 +2393,15 @@
      a card, because that is what the homepage is showing off. */
   renderSpaces();
   if (DEMO) startSession(); else renderDue();
+
+  /* Offline. Registered last and failing silently: a browser without service
+     workers, or one that refuses, simply has a page that needs the network. */
+  if (!DEMO && "serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("/vocab/sw.js", { scope: "/vocab/" })
+        .catch(function () {});
+    });
+  }
 
   /* Last, and without blocking anything above it: the page is fully usable
      before this answers, and stays usable if it never does. */
