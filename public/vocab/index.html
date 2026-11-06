@@ -665,13 +665,24 @@
     return out;
   }
 
+  /* Two different outcomes that used to look identical. "Neither source has a
+     Turkish entry" is an answer and is worth keeping. "I could not reach
+     them" is not an answer at all, and saving it as one froze the word on
+     that message for good — one blocked request and the word never asked
+     again. Only a real answer is ever cached. */
   function viaTurkish(term) {
+    var reached = false;
     return getJSON(WIKT_RAW + encodeURIComponent(term))
       .then(function (j) {
+        reached = true;
         var wt = j && j.parse && j.parse.wikitext ? j.parse.wikitext["*"] : "";
         return trBlocks(wt || "");
       })
-      .catch(function () { return []; })
+      .catch(function (e) {
+        /* a 404 is Wiktionary saying it has no such page: asked and answered */
+        if (e && e.status === 404) { reached = true; return []; }
+        return [];
+      })
       .then(function (blocks) {
         if (blocks.length) return { blocks: blocks, one: "", from: "Wiktionary" };
         return getJSON(WIKI_LL + encodeURIComponent(term))
@@ -679,17 +690,25 @@
             var pages = (j && j.query && j.query.pages) || {}, k, p;
             for (k in pages) { p = pages[k]; break; }
             var ll = p && p.langlinks && p.langlinks[0] && p.langlinks[0]["*"];
-            return ll ? { blocks: [], one: ll, from: "Wikipedia" }
-                      : { blocks: [], one: "", from: "" };
+            if (ll) return { blocks: [], one: ll, from: "Wikipedia" };
+            return { blocks: [], one: "", from: "none" };
           })
-          .catch(function () { return { blocks: [], one: "", from: "" }; });
+          .catch(function (e) {
+            if ((e && e.status === 404) || reached) {
+              return { blocks: [], one: "", from: "none" };
+            }
+            return { blocks: [], one: "", from: "", unreachable: true };
+          });
       });
   }
 
   var translating = {};
 
   function ensureTurkish(w, after) {
-    if (w.tr || translating[w.id]) return;
+    /* `from` is what makes it an answer: Wiktionary, Wikipedia, or none.
+       A record saved by the older build has from:"" — that was a failure
+       wearing an answer's clothes, so it is retried rather than believed. */
+    if ((w.tr && w.tr.from) || translating[w.id]) return;
     translating[w.id] = 1;
     /* The word the dictionary actually settled on: "Evals" resolves through
        eval to evaluation, and that is the one with a translation table. */
@@ -700,8 +719,14 @@
     }
     viaTurkish(term.toLowerCase()).then(function (tr) {
       delete translating[w.id];
-      w.tr = tr;
-      save();
+      if (tr.unreachable) {
+        /* Not written down: the next press asks again. */
+        trFailed = true;
+      } else {
+        trFailed = false;
+        w.tr = tr;
+        save();
+      }
       if (after) after();
     });
   }
@@ -768,10 +793,21 @@
     } catch (e) {}
   }
 
-  function getJSON(url) {
+  function getJSON(url, tries) {
+    tries = tries || 1;
     return fetch(url, { mode: "cors" }).then(function (r) {
-      if (!r.ok) throw new Error(r.status);
+      if (!r.ok) {
+        var err = new Error(r.status);
+        err.status = r.status;           /* 404 means "no such page", which is
+                                            an answer; 5xx means try again */
+        throw err;
+      }
       return r.json();
+    }).catch(function (e) {
+      var worth = !e.status || e.status === 429 || e.status >= 500;
+      if (tries >= 3 || !worth) throw e;
+      return new Promise(function (go) { setTimeout(go, 600 * tries); })
+        .then(function () { return getJSON(url, tries + 1); });
     });
   }
 
@@ -1019,6 +1055,7 @@
   var noteOpen = false;
   var editingNote = null;
   var trOpen = false;        /* is the Turkish showing on this card? */
+  var trFailed = false;      /* the last lookup could not reach its sources */
   var fullOpen = false;      /* the precise senses instead of the plain ones */
 
   function startSession() {
@@ -1116,7 +1153,18 @@
       }
       if (trOpen) {
         html += '<div class="yournote tr"><b>T\u00fcrk\u00e7e</b>';
-        if (!w.tr) {
+        /* The failure is checked first. A lookup that could not reach its
+           sources writes nothing down, so there is no record to carry the
+           news — asking "is there a record?" first left the card saying
+           "looking it up" for ever. */
+        if (trFailed && !(w.tr && w.tr.from)) {
+          html += '<span class="notetext" style="color:var(--stop)">'
+                + 'Could not reach Wiktionary or Wikipedia. Nothing is wrong '
+                + 'with the word \u2014 press T\u00fcrk\u00e7e again to retry. If it keeps '
+                + 'failing, an ad or privacy blocker is the usual cause: both '
+                + 'requests go to <b style="display:inline">api.php</b> on '
+                + 'wiktionary.org and wikipedia.org.</span>';
+        } else if (!w.tr) {
           html += '<span class="notetext" style="color:var(--muted)">'
                 + 'Bak\u0131l\u0131yor\u2026</span>';
         } else if (w.tr.blocks && w.tr.blocks.length) {
@@ -1246,11 +1294,12 @@
       if ($("trBtn")) {
         $("trBtn").addEventListener("click", function () {
           trOpen = !trOpen;
+          if (trOpen) trFailed = false;   /* this press gets its own verdict */
           renderDue();
           /* Fetched on the press, not on every flip: most cards are turned
              over without ever wanting it. Cached afterwards, so the second
              press is instant. */
-          if (trOpen && !w.tr) {
+          if (trOpen && !(w.tr && w.tr.from)) {
             ensureTurkish(w, function () { if (flipped && trOpen) renderDue(); });
           }
         });
