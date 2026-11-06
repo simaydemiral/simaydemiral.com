@@ -20,6 +20,9 @@
   "vars": {
     "GOOGLE_CLIENT_ID": "87625451763-pr3t8hmvm4rm5hffk17o6tkk5travmdr.apps.googleusercontent.com"
   },
+  // Logs and traces in the dashboard. Worth having after a routing problem
+  // that took three wrong guesses to find, because nothing recorded it.
+  "observability": { "enabled": true },
   "d1_databases": [
     {
       "binding": "vocab",
