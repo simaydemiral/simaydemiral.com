@@ -209,6 +209,8 @@
   #account a{text-decoration:none}
   .who{font-size:12.5px;color:var(--muted);max-width:230px;overflow:hidden;
        text-overflow:ellipsis;white-space:nowrap}
+  .howto{margin:0;padding-left:20px;color:var(--muted);font-size:14px}
+  .howto li{margin:3px 0}
   .deckname{font:inherit;font-weight:600;padding:5px 8px;border-radius:7px;
             border:1px solid var(--brand);background:var(--surface);
             color:var(--ink);width:100%;max-width:230px}
@@ -1744,6 +1746,53 @@
   /* Wiktionary keeps its Turkish translation tables on English entries. A
      Spanish or German word has no such row to read, and the English sense on
      the card is doing that job anyway. */
+  /* Installing is a phone thing, and the steps are invisible on a laptop
+     where there is nothing to tap. Shown anyway, because this is usually read
+     on the laptop and done on the phone afterwards. */
+  function installCard() {
+    var standalone = false;
+    try {
+      standalone = window.matchMedia("(display-mode: standalone)").matches
+                || window.navigator.standalone === true;
+    } catch (e) {}
+
+    if (standalone) {
+      return '<div class="card" style="margin-top:14px">'
+        + '<h2 style="margin:0 0 4px;font:500 19px/1.2 var(--f-display)">'
+        + 'You are in the app</h2>'
+        + '<p class="step" style="font-size:14px;color:var(--muted);margin:0">'
+        + 'Running from your home screen, so this works with no signal. '
+        + 'Catching new words still needs a browser \u2014 there is no address bar '
+        + 'in here for the bookmarklet to run from.</p></div>';
+    }
+
+    return '<div class="card" style="margin-top:14px">'
+      + '<h2 style="margin:0 0 4px;font:500 19px/1.2 var(--f-display)">'
+      + 'Put it on your phone</h2>'
+      + '<p class="step" style="font-size:14px;color:var(--muted);margin:0 0 10px">'
+      + 'On a phone you can add FlashCards to the home screen. It gets its own icon, '
+      + 'opens without an address bar, and works with no signal \u2014 which is the '
+      + 'point of having it on a phone.</p>'
+      + '<p class="step" style="margin:0 0 4px"><b style="display:inline">iPhone</b> '
+      + '<span style="color:var(--muted)">\u2014 in Safari. Chrome on iOS cannot do '
+      + 'this.</span></p>'
+      + '<ol class="howto">'
+      + '<li>Open <b style="display:inline">simaydemiral.com/vocab</b> in Safari</li>'
+      + '<li>Tap <b style="display:inline">Share</b> \u2014 the square with the arrow, '
+      + 'in the bottom bar</li>'
+      + '<li>Scroll down and tap <b style="display:inline">Add to Home Screen</b></li>'
+      + '<li>Tap <b style="display:inline">Add</b></li>'
+      + '</ol>'
+      + '<p class="step" style="margin:10px 0 4px"><b style="display:inline">Android</b> '
+      + '<span style="color:var(--muted)">\u2014 in Chrome: accept the install prompt, '
+      + 'or Menu \u203a Add to Home screen.</span></p>'
+      + '<p class="step" style="font-size:14px;color:var(--muted);margin:10px 0 0">'
+      + 'Then <b style="display:inline;color:var(--ink)">sign in inside the app</b>. An '
+      + 'installed app often gets its own storage, so it may open empty until your '
+      + 'words sync down.</p>'
+      + '</div>';
+  }
+
   function trButton(w) {
     if ((w.lang || "en") !== "en") return "";
     return '<button class="btn-q' + (trOpen ? ' is-on' : '') + '" id="trBtn">'
@@ -2015,13 +2064,23 @@
       + '<button class="btn" id="pasteGo">Add them</button>'
       + '</div></div>'
 
+      + installCard()
+
       + '<div class="card" style="margin-top:14px">'
       + '<h2 style="margin:0 0 4px;font:500 19px/1.2 var(--f-display)">Where your words live</h2>'
+      /* Rewritten when sign-in arrived. The old wording promised there was no
+         account and no server, which stopped being true that afternoon. */
+      + '<p class="step" style="font-size:14px;color:var(--muted);margin:0 0 8px">'
+      + '<b style="display:inline;color:var(--ink)">Signed out</b> \u2014 in this browser, '
+      + 'on this device. No account, nothing on a server.</p>'
+      + '<p class="step" style="font-size:14px;color:var(--muted);margin:0 0 8px">'
+      + '<b style="display:inline;color:var(--ink)">Signed in</b> \u2014 your words sync to '
+      + 'your account, so the same list is on every device you sign in on. That includes '
+      + 'the sentences you saved them with.</p>'
       + '<p class="step" style="font-size:14px;color:var(--muted);margin:0">'
-      + 'In this browser, on this device. There is no account and no server holding them. '
-      + 'The one thing that leaves is a single word at a time, sent to Wiktionary to ask '
-      + 'what it means &mdash; your list, your sentences and the pages you took them from '
-      + 'are never sent anywhere.</p>'
+      + 'Either way, the only thing sent while you study is a single word at a time, to '
+      + 'Wiktionary, to ask what it means. The pages you took words from are never sent '
+      + 'anywhere.</p>'
       + '</div>';
 
     var a = $("mark");

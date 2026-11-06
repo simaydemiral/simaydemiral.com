@@ -8,7 +8,7 @@
  * Scope is /vocab/, so the rest of the site is untouched. Sign-in and sync
  * are never cached: a stale answer there would be worse than no answer.
  */
-const VERSION = "vocab-5";   /* bumped: renamed to FlashCards */
+const VERSION = "vocab-7";   /* bumped: document always fetched fresh */
 const SHELL = [
   "/vocab/",
   "/vocab/manifest.webmanifest",
@@ -37,8 +37,16 @@ self.addEventListener("fetch", (e) => {
   if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/auth/")) return;
   if (!url.pathname.startsWith("/vocab/")) return;
 
+  /* A plain fetch() still consults the browser's HTTP cache, so "network
+     first" quietly meant "cache first" for the page itself and a rename sat
+     unseen behind a stale copy. The document is always fetched fresh; the
+     images and the manifest may come from the HTTP cache as usual. */
+  const ask = e.request.mode === "navigate"
+    ? fetch(new Request(e.request.url, { cache: "no-store", credentials: "same-origin" }))
+    : fetch(e.request);
+
   e.respondWith(
-    fetch(e.request)
+    ask
       .then((res) => {
         /* Keep a copy of what worked, for the next time it does not. */
         if (res && res.ok) {
