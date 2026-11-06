@@ -183,6 +183,12 @@
             margin-left:5px}
   .ipa{font-family:var(--f-mono);font-size:13px;color:var(--muted)}
   .ipa.sm{font-size:11.5px;margin-left:7px}
+  .egbox{margin-top:13px;padding:10px 13px;background:var(--sunken);border-radius:9px}
+  .egbox b{display:block;font:500 10.5px/1 var(--f-mono);letter-spacing:.14em;
+           text-transform:uppercase;color:var(--faint);margin-bottom:5px}
+  .egtext{display:block;font-size:14.5px;line-height:1.5}
+  .egfrom{display:block;margin-top:6px;font:500 10.5px/1 var(--f-mono);
+          letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
   .deckname{font:inherit;font-weight:600;padding:5px 8px;border-radius:7px;
             border:1px solid var(--brand);background:var(--surface);
             color:var(--ink);width:100%;max-width:230px}
@@ -364,6 +370,10 @@
           from: typeof w.tr.from === "string" ? w.tr.from.slice(0, 20) : ""
         };
       } else { delete w.tr; }
+      if (w.eg && typeof w.eg === "object") {
+        w.eg = { text: typeof w.eg.text === "string" ? w.eg.text.slice(0, 300) : "",
+                 from: typeof w.eg.from === "string" ? w.eg.from.slice(0, 20) : "" };
+      } else { delete w.eg; }
       src = (w.src && typeof w.src === "object") ? w.src : {};
       w.src = {
         url: safeUrl(src.url).slice(0, 400),
@@ -705,6 +715,80 @@
             return { blocks: [], one: "", from: "", unreachable: true };
           });
       });
+  }
+
+  /* ------------------------------------------------------------------
+     An example for every word.
+
+     A word she caught with the bookmarklet arrives with the sentence she met
+     it in, which is the best example there is. A word typed into the Add tab
+     has nothing, and the dictionaries only sometimes carry one. Wiktionary's
+     own usage examples fill the gap: {{ux|en|...}} is a short modern sentence
+     written for the entry, and where there is none, a quoted passage from the
+     citations will do. Same page the translations already read, so the
+     browser usually has it cached.
+     ------------------------------------------------------------------ */
+  function cleanWiki(t) {
+    return String(t || "")
+      .replace(/\[\[[^\]|]*\|([^\]]*)\]\]/g, "$1")   /* [[target|text]] */
+      .replace(/\[\[([^\]]*)\]\]/g, "$1")              /* [[text]]        */
+      .replace(/\{\{[^{}]*\}\}/g, "")                   /* leftover bits   */
+      .replace(/<[^>]*>/g, "")
+      .replace(/'''?/g, "")                             /* bold and italic */
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function exampleFrom(wikitext) {
+    var m, out;
+    /* written for the entry, and short */
+    var ux = /\{\{(?:ux|usex|uxi)\|en\|([\s\S]*?)\}\}/g;
+    while ((m = ux.exec(wikitext))) {
+      out = cleanWiki(String(m[1]).split("|")[0]);
+      if (out.length > 12 && out.length < 220) return { text: out, from: "Wiktionary" };
+    }
+    /* otherwise something somebody actually wrote */
+    var q = /\|(?:passage|text)=([^|}]{25,240})/g;
+    while ((m = q.exec(wikitext))) {
+      out = cleanWiki(m[1]);
+      if (out.length > 25 && out.length < 240) return { text: out, from: "Wiktionary" };
+    }
+    return null;
+  }
+
+  var exampling = {};
+
+  /* Only asked for when the word has none of its own. */
+  function hasExample(w) {
+    if (w.src && w.src.sentence) return true;
+    for (var i = 0; i < (w.senses || []).length; i++) {
+      if (w.senses[i].example) return true;
+    }
+    return false;
+  }
+
+  function ensureExample(w, after) {
+    if ((w.eg && w.eg.from) || exampling[w.id] || hasExample(w)) return;
+    exampling[w.id] = 1;
+    var term = w.term;
+    if (w.via) {
+      var hops = w.via.split("\u2192");
+      term = hops[hops.length - 1].trim() || w.term;
+    }
+    getJSON(WIKT_RAW + encodeURIComponent(term.toLowerCase()))
+      .then(function (j) {
+        var wt = j && j.parse && j.parse.wikitext ? j.parse.wikitext["*"] : "";
+        return exampleFrom(wt || "");
+      })
+      .then(function (eg) {
+        delete exampling[w.id];
+        /* "none" is an answer and is kept; a failed request is not, so it is
+           not written down and the next flip tries again. */
+        w.eg = eg || { text: "", from: "none" };
+        save();
+        if (after) after();
+      })
+      .catch(function () { delete exampling[w.id]; });
   }
 
   var translating = {};
@@ -1260,6 +1344,18 @@
               + '<button class="btn-q" id="noteBtn">Add a note</button>'
               + trButton(w) + fullButton(w) + '</div>';
       }
+      /* Only when nothing above carried one, so a word never shows two. */
+      if (!hasExample(w)) {
+        if (w.eg && w.eg.text) {
+          html += '<div class="egbox"><b>In a sentence</b>'
+                + '<span class="egtext">\u201c' + esc(w.eg.text) + '\u201d</span>'
+                + '<span class="egfrom">Wiktionary</span></div>';
+        } else if (!w.eg) {
+          html += '<div class="egbox"><span class="egtext" '
+                + 'style="color:var(--muted)">Looking for an example\u2026</span></div>';
+        }
+      }
+
       if (w.src && w.src.sentence) {
         var link = safeUrl(w.src.url);
         html += '<div class="ctx"><b>Where you found it</b>'
@@ -1309,6 +1405,8 @@
           if (!flipped && session[0] === w) renderDue();
         });
       }
+      /* Quietly, while she is still trying to remember it. */
+      if (!(w.eg && w.eg.from) && !hasExample(w)) ensureExample(w);
     } else {
       $("gNo").addEventListener("click", function () { answer("no"); });
       $("gMid").addEventListener("click", function () { answer("mid"); });
@@ -1334,6 +1432,9 @@
          for a word that already has one, redraws the back, and asks again —
          a redraw that never ends. */
       if (!w.say) ensureSay(w, function () { if (flipped) renderDue(); });
+      if (!(w.eg && w.eg.from) && !hasExample(w)) {
+        ensureExample(w, function () { if (flipped) renderDue(); });
+      }
       /* Only once the headword has settled, or it asks about "plunged". */
       if (w.looked && !w.plain) {
         ensurePlain(w, function () { if (flipped) renderDue(); });
