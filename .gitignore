@@ -7,3 +7,6 @@ NOTES.local.md
 PERSONAL_SITE_PLAYBOOK.md
 Picture1.png
 1660133194029.jpeg
+
+# local-only secrets for wrangler dev; never committed
+.dev.vars

@@ -189,6 +189,17 @@
   .egtext{display:block;font-size:14.5px;line-height:1.5}
   .egfrom{display:block;margin-top:6px;font:500 10.5px/1 var(--f-mono);
           letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+  .spaces{display:flex;gap:6px;margin:0 0 14px;flex-wrap:wrap}
+  .space{font:inherit;font-size:13px;font-weight:600;padding:6px 13px;
+         border:1px solid var(--line);border-radius:999px;cursor:pointer;
+         background:var(--surface);color:var(--muted);font-family:inherit}
+  .space:hover{color:var(--ink)}
+  .space.on{background:var(--brand-wash);border-color:var(--brand);color:var(--brand)}
+  .space-n{font:500 11px/1 var(--f-mono);margin-left:7px;opacity:.75}
+  #account{display:inline-flex;align-items:center;gap:8px;margin-left:4px}
+  #account a{text-decoration:none}
+  .who{font-size:12.5px;color:var(--muted);max-width:230px;overflow:hidden;
+       text-overflow:ellipsis;white-space:nowrap}
   .deckname{font:inherit;font-weight:600;padding:5px 8px;border-radius:7px;
             border:1px solid var(--brand);background:var(--surface);
             color:var(--ink);width:100%;max-width:230px}
@@ -259,8 +270,11 @@
       <button class="btn-q" id="import">Import</button>
       <input type="file" id="file" accept="application/json,.json" hidden>
       <button class="btn-q" id="wipe">Clear all</button>
+      <span id="account"></span>
     </div>
   </div>
+
+  <div class="spaces" id="spaces" role="tablist" aria-label="Language"></div>
 
   <div class="tabs" role="tablist" id="tabs">
     <button class="tab" role="tab" aria-selected="true" data-tab="due">Study <span class="tab-n" id="nDue">0</span></button>
@@ -350,6 +364,8 @@
          less than today and the word would wait forever. */
       w.due = /^\d{4}-\d{2}-\d{2}$/.test(w.due) ? w.due : today();
       w.note = typeof w.note === "string" ? w.note.slice(0, 2000) : "";
+      /* Everything saved before there were spaces was English. */
+      w.lang = (w.lang === "es" || w.lang === "de") ? w.lang : "en";
       /* An audio URL from a file is a URL like any other: http(s) only. */
       if (w.say && typeof w.say === "object") {
         w.say = { audio: safeUrl(w.say.audio).slice(0, 400),
@@ -407,10 +423,108 @@
     }
   }
 
+  /* Words touched since the last save. Stamping only these, rather than the
+     whole list, is what lets two devices merge: a word the phone did not
+     touch keeps its old stamp and loses to the laptop's newer edit. */
+  /* ------------------------------------------------------------------
+     Sync.
+
+     Local first, always. The list in this browser is the one the page reads
+     and writes; the account is a copy that is reconciled with it. Signed out,
+     or offline, or if the server is down, nothing here changes behaviour.
+
+     The merge is a union, never a replacement. That matters most at the very
+     first sign-in, when the account is empty and this browser holds years of
+     words: pulling first would show an empty list and then save it over the
+     top. So the local list goes up before anything comes down, and a word
+     present in both is settled by whichever copy was edited later.
+     ------------------------------------------------------------------ */
+  var me = null;            /* { signedIn, email } once /auth/me has answered */
+  var syncing = false, syncTimer = null, lastSync = 0;
+
+  function syncSoon() {
+    if (DEMO || !me || !me.signedIn) return;
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(syncNow, 1200);   /* settle after a burst of edits */
+  }
+
+  function syncNow() {
+    if (DEMO || syncing || !me || !me.signedIn) return;
+    syncing = true;
+    var payload = db.words.concat(db.gone || []);
+    fetch("/api/sync", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ words: payload })
+    })
+      .then(function (r) {
+        if (r.status === 401) { me = { signedIn: false }; throw new Error("signed out"); }
+        if (!r.ok) throw new Error(r.status);
+        return r.json();
+      })
+      .then(function (out) {
+        syncing = false;
+        if (!out || !Array.isArray(out.words)) return;
+        absorb(out.words);
+        lastSync = Date.now();
+        renderAccount();
+      })
+      .catch(function () { syncing = false; renderAccount(); });
+  }
+
+  /* What came back replaces what is here only where it is newer. */
+  function absorb(remote) {
+    var byId = {}, i, w, changed = false;
+    for (i = 0; i < db.words.length; i++) byId[db.words[i].id] = db.words[i];
+    var gone = {};
+    for (i = 0; i < (db.gone || []).length; i++) gone[db.gone[i].id] = db.gone[i].updated || 0;
+
+    var keep = [];
+    for (i = 0; i < remote.length; i++) {
+      w = remote[i];
+      if (!w || !w.id) continue;
+      if (w.deleted) {
+        /* Deleted elsewhere. Drop it here too, unless this device has since
+           brought it back. */
+        var local = byId[w.id];
+        if (local && (local.updated || 0) > (w.updated || 0)) { keep.push(local); continue; }
+        if (local) changed = true;
+        delete byId[w.id];
+        gone[w.id] = Math.max(gone[w.id] || 0, w.updated || 0);
+        continue;
+      }
+      if (gone[w.id] && gone[w.id] >= (w.updated || 0)) continue;   /* deleted here, later */
+      var here = byId[w.id];
+      if (!here || (w.updated || 0) > (here.updated || 0)) { byId[w.id] = w; changed = true; }
+    }
+    for (var k in byId) keep.push(byId[k]);
+    keep.sort(function (a, b) {
+      var x = a.added || "", y = b.added || "";
+      return x < y ? 1 : x > y ? -1 : 0;
+    });
+    db.words = normalize(keep);
+    db.gone = [];
+    for (var g in gone) db.gone.push({ id: g, deleted: true, updated: gone[g] });
+
+    try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {}
+    if (changed) { counts(); fillFilter(); renderAll(); renderDecks(); renderDue(); }
+  }
+
+  var touched = {};
+
+  function mark(id) { if (id) touched[id] = 1; }
+
   function save() {
     if (DEMO) return;
+    var now = Date.now(), i, w;
+    for (i = 0; i < db.words.length; i++) {
+      w = db.words[i];
+      if (touched[w.id] || !w.updated) w.updated = now;
+    }
+    touched = {};
     try { localStorage.setItem(KEY, JSON.stringify(db)); }
     catch (e) { toast("Could not save — browser storage is full or blocked."); }
+    syncSoon();
   }
 
   /* Dates are local, not UTC. toISOString() would roll over at 5pm in
@@ -559,7 +673,14 @@
   }
 
   function stripTags(s) {
-    return String(s || "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+    /* Whole elements first. Dropping only the tags leaves what was between
+       them, which is how a stylesheet ended up inside a definition:
+       "to speak .mw-parser-output .object-usage-tag{font-style:italic}". */
+    return String(s || "")
+      .replace(/<(style|script)\b[\s\S]*?<\/\1>/gi, "")
+      .replace(/<[^>]+>/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
   }
 
   /* Wiktionary sometimes runs a citation straight onto the end of a
@@ -582,7 +703,10 @@
   }
 
   function fromWiktionary(json) {
-    var out = [], langs = json && json.en, i, j;
+    /* The endpoint groups a page by language, which is how one URL serves all
+       three spaces: "casa" is listed under twenty of them, and only the one
+       being studied is wanted. */
+    var out = [], langs = json && json[SPACE], i, j;
     if (!langs) return out;
     for (i = 0; i < langs.length && out.length < 3; i++) {
       var defs = langs[i].definitions || [];
@@ -728,6 +852,15 @@
      citations will do. Same page the translations already read, so the
      browser usually has it cached.
      ------------------------------------------------------------------ */
+  /* A page covers every language that spells the word this way — "casa" runs
+     to twenty sections. Reading the whole page hands back a German example
+     for a Spanish card, so everything below works on one section only. */
+  function section(wikitext, wiktName) {
+    var re = new RegExp("\\n==\\s*" + wiktName + "\\s*==\\n([\\s\\S]*?)(?=\\n==[^=]|$)");
+    var m = re.exec("\n" + wikitext);
+    return m ? m[1] : "";
+  }
+
   function cleanWiki(t) {
     return String(t || "")
       .replace(/\[\[[^\]|]*\|([^\]]*)\]\]/g, "$1")   /* [[target|text]] */
@@ -739,10 +872,15 @@
       .trim();
   }
 
-  function exampleFrom(wikitext) {
+  function exampleFrom(wikitext, code) {
+    code = code || SPACE;
+    var sec = section(wikitext, lang(code).wikt);
+    if (!sec) return null;
+    wikitext = sec;
     var m, out;
-    /* written for the entry, and short */
-    var ux = /\{\{(?:ux|usex|uxi)\|en\|([\s\S]*?)\}\}/g;
+    /* "uxa" is the Spanish and German habit and carries an English rendering
+       after the sentence, which is more use than the sentence alone. */
+    var ux = new RegExp("\\{\\{(?:ux|uxa|usex|uxi)\\|" + code + "\\|([\\s\\S]*?)\\}\\}", "g");
     while ((m = ux.exec(wikitext))) {
       out = cleanWiki(String(m[1]).split("|")[0]);
       if (out.length > 12 && out.length < 220) return { text: out, from: "Wiktionary" };
@@ -778,7 +916,7 @@
     getJSON(WIKT_RAW + encodeURIComponent(term.toLowerCase()))
       .then(function (j) {
         var wt = j && j.parse && j.parse.wikitext ? j.parse.wikitext["*"] : "";
-        return exampleFrom(wt || "");
+        return exampleFrom(wt || "", SPACE);
       })
       .then(function (eg) {
         delete exampling[w.id];
@@ -830,6 +968,15 @@
        back. The callback redraws, the redraw asks again, and an answer that
        arrives instantly turns that into a loop with no end. */
     if (w.say || saying[w.id]) return;
+    /* The recordings and IPA come from an English-only dictionary. For the
+       other two the browser says the word itself, in that language's voice,
+       which every machine can do. */
+    if ((w.lang || "en") !== "en") {
+      w.say = { audio: "", ipa: "", us: false };
+      save();
+      if (after) after();
+      return;
+    }
     /* The dictionary has no entry for a phrase, so there is no recording to
        fetch — but it still gets a settled answer, or the guard above never
        becomes true and every redraw asks again. The browser can still say it. */
@@ -859,24 +1006,31 @@
       try {
         if (player) player.pause();
         player = new Audio(src);
-        player.play().catch(function () { voice(w.term); });
+        player.play().catch(function () { voice(w.term, w.lang); });
         return;
       } catch (e) { /* fall through to the browser's voice */ }
     }
-    voice(w.term);
+    voice(w.term, w.lang);
   }
 
   /* No recording: say it with the browser. Prefer an American voice, since
      that is the one she is listening for. */
-  function voice(term) {
+  function voice(term, code) {
     try {
       if (!window.speechSynthesis) return;
       window.speechSynthesis.cancel();
+      var want = lang(code).voice;
       var u = new SpeechSynthesisUtterance(term);
-      u.lang = "en-US";
-      var vs = window.speechSynthesis.getVoices() || [];
-      for (var i = 0; i < vs.length; i++) {
-        if (vs[i].lang === "en-US") { u.voice = vs[i]; break; }
+      u.lang = want;
+      var vs = window.speechSynthesis.getVoices() || [], i;
+      /* An exact match first, then any voice for the same language: a Mac may
+         have es-MX and no es-ES, and Mexican Spanish is a great deal better
+         than reading Spanish aloud in an American accent. */
+      for (i = 0; i < vs.length; i++) if (vs[i].lang === want) { u.voice = vs[i]; break; }
+      if (!u.voice) {
+        for (i = 0; i < vs.length; i++) {
+          if (vs[i].lang && vs[i].lang.slice(0, 2) === want.slice(0, 2)) { u.voice = vs[i]; break; }
+        }
       }
       window.speechSynthesis.speak(u);
     } catch (e) {}
@@ -949,6 +1103,9 @@
   }
 
   function viaSimple(term) {
+    /* An English dictionary. Asked about "casa" it answers with the English
+       slang sense, which is not what a Spanish card is for. */
+    if (SPACE !== "en") return Promise.resolve([]);
     var slug = encodeURIComponent(String(term).trim().replace(/\s+/g, "_"));
     return getJSON(SIMPLE + slug).then(function (d) {
       var pages = d && d.query && d.query.pages, k, p = null;
@@ -1058,6 +1215,10 @@
         var needsExample = !senses.length || !senses.some(function (s) { return s.example; });
         if (!needsExample) return senses;
         if (senses.length && senses[0].pos === "Wikipedia") return senses;
+        /* An English dictionary, so only an English card may borrow from it.
+           The Spanish entry for "casa" carries no example, and reaching here
+           lent it the English slang one: "Get out of my casa!". */
+        if (SPACE !== "en") return senses;
         /* one word only: the second source does not do phrases */
         if (/\s/.test(term.trim())) return senses;
         return getJSON(DICT + encodeURIComponent(resolved))
@@ -1132,14 +1293,61 @@
     save();
   }
 
+  /* ------------------------------------------------------------------
+     Three languages, three spaces.
+
+     One stored list underneath, because sync, export and import should carry
+     everything a person has. What makes them feel separate is that every
+     screen reads `here()` rather than db.words: the study queue, the decks,
+     the counts and the list all stop at the edge of the language you are in.
+     A word saved before any of this has no language and is English, which is
+     what it was.
+     ------------------------------------------------------------------ */
+  var LANGS = [
+    { code: "en", label: "English",  wikt: "English", voice: "en-US" },
+    { code: "es", label: "Espa\u00f1ol", wikt: "Spanish", voice: "es-ES" },
+    { code: "de", label: "Deutsch",  wikt: "German",  voice: "de-DE" }
+  ];
+
+  var SPACE = "en";
+  try {
+    var savedSpace = localStorage.getItem("vocab.space");
+    for (var li = 0; li < LANGS.length; li++) {
+      if (LANGS[li].code === savedSpace) SPACE = savedSpace;
+    }
+  } catch (e) {}
+
+  function lang(code) {
+    for (var i = 0; i < LANGS.length; i++) {
+      if (LANGS[i].code === (code || SPACE)) return LANGS[i];
+    }
+    return LANGS[0];
+  }
+
+  /* The words of the language you are currently in. */
+  function here() {
+    return db.words.filter(function (w) { return (w.lang || "en") === SPACE; });
+  }
+
+  function setSpace(code) {
+    if (code === SPACE) return;
+    SPACE = code;
+    try { localStorage.setItem("vocab.space", code); } catch (e) {}
+    /* A sitting belongs to the language it started in. */
+    session = []; done = 0; misses = {}; almost = {};
+    flipped = false; noteOpen = false; trOpen = false;
+    renderSpaces(); counts(); fillFilter();
+    renderAll(); renderDecks(); renderDue();
+  }
+
   function dueNow() {
     var t = today();
-    return db.words.filter(function (w) { return (w.due || t) <= t; });
+    return here().filter(function (w) { return (w.due || t) <= t; });
   }
 
   function decks() {
     var seen = {}, out = [];
-    db.words.forEach(function (w) {
+    here().forEach(function (w) {
       var d = w.deck || "Inbox";
       if (!seen[d]) { seen[d] = 0; out.push(d); }
       seen[d]++;
@@ -1187,8 +1395,9 @@
   function renderDue() {
     var el = $("p-due");
 
-    if (!db.words.length) {
-      el.innerHTML = '<div class="card"><p class="empty"><b>No words yet</b>'
+    if (!here().length) {
+      el.innerHTML = '<div class="card"><p class="empty"><b>No '
+        + (SPACE === "en" ? "" : esc(lang().label) + " ") + 'words yet</b>'
         + 'Add one from the <b style="display:inline">Add</b> tab, or install the '
         + 'bookmarklet and save a word straight from whatever you are reading.</p></div>';
       return;
@@ -1211,7 +1420,7 @@
       } else if (justFinished) {
         head = "All done";
         body = done + ' word' + (done === 1 ? '' : 's') + ' this round, and '
-             + 'nothing left due. ' + db.words.length + ' in total.';
+             + 'nothing left due. ' + here().length + ' in total.';
         label = "";
       } else if (nd) {
         head = "Ready when you are";
@@ -1221,7 +1430,7 @@
       } else {
         head = "Nothing due today";
         body = 'You have studied everything that came up. '
-             + db.words.length + ' word' + (db.words.length === 1 ? '' : 's') + ' in total.';
+             + here().length + ' word' + (here().length === 1 ? '' : 's') + ' in total.';
         label = "";
       }
       el.innerHTML = '<div class="card"><p class="empty"><b>' + head + '</b>'
@@ -1523,7 +1732,11 @@
   /* The speaker, and the IPA beside it when the dictionary gave one. Its own
      button rather than a click on the word, because the word itself now turns
      the card back over. */
+  /* Wiktionary keeps its Turkish translation tables on English entries. A
+     Spanish or German word has no such row to read, and the English sense on
+     the card is doing that job anyway. */
   function trButton(w) {
+    if ((w.lang || "en") !== "en") return "";
     return '<button class="btn-q' + (trOpen ? ' is-on' : '') + '" id="trBtn">'
          + (trOpen ? 'Hide T\u00fcrk\u00e7e' : 'T\u00fcrk\u00e7e') + '</button>';
   }
@@ -1576,7 +1789,7 @@
      ------------------------------------------------------------------ */
   function renderAll() {
     var deck = $("fDeck").value, sort = $("fSort").value;
-    var rows = db.words.filter(function (w) { return !deck || (w.deck || "Inbox") === deck; });
+    var rows = here().filter(function (w) { return !deck || (w.deck || "Inbox") === deck; });
 
     /* Newest first, and always as the tiebreak: a comparator that never
        returns 0 leaves equal rows in whatever order the engine happens to
@@ -1666,6 +1879,39 @@
   /* ------------------------------------------------------------------
      Decks
      ------------------------------------------------------------------ */
+  function renderSpaces() {
+    var el = $("spaces"), h = "", i, L, n;
+    for (i = 0; i < LANGS.length; i++) {
+      L = LANGS[i];
+      n = db.words.filter(function (w) { return (w.lang || "en") === L.code; }).length;
+      h += '<button class="space' + (L.code === SPACE ? ' on' : '') + '" '
+         + 'role="tab" aria-selected="' + (L.code === SPACE) + '" '
+         + 'data-space="' + L.code + '">' + esc(L.label)
+         + (n ? '<span class="space-n">' + n + '</span>' : '') + '</button>';
+    }
+    el.innerHTML = h;
+  }
+
+  $("spaces").addEventListener("click", function (e) {
+    var b = e.target.closest ? e.target.closest("[data-space]") : null;
+    if (b) setSpace(b.getAttribute("data-space"));
+  });
+
+  function renderAccount() {
+    var el = $("account");
+    if (!el || DEMO) return;
+    if (!me) { el.innerHTML = ""; return; }
+    if (!me.signedIn) {
+      el.innerHTML = '<a class="btn-q" href="/auth/start">Sign in to sync</a>';
+      return;
+    }
+    var when = syncing ? "syncing\u2026"
+             : lastSync ? "synced" : "not synced yet";
+    el.innerHTML = '<span class="who" title="' + esc(me.email || "") + '">'
+                 + esc(me.email || "signed in") + ' \u00b7 ' + when + '</span>'
+                 + ' <a class="btn-q" href="/auth/signout">Sign out</a>';
+  }
+
   function renderDecks() {
     var list = decks();
     if (!list.length) {
@@ -1812,14 +2058,15 @@
   function addWord(term, deck, src) {
     /* "???" is not a word, and Wiktionary will cheerfully define it. */
     if (!/[A-Za-z\u00C0-\u024F]/.test(term)) return "junk";
-    var id = idOf(term), i;
-    /* Either spelling finds the card: "plunged" is already a form of the
-       "plunge" card here, so it is a duplicate rather than a new word. */
-    for (i = 0; i < db.words.length; i++) {
-      if (db.words[i].id === id || hasForm(db.words[i], term)) return "dup";
+    /* Scoped to the language: "die" is an English verb and a German article,
+       and saving one must not be refused because the other is already here.
+       The id carries the language for the same reason. */
+    var id = SPACE + ":" + idOf(term), i, mine = here();
+    for (i = 0; i < mine.length; i++) {
+      if (mine[i].id === id || hasForm(mine[i], term)) return "dup";
     }
     db.words.unshift({
-      id: id, term: term, added: new Date().toISOString(),
+      id: id, term: term, lang: SPACE, added: new Date().toISOString(),
       deck: deck || "Inbox", box: 1, due: today(),
       src: src || {}, senses: [], looked: false, note: "", forms: [term]
     });
@@ -1846,7 +2093,7 @@
        is what is left in it — not the day's total, which over-promises at the
        start and reads as "finished" while a card is still on screen. */
     $("nDue").textContent = session.length || dueNow().length;
-    $("nAll").textContent = db.words.length;
+    $("nAll").textContent = here().length;
     $("nDecks").textContent = decks().length;
   }
 
@@ -1928,6 +2175,15 @@
 
     var del = get("data-del");
     if (del) {
+      /* A tombstone, not a disappearance: a row that simply vanishes here is
+         handed straight back by whichever device has not synced yet. */
+      for (var dz = 0; dz < db.words.length; dz++) {
+        if (db.words[dz].id === del) {
+          db.gone = db.gone || [];
+          db.gone.push({ id: del, deleted: true, updated: Date.now() });
+          break;
+        }
+      }
       db.words = db.words.filter(function (w) { return w.id !== del; });
       session = session.filter(function (w) { return w.id !== del; });
       if (editingNote === del) editingNote = null;
@@ -1965,11 +2221,11 @@
     var taken = false, dl = decks(), di;
     for (di = 0; di < dl.length; di++) if (dl[di].name === name) taken = true;
     var moving = 0;
-    db.words.forEach(function (w) { if ((w.deck || "Inbox") === was) moving++; });
+    here().forEach(function (w) { if ((w.deck || "Inbox") === was) moving++; });
     if (taken && !confirm('“' + name + '” already exists. Merge '
           + moving + ' word' + (moving === 1 ? '' : 's') + ' into it?')) return;
 
-    db.words.forEach(function (w) { if ((w.deck || "Inbox") === was) w.deck = name; });
+    here().forEach(function (w) { if ((w.deck || "Inbox") === was) w.deck = name; });
     renaming = null;
     save(); renderDecks(); fillFilter(); renderAll(); counts();
     toast(taken ? "Merged." : "Renamed.");
@@ -2006,6 +2262,7 @@
 
   $("export").addEventListener("click", function () {
     if (!db.words.length) { toast("Nothing to export yet."); return; }
+    /* Deliberately every language: a backup of one space is not a backup. */
     var blob = new Blob([JSON.stringify(db, null, 1)], { type: "application/json" });
     var a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
@@ -2125,7 +2382,21 @@
      dropped you straight onto a card while adding a word showed Start —
      the same situation with two different screens. The demo still opens on
      a card, because that is what the homepage is showing off. */
+  renderSpaces();
   if (DEMO) startSession(); else renderDue();
+
+  /* Last, and without blocking anything above it: the page is fully usable
+     before this answers, and stays usable if it never does. */
+  if (!DEMO) {
+    fetch("/auth/me", { headers: { accept: "application/json" } })
+      .then(function (r) { return r.json(); })
+      .then(function (who) {
+        me = who;
+        renderAccount();
+        if (me.signedIn) syncNow();
+      })
+      .catch(function () { me = { signedIn: false }; renderAccount(); });
+  }
 })();
 </script>
 </body>

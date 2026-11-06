@@ -1,12 +1,32 @@
-// No "main" script on purpose: Cloudflare just serves ./public as plain files.
-// No code runs, so every request stays in the free, unlimited static-asset tier.
+// Mostly static: the Worker exists only for /auth/* and /api/sync. Every
+// other request falls straight through to ./public via the ASSETS binding,
+// so the site serves exactly as it did before.
 {
   "name": "simaydemiral",
+  "main": "src/index.js",
   "compatibility_date": "2026-09-01",
   "assets": {
     "directory": "./public",
-    "not_found_handling": "404-page"
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    // Without this, the asset router answers HTML navigations itself and
+    // never reaches the Worker — so /auth/start returned the 404 page in a
+    // browser while plain requests redirected correctly. These paths have no
+    // file behind them and must reach the code.
+    "run_worker_first": ["/auth/*", "/api/*"]
   },
+  // Not a secret: it is sent to Google in the sign-in URL and is visible to
+  // anyone who looks. The secret that pairs with it is a Worker secret.
+  "vars": {
+    "GOOGLE_CLIENT_ID": "87625451763-pr3t8hmvm4rm5hffk17o6tkk5travmdr.apps.googleusercontent.com"
+  },
+  "d1_databases": [
+    {
+      "binding": "vocab",
+      "database_name": "vocab",
+      "database_id": "070dfbf0-e589-4f6e-9f7f-dda9f63799a4"
+    }
+  ],
   "routes": [
     { "pattern": "simaydemiral.com", "custom_domain": true },
     { "pattern": "www.simaydemiral.com", "custom_domain": true }

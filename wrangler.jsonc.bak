@@ -1,0 +1,14 @@
+// No "main" script on purpose: Cloudflare just serves ./public as plain files.
+// No code runs, so every request stays in the free, unlimited static-asset tier.
+{
+  "name": "simaydemiral",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./public",
+    "not_found_handling": "404-page"
+  },
+  "routes": [
+    { "pattern": "simaydemiral.com", "custom_domain": true },
+    { "pattern": "www.simaydemiral.com", "custom_domain": true }
+  ]
+}
