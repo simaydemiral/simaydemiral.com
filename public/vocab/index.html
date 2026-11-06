@@ -339,7 +339,7 @@
         .map(function (x) { return x.trim().replace(/\s+/g, " ").slice(0, 80); })
         .slice(0, 12);
       w.deck = (typeof w.deck === "string" && w.deck.trim()) ? w.deck.trim() : "Inbox";
-      w.box = Math.min(DAYS.length + 1, Math.max(1, Number(w.box) || 1));
+      w.box = Math.min(BOXES, Math.max(1, Number(w.box) || 1));
       /* A due date is compared as a string, so a malformed one is never
          less than today and the word would wait forever. */
       w.due = /^\d{4}-\d{2}-\d{2}$/.test(w.due) ? w.due : today();
@@ -1015,7 +1015,16 @@
      the start. Deliberately not SM-2 — five intervals is enough for a
      few hundred words and can be explained in one line.
      ------------------------------------------------------------------ */
-  var DAYS = [1, 3, 7, 16, 35];
+  /* How long until a word comes back, by what you said about it.
+
+     "Not yet" is 0 — still due today. That is what makes a second sitting on
+     the same day worth starting: the words you could not produce are waiting
+     in it, and they keep waiting until you answer one of the other two. The
+     ladder that used to stretch 1/3/7/16/35 is gone; the answer decides the
+     gap, not how many times the word has survived. */
+  var GAP = { no: 0, mid: 2, yes: 16 };
+
+  var BOXES = 6;
 
   /* Box 1 is "new or just missed". Boxes 2..6 carry the five intervals, so
      the first word you know comes back in a day and the ladder is actually
@@ -1029,10 +1038,12 @@
      away a gap you had already earned punishes honesty about being shaky. */
   function grade(w, how) {
     var box = w.box || 1;
-    if (how === "yes")      w.box = Math.min(DAYS.length + 1, box + 1);
+    /* The box no longer sets the gap — it is kept as a record of how well
+       she knows the word, which the list sorts and shows. */
+    if (how === "yes")      w.box = Math.min(BOXES, box + 1);
     else if (how === "mid") w.box = Math.max(2, box);
     else                    w.box = 1;
-    w.due = plus(w.box === 1 ? DAYS[0] : DAYS[w.box - 2]);
+    w.due = plus(GAP[how] === undefined ? 0 : GAP[how]);
     w.seen = (w.seen || 0) + 1;
     save();
   }
@@ -1100,16 +1111,39 @@
     }
     if (!session.length) {
       var nd = dueNow().length;
-      el.innerHTML = '<div class="card"><p class="empty"><b>'
-        + (nd ? "Ready when you are" : "Nothing due today")
-        + '</b>' + (nd
-            ? nd + ' word' + (nd === 1 ? '' : 's') + ' waiting'
-              + (nd > CAP ? ' \u2014 ' + CAP + ' in this sitting.' : '.')
-            : 'You have studied everything that came up. '
-              + db.words.length + ' word' + (db.words.length === 1 ? '' : 's') + ' in total.')
-        + '</p>'
-        + (nd ? '<div style="text-align:center;padding-bottom:18px">'
-                + '<button class="btn" id="go">Start</button></div>' : '')
+      /* Having just finished a round is a different situation from arriving
+         at the page. The words left over are the ones answered "Not yet",
+         which stay due today on purpose — so the offer is a second round,
+         not a puzzle about why the count did not reach zero. */
+      var justFinished = done > 0;
+      var head, body, label;
+      if (justFinished && nd) {
+        head = "Round done";
+        body = nd + ' word' + (nd === 1 ? ' is' : 's are') + ' still due \u2014 '
+             + (nd === 1 ? 'the one' : 'the ones') + ' you answered '
+             + '<b style="display:inline">Not yet</b>. They stay due until you '
+             + 'get ' + (nd === 1 ? 'it' : 'them') + ', today or any day.';
+        label = "Go again";
+      } else if (justFinished) {
+        head = "All done";
+        body = done + ' word' + (done === 1 ? '' : 's') + ' this round, and '
+             + 'nothing left due. ' + db.words.length + ' in total.';
+        label = "";
+      } else if (nd) {
+        head = "Ready when you are";
+        body = nd + ' word' + (nd === 1 ? '' : 's') + ' waiting'
+             + (nd > CAP ? ' \u2014 ' + CAP + ' in this sitting.' : '.');
+        label = "Start";
+      } else {
+        head = "Nothing due today";
+        body = 'You have studied everything that came up. '
+             + db.words.length + ' word' + (db.words.length === 1 ? '' : 's') + ' in total.';
+        label = "";
+      }
+      el.innerHTML = '<div class="card"><p class="empty"><b>' + head + '</b>'
+        + body + '</p>'
+        + (label ? '<div style="text-align:center;padding-bottom:18px">'
+                 + '<button class="btn" id="go">' + label + '</button></div>' : '')
         + '</div>';
       if ($("go")) $("go").addEventListener("click", startSession);
       return;
