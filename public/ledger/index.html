@@ -217,6 +217,10 @@ tbody tr:hover{background:var(--sunken)}
 select.cat{font:inherit;font-size:12.5px;padding:3px 5px;border:1px solid var(--line);
   border-radius:6px;background:var(--surface);color:var(--ink-2);max-width:140px}
 select.cat.unc{border-color:var(--warn);color:var(--warn)}
+select.pmode{font:inherit;font-size:12.5px;padding:3px 5px;border:1px solid var(--line);
+  border-radius:6px;background:var(--surface);color:var(--ink-2);max-width:190px}
+select.pmode.set{box-shadow:inset 3px 0 0 var(--brand);color:var(--ink)}
+select.pmode option{color:var(--ink);background:var(--surface)}
 /* The popup's highlight follows accent-color in Chrome; the option colours
    are honoured where the browser draws the list itself. */
 select{accent-color:var(--brand)}
@@ -612,6 +616,7 @@ table.mdtable tr:last-child td{border-bottom:0}
       <button class="tab" role="tab" aria-selected="false" data-tab="pend">Pending &amp; refunds <span class="tab-n" id="nPe">0</span></button>
       <button class="tab" role="tab" aria-selected="false" data-tab="subs">Bills <span class="tab-n" id="nSu">0</span></button>
       <button class="tab" role="tab" aria-selected="false" data-tab="merch">Merchants <span class="tab-n" id="nMe">0</span></button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="people">People <span class="tab-n" id="nPp">0</span></button>
       <button class="tab" role="tab" aria-selected="false" data-tab="files">Files <span class="tab-n" id="nFi">0</span></button>
     </nav>
 
@@ -621,6 +626,7 @@ table.mdtable tr:last-child td{border-bottom:0}
         <select class="f" id="month"></select>
       </div>
       <div id="dups"></div>
+      <div id="pairs"></div>
       <div class="grid2">
         <div class="card summary" id="cSummary"><h3>Insights</h3><div id="summary"></div></div>
         <div class="card" id="cCats"><h3>Where it went</h3><div id="cats"></div></div>
@@ -714,6 +720,15 @@ table.mdtable tr:last-child td{border-bottom:0}
       <div class="card"><h3>Bills you could cancel <span class="note" style="font-weight:400;text-transform:none;letter-spacing:0">same day each month, three times or more</span></h3><div class="tscroll" id="subs"></div></div>
     </section>
 
+    <section id="p-people" hidden>
+      <div class="card"><h3>Money between you and people</h3>
+        <p class="note" style="margin:-2px 0 12px">Both directions together,
+          which no other view can show: the bank files a payment to someone and
+          a payment from them as two unrelated merchants. Say once how a
+          person works and every payment either way follows it.</p>
+        <div class="tscroll" id="people"></div></div>
+    </section>
+
     <section id="p-merch" hidden>
       <div class="card"><h3>By merchant, all time <button class="btn-q" id="merchFixed"
         style="float:right;text-transform:none;letter-spacing:0;font-weight:400"></button></h3>
@@ -791,7 +806,7 @@ function median(a){
    STORE
    ============================================================ */
 var KEY = "spend.v1";
-var db = { v:1, idv:2, txns:[], rules:{}, files:[], pending:[], dupsOk:{}, cats:[], splits:{}, asked:{}, paidBack:{}, unspent:{}, paidBackTx:{}, catTx:{}, notMine:{} };
+var db = { v:1, idv:2, txns:[], rules:{}, files:[], pending:[], dupsOk:{}, cats:[], splits:{}, asked:{}, paidBack:{}, unspent:{}, paidBackTx:{}, catTx:{}, notMine:{}, people:{}, pairsOk:{} };
 
 /* Ids used to include the account, which came from the filename, so the same
    row arriving as stmt.csv and stmt (2).csv counted twice. Rows stored under
@@ -845,7 +860,14 @@ function load(){
     if(raw){ var d = JSON.parse(raw); if(d && d.txns){ db = d; db.rules = db.rules||{}; db.files = db.files||[]; db.pending = db.pending||[]; db.dupsOk = db.dupsOk||{}; db.cats = db.cats||[]; db.splits = db.splits||{}; db.asked = db.asked||{};
         db.paidBack = db.paidBack||{}; db.unspent = db.unspent||{};
         db.paidBackTx = db.paidBackTx||{}; db.catTx = db.catTx||{};
-        db.notMine = db.notMine||{}; } }
+        db.notMine = db.notMine||{};
+        db.people = db.people||{}; db.pairsOk = db.pairsOk||{};
+        /* Anyone already answered "yes, their share" keeps that answer under
+           the new name, so nothing set before people existed is lost. */
+        for(var pk in db.paidBack){
+          var pn = personOf(pk);
+          if(pn && !db.people[pn]) db.people[pn] = "settle";
+        } } }
   }catch(e){ /* corrupt or blocked storage — start empty rather than break */ }
 }
 /* ?demo=1 runs the page on invented data and writes nothing, so it can be
@@ -1349,6 +1371,36 @@ function baseCategory(key){
   return "uncategorized";
 }
 
+/* ------------------------------------------------------------
+   A person, as opposed to a merchant.
+
+   The bank writes one human as two merchants -- ZELLE PAYMENT TO BARKIN
+   ARGIN and ZELLE PAYMENT FROM BARKIN ARGIN -- which never meet anywhere
+   in the app. Everything about settling up is a fact about the person, so
+   the two have to be brought back together.
+
+   Returns "" for anything that is not money moving between people, which
+   leaves shops, cash machines and bills exactly as they were.
+   ------------------------------------------------------------ */
+var RAIL_PERSON = /^(?:ZELLE|VENMO|CASH ?APP|CASHAPP|APPLE CASH|PAYPAL|WISE|TRANSFERWISE|REMITLY|XOOM|WESTERN UNION|MONEYGRAM)\s+(?:PAYMENT\s+)?(?:TO|FROM)\s+/;
+
+function personOf(key){
+  if(baseCategory(key) !== "external") return "";
+  var s = String(key || "").toUpperCase().trim();
+  if(!RAIL_PERSON.test(s)) return "";
+  s = s.replace(RAIL_PERSON, "");
+  /* An inbound key keeps whatever the sender typed in the memo: CEREN
+     DUNDAR FOR ADAM PORT is one person and one note. The name comes first. */
+  s = s.split(/\s+FOR\s+/)[0];
+  s = s.replace(/\s+(CONF|REF|ID)\s*#?.*$/, "");
+  s = s.replace(/[^A-Z' -]/g, " ").replace(/\s+/g, " ").trim();
+  /* Two words or fewer that are all initials is not a name worth grouping. */
+  return s.length > 2 ? s : "";
+}
+
+/* The display form: BARKIN ARGIN reads badly in a table of real words. */
+function personLabel(name){ return titleCase(String(name || "")); }
+
 function categorize(key, amount){
   if(db.rules[key]) return { c: db.rules[key], why: "you set this" };
   for(var i=0;i<RULES_SORTED.length;i++){
@@ -1513,20 +1565,34 @@ function view(){
        without the parent's category made a credit filed under Restaurants come
        off External transfers, cancelling $180 she really had sent a friend and
        deleting the bar it belonged to. */
+    /* What she has said about this person, once, instead of about each of
+       their payments. "settle" means their credits come off what she spent;
+       "neither" means money between them is not spending in either
+       direction -- the lender case, where the thing the loan paid for is
+       already sitting in her transactions on its own. */
+    var person = part ? "" : personOf(key);
+    var mode = person ? db.people[person] : "";
+
     var nets = part ? !MONEY_IN[cat]
-             : (!MONEY_IN[cat] || !!db.paidBack[key] || !!db.unspent[t.id] || !!one);
+             : (!MONEY_IN[cat] || mode === "settle" || !!db.paidBack[key]
+                || !!db.unspent[t.id] || !!one);
     /* Money that left and came back. The pair is not spending in either
        direction, and netting the return against the month it arrives in
        would take it off a month that never had it: $390 sent in September
        and $398 returned in October left September overstated and October
        short by the difference. Said about one row, so a later transfer to
        the same person is untouched. */
-    var skip = !part && !!db.notMine[t.id];
-    if(skip) why = "you said you did not spend this";
+    var skip = !part && (!!db.notMine[t.id] || mode === "neither");
+    if(skip) {
+      why = mode === "neither" && !db.notMine[t.id]
+          ? "money between you and " + personLabel(person) + " is not spending"
+          : "you said you did not spend this";
+    }
 
     return { id:id, date:t.date, month:t.date.slice(0,7), desc:t.desc, key:key,
              merch:merch, amt:amt, acct:t.acct, cat:cat, why:why, part:part,
              nets: nets, notMine: skip, baseCat: baseCat,
+             person: person,
              spend: (skip || NOT_SPEND[cat]) ? 0 : (amt < 0 ? -amt : 0),
              refund: (skip || NOT_SPEND[cat]) ? 0 : (amt > 0 ? amt : 0) };
   }
@@ -2086,6 +2152,7 @@ function renderMonth(){
 
   renderTrend();
   renderDups(list);
+  renderPairs();
 
   /* top merchants this month */
   var mm = {}, k;
@@ -2702,6 +2769,83 @@ function renderDups(list){
   $("dups").innerHTML = h + '</tbody></table></div></div>';
 }
 
+/* Money out and the same money back from the same person. Nothing was bought,
+   so neither row is spending -- but it is a guess about two rows she never
+   mentioned, so it is never applied on its own: she approves it or it goes
+   away. Scans everything, not the month on screen, because the whole reason
+   this is hard is that the two halves often land in different months. */
+function roundTrips(){
+  var byPerson = {}, out = [], i, j, k;
+  for(i=0;i<V.length;i++){
+    var t = V[i];
+    if(!t.person || t.part) continue;
+    /* Already answered, one way or another: by a mode on the person, by a mark
+       on the row, or by an earlier approval here. */
+    if(db.people[t.person]) continue;
+    if(db.notMine[t.id] || db.paidBackTx[t.id] || db.unspent[t.id]) continue;
+    (byPerson[t.person] = byPerson[t.person] || []).push(t);
+  }
+  for(k in byPerson){
+    var ts = byPerson[k], used = {}, cands = [];
+    for(i=0;i<ts.length;i++) for(j=0;j<ts.length;j++){
+      var a = ts[i], b = ts[j];                      /* a went out, b came in */
+      if(a.amt >= 0 || b.amt <= 0) continue;
+      var gap = Math.abs(dayNum(b.date) - dayNum(a.date));
+      if(gap > 45) continue;
+      var diff = Math.abs(b.amt + a.amt);            /* a is negative */
+      if(diff > Math.max(15, -a.amt * 0.02)) continue;
+      if(-a.amt < 20) continue;                      /* a $6 round trip is noise */
+      cands.push({ a:a, b:b, diff:diff, gap:gap });
+    }
+    /* Closest match first, each row spent once, so a person with many
+       transfers yields pairs rather than every combination of them. */
+    cands.sort(function(x,y){ return (x.diff - y.diff) || (x.gap - y.gap); });
+    for(i=0;i<cands.length;i++){
+      var c = cands[i];
+      if(used[c.a.id] || used[c.b.id]) continue;
+      used[c.a.id] = used[c.b.id] = 1;
+      out.push({ key: c.a.id < c.b.id ? c.a.id + "~" + c.b.id
+                                      : c.b.id + "~" + c.a.id,
+                 person:k, out:-c.a.amt, back:c.b.amt, gap:c.gap,
+                 dOut:c.a.date, dIn:c.b.date, ids:[c.a.id, c.b.id] });
+    }
+  }
+  out.sort(function(x,y){ return y.out - x.out; });
+  return out;
+}
+
+function renderPairs(){
+  var all = roundTrips(), d = [], i;
+  for(i=0;i<all.length;i++) if(!db.pairsOk[all[i].key]) d.push(all[i]);
+  if(!d.length){ $("pairs").innerHTML = ""; return; }
+  var h = '<div class="card flagcard"><h3>Transfers that cancelled out</h3>'
+        + '<p class="note" style="margin:-4px 0 10px">The same amount moved '
+        + 'between you and this person in both directions, so it looks like '
+        + 'nothing was bought &mdash; or they lent you money and you paid it '
+        + 'back, in which case what you bought is already in your '
+        + 'transactions on its own. If both are real spending, leave it '
+        + 'alone. Nothing changes until you say so.</p>'
+        + '<div class="tscroll"><table><tbody>';
+  for(i=0;i<d.length;i++){
+    var r = d[i];
+    /* Oldest line first. Printed out-then-in regardless, a loan repaid read
+       as money she had sent coming back, which is the opposite story. */
+    var sent = 'you sent ' + esc(money(r.out)) + ' on ' + esc(r.dOut);
+    var got  = 'they sent ' + esc(money(r.back)) + ' on ' + esc(r.dIn);
+    h += '<tr><td class="t-merch">'+esc(personLabel(r.person))+'</td>'
+       + '<td class="t-date">'
+       + (r.dOut <= r.dIn ? sent + '<br>' + got : got + '<br>' + sent)
+       + '</td>'
+       + '<td class="t-acct">'+r.gap+' day'+(r.gap===1?'':'s')+' apart</td>'
+       + '<td style="text-align:right">'
+       + '<button class="btn-q" data-pairgo="'+esc(r.key)+'">'
+       + 'Neither counts</button> '
+       + '<button class="btn-q" data-pairok="'+esc(r.key)+'">Leave it</button>'
+       + '</td></tr>';
+  }
+  $("pairs").innerHTML = h + '</tbody></table></div></div>';
+}
+
 function renderSubs(){
   var rows = recurring(), i;
   $("nSu").textContent = rows.length;
@@ -2831,6 +2975,92 @@ function merchDetail(r){
        + '<td><div class="t-raw">'+esc(t.desc)+'</div>'
        + (t.notMine ? '<div class="notcounted">not counted \u2014 you said you '
                     + 'did not spend this</div>' : '')
+       + '</td>'
+       + '<td class="t-acct">'+esc(t.acct)+'</td>'
+       + '<td class="t-amt '+(t.amt<0?'neg':'pos')+(t.notMine?' struck':'')+'">'
+       + esc(money2(t.amt))+'</td></tr>';
+  }
+  return h + '</tbody></table></div></td></tr>';
+}
+
+var peopleOpen = null;       /* the one person whose transfers are showing */
+
+/* Everything that moved between her and one human, both directions in one
+   row. No other view can show this: the bank files a payment to someone and a
+   payment from them as two unrelated merchants, and the merchant list drops
+   the inbound one entirely because its spend is zero. */
+function renderPeople(){
+  var p = {}, i, k;
+  for(i=0;i<V.length;i++){
+    var t = V[i];
+    if(!t.person) continue;
+    if(!p[t.person]) p[t.person] = { out:0, "in":0, txns:[] };
+    if(t.amt < 0) p[t.person].out += -t.amt; else p[t.person]["in"] += t.amt;
+    p[t.person].txns.push(t);
+  }
+  var rows = [];
+  for(k in p) rows.push([k, p[k]]);
+  /* Biggest relationship first, measured by how much has moved either way --
+     not by the net, which hides a person you have sent and been sent
+     thousands behind someone you once split a coffee with. */
+  rows.sort(function(a,b){
+    return (b[1].out + b[1]["in"]) - (a[1].out + a[1]["in"]);
+  });
+  if(!rows.length){
+    $("people").innerHTML = '<p class="empty">No transfers to or from a person '
+      + 'yet. Zelle, Venmo, PayPal, Cash App, Apple Cash and wires show up here '
+      + 'once they are in your transactions.</p>';
+    return;
+  }
+  var h = '<table><thead><tr><th>Person</th><th class="t-amt">Sent</th>'
+        + '<th class="t-amt">Received</th><th class="t-amt">Net</th>'
+        + '<th>Treatment</th></tr></thead><tbody>';
+  for(i=0;i<rows.length;i++){
+    var name = rows[i][0], r = rows[i][1], open = (peopleOpen === name);
+    var net = r["in"] - r.out, mode = db.people[name] || "";
+    h += '<tr class="mrow'+(open?' is-open':'')+'">'
+      + '<td class="t-merch"><button class="mtoggle" data-person="'+esc(name)+'" '
+      + 'aria-expanded="'+(open?'true':'false')+'">'
+      + '<span class="caret" aria-hidden="true">'+(open?'\u25be':'\u25b8')+'</span>'
+      + esc(personLabel(name))+'</button></td>'
+      + '<td class="t-amt">'+esc(money(r.out))+'</td>'
+      + '<td class="t-amt">'+esc(money(r["in"]))+'</td>'
+      + '<td class="t-amt '+(!net?'':net<0?'neg':'pos')+'">'
+      + (!net ? '$0' : (net<0?'\u2212':'+')+esc(money(Math.abs(net))))+'</td>'
+      + '<td><select class="pmode'+(mode?' set':'')+'" data-person="'+esc(name)+'">'
+      + '<option value=""'+(mode?'':' selected')+'>Normal</option>'
+      + '<option value="settle"'+(mode==="settle"?' selected':'')
+      + '>We settle up</option>'
+      + '<option value="neither"'+(mode==="neither"?' selected':'')
+      + '>Not spending either way</option>'
+      + '</select></td></tr>';
+    if(open) h += personDetail(r);
+  }
+  $("people").innerHTML = h + '</tbody></table>'
+    + '<p class="note" style="margin-top:12px"><b>Normal</b> &mdash; money you '
+    + 'send counts as spending, money they send is just money arriving.<br>'
+    + '<b>We settle up</b> &mdash; what they send comes off what you spent, '
+    + 'because it is their share of something you paid for.<br>'
+    + '<b>Not spending either way</b> &mdash; nothing between you counts. For '
+    + 'somebody who lends you money, or money that went out and came straight '
+    + 'back: whatever the money bought is already in your transactions on its '
+    + 'own, so counting the transfer too would charge you twice.</p>';
+}
+
+/* Both directions, newest first, with what the figures above leave out shown
+   struck through so the rows add up to the row they sit under. */
+function personDetail(r){
+  var list = r.txns.slice().sort(function(a,b){
+    return a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
+  });
+  var h = '<tr class="mdetail"><td colspan="5"><div class="mdwrap">'
+        + '<table class="mdtable"><tbody>';
+  for(var i=0;i<list.length;i++){
+    var t = list[i];
+    h += '<tr><td class="t-date">'+esc(t.date)+'</td>'
+       + '<td><div class="t-raw">'+esc(t.desc)+'</div>'
+       + (t.notMine ? '<div class="notcounted">not counted \u2014 '+esc(t.why)
+                    + '</div>' : '')
        + '</td>'
        + '<td class="t-acct">'+esc(t.acct)+'</td>'
        + '<td class="t-amt '+(t.amt<0?'neg':'pos')+(t.notMine?' struck':'')+'">'
@@ -3036,6 +3266,7 @@ function render(){
   if(!$("p-txns").hidden) renderTxns();
   if(!$("p-pend").hidden) renderPend();
   if(!$("p-merch").hidden) renderMerch();
+  if(!$("p-people").hidden) renderPeople();
   if(!$("p-files").hidden) renderFiles();
   $("nTx").textContent = V.length;
   /* Counting only pending items made this read 0 almost always, because a
@@ -3051,6 +3282,10 @@ function render(){
   for(mi=0;mi<V.length;mi++)
     if(!NOT_SPEND[V[mi].cat] && !mk[V[mi].key]){ mk[V[mi].key] = 1; mn++; }
   $("nMe").textContent = mn;
+  var pk = {}, pn = 0, pi;
+  for(pi=0;pi<V.length;pi++)
+    if(V[pi].person && !pk[V[pi].person]){ pk[V[pi].person] = 1; pn++; }
+  $("nPp").textContent = pn;
 }
 
 /* ============================================================
@@ -3174,13 +3409,14 @@ $("tabs").addEventListener("click", function(e){
   if(!b) return;
   var all = document.querySelectorAll(".tab");
   for(var i=0;i<all.length;i++) all[i].setAttribute("aria-selected", String(all[i]===b));
-  ["month","txns","pend","subs","merch","files"].forEach(function(k){
+  ["month","txns","pend","subs","merch","people","files"].forEach(function(k){
     $("p-"+k).hidden = (k !== b.getAttribute("data-tab"));
   });
   if(b.getAttribute("data-tab")==="txns") renderTxns();
   if(b.getAttribute("data-tab")==="pend") renderPend();
   if(b.getAttribute("data-tab")==="subs") renderSubs();
   if(b.getAttribute("data-tab")==="merch") renderMerch();
+  if(b.getAttribute("data-tab")==="people") renderPeople();
   if(b.getAttribute("data-tab")==="files") renderFiles();
 });
 
@@ -3269,6 +3505,34 @@ $("merch").addEventListener("click", function(e){
   var key = b.getAttribute("data-merch");
   merchOpen = (merchOpen === key) ? null : key;
   renderMerch();
+});
+
+/* One person's transfers at a time, same as the merchant list. */
+$("people").addEventListener("click", function(e){
+  var b = e.target.closest ? e.target.closest("button[data-person]") : null;
+  if(!b) return;
+  var name = b.getAttribute("data-person");
+  peopleOpen = (peopleOpen === name) ? null : name;
+  renderPeople();
+});
+
+/* Said once about a person, which is the whole point of this view: she has
+   dozens of transfers with somebody and no appetite for answering about each
+   one. render() rebuilds the figures; redrawLists() would miss this panel. */
+$("people").addEventListener("change", function(e){
+  var s = e.target;
+  if(!s.classList || !s.classList.contains("pmode")) return;
+  var name = s.getAttribute("data-person"), val = s.value;
+  if(val) db.people[name] = val; else delete db.people[name];
+  /* The old per-merchant flag would otherwise keep netting their credits
+     after she has just said nothing between them counts. */
+  if(val === "neither") for(var mk in db.paidBack)
+    if(personOf(mk) === name) delete db.paidBack[mk];
+  save(); render(); redrawLists();
+  toast(!val ? "Back to normal for " + personLabel(name)
+      : val === "settle" ? personLabel(name)
+          + "'s payments come off what you spent."
+      : "Money between you and " + personLabel(name) + " no longer counts.");
 });
 
 $("month").addEventListener("change", function(){ curMonth = this.value; renderMonth(); });
@@ -3757,6 +4021,24 @@ document.addEventListener("click", function(e){
     toast("Acknowledged. That pair will not be flagged again.");
     return;
   }
+  var pgo = e.target && e.target.getAttribute && e.target.getAttribute("data-pairgo");
+  if(pgo){
+    /* The mark that already exists for "I did not spend this", set on both
+       halves -- so the figures change through the one path everything else
+       goes through, and either row can be un-marked later on its own. */
+    var two = pgo.split("~");
+    db.notMine[two[0]] = 1; db.notMine[two[1]] = 1;
+    db.pairsOk[pgo] = 1;
+    save(); render(); redrawLists();
+    toast("Neither side counts now.");
+    return;
+  }
+  var pok = e.target && e.target.getAttribute && e.target.getAttribute("data-pairok");
+  if(pok){
+    db.pairsOk[pok] = 1; save(); renderMonth();
+    toast("Left alone. That pair will not be flagged again.");
+    return;
+  }
   var id = e.target && e.target.getAttribute && e.target.getAttribute("data-pdel");
   if(!id) return;
   db.pending = db.pending.filter(function(p){ return p.id !== id; });
@@ -3850,10 +4132,15 @@ $("bakfile").addEventListener("change", function(){
     if(db.txns.length && !confirm(
         "Replace the " + db.txns.length + " transactions in this browser with the "
         + d.txns.length + " in the backup?")) return;
+    /* Every store, or none: a field missing here is not an empty object, it
+       is undefined, and row() reads them without guarding. notMine was added
+       after this literal was written and restoring a backup threw on the
+       first transaction, taking the whole page down with it. */
     db = { v:1, idv:d.idv, txns:d.txns, rules:d.rules||{}, files:d.files||[],
            pending:d.pending||[], dupsOk:d.dupsOk||{}, cats:d.cats||[],
            splits:d.splits||{}, asked:d.asked||{}, paidBack:d.paidBack||{},
-           unspent:d.unspent||{}, paidBackTx:d.paidBackTx||{}, catTx:d.catTx||{} };
+           unspent:d.unspent||{}, paidBackTx:d.paidBackTx||{}, catTx:d.catTx||{},
+           notMine:d.notMine||{}, people:d.people||{}, pairsOk:d.pairsOk||{} };
     migrateIds();
     save();
     curMonth = "";
@@ -3871,7 +4158,7 @@ $("fClear").addEventListener("click", function(){
 
 $("reset").addEventListener("click", function(){
   if(!confirm("Delete every transaction and rule stored in this browser?")) return;
-  db = { v:1, idv:2, txns:[], rules:{}, files:[], pending:[], dupsOk:{}, cats:[], splits:{}, asked:{}, paidBack:{}, unspent:{}, paidBackTx:{}, catTx:{} };
+  db = { v:1, idv:2, txns:[], rules:{}, files:[], pending:[], dupsOk:{}, cats:[], splits:{}, asked:{}, paidBack:{}, unspent:{}, paidBackTx:{}, catTx:{}, notMine:{}, people:{}, pairsOk:{} };
   try{ localStorage.removeItem(KEY); }catch(e){}
   curMonth = "";
   render();
