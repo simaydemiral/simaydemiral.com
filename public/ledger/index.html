@@ -2364,6 +2364,7 @@ function renderTxns(){
       + creditCtl(t)
       + notMineCtl(t)
       + '</td></tr>'
+      + pbOfferRow(t.id, 6)
       + catOfferRow(t.id, 6)
       + helpRow(t.id, 6);
     if(splitOpen && t.id === splitOpen) h += splitEditor(t.id);
@@ -3411,6 +3412,20 @@ document.addEventListener("click", function(e){
 
   if(b.getAttribute && b.getAttribute("data-pbcancel")){ pbOpen = ""; redrawLists(); return; }
 
+  /* A whole relationship rather than one payment: every credit from this
+     person comes off what she spent, the way the monthly question does for
+     a regular one. */
+  if(b.getAttribute && b.getAttribute("data-pball")){
+    db.paidBack[b.getAttribute("data-pball")] = 1;
+    pbOffer = null;
+    save(); render(); redrawLists();
+    toast("Every payment from them settles up \u2014 back and forward.");
+    return;
+  }
+  if(b.getAttribute && b.getAttribute("data-pbonce")){
+    pbOffer = null; redrawLists(); return;
+  }
+
   if(b.id === "catOne"){ catOffer = null; redrawLists(); return; }
   if(b.id === "catAll"){
     var off = catOffer;
@@ -3532,10 +3547,17 @@ document.addEventListener("change", function(e){
        invisible, and surface as a third category when this mark is removed. */
     if(db.catTx[txid]) delete db.catTx[txid];
     pbOpen = "";
+    /* Somebody you settle up with is not one repayment, it is a running tab.
+       The monthly question never fires for an irregular one, so it is asked
+       here instead, where she has just said this payment settles up. */
+    var pbTx = null, pbi;
+    for(pbi = 0; pbi < V.length; pbi++) if(V[pbi].id === txid) pbTx = V[pbi];
+    pbOffer = (pbTx && !db.paidBack[pbTx.key]) ? { id: txid, key: pbTx.key } : null;
     save(); render(); redrawLists();
     toast("Comes off what you spent.");
     return;
   }
+
 
   /* "Paying me back" is a category plus one extra fact: that the money coming
      in should come off that category rather than sit beside it. Without the
@@ -3679,6 +3701,25 @@ document.addEventListener("change", function(e){
 /* How many other transactions the merchant rule would reach, so the size of
    the thing is on screen before it is done rather than after. */
 var catOffer = null;
+/* The row that has just been marked "paying me back", so the page can ask
+   whether it is the whole relationship rather than this one payment. */
+var pbOffer = null;
+
+/* Offered once, straight after the answer, in the row it belongs to. */
+function pbOfferRow(id, cols){
+  if(!pbOffer || pbOffer.id !== id) return "";
+  var n = 0, i;
+  for(i=0;i<V.length;i++)
+    if(V[i].key === pbOffer.key && V[i].amt > 0 && V[i].id !== id && !V[i].part) n++;
+  return '<tr class="helprow"><td colspan="'+cols+'"><div class="offer">'
+    + '<span>Do you settle up with <b>'
+    + esc(MERCH_LABEL[pbOffer.key] || titleCase(pbOffer.key)) + '</b> generally? '
+    + 'Then every payment from them' + (n ? ' \u2014 ' + n + ' more so far \u2014 ' : ' ')
+    + 'comes off what you spent, rather than counting as money arriving.</span>'
+    + '<button class="btn-q" data-pball="'+esc(pbOffer.key)+'">Yes, always</button>'
+    + '<button class="btn-q" data-pbonce="1">Just this one</button>'
+    + '</div></td></tr>';
+}
 
 function catOfferRow(id, cols){
   if(!catOffer || catOffer.id !== id) return "";
