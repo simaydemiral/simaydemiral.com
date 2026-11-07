@@ -117,8 +117,9 @@
   .back .term{font-size:25px;text-align:left;margin-bottom:2px}
   .via{margin-top:9px;font:500 11px/1 var(--f-mono);letter-spacing:.08em;
        color:var(--faint)}
-  .seenas{margin-top:10px;font:500 11px/1 var(--f-mono);letter-spacing:.08em;
-          color:var(--faint)}
+  .seenas{margin-top:8px;font:500 12px/1.3 var(--f-mono);letter-spacing:.06em;
+          color:var(--muted)}
+  .back .seenas{margin:4px 0 0}
   .w-form{margin-left:7px;font:500 11px/1 var(--f-mono);letter-spacing:.06em;
           color:var(--faint)}
   .sense{margin:10px 0 0;padding-left:0}
@@ -1582,6 +1583,10 @@
             + '<div class="term">' + esc(w.term) + '</div>'
             + sayBtn(w)
             + '</div>'
+            /* Both words, on the side she is reading the meaning from. The
+               headword is what the dictionary files it under; this is the
+               form she will actually meet again on a page. */
+            + seenAsLine(w)
             + '<div class="pill" style="align-self:flex-start;margin-top:2px">'
             + esc(w.deck || "Inbox") + '</div>';
       if (!w.looked && !w.senses.length) {
@@ -1590,7 +1595,10 @@
         html += '<p class="def" style="margin-top:12px;color:var(--warn)">'
               + 'No definition found &mdash; neither dictionary knows this one.</p>';
       } else {
-        if (w.via) {
+        /* One hop is already said by the line under the word. A longer chain
+           is worth spelling out, because "Evals -> eval -> evaluation"
+           explains a headword that otherwise looks unrelated to it. */
+        if (w.via && w.via.split("\u2192").length > 2) {
           html += '<div class="via">' + esc(w.via) + '</div>';
         }
         /* Plain English when there is any, the precise senses when she asks
