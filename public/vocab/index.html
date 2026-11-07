@@ -382,7 +382,10 @@
       if (w.say && typeof w.say === "object") {
         w.say = { audio: safeUrl(w.say.audio).slice(0, 400),
                   ipa: typeof w.say.ipa === "string" ? w.say.ipa.slice(0, 80) : "",
-                  us: !!w.say.us };
+                  us: !!w.say.us,
+                  /* Kept, or a round trip through export and import would
+                     look like a card that had never been asked. */
+                  v: typeof w.say.v === "number" ? w.say.v : 0 };
       } else { delete w.say; }
       if (w.tr && typeof w.tr === "object") {
         var tb = Array.isArray(w.tr.blocks) ? w.tr.blocks : [];
@@ -1078,18 +1081,99 @@
   /* Kept apart from the definition lookup on purpose: words saved before this
      existed are already marked looked-up, so asking there would have left all
      of them silent for good. */
+  /* ------------------------------------------------------------------
+     Real recordings for Spanish and German.
+
+     The English-only dictionary that supplies the English ones has no
+     equivalent for either, so both used the browser's synthetic voice. But
+     the English Wiktionary page -- already fetched for the translations and
+     the example, so usually warm in the browser's cache -- carries the
+     Commons filename of a recording somebody actually made:
+
+       German   {{audio|de|De-Haus.ogg}}
+       Spanish  {{es-pr|+<audio:Es-am-lat-casa.ogg<a:Latin America>>}}
+
+     Two different templates because the two sections are maintained by
+     different people; there is no single one to read. German also writes its
+     IPA out in full, which Spanish computes inside the template and does not,
+     so German cards get a phonetic spelling and Spanish ones do not.
+     ------------------------------------------------------------------ */
+  var COMMONS = "https://commons.wikimedia.org/wiki/Special:FilePath/";
+  /* Every Spanish and German card already carries a settled "no recording",
+     written when there was nowhere to look. Bumping this re-asks those once;
+     an English card is untouched, and nothing is fetched twice. */
+  var SAY_SOURCES = 2;
+
+  function audioFile(name) {
+    /* Commons stores a file under the name with spaces as underscores; the
+       Spanish recordings are mostly "LL-Q1321 (spa)-Someone-word.wav". */
+    name = String(name || "").trim().replace(/\s+/g, "_");
+    if (!/\.(ogg|oga|wav|mp3|flac)$/i.test(name)) return "";
+    return COMMONS + encodeURIComponent(name);
+  }
+
+  function sayFromWikitext(wikitext, code) {
+    var sec = section(wikitext, lang(code).wikt);
+    if (!sec) return null;
+    var file = "", ipa = "", m;
+    if (code === "es") {
+      /* Several regions can be listed. Latin American first, because it is
+         the Spanish she is most likely to hear; otherwise whichever is
+         first, because any real voice beats a synthetic one. */
+      var all = [], pr = /<audio:([^<>]+?)(?:<a:([^<>]*)>)?>/g;
+      while ((m = pr.exec(sec))) all.push({ f: m[1], a: m[2] || "" });
+      for (var i = 0; i < all.length && !file; i++)
+        if (/latin|america|mexic|colomb|peru|argentin|chile/i.test(all[i].a)) file = all[i].f;
+      if (!file && all.length) file = all[0].f;
+    } else {
+      m = new RegExp("\\{\\{audio\\|" + code + "\\|([^|}]+)").exec(sec);
+      if (m) file = m[1];
+    }
+    m = new RegExp("\\{\\{IPA\\|" + code + "\\|([^|}]+)").exec(sec);
+    if (m) ipa = String(m[1]).trim();
+    var src = audioFile(file);
+    if (!src && !ipa) return null;
+    return { audio: src, ipa: ipa, us: false };
+  }
+
+  /* The three places that ask share one test, so a card settled before
+     Spanish and German had anywhere to look is re-asked exactly once.
+     Written as "!w.say" at each call site, the guard outside this function
+     was stricter than the one inside it and nothing was ever re-asked. */
+  function needsSay(w) {
+    if (!w.say) return true;
+    if ((w.lang || "en") === "en") return false;
+    return (w.say.v || 0) < SAY_SOURCES;
+  }
+
   function ensureSay(w, after) {
     /* Settled already, or still in flight: nothing changed, so do not call
        back. The callback redraws, the redraw asks again, and an answer that
        arrives instantly turns that into a loop with no end. */
-    if (w.say || saying[w.id]) return;
-    /* The recordings and IPA come from an English-only dictionary. For the
-       other two the browser says the word itself, in that language's voice,
-       which every machine can do. */
-    if ((w.lang || "en") !== "en") {
-      w.say = { audio: "", ipa: "", us: false };
-      save();
-      if (after) after();
+    if (!needsSay(w) || saying[w.id]) return;
+    /* Spanish and German read their recording off the Wiktionary page. A
+       phrase has no page of its own, and nothing found still counts as an
+       answer -- the browser's own voice says it, as it did before. */
+    var wl = w.lang || "en";
+    if (wl !== "en") {
+      if (/\s/.test(w.term)) {
+        w.say = { audio: "", ipa: "", us: false, v: SAY_SOURCES };
+        save(); if (after) after(); return;
+      }
+      saying[w.id] = 1;
+      getJSON(WIKT_RAW + encodeURIComponent(w.term.trim()))
+        .then(function (d) {
+          var txt = d && d.parse && d.parse.wikitext ? d.parse.wikitext["*"] : "";
+          return txt ? sayFromWikitext(txt, wl) : null;
+        })
+        .catch(function () { return null; })
+        .then(function (say) {
+          delete saying[w.id];
+          w.say = say || { audio: "", ipa: "", us: false };
+          w.say.v = SAY_SOURCES;
+          save();
+          if (after) after();
+        });
       return;
     }
     /* The dictionary has no entry for a phrase, so there is no recording to
@@ -1743,7 +1827,7 @@
       /* and the recording, so the speaker on this face works straight away.
          Redrawn only once, when the answer lands: by then w.say is set, so
          the next pass does not ask again. */
-      if (!w.say) {
+      if (needsSay(w)) {
         ensureSay(w, function () {
           if (!flipped && session[0] === w) renderDue();
         });
@@ -1774,7 +1858,7 @@
          the way ensureLooked is: without the guard the callback fires at once
          for a word that already has one, redraws the back, and asks again —
          a redraw that never ends. */
-      if (!w.say) ensureSay(w, function () { if (flipped) renderDue(); });
+      if (needsSay(w)) ensureSay(w, function () { if (flipped) renderDue(); });
       if (!(w.eg && w.eg.from) && !hasExample(w)) {
         ensureExample(w, function () { if (flipped) renderDue(); });
       }
@@ -2335,7 +2419,7 @@
           var sw = db.words[si];
           /* Nothing fetched yet — get it, then play it, so the first press
              works rather than teaching her the button is broken. */
-          if (!sw.say) ensureSay(sw, function () { speak(sw); renderAll(); renderDue(); });
+          if (needsSay(sw)) ensureSay(sw, function () { speak(sw); renderAll(); renderDue(); });
           else speak(sw);
           break;
         }

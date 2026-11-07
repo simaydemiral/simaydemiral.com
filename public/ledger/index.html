@@ -277,6 +277,37 @@ select.cat option[value="__new"]{color:var(--brand);font-weight:600}
   table.mdtable .t-amt{grid-column:2;grid-row:1;text-align:right;font-weight:600}
   table.mdtable td:nth-child(2){grid-column:1/-1;grid-row:2}
   table.mdtable .t-acct{grid-column:1/-1;grid-row:3;color:var(--muted);font-size:12px}
+
+  /* The transactions table is the one you actually work in, and it was the
+     worst offender: 520px of table in a 343px screen, with the column that
+     holds every button -- Split, Paying me back, Didn't spend this -- hanging
+     off the right-hand edge behind a sideways scroll. The row becomes a card
+     instead. Date and amount on the top line, merchant under it, the category
+     and the account together, and the buttons across the bottom at a size a
+     thumb can hit. */
+  #tbl .tscroll, #tbl{overflow-x:visible}
+  #tbl table{min-width:0;width:100%}
+  #tbl thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  #tbl tbody tr{display:grid;grid-template-columns:1fr auto;gap:3px 10px;
+    padding:11px 2px;border-bottom:1px solid var(--line-soft)}
+  #tbl tbody td{display:block;border:0;padding:0;white-space:normal}
+  #tbl tbody td.t-date{grid-column:1;grid-row:1;color:var(--muted);font-size:12px}
+  #tbl tbody td.t-amt{grid-column:2;grid-row:1;text-align:right;font-weight:600}
+  #tbl tbody td:nth-child(2){grid-column:1/-1;grid-row:2}
+  #tbl tbody td:nth-child(3){grid-column:1;grid-row:3;margin-top:4px}
+  #tbl tbody td.t-acct{grid-column:2;grid-row:3;text-align:right;align-self:center;
+    color:var(--muted);font-size:12px}
+  #tbl tbody td.t-split{grid-column:1/-1;grid-row:4;margin-top:6px;
+    display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  #tbl tbody td.t-split .btn-q{border:1px solid var(--line);border-radius:7px;
+    padding:7px 10px}
+  #tbl select.cat{max-width:100%;width:100%;padding:6px 7px}
+  /* A row that opens underneath -- the help sentence, the split editor, the
+     two offers -- is one block across the card, not a grid cell. */
+  #tbl tbody tr.helprow, #tbl tbody tr.splitedit{
+    display:block;padding:0 2px 11px}
+  #tbl tbody tr.helprow > td, #tbl tbody tr.splitedit > td{
+    display:block;width:100%}
 }
 
 /* ---- insights ---- */
@@ -2305,6 +2336,10 @@ var HELP = {
 };
 var helpOpen = "";
 
+/* The sentence behind each of these buttons is also on the button as a
+   title attribute, which is a tooltip, which needs a mouse. On the phone --
+   where the whole right-hand column had just gone off the edge anyway -- it
+   could not be read at all. */
 function helpBtn(topic, id){
   var k = topic + ":" + id;
   return ' <button class="btn-help" data-help="'+esc(k)+'" aria-expanded="'
@@ -2335,7 +2370,8 @@ function unspentCtl(t){
   if(!CASH[t.cat] || !(t.amt > 0) || t.part) return "";
   return ' <button class="btn-q' + (db.unspent[t.id] ? ' is-on' : '')
     + '" data-unspent="'+esc(t.id)+'" title="' + esc(HELP.unspent) + '">'
-    + (db.unspent[t.id] ? 'Unspent cash \u2713' : 'Unspent cash') + '</button>';
+    + (db.unspent[t.id] ? 'Unspent cash \u2713' : 'Unspent cash') + '</button>'
+    + helpBtn("unspent", t.id);
 }
 
 /* Their half of a bill you paid, said about one row. */
@@ -2350,7 +2386,8 @@ function payBackCtl(t){
       + ' <button class="btn-q" data-pbcancel="1">Back</button>';
   return ' <button class="btn-q' + (db.paidBackTx[t.id] ? ' is-on' : '')
     + '" data-pb="'+esc(t.id)+'" title="' + esc(HELP.payback) + '">'
-    + (db.paidBackTx[t.id] ? 'Paying me back \u2713' : 'Paying me back') + '</button>';
+    + (db.paidBackTx[t.id] ? 'Paying me back \u2713' : 'Paying me back') + '</button>'
+    + helpBtn("payback", t.id);
 }
 
 /* The payment that went out and came back. Offered on transfers in both
@@ -2362,7 +2399,8 @@ function notMineCtl(t){
   return ' <button class="btn-q' + (t.notMine ? ' is-on' : '')
     + '" data-notmine="'+esc(t.id)+'" title="' + esc(HELP.notmine) + '">'
     + (t.notMine ? 'Didn\u2019t spend this \u2713' : 'Didn\u2019t spend this')
-    + '</button>';
+    + '</button>'
+    + helpBtn("notmine", t.id);
 }
 
 function creditCtl(t){ return payBackCtl(t) + unspentCtl(t); }
