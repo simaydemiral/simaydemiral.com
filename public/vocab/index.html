@@ -393,8 +393,12 @@
                      words: b.words.filter(function (x) { return typeof x === "string"; })
                                    .slice(0, 6).map(function (x) { return x.slice(0, 60); }) };
           }),
+          v: Number(w.tr.v) || 0,
+          more: (Array.isArray(w.tr.more) ? w.tr.more : [])
+                  .filter(function (x) { return typeof x === "string"; })
+                  .slice(0, 6).map(function (x) { return x.slice(0, 160); }),
           one: typeof w.tr.one === "string" ? w.tr.one.slice(0, 120) : "",
-          from: typeof w.tr.from === "string" ? w.tr.from.slice(0, 20) : ""
+          from: typeof w.tr.from === "string" ? w.tr.from.slice(0, 40) : ""
         };
       } else { delete w.tr; }
       if (w.eg && typeof w.eg === "object") {
@@ -799,55 +803,104 @@
                + "&format=json&origin=*&redirects=1&page=";
   var WIKI_LL  = "https://en.wikipedia.org/w/api.php?action=query&prop=langlinks"
                + "&lllang=tr&format=json&origin=*&redirects=1&titles=";
+  /* Turkish Wiktionary keeps its own entry for an English word, written in
+     Turkish. It covers words the English translation tables miss — "salient"
+     has no table at all there and three senses here — so the two are asked
+     together rather than one as a fallback for the other. */
+  var TRW_RAW  = "https://tr.wiktionary.org/w/api.php?action=parse&prop=wikitext"
+               + "&format=json&origin=*&redirects=1&page=";
 
-  function trBlocks(wikitext) {
-    var out = [], re = /\{\{trans-top\|([^}]*)\}\}([\s\S]*?)\{\{trans-bottom\}\}/g, m;
-    while ((m = re.exec(wikitext))) {
-      var sense = m[1].replace(/^id=[^|]*\|/, "").trim();
-      var inner = m[2], t = /\{\{t\+?\|tr\|([^}|]+)/g, hit, seen = {}, words = [];
-      while ((hit = t.exec(inner))) {
-        var word = hit[1].trim();
-        if (word && !seen[word]) { seen[word] = 1; words.push(word); }
+  /* Blocks inside an entry that are not meanings: etymology, pronunciation,
+     and the synonym lists, which name English words rather than Turkish. */
+  var TRW_SKIP = /^(Eş anlamlılar|Karşıt anlamlılar|Köken|Söyleniş|Çeviriler|Türetilmiş|İlgili|Ayrıca|Kaynak)/i;
+
+  function trWiktionary(wikitext) {
+    var m = /\n==\s*İngilizce\s*==\s*\n([\s\S]*?)(?=\n==[^=]|$)/.exec("\n" + wikitext);
+    if (!m) return [];
+
+    /* The leading newline matters: a heading on the line straight after
+       ==İngilizce== has none before it inside the captured section, so the
+       split would miss it and the whole entry would arrive as one unlabelled
+       chunk — which is how "salient" came back empty while having three
+       perfectly good senses. */
+    var chunks = ("\n" + m[1]).split(/\n===+\s*([^=\n]+?)\s*===+/);
+    var blocks = [{ head: "", body: chunks[0] || "" }], i;
+    for (i = 1; i < chunks.length; i += 2) {
+      blocks.push({ head: chunks[i] || "", body: chunks[i + 1] || "" });
+    }
+
+    var out = [], seen = {};
+    for (i = 0; i < blocks.length; i++) {
+      if (TRW_SKIP.test(blocks[i].head)) continue;
+      var lines = blocks[i].body.split("\n");
+      for (var j = 0; j < lines.length; j++) {
+        if (!/^#[^:*#]/.test(lines[j])) continue;
+        var t = cleanWiki(lines[j].replace(/^#\s*/, ""));
+        if (!t || t.length < 2 || !/[a-zçğıöşü]/i.test(t)) continue;
+        if (seen[t.toLowerCase()]) continue;
+        seen[t.toLowerCase()] = 1;
+        out.push(t.slice(0, 160));
+        if (out.length >= 6) return out;
       }
-      if (words.length) out.push({ sense: sense, words: words.slice(0, 6) });
-      if (out.length >= 4) break;
     }
     return out;
   }
 
-  /* Two different outcomes that used to look identical. "Neither source has a
-     Turkish entry" is an answer and is worth keeping. "I could not reach
-     them" is not an answer at all, and saving it as one froze the word on
-     that message for good — one blocked request and the word never asked
-     again. Only a real answer is ever cached. */
   function viaTurkish(term) {
     var reached = false;
-    return getJSON(WIKT_RAW + encodeURIComponent(term))
+
+    var english = getJSON(WIKT_RAW + encodeURIComponent(term))
       .then(function (j) {
         reached = true;
         var wt = j && j.parse && j.parse.wikitext ? j.parse.wikitext["*"] : "";
         return trBlocks(wt || "");
       })
       .catch(function (e) {
-        /* a 404 is Wiktionary saying it has no such page: asked and answered */
         if (e && e.status === 404) { reached = true; return []; }
         return [];
+      });
+
+    /* Asked at the same time, not after: the two dictionaries cover different
+       words, so whichever has the entry should not wait on the other. */
+    var turkish = getJSON(TRW_RAW + encodeURIComponent(term))
+      .then(function (j) {
+        reached = true;
+        var wt = j && j.parse && j.parse.wikitext ? j.parse.wikitext["*"] : "";
+        return trWiktionary(wt || "");
       })
-      .then(function (blocks) {
-        if (blocks.length) return { blocks: blocks, one: "", from: "Wiktionary" };
+      .catch(function (e) {
+        if (e && e.status === 404) { reached = true; return []; }
+        return [];
+      });
+
+    return Promise.all([english, turkish])
+      .then(function (both) {
+        var blocks = both[0], more = both[1];
+        /* Drop anything the sense-labelled blocks already said. */
+        var said = {};
+        blocks.forEach(function (b) {
+          b.words.forEach(function (x) { said[x.toLowerCase()] = 1; });
+        });
+        more = more.filter(function (t) { return !said[t.toLowerCase()]; });
+
+        if (blocks.length || more.length) {
+          return { blocks: blocks, more: more, one: "",
+                   from: blocks.length && more.length ? "Wiktionary \u00b7 T\u00fcrk\u00e7e Vikis\u00f6zl\u00fck"
+                       : blocks.length ? "Wiktionary" : "T\u00fcrk\u00e7e Vikis\u00f6zl\u00fck" };
+        }
         return getJSON(WIKI_LL + encodeURIComponent(term))
           .then(function (j) {
             var pages = (j && j.query && j.query.pages) || {}, k, p;
             for (k in pages) { p = pages[k]; break; }
             var ll = p && p.langlinks && p.langlinks[0] && p.langlinks[0]["*"];
-            if (ll) return { blocks: [], one: ll, from: "Wikipedia" };
-            return { blocks: [], one: "", from: "none" };
+            if (ll) return { blocks: [], more: [], one: ll, from: "Wikipedia" };
+            return { blocks: [], more: [], one: "", from: "none" };
           })
           .catch(function (e) {
             if ((e && e.status === 404) || reached) {
-              return { blocks: [], one: "", from: "none" };
+              return { blocks: [], more: [], one: "", from: "none" };
             }
-            return { blocks: [], one: "", from: "", unreachable: true };
+            return { blocks: [], more: [], one: "", from: "", unreachable: true };
           });
       });
   }
@@ -942,11 +995,17 @@
 
   var translating = {};
 
+  /* Bumped whenever a new source is added. A "none" recorded before Turkish
+     Wiktionary existed was true then and wrong now, and without this every
+     word already asked about would keep showing the old verdict for ever. */
+  var TR_SOURCES = 2;
+
   function ensureTurkish(w, after) {
     /* `from` is what makes it an answer: Wiktionary, Wikipedia, or none.
        A record saved by the older build has from:"" — that was a failure
        wearing an answer's clothes, so it is retried rather than believed. */
-    if ((w.tr && w.tr.from) || translating[w.id]) return;
+    var settled = w.tr && w.tr.from && (w.tr.v || 0) >= TR_SOURCES;
+    if (settled || translating[w.id]) return;
     translating[w.id] = 1;
     /* The word the dictionary actually settled on: "Evals" resolves through
        eval to evaluation, and that is the one with a translation table. */
@@ -962,6 +1021,7 @@
         trFailed = true;
       } else {
         trFailed = false;
+        tr.v = TR_SOURCES;
         w.tr = tr;
         save();
       }
@@ -1521,18 +1581,25 @@
                 + 'failing, an ad or privacy blocker is the usual cause: both '
                 + 'requests go to <b style="display:inline">api.php</b> on '
                 + 'wiktionary.org and wikipedia.org.</span>';
-        } else if (!w.tr) {
+        } else if (!w.tr || (w.tr.v || 0) < TR_SOURCES) {
           html += '<span class="notetext" style="color:var(--muted)">'
                 + 'Bak\u0131l\u0131yor\u2026</span>';
-        } else if (w.tr.blocks && w.tr.blocks.length) {
-          for (var ti = 0; ti < w.tr.blocks.length; ti++) {
-            var tb = w.tr.blocks[ti];
+        } else if ((w.tr.blocks && w.tr.blocks.length) || (w.tr.more && w.tr.more.length)) {
+          /* Every sense it has, each on its own line: a word that means three
+             things should say all three rather than pick one. */
+          var ti, tb;
+          for (ti = 0; ti < (w.tr.blocks || []).length; ti++) {
+            tb = w.tr.blocks[ti];
             html += '<div class="trline"><span class="trwords">'
                   + esc(tb.words.join(", ")) + '</span>'
                   + (tb.sense ? '<span class="trsense">' + esc(tb.sense) + '</span>' : '')
                   + '</div>';
           }
-          html += '<div class="trfrom">Wiktionary</div>';
+          for (ti = 0; ti < (w.tr.more || []).length; ti++) {
+            html += '<div class="trline"><span class="trwords">'
+                  + esc(w.tr.more[ti]) + '</span></div>';
+          }
+          html += '<div class="trfrom">' + esc(w.tr.from || "Wiktionary") + '</div>';
         } else if (w.tr.one) {
           html += '<div class="trline"><span class="trwords">' + esc(w.tr.one) + '</span>'
                 + '<span class="trsense">the Turkish article for the same thing</span></div>'
@@ -1675,7 +1742,7 @@
           /* Fetched on the press, not on every flip: most cards are turned
              over without ever wanting it. Cached afterwards, so the second
              press is instant. */
-          if (trOpen && !(w.tr && w.tr.from)) {
+          if (trOpen && !(w.tr && w.tr.from && (w.tr.v || 0) >= TR_SOURCES)) {
             ensureTurkish(w, function () { if (flipped && trOpen) renderDue(); });
           }
         });
