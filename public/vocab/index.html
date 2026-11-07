@@ -398,6 +398,7 @@
                   .filter(function (x) { return typeof x === "string"; })
                   .slice(0, 6).map(function (x) { return x.slice(0, 160); }),
           one: typeof w.tr.one === "string" ? w.tr.one.slice(0, 120) : "",
+          oneNote: typeof w.tr.oneNote === "string" ? w.tr.oneNote.slice(0, 160) : "",
           from: typeof w.tr.from === "string" ? w.tr.from.slice(0, 40) : ""
         };
       } else { delete w.tr; }
@@ -814,6 +815,41 @@
      and the synonym lists, which name English words rather than Turkish. */
   var TRW_SKIP = /^(Eş anlamlılar|Karşıt anlamlılar|Köken|Söyleniş|Çeviriler|Türetilmiş|İlgili|Ayrıca|Kaynak)/i;
 
+  /* Neither dictionary carries business and technical jargon — "due
+     diligence" and "hedge fund" are in neither. Wikidata does: it holds a
+     Turkish label for a concept even where no Turkish article exists.
+     What it cannot do is pick a sense, so "runway" comes back as the strip
+     at an airport. Its Turkish description is shown with the label for
+     exactly that reason: a wrong sense should be visible, not silent. */
+  var WIKI_QID = "https://en.wikipedia.org/w/api.php?action=query&prop=pageprops"
+               + "&format=json&origin=*&redirects=1&titles=";
+  var WD_ENT   = "https://www.wikidata.org/w/api.php?action=wbgetentities"
+               + "&props=labels|descriptions&languages=tr&format=json&origin=*&ids=";
+
+  function viaWikidata(term) {
+    return getJSON(WIKI_QID + encodeURIComponent(term))
+      .then(function (j) {
+        var pages = (j && j.query && j.query.pages) || {}, k, p;
+        for (k in pages) { p = pages[k]; break; }
+        var qid = p && p.pageprops && p.pageprops.wikibase_item;
+        if (!qid) return null;
+        return getJSON(WD_ENT + encodeURIComponent(qid)).then(function (e) {
+          var ent = e && e.entities && e.entities[qid];
+          if (!ent) return null;
+          var label = ent.labels && ent.labels.tr && ent.labels.tr.value;
+          var desc  = ent.descriptions && ent.descriptions.tr
+                    && ent.descriptions.tr.value;
+          if (!label) return null;
+          /* A page listing several unrelated meanings is not a translation. */
+          if (/anlam ayr[ıi]m[ıi]|disambiguation/i.test(desc || "")) return null;
+          /* "Candid" for candid is the English word in a Turkish coat. */
+          if (label.toLowerCase() === String(term).trim().toLowerCase()) return null;
+          return { label: label, desc: desc || "" };
+        });
+      })
+      .catch(function () { return null; });
+  }
+
   function trWiktionary(wikitext) {
     var m = /\n==\s*İngilizce\s*==\s*\n([\s\S]*?)(?=\n==[^=]|$)/.exec("\n" + wikitext);
     if (!m) return [];
@@ -888,7 +924,13 @@
                    from: blocks.length && more.length ? "Wiktionary \u00b7 T\u00fcrk\u00e7e Vikis\u00f6zl\u00fck"
                        : blocks.length ? "Wiktionary" : "T\u00fcrk\u00e7e Vikis\u00f6zl\u00fck" };
         }
-        return getJSON(WIKI_LL + encodeURIComponent(term))
+        /* Jargon lives here, where the dictionaries have nothing. */
+        return viaWikidata(term).then(function (wd) {
+          if (wd) {
+            return { blocks: [], more: [], one: wd.label, oneNote: wd.desc,
+                     from: "Wikidata" };
+          }
+          return getJSON(WIKI_LL + encodeURIComponent(term))
           .then(function (j) {
             var pages = (j && j.query && j.query.pages) || {}, k, p;
             for (k in pages) { p = pages[k]; break; }
@@ -902,6 +944,7 @@
             }
             return { blocks: [], more: [], one: "", from: "", unreachable: true };
           });
+        });
       });
   }
 
@@ -998,7 +1041,7 @@
   /* Bumped whenever a new source is added. A "none" recorded before Turkish
      Wiktionary existed was true then and wrong now, and without this every
      word already asked about would keep showing the old verdict for ever. */
-  var TR_SOURCES = 2;
+  var TR_SOURCES = 3;
 
   function ensureTurkish(w, after) {
     /* `from` is what makes it an answer: Wiktionary, Wikipedia, or none.
@@ -1602,8 +1645,13 @@
           html += '<div class="trfrom">' + esc(w.tr.from || "Wiktionary") + '</div>';
         } else if (w.tr.one) {
           html += '<div class="trline"><span class="trwords">' + esc(w.tr.one) + '</span>'
-                + '<span class="trsense">the Turkish article for the same thing</span></div>'
-                + '<div class="trfrom">Wikipedia</div>';
+                + '<span class="trsense">'
+                + esc(w.tr.oneNote
+                      || (w.tr.from === "Wikidata"
+                            ? "the Turkish name for this, not a dictionary sense"
+                            : "the Turkish article for the same thing"))
+                + '</span></div>'
+                + '<div class="trfrom">' + esc(w.tr.from || "Wikipedia") + '</div>';
         } else {
           html += '<span class="notetext" style="color:var(--warn)">'
                 + 'Neither Wiktionary nor Wikipedia has a Turkish entry for this '
