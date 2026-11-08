@@ -382,9 +382,10 @@
       w.due = /^\d{4}-\d{2}-\d{2}$/.test(w.due) ? w.due : today();
       w.note = typeof w.note === "string" ? w.note.slice(0, 2000) : "";
       /* Everything saved before there were spaces was English. */
-      w.lang = (w.lang === "es" || w.lang === "de") ? w.lang : "en";
-      /* Only ever one of three letters, and only ever on a German word. */
-      w.gen = (w.lang === "de" && /^[mfn]$/.test(w.gen)) ? w.gen : "";
+      w.lang = /^(es|de|fr)$/.test(w.lang) ? w.lang : "en";
+      /* Only ever one of three letters, and only on a language that has
+         grammatical gender on its nouns. */
+      w.gen = (GENDERED[w.lang] && /^[mfn]$/.test(w.gen)) ? w.gen : "";
       w.want = (w.want === "verb" || w.want === "noun" || w.want === "adjective")
              ? w.want : "";
       /* An audio URL from a file is a URL like any other: http(s) only. */
@@ -515,7 +516,7 @@
       d = list[i];
       if (!d || typeof d.name !== "string") continue;
       var name = d.name.trim().replace(/\s+/g, " ").slice(0, 40);
-      var code = (d.lang === "es" || d.lang === "de") ? d.lang : "en";
+      var code = /^(es|de|fr)$/.test(d.lang) ? d.lang : "en";
       if (!name || name === "Inbox") continue;     /* Inbox is never stored */
       k = code + ":" + name;
       var rec = { name: name, lang: code, deleted: !!d.deleted,
@@ -1250,7 +1251,7 @@
      existed are already marked looked-up, so asking there would have left all
      of them silent for good. */
   /* ------------------------------------------------------------------
-     Real recordings for Spanish and German.
+     Real recordings for Spanish, German and French.
 
      The English-only dictionary that supplies the English ones has no
      equivalent for either, so both used the browser's synthetic voice. But
@@ -1267,7 +1268,7 @@
      so German cards get a phonetic spelling and Spanish ones do not.
      ------------------------------------------------------------------ */
   var COMMONS = "https://commons.wikimedia.org/wiki/Special:FilePath/";
-  /* Every Spanish and German card already carries a settled "no recording",
+  /* Every card outside English already carries a settled "no recording",
      written when there was nowhere to look. Bumping this re-asks those once;
      an English card is untouched, and nothing is fetched twice. */
   var SAY_SOURCES = 3;
@@ -1305,7 +1306,7 @@
   }
 
   /* The three places that ask share one test, so a card settled before
-     Spanish and German had anywhere to look is re-asked exactly once.
+     the other languages had anywhere to look is re-asked exactly once.
      Written as "!w.say" at each call site, the guard outside this function
      was stricter than the one inside it and nothing was ever re-asked. */
   function needsSay(w) {
@@ -1319,8 +1320,8 @@
        back. The callback redraws, the redraw asks again, and an answer that
        arrives instantly turns that into a loop with no end. */
     if (!needsSay(w) || saying[w.id]) return;
-    /* Spanish and German read their recording off the Wiktionary page. A
-       phrase has no page of its own, and nothing found still counts as an
+    /* Every language but English reads its recording off the Wiktionary page.
+       A phrase has no page of its own, and nothing found still counts as an
        answer -- the browser's own voice says it, as it did before. */
     var wl = w.lang || "en";
     if (wl !== "en") {
@@ -1696,7 +1697,7 @@
   }
 
   /* ------------------------------------------------------------------
-     Three languages, three spaces.
+     Four languages, four spaces.
 
      One stored list underneath, because sync, export and import should carry
      everything a person has. What makes them feel separate is that every
@@ -1708,7 +1709,8 @@
   var LANGS = [
     { code: "en", label: "English",  wikt: "English", voice: "en-US" },
     { code: "es", label: "Espa\u00f1ol", wikt: "Spanish", voice: "es-ES" },
-    { code: "de", label: "Deutsch",  wikt: "German",  voice: "de-DE" }
+    { code: "de", label: "Deutsch",  wikt: "German",  voice: "de-DE" },
+    { code: "fr", label: "Fran\u00e7ais", wikt: "French", voice: "fr-FR" }
   ];
 
   var SPACE = "en";
@@ -1731,20 +1733,30 @@
      Wiktionary writes the gender as the first letter of the head template's
      first argument: {{de-noun|n,,^er}}, {{de-noun|f}}, {{de-noun|n.sg}}.
      ------------------------------------------------------------------ */
-  var ARTICLE = { m: "der", f: "die", n: "das" };
+  /* German takes the definite article, because der/die/das never contract.
+     French takes the indefinite one: le and la both elide to l' in front of a
+     vowel, so "l'\u00e9cole" hides the very thing the article is there to show,
+     while "une \u00e9cole" always says it. This is also how French textbooks
+     write their word lists. */
+  var ARTICLE = {
+    de: { m: "der", f: "die", n: "das" },
+    fr: { m: "un",  f: "une" }
+  };
+  var GENDERED = { de: 1, fr: 1 };
 
   function genderFrom(wikitext, code) {
-    if (code !== "de") return "";
-    var sec = section(wikitext, "German");
+    if (!GENDERED[code]) return "";
+    var sec = section(wikitext, lang(code).wikt);
     if (!sec) return "";
-    var m = /\{\{de-noun\|\s*([mfn])\b/.exec(sec);
+    var m = new RegExp("\\{\\{" + code + "-noun\\|\\s*([mfn])\\b").exec(sec);
     return m ? m[1] : "";
   }
 
   /* The word as it should be read and remembered, which for a German noun
      includes the article and for everything else is just the word. */
   function headword(w) {
-    var a = (w.lang === "de" && w.gen) ? ARTICLE[w.gen] : "";
+    var set = w.gen ? ARTICLE[w.lang] : null;
+    var a = set ? set[w.gen] : "";
     return a ? a + " " + w.term : w.term;
   }
 
