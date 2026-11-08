@@ -215,6 +215,11 @@
   .deckname{font:inherit;font-weight:600;padding:5px 8px;border-radius:7px;
             border:1px solid var(--brand);background:var(--surface);
             color:var(--ink);width:100%;max-width:230px}
+  .deckadd{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .deckadd input{font:inherit;padding:7px 10px;border-radius:8px;
+            border:1px solid var(--line);background:var(--surface);
+            color:var(--ink);flex:1;min-width:190px;max-width:320px}
+  .deckadd input:focus{outline:none;border-color:var(--brand)}
   .yournote.tr b{color:var(--brand)}
   .trline{padding:4px 0}
   .trline + .trline{border-top:1px solid var(--line-soft);margin-top:2px}
@@ -345,7 +350,7 @@
      older version stop the page booting, and never let blocked storage
      throw.
      ------------------------------------------------------------------ */
-  var db = { v: 1, words: [] };
+  var db = { v: 1, words: [], decks: [] };
 
   /* Everything that comes from outside this session goes through here —
      storage written by an older build, and an imported file, which is just
@@ -378,6 +383,10 @@
       w.note = typeof w.note === "string" ? w.note.slice(0, 2000) : "";
       /* Everything saved before there were spaces was English. */
       w.lang = (w.lang === "es" || w.lang === "de") ? w.lang : "en";
+      /* Only ever one of three letters, and only ever on a German word. */
+      w.gen = (w.lang === "de" && /^[mfn]$/.test(w.gen)) ? w.gen : "";
+      w.want = (w.want === "verb" || w.want === "noun" || w.want === "adjective")
+             ? w.want : "";
       /* An audio URL from a file is a URL like any other: http(s) only. */
       if (w.say && typeof w.say === "object") {
         w.say = { audio: safeUrl(w.say.audio).slice(0, 400),
@@ -433,6 +442,7 @@
       if (d && Array.isArray(d.words)) {
         db = d;
         db.words = normalize(db.words);
+        db.decks = normalizeDecks(db.decks);
         /* Written back, or storage keeps the pair and every load folds them
            again -- harmless, but it leaves the file disagreeing with what is
            on screen. */
@@ -468,10 +478,67 @@
     syncTimer = setTimeout(syncNow, 1200);   /* settle after a burst of edits */
   }
 
+  /* A deck crosses to the other device as one more record in the same list,
+     with an id nothing else can collide with. The server stores a body and an
+     id and reads neither, so this needed no change there. */
+  function deckRecords() {
+    return deckList().map(function (d) {
+      return { id: "deck:" + d.lang + ":" + d.name, deck: true,
+               name: d.name, lang: d.lang,
+               deleted: !!d.deleted, updated: d.updated || 0 };
+    });
+  }
+
+  function isDeckRec(r) {
+    return !!r && (r.deck === true
+                   || String(r.id || "").indexOf("deck:") === 0);
+  }
+
+  /* A deleted row comes back as {id, deleted, updated} and nothing else, so
+     the name and the language are read back out of the id. */
+  function deckFromRec(r) {
+    if (r.name && r.lang) {
+      return { name: r.name, lang: r.lang,
+               deleted: !!r.deleted, updated: r.updated || 0 };
+    }
+    var rest = String(r.id || "").slice(5);        /* after "deck:" */
+    var cut = rest.indexOf(":");
+    if (cut < 1) return null;
+    return { name: rest.slice(cut + 1), lang: rest.slice(0, cut),
+             deleted: !!r.deleted, updated: r.updated || 0 };
+  }
+
+  function normalizeDecks(list) {
+    if (!Array.isArray(list)) return [];
+    var out = [], seen = {}, i, d, k;
+    for (i = 0; i < list.length; i++) {
+      d = list[i];
+      if (!d || typeof d.name !== "string") continue;
+      var name = d.name.trim().replace(/\s+/g, " ").slice(0, 40);
+      var code = (d.lang === "es" || d.lang === "de") ? d.lang : "en";
+      if (!name || name === "Inbox") continue;     /* Inbox is never stored */
+      k = code + ":" + name;
+      var rec = { name: name, lang: code, deleted: !!d.deleted,
+                  updated: typeof d.updated === "number" ? d.updated : 0 };
+      /* The newer of a duplicated pair wins, the same rule the merge uses
+         everywhere else -- keeping the first would let a stale "deleted"
+         bury a deck somebody had just made again. */
+      if (seen[k]) {
+        if (rec.updated > seen[k].updated) {
+          seen[k].deleted = rec.deleted; seen[k].updated = rec.updated;
+        }
+        continue;
+      }
+      seen[k] = rec;
+      out.push(rec);
+    }
+    return out.slice(0, 400);
+  }
+
   function syncNow() {
     if (DEMO || syncing || !me || !me.signedIn) return;
     syncing = true;
-    var payload = db.words.concat(db.gone || []);
+    var payload = db.words.concat(db.gone || []).concat(deckRecords());
     fetch("/api/sync", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -495,6 +562,25 @@
   /* What came back replaces what is here only where it is newer. */
   function absorb(remote) {
     var byId = {}, i, w, changed = false;
+
+    /* Decks first, and taken out of the list: fed through the word merge
+       they would land in db.words and be rendered as cards. */
+    var incoming = [], deckByKey = {}, dl = deckList();
+    for (i = 0; i < dl.length; i++) deckByKey[dl[i].lang + ":" + dl[i].name] = dl[i];
+    for (i = 0; i < remote.length; i++) {
+      if (!isDeckRec(remote[i])) { incoming.push(remote[i]); continue; }
+      var dr = deckFromRec(remote[i]);
+      if (!dr || dr.name === "Inbox") continue;
+      var k = dr.lang + ":" + dr.name, mine = deckByKey[k];
+      if (!mine) { deckByKey[k] = dr; changed = true; }
+      else if ((dr.updated || 0) > (mine.updated || 0)) {
+        mine.deleted = dr.deleted; mine.updated = dr.updated; changed = true;
+      }
+    }
+    db.decks = [];
+    for (var dk in deckByKey) db.decks.push(deckByKey[dk]);
+    db.decks = normalizeDecks(db.decks);
+    remote = incoming;
     for (i = 0; i < db.words.length; i++) byId[db.words[i].id] = db.words[i];
     var gone = {};
     for (i = 0; i < (db.gone || []).length; i++) gone[db.gone[i].id] = db.gone[i].updated || 0;
@@ -657,6 +743,9 @@
       if (w.note && !o.note) o.note = w.note;
       if (!o.senses.length && w.senses.length) {
         o.senses = w.senses; o.via = w.via || ""; o.looked = true;
+        /* Inherited as it stands, not claimed as current: senses copied from
+           a card read by an older reader are still senses from that reader. */
+        o.lv = w.lv || 0;
       }
     }
     if (keep.length === db.words.length) return false;
@@ -685,10 +774,30 @@
     "third-person singular|simple past|comparative|superlative|synonym|" +
     "misspelling|inflection|form)\\b[^.]*?\\bof\\s+([A-Za-z][A-Za-z'\\u2019-]*)", "i");
 
+  /* A sense that is nothing but a grammatical form of another word. Narrower
+     than POINTER on purpose: "Initialism of retrieval-augmented generation: a
+     method of..." is an answer, and so is "Synonym of inlet, an arm of the
+     sea". "Inflection of casar: third-person singular present indicative" is
+     not -- pointsTo() lets that one through, because the grammar jargon after
+     the colon is long enough to look like an explanation. */
+  var FORM_ONLY = new RegExp(
+    "^(plural|present participle|gerund|past tense|past participle|" +
+    "third-person singular|simple past|comparative|superlative|" +
+    "inflection|form|alternative form|alternative spelling|misspelling)" +
+    "\\b[^.]*?\\bof\\s", "i");
+
+  function formOnly(sense) { return FORM_ONLY.test(sense && sense.text); }
+
   /* Wiktionary's own placeholder, and empty senses it sometimes emits. */
   function usable(text) {
     if (!text || text.length < 3) return false;
     if (/^this term needs a definition/i.test(text)) return false;
+    /* A conjugated form's entry sometimes gives the grammar label as the
+       definition: "casa" came back as house, then "third-person singular
+       present indicative" and "second-person singular imperative", neither of
+       which says anything. No real definition opens this way. */
+    if (/^(first|second|third)[-\s]person\b/i.test(text)) return false;
+    if (/^(singular|plural)\s+(imperative|subjunctive|indicative)\b/i.test(text)) return false;
     return true;
   }
 
@@ -726,11 +835,19 @@
     /* The endpoint groups a page by language, which is how one URL serves all
        three spaces: "casa" is listed under twenty of them, and only the one
        being studied is wanted. */
-    var out = [], langs = json && json[SPACE], i, j;
-    if (!langs) return out;
-    for (i = 0; i < langs.length && out.length < 3; i++) {
-      var defs = langs[i].definitions || [];
-      for (j = 0; j < defs.length && out.length < 3; j++) {
+    var langs = json && json[SPACE], i, j;
+    if (!langs) return [];
+
+    /* Gathered per part of speech, then taken from each in turn. Filling a
+       flat list of three in page order meant a word that is both a noun and
+       a verb showed three senses of whichever came first and none of the
+       other: "vet" is a veterinarian three times over, and the sense the
+       card was saved for -- to check somebody before approving them -- never
+       appeared at all. */
+    var blocks = [];
+    for (i = 0; i < langs.length; i++) {
+      var defs = langs[i].definitions || [], got = [];
+      for (j = 0; j < defs.length && got.length < 3; j++) {
         var text = firstSentence(stripTags(defs[j].definition));
         if (!usable(text)) continue;
         var eg = "";
@@ -739,9 +856,60 @@
         } else if (defs[j].examples && defs[j].examples.length) {
           eg = stripTags(defs[j].examples[0]);
         }
-        out.push({ pos: stripTags(langs[i].partOfSpeech) || "", text: text, example: eg });
+        got.push({ pos: stripTags(langs[i].partOfSpeech) || "", text: text, example: eg });
       }
+      if (got.length) blocks.push(got);
     }
+    if (!blocks.length) return [];
+
+    /* A sense that only points somewhere -- "inflection of casar:
+       third-person singular present indicative" -- teaches nothing and used
+       to be hidden by the old cap of three. Reading further found it. The
+       very first sense survives regardless, because it is the one the
+       pointer trail is followed from. */
+    var head = blocks[0][0];
+    blocks = blocks.map(function (b) {
+      return b.filter(function (x) { return x === head || !formOnly(x); });
+    }).filter(function (b) { return b.length; });
+    if (!blocks.length) return [head];
+
+    /* One part of speech keeps the three it always had. Two or more share
+       the room: two each, four in all, so both readings reach the card. */
+    if (blocks.length === 1) return blocks[0].slice(0, 3);
+    var out = [];
+    for (i = 0; i < blocks.length && out.length < 4; i++)
+      out = out.concat(blocks[i].slice(0, 2));
+    return out.slice(0, 4);
+  }
+
+  /* An inflected form names the part of speech it belongs to: only a verb has
+     a past tense, only a noun has a plural. Carried through the pointer so
+     the senses of the word it points at can be put in that order. */
+  function pointerPos(text) {
+    var t = String(text || "");
+    if (/^(present participle|gerund|past tense|past participle|third-person singular|simple past)\b/i.test(t)) return "verb";
+    /* "Inflection of casar: third-person singular present indicative" names
+       a verb just as plainly, in the other house style. */
+    if (/^(inflection|form)\b/i.test(t)
+        && /(indicative|subjunctive|imperative|participle|infinitive|preterite|person singular|person plural)/i.test(t))
+      return "verb";
+    if (/^(plural)\b/i.test(t)) return "noun";
+    if (/^(comparative|superlative)\b/i.test(t)) return "adjective";
+    return "";
+  }
+
+  /* Stable: everything keeps its order, the matching part of speech simply
+     moves ahead of the rest. */
+  function posFirst(senses, want) {
+    if (!want) return senses;
+    var hit = [], rest = [], i;
+    for (i = 0; i < senses.length; i++) {
+      if (String(senses[i].pos || "").toLowerCase() === want) hit.push(senses[i]);
+      else rest.push(senses[i]);
+    }
+    if (!hit.length || !rest.length) return senses;
+    var out = hit.concat(rest);
+    out.via = senses.via;
     return out;
   }
 
@@ -1102,7 +1270,7 @@
   /* Every Spanish and German card already carries a settled "no recording",
      written when there was nowhere to look. Bumping this re-asks those once;
      an English card is untouched, and nothing is fetched twice. */
-  var SAY_SOURCES = 2;
+  var SAY_SOURCES = 3;
 
   function audioFile(name) {
     /* Commons stores a file under the name with spaces as underscores; the
@@ -1164,6 +1332,10 @@
       getJSON(WIKT_RAW + encodeURIComponent(w.term.trim()))
         .then(function (d) {
           var txt = d && d.parse && d.parse.wikitext ? d.parse.wikitext["*"] : "";
+          /* One page, two answers: the recording and, for German, the
+             gender. Asking twice for the same page would be two requests
+             for one fact each. */
+          if (txt) w.gen = genderFrom(txt, wl);
           return txt ? sayFromWikitext(txt, wl) : null;
         })
         .catch(function () { return null; })
@@ -1324,7 +1496,7 @@
     plaining[w.id] = 1;
     viaSimple(w.term).then(function (senses) {
       delete plaining[w.id];
-      w.plain = senses;
+      w.plain = posFirst(senses, w.want || "");
       save();
       if (after) after();
     });
@@ -1358,20 +1530,29 @@
          is left where it is. Reading the whole list instead of just the head
          answered a different word entirely. */
       var next = pointsTo(senses[0]);
+      /* "vetted" is the past tense of "vet", so the verb is what she met --
+         not the veterinarian the dictionary happens to list first. Both are
+         kept; only the order changes. */
+      var want = pointerPos(senses[0] && senses[0].text);
       if (next && hops < 2 && trail.indexOf(next) < 0) {
         trail = trail.concat([next]);
         return viaWiktionary(next, trail, hops + 1).then(function (r) {
           if (!r.senses.length) return { senses: senses, trail: trail };
+          r.senses = posFirst(r.senses, want);
+          /* Carried out so Simple Wiktionary's plainer senses can be put in
+             the same order. The card shows those by default, so reordering
+             only the precise ones fixed the page nobody was reading. */
+          r.want = r.want || want;
           /* Whatever the form means in its own right is kept after what it
              points at: "vetted" points at "vet" and also carries "having
              undergone an investigation and been approved", worth having on
              the card. Pure pointers are dropped -- "simple past of vet"
              says nothing once "vet" itself is there. */
           var own = senses.filter(function (x) { return !pointsTo(x); });
-          return { senses: r.senses.concat(own), trail: trail };
+          return { senses: r.senses.concat(own), trail: trail, want: r.want };
         });
       }
-      return { senses: senses, trail: trail };
+      return { senses: senses, trail: trail, want: want };
     });
   }
 
@@ -1392,11 +1573,14 @@
     /* Where the pointer chain ended up: "Evals" resolves to "evaluation", and
        the second dictionary should be asked about that, not the original. */
     var resolved = term.trim();
+    var want = "";
     return viaWiktionary(term.trim())
       .then(function (r) {
         if (r.trail && r.trail.length) resolved = r.trail[r.trail.length - 1];
+        want = r.want || "";
         if (r.senses.length) {
           if (r.trail.length > 1) r.senses.via = r.trail.join(" \u2192 ");
+          r.senses.want = want;
           return r.senses;
         }
         return viaWikipedia(term).then(function (w) {
@@ -1435,8 +1619,21 @@
   }
 
   var looking = {};
+  /* Every card already looked up was looked up by the old reader, which
+     filled its three senses from one part of speech. Bumping this looks each
+     one up again, once, so a card saved as "vetted" stops leading with the
+     veterinarian. relemma() is idempotent, so a second pass over a card it
+     already renamed changes nothing. */
+  var LOOK_SOURCES = 2;
+
+  function needsLook(w) { return !w.looked || (w.lv || 0) < LOOK_SOURCES; }
+
   function ensureLooked(w, after) {
-    if (w.looked || looking[w.id]) { if (after) after(); return; }
+    if (!needsLook(w) || looking[w.id]) { if (after) after(); return; }
+    /* A card being re-read also had its plain-English senses fetched by the
+       old reader, in the old order. They are the ones the card actually
+       shows, so they go with it. */
+    var again = w.looked;
     looking[w.id] = 1;
     lookup(w.term).then(function (senses) {
       delete looking[w.id];
@@ -1444,7 +1641,13 @@
       /* a custom property on an array does not survive JSON, so the trail
          lives on the word */
       w.via = senses.via || "";
+      /* "vetted" is a past tense, so the verb is the sense she met. Kept on
+         the word, because the plain-English senses are fetched separately
+         and have to be put in the same order. */
+      w.want = senses.want || "";
+      if (again) w.plain = null;
       w.looked = true;
+      w.lv = LOOK_SOURCES;
       var renamed = relemma(w);
       /* Folding takes a card away, so it waits until none is on screen. */
       var folded = (renamed && !session.length) ? foldDuplicates() : false;
@@ -1516,6 +1719,35 @@
     }
   } catch (e) {}
 
+  /* ------------------------------------------------------------------
+     German articles.
+
+     A German noun without its article is a noun learned wrong: the gender
+     decides the endings on everything around it, and it is not guessable
+     from the word. So the card says "das Haus", not "Haus". The term itself
+     is still stored as "Haus" -- it is what the dictionary is asked about,
+     what the id is made from, and what she typed.
+
+     Wiktionary writes the gender as the first letter of the head template's
+     first argument: {{de-noun|n,,^er}}, {{de-noun|f}}, {{de-noun|n.sg}}.
+     ------------------------------------------------------------------ */
+  var ARTICLE = { m: "der", f: "die", n: "das" };
+
+  function genderFrom(wikitext, code) {
+    if (code !== "de") return "";
+    var sec = section(wikitext, "German");
+    if (!sec) return "";
+    var m = /\{\{de-noun\|\s*([mfn])\b/.exec(sec);
+    return m ? m[1] : "";
+  }
+
+  /* The word as it should be read and remembered, which for a German noun
+     includes the article and for everything else is just the word. */
+  function headword(w) {
+    var a = (w.lang === "de" && w.gen) ? ARTICLE[w.gen] : "";
+    return a ? a + " " + w.term : w.term;
+  }
+
   function lang(code) {
     for (var i = 0; i < LANGS.length; i++) {
       if (LANGS[i].code === (code || SPACE)) return LANGS[i];
@@ -1544,14 +1776,63 @@
     return here().filter(function (w) { return (w.due || t) <= t; });
   }
 
+  /* ------------------------------------------------------------------
+     Decks.
+
+     A deck used to be nothing but a label written on each word: the list was
+     assembled by walking every word and collecting what it found. So a deck
+     whose last word moved out did not become empty, it ceased to exist --
+     and an empty deck could not be made at all, because there was nothing to
+     write the name on. Meanwhile "Inbox" was offered as the place a new word
+     goes while appearing nowhere in the list, which is a deck that does not
+     exist being the default.
+
+     Decks are stored now. The list below is still a union with whatever the
+     words actually say, so a deck named only by an imported word is never
+     lost, and Inbox is always there because it is where everything starts.
+     ------------------------------------------------------------------ */
+  function deckList() { return Array.isArray(db.decks) ? db.decks : (db.decks = []); }
+
+  function deckRec(name, code) {
+    var l = deckList(), i;
+    for (i = 0; i < l.length; i++)
+      if (l[i].name === name && l[i].lang === code) return l[i];
+    return null;
+  }
+
+  /* Stamped, because a deck travels to the other device the same way a word
+     does and the newer of the two has to win. */
+  function putDeck(name, code, deleted) {
+    /* Inbox is never a stored record: it exists because decks() always puts
+       it there, so storing it would make it possible to delete the one place
+       a word can always go. */
+    if (name === "Inbox") return null;
+    var r = deckRec(name, code);
+    if (!r) { r = { name: name, lang: code }; deckList().push(r); }
+    r.deleted = !!deleted;
+    r.updated = Date.now();
+    return r;
+  }
+
   function decks() {
     var seen = {}, out = [];
     here().forEach(function (w) {
       var d = w.deck || "Inbox";
-      if (!seen[d]) { seen[d] = 0; out.push(d); }
+      if (!(d in seen)) { seen[d] = 0; out.push(d); }
       seen[d]++;
     });
-    out.sort();
+    deckList().forEach(function (d) {
+      if (!d || d.deleted || d.lang !== SPACE) return;
+      if (!(d.name in seen)) { seen[d.name] = 0; out.push(d.name); }
+    });
+    if (!("Inbox" in seen)) { seen.Inbox = 0; out.push("Inbox"); }
+    /* Inbox first wherever decks are listed: it is not alphabetically
+       special, it is where every word lands before she files it. */
+    out.sort(function (a, b) {
+      if (a === "Inbox") return -1;
+      if (b === "Inbox") return 1;
+      return a < b ? -1 : a > b ? 1 : 0;
+    });
     return out.map(function (d) { return { name: d, n: seen[d] }; });
   }
 
@@ -1655,7 +1936,7 @@
       html += '<div class="face" id="face" tabindex="0" role="button" '
             + 'aria-label="Show the meaning">'
             + '<div class="termrow">'
-            + '<div class="term">' + esc(w.term) + '</div>'
+            + '<div class="term">' + esc(headword(w)) + '</div>'
             + sayBtn(w)
             + '</div>'
             + seenAsLine(w)
@@ -1664,7 +1945,7 @@
       html += '<div class="face back" id="back" tabindex="0" role="button" '
             + 'aria-label="Turn the card back to the word">'
             + '<div class="termrow">'
-            + '<div class="term">' + esc(w.term) + '</div>'
+            + '<div class="term">' + esc(headword(w)) + '</div>'
             + sayBtn(w)
             + '</div>'
             /* Both words, on the side she is reading the meaning from. The
@@ -2091,7 +2372,7 @@
       var w = rows[i];
       var first = w.senses && w.senses.length ? w.senses[0].text : "";
       h += '<tr>'
-         + '<td><span class="w-term">' + esc(w.term) + '</span>'
+         + '<td><span class="w-term">' + esc(headword(w)) + '</span>'
          + ' <button class="speak sm" data-say="' + esc(w.id) + '" '
          + 'aria-label="Hear ' + esc(w.term) + '" title="Hear it">'
          + '<span aria-hidden="true">\u25b6</span></button>'
@@ -2179,17 +2460,25 @@
 
   function renderDecks() {
     var list = decks();
-    if (!list.length) {
-      $("p-decks").innerHTML = '<div class="card"><p class="empty">'
-        + 'Decks appear once you have words. Every word starts in <b style="display:inline">Inbox</b>.</p></div>';
-      return;
-    }
-    var h = '<div class="card"><table><thead><tr><th>Deck</th><th>Words</th>'
+    var h = '<div class="card">'
+          + '<div class="deckadd">'
+          + '<input id="newDeck" type="text" maxlength="40" '
+          + 'placeholder="Name a new deck — Finance, Interviews…" '
+          + 'aria-label="New deck name">'
+          + '<button class="btn" id="newDeckGo">Create</button></div>'
+          + '<p class="step" style="font-size:13px;color:var(--faint);margin:8px 0 14px">'
+          + 'An empty deck is a real deck. Make one now and fill it when you '
+          + 'meet the words.</p>'
+          + '<table><thead><tr><th>Deck</th><th>Words</th>'
           + '<th>Due today</th><th></th></tr></thead><tbody>';
     var t = today();
     for (var i = 0; i < list.length; i++) {
       var d = list[i];
-      var due = db.words.filter(function (w) {
+      /* here(), not db.words: every other figure on this tab counts the
+         language she is in, and this one counted all three. The English
+         Inbox, with nothing in it, reported three words due today -- they
+         were German. */
+      var due = here().filter(function (w) {
         return (w.deck || "Inbox") === d.name && (w.due || t) <= t;
       }).length;
       var editing = renaming === d.name;
@@ -2205,7 +2494,11 @@
          + (editing
              ? '<button class="btn-q" data-rensave="' + esc(d.name) + '">Save</button> '
                + '<button class="btn-q" data-rencancel="1">Cancel</button>'
-             : '<button class="btn-q" data-rename="' + esc(d.name) + '">Rename</button>')
+             : '<button class="btn-q" data-rename="' + esc(d.name) + '">Rename</button>'
+               /* Inbox is where a word goes when it has nowhere else, so
+                  there has to be one. Everything else can go. */
+               + (d.name === "Inbox" ? ''
+                   : ' <button class="btn-q" data-deckdel="' + esc(d.name) + '">Delete</button>'))
          + '</td></tr>';
     }
     $("p-decks").innerHTML = h + '</tbody></table></div>';
@@ -2305,7 +2598,9 @@
     var lines = $("paste").value.split("\n");
     var deck = $("pasteDeck").value || "Inbox";
     if (deck === "__new") {
-      deck = (prompt("Name the new deck") || "").trim() || "Inbox";
+      deck = (prompt("Name the new deck") || "").trim()
+               .replace(/\s+/g, " ").slice(0, 40) || "Inbox";
+      if (deck !== "Inbox") putDeck(deck, SPACE, false);
     }
     var added = 0, dup = 0, long = 0, junk = 0, i;
     for (i = 0; i < lines.length; i++) {
@@ -2484,6 +2779,53 @@
     if (get("data-rencancel")) { renaming = null; renderDecks(); return; }
     var rs = get("data-rensave");
     if (rs) { saveDeckName(rs); return; }
+
+    if (e.target && e.target.id === "newDeckGo") { makeDeck(); return; }
+
+    var dd = get("data-deckdel");
+    if (dd) { dropDeck(dd); return; }
+  });
+
+  function makeDeck() {
+    var box = $("newDeck");
+    var name = box ? box.value.trim().replace(/\s+/g, " ").slice(0, 40) : "";
+    if (!name) { toast("Give the deck a name first."); return; }
+    var dl = decks(), i;
+    for (i = 0; i < dl.length; i++) if (dl[i].name === name) {
+      toast("\u201c" + name + "\u201d already exists."); return;
+    }
+    putDeck(name, SPACE, false);
+    if (box) box.value = "";
+    save(); renderDecks(); fillFilter(); counts();
+    toast("\u201c" + name + "\u201d is ready. Nothing in it yet.");
+  }
+
+  /* Deleting a deck never deletes words -- they go back to Inbox, which is
+     what Inbox is for. Said out loud, because the words move whether or not
+     that is what she pictured. */
+  function dropDeck(name) {
+    if (name === "Inbox") return;
+    var moving = 0;
+    here().forEach(function (w) { if ((w.deck || "Inbox") === name) moving++; });
+    if (moving && !confirm("Delete \u201c" + name + "\u201d? Its " + moving
+        + (moving === 1 ? " word goes" : " words go") + " back to Inbox \u2014 "
+        + "nothing is lost.")) return;
+    here().forEach(function (w) {
+      if ((w.deck || "Inbox") === name) { w.deck = "Inbox"; mark(w.id); }
+    });
+    putDeck(name, SPACE, true);
+    if (renaming === name) renaming = null;
+    if ($("fDeck") && $("fDeck").value === name) $("fDeck").value = "";
+    save(); renderDecks(); fillFilter(); renderAll(); counts();
+    toast(moving ? "Deleted. " + moving + " word" + (moving === 1 ? "" : "s")
+                   + " back in Inbox." : "Deleted.");
+  }
+
+  /* Enter creates, the same way Enter saves a rename. */
+  document.addEventListener("keydown", function (e) {
+    if (e.target && e.target.id === "newDeck" && e.key === "Enter") {
+      e.preventDefault(); makeDeck();
+    }
   });
 
   function saveDeckName(was) {
@@ -2500,7 +2842,13 @@
     if (taken && !confirm('“' + name + '” already exists. Merge '
           + moving + ' word' + (moving === 1 ? '' : 's') + ' into it?')) return;
 
-    here().forEach(function (w) { if ((w.deck || "Inbox") === was) w.deck = name; });
+    here().forEach(function (w) {
+      if ((w.deck || "Inbox") === was) { w.deck = name; mark(w.id); }
+    });
+    /* The stored deck moves with its words. Left behind, the old name would
+       come back as an empty deck the moment the list was next assembled. */
+    if (was !== "Inbox") putDeck(was, SPACE, true);
+    putDeck(name, SPACE, false);
     renaming = null;
     save(); renderDecks(); fillFilter(); renderAll(); counts();
     toast(taken ? "Merged." : "Renamed.");
@@ -2518,10 +2866,11 @@
     if (!id) return;
     var v = e.target.value;
     if (v === "__new") {
-      v = (prompt("Name the new deck") || "").trim();
+      v = (prompt("Name the new deck") || "").trim().replace(/\s+/g, " ").slice(0, 40);
       if (!v) { renderAll(); return; }
+      putDeck(v, SPACE, false);
     }
-    db.words.forEach(function (w) { if (w.id === id) w.deck = v; });
+    db.words.forEach(function (w) { if (w.id === id) { w.deck = v; mark(w.id); } });
     save(); fillFilter(); renderAll(); renderDecks(); counts();
     toast("Moved to " + v + ".");
   });
@@ -2536,7 +2885,9 @@
   });
 
   $("export").addEventListener("click", function () {
-    if (!db.words.length) { toast("Nothing to export yet."); return; }
+    if (!db.words.length && !deckList().length) {
+      toast("Nothing to export yet."); return;
+    }
     /* Deliberately every language: a backup of one space is not a backup. */
     var blob = new Blob([JSON.stringify(db, null, 1)], { type: "application/json" });
     var a = document.createElement("a");
@@ -2569,6 +2920,14 @@
 
       var list = normalize(parsed && parsed.words);
       if (!list.length) { toast("No words in that file."); return; }
+
+      /* An empty deck is in the file and in nothing else, so without this an
+         export and an import round trip would quietly lose it. */
+      var fileDecks = normalizeDecks(parsed && parsed.decks), fd;
+      for (fd = 0; fd < fileDecks.length; fd++) {
+        if (!deckRec(fileDecks[fd].name, fileDecks[fd].lang))
+          deckList().push(fileDecks[fd]);
+      }
 
       var have = {}, i, ff, k;
       for (i = 0; i < db.words.length; i++) {

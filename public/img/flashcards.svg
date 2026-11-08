@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 600" width="1800" height="600" role="img" aria-label="A stack of cards, a voice, and a repeating interval">
+  <!-- Drawn in white on nothing, because the page uses this as a mask: only
+       the alpha is read, and the colour underneath is the page's own. -->
+  <g fill="none" stroke="#fff" stroke-width="13" stroke-linecap="round" stroke-linejoin="round">
+
+    <!-- A stack of cards. The two behind are the ones not due yet. -->
+    <rect x="152" y="138" width="300" height="212" rx="26" opacity=".38"/>
+    <rect x="120" y="176" width="300" height="212" rx="26" opacity=".62"/>
+    <rect x="88"  y="214" width="300" height="212" rx="26"/>
+    <!-- the word, and the phonetic line under it -->
+    <line x1="128" y1="286" x2="268" y2="286"/>
+    <line x1="128" y1="334" x2="344" y2="334" opacity=".5"/>
+    <line x1="128" y1="376" x2="300" y2="376" opacity=".5"/>
+
+    <!-- A voice: a real recording, not a synthesised one. -->
+    <path d="M640 246 h58 l82 -72 v252 l-82 -72 h-58 z"/>
+    <path d="M818 244 a104 104 0 0 1 0 112"/>
+    <path d="M872 206 a168 168 0 0 1 0 188" opacity=".62"/>
+    <path d="M926 168 a232 232 0 0 1 0 264" opacity=".38"/>
+
+    <!-- Three languages, kept apart. -->
+    <rect x="1096" y="200" width="150" height="86" rx="43"/>
+    <rect x="1096" y="314" width="214" height="86" rx="43" opacity=".62"/>
+    <rect x="1348" y="200" width="214" height="86" rx="43" opacity=".38"/>
+
+    <!-- Coming back round: today, two days, sixteen. -->
+    <path d="M1560 420 a106 106 0 1 0 -58 -96" opacity=".62"/>
+    <path d="M1502 254 l-4 70 l66 -22" opacity=".62"/>
+  </g>
+  <g fill="#fff">
+    <circle cx="1602" cy="470" r="12"/>
+    <circle cx="1658" cy="470" r="12" opacity=".62"/>
+    <circle cx="1714" cy="470" r="12" opacity=".38"/>
+  </g>
+</svg>

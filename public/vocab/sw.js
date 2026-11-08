@@ -8,7 +8,7 @@
  * Scope is /vocab/, so the rest of the site is untouched. Sign-in and sync
  * are never cached: a stale answer there would be worse than no answer.
  */
-const VERSION = "vocab-14";  /* bumped: real recordings for Spanish and German */
+const VERSION = "vocab-15";  /* bumped: German articles, both parts of speech, real decks */
 const SHELL = [
   "/vocab/",
   "/vocab/manifest.webmanifest",

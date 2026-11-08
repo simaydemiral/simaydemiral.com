@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FlashCards — Simay Demiral</title>
+  <meta name="description" content="Catch a word from whatever you are reading, study it later. English, Spanish and German, with the sentence you met it in.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Simay Demiral">
+  <meta property="og:url" content="https://simaydemiral.com/tinkering/flashcards">
+  <meta property="og:title" content="FlashCards — Simay Demiral">
+  <meta property="og:description" content="Catch a word from whatever you are reading, study it later. English, Spanish and German, with the sentence you met it in.">
+  <meta property="og:image" content="https://simaydemiral.com/img/og-home.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="FlashCards — Simay Demiral">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="FlashCards — Simay Demiral">
+  <meta name="twitter:description" content="Catch a word from whatever you are reading, study it later. English, Spanish and German, with the sentence you met it in.">
+  <meta name="twitter:image" content="https://simaydemiral.com/img/og-home.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://api.fontshare.com/v2/css?f%5B%5D=switzer@400,500,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/icon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#171210">
+</head>
+<body>
+<div class="sheet">
+
+  <nav>
+    <ul>
+      <li><a href="/">&larr; Back</a></li>
+    </ul>
+      <button type="button" id="theme" class="theme-btn" aria-label="Switch between light and dark">
+      <span class="theme-dot" aria-hidden="true"></span><span id="themeWord">Dark</span>
+    </button>
+  </nav>
+
+  <article class="case">
+    <div class="case-body">
+    <h1>FlashCards</h1>
+    <p class="case-lede">
+      Catch a word from whatever you are reading, study it a few days later,
+      with the sentence you actually met it in.
+    </p>
+    <nav class="case-jump" aria-label="Sections of this write-up">
+      <a href="#problem">Problem</a>
+      <a href="#built">What I built</a>
+      <a href="#lessons">Lessons</a>
+      <a href="#stack">Stack</a>
+    </nav>
+
+    <div class="actions" style="margin:2rem 0">
+      <a class="btn" href="/vocab/">Open FlashCards <span aria-hidden="true">&rarr;</span></a>
+      <a class="btn-plain" href="https://github.com/simaydemiral/simaydemiral.com/blob/main/public/vocab/index.html">Read the source</a>
+    </div>
+
+    <h2 id="problem">The problem</h2>
+    <p>
+      I read in three languages and meet words I do not know in all of them. By
+      the time I have finished the paragraph I have lost the word, and if I have
+      not lost the word I have lost the sentence, which is the part that teaches
+      you how it is used.
+    </p>
+    <p>
+      The apps for this exist. They want me to type the word in, then type the
+      meaning in, then type an example in. That is three steps between seeing a
+      word and keeping it, and I was not doing them.
+    </p>
+
+    <h2 id="built">What I built</h2>
+    <p>
+      <strong>Two halves: catching and studying.</strong> A bookmarklet sits on
+      the favourites bar. Select a word on any page, click it, and the word is
+      saved with the sentence around it, the page title and the link. Nothing
+      else to fill in.
+    </p>
+    <p>
+      <strong>The meaning arrives on its own.</strong> Wiktionary for the
+      definitions and an example, Simple Wiktionary for a plainer version of the
+      same thing, with the full dictionary one button away. Wikipedia as a last
+      resort, which is how a word like <em>evals</em> gets an answer at all.
+    </p>
+    <p>
+      <strong>Three languages, three separate spaces.</strong> English, Spanish
+      and German do not share a pile. Each keeps its own words, its own decks and
+      its own sitting, and switching between them is one click.
+    </p>
+    <p>
+      <strong>Turkish on the back, when there is one.</strong> Wiktionary keeps
+      translation tables written by people, one per sense, so
+      <em>prudent</em> comes back as ihtiyatl&#x131; for the careful sense and
+      tutumlu for the thrifty one. Four sources are asked in all. Where none of
+      them knows, it says so.
+    </p>
+    <p>
+      <strong>Three answers, not two.</strong> Not yet, Almost, Knew it. Not yet
+      leaves the card due today, Almost pushes it two days out, Knew it sixteen.
+      Flat gaps rather than a doubling ladder, because I study twice a day and a
+      ladder sent everything to next month by Thursday.
+    </p>
+    <p>
+      <strong>Real voices.</strong> English, Spanish and German recordings come
+      from Wikimedia Commons, made by people. German brings its phonetic
+      spelling with it. Where no recording exists the browser says the word in
+      that language&rsquo;s own voice, which is worse and still better than
+      guessing.
+    </p>
+    <p>
+      <strong>German nouns carry their article.</strong> The card says
+      <em>das Haus</em>, not <em>Haus</em>. A German noun without its gender is a
+      noun learned wrong, and the gender is not guessable from the word.
+    </p>
+    <p>
+      <strong>It works on the phone, and offline.</strong> Added to the home
+      screen it opens like an app, with no browser chrome and no address bar.
+      Sign in with Google and the words follow you between the laptop and the
+      phone; stay signed out and they never leave the browser you saved them in.
+    </p>
+
+    <h2 id="lessons">What I learned</h2>
+    <p>
+      <strong>A dictionary answers the word you asked about, not the word you
+      met.</strong> Save <em>vetted</em> and Wiktionary says &ldquo;past tense of
+      vet&rdquo;, so the card follows the pointer to <em>vet</em> and leads with
+      its first meaning, which is a veterinarian. The fix is to notice that only
+      verbs have a past tense, and put the verb senses first. Both are still
+      there. Only the order changed.
+    </p>
+    <p>
+      <strong>Machine translation is worse than no translation.</strong> I tried
+      it for the Turkish before the translation tables. It returned
+      <em>&ccedil;ekirdek</em> for quorum and <em>ubikuit&ouml;z</em> for
+      ubiquitous. A wrong answer in a vocabulary tool is worse than a blank,
+      because you will learn the wrong answer.
+    </p>
+    <p>
+      <strong>A full stop is not a sentence boundary.</strong> The bookmarklet
+      grabs the sentence around the word, and the first version cut
+      &ldquo;$1.25 trillion&rdquo; in half and started the sentence at
+      &ldquo;25 trillion&rdquo;. A boundary is a stop, followed by a space, not
+      preceded by a digit or a lone capital letter.
+    </p>
+    <p>
+      <strong>A deck that is only a label is not a deck.</strong> Decks started as
+      a word written on each card, so the list was assembled by reading every
+      card. Move the last word out of a deck and the deck did not become empty,
+      it stopped existing. You also could not make one in advance and fill it
+      later, because there was nothing to write the name on.
+    </p>
+    <p>
+      <strong>Storage you did not write is hostile.</strong> One malformed field
+      in the browser&rsquo;s own storage took the whole page down to a blank
+      screen. Everything read back out now goes through one sanitiser, which also
+      catches anything arriving from an import file.
+    </p>
+
+    <h2 id="stack">Stack</h2>
+    <p class="case-note">
+      Plain HTML, CSS and JavaScript, no framework and no build step. Cloudflare
+      Workers and D1 for the sign-in and the sync. Wiktionary, Simple Wiktionary,
+      Wikipedia, Wikidata and Wikimedia Commons for everything on the card.
+      Written with Claude Code.
+    </p>
+
+    <p class="case-note">
+      <a href="/vocab/">Open FlashCards</a> &mdash; it starts empty, and signing
+      in is optional.
+    </p>
+
+    </div>
+
+    <p class="case-back"><a href="/">&larr; Back to the homepage</a></p>
+  </article>
+
+</div>
+
+<!-- Cloudflare Web Analytics. Deliberately absent from /ledger/, whose case
+     study invites the reader to open the network tab and find it empty. -->
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "b5ccee39b4ca42329bce3ede2880bcc6"}'></script>
+<script>
+/* Theme. Follows the system until someone chooses, then remembers — on every
+   page, so the choice does not evaporate when they open a case study. */
+(function () {
+  var root = document.documentElement, KEY = 'sd-theme';
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  if (saved === 'light' || saved === 'dark') root.setAttribute('data-theme', saved);
+
+  function isDark() {
+    return root.getAttribute('data-theme') !== 'light';
+  }
+  function label() {
+    var w = document.getElementById('themeWord');
+    if (w) w.textContent = isDark() ? 'Light' : 'Dark';
+  }
+  label();
+
+  var btn = document.getElementById('theme');
+  if (btn) btn.addEventListener('click', function () {
+    var next = isDark() ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem(KEY, next); } catch (e) {}
+    label();
+  });
+
+})();
+</script>
+</body>
+</html>
