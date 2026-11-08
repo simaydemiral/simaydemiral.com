@@ -521,7 +521,7 @@ h1 em {
   padding: 0;
 }
 .case-jump a {
-  font: 500 0.66rem/1 var(--mono);
+  font: 500 0.7rem/1 var(--mono);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   text-decoration: none;
@@ -600,7 +600,7 @@ html { scroll-behavior: smooth; }
 }
 
 .case-body h2 {
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 620;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -612,20 +612,23 @@ html { scroll-behavior: smooth; }
 
 .case-body > p {
   color: var(--body);
-  font-size: 0.83rem;
+  /* Was 0.83rem, which is about 13px: small enough on a laptop that a
+     paragraph of it is work to read. The measure is capped at 42rem, so the
+     line length holds. */
+  font-size: 0.92rem;
   line-height: 1.75;
   margin: 0 0 1.05rem;
 }
 
 /* The opening line stays a little larger than the rest. */
-.case-body > .case-lede { font-size: 0.9rem; }
+.case-body > .case-lede { font-size: 1rem; }
 
 .case-body ul {
   margin: 0;
   padding-left: 1.1rem;
   color: var(--body);
 }
-.case-body li { margin-bottom: 0.3rem; line-height: 1.6; font-size: 0.87rem; }
+.case-body li { margin-bottom: 0.3rem; line-height: 1.65; font-size: 0.95rem; }
 .case-body li:last-child { margin-bottom: 0; }
 
 /* A line that introduces a list belongs to it, so it sits close. */
@@ -635,8 +638,8 @@ html { scroll-behavior: smooth; }
 /* Each paragraph opens with its own one-line headline. */
 .case-body > p strong { color: var(--ink); font-weight: 600; }
 
-.case-note { font-size: 0.75rem; color: var(--body); margin: 0.85rem 0 0; }
-.case-back { margin: 3.5rem 0 0; font-size: 0.9rem; }
+.case-note { font-size: 0.84rem; line-height: 1.7; color: var(--body); margin: 0.85rem 0 0; }
+.case-back { margin: 3.5rem 0 0; font-size: 0.95rem; }
 .case-back a { color: var(--accent); }
 
 /* Work items that link to a case study. */
