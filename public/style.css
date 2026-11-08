@@ -222,6 +222,11 @@ h1 em {
 }
 .btn-plain:hover { color: var(--ink); border-bottom-color: var(--accent); }
 
+/* A source link wears the mark people scan for, with the word still there:
+   an icon on its own is a guess about where it goes. */
+.btn-gh { display: inline-flex; align-items: center; gap: 0.45em; }
+.btn-gh .gh { width: 1.05em; height: 1.05em; flex: none; }
+
 /* ---------- Hero panel ----------------------------------------- */
 
 .hero-panel {
