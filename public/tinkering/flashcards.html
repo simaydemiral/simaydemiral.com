@@ -63,23 +63,24 @@
 
     <h2 id="problem">The problem</h2>
     <p>
-      I read in three languages and meet words I do not know in all of them. By
-      the time I have finished the paragraph I have lost the word, and if I have
-      not lost the word I have lost the sentence, which is the part that teaches
-      you how it is used.
+      People who study or work in a second language struggle to find a seamless
+      way to learn vocabulary. You are reading a case or a paper for class, you
+      hit a word you do not know, and going off to a translator takes enough
+      effort that you either skip it or look it up and forget it by the end of
+      the paragraph. It does not stick.
     </p>
     <p>
-      The apps for this exist. They want me to type the word in, then type the
-      meaning in, then type an example in. That is three steps between seeing a
-      word and keeping it, and I was not doing them.
+      So I built one that gets out of the way. You save a word by clicking one
+      button on your bookmarks bar, and it builds the card for you: what the
+      word means as a verb and what it means as a noun, an example sentence, and
+      a recording of someone actually saying it.
     </p>
 
     <h2 id="built">What I built</h2>
     <p>
       <strong>Two halves: catching and studying.</strong> A bookmarklet sits on
       the favourites bar. Select a word on any page, click it, and the word is
-      saved with the sentence around it, the page title and the link. Nothing
-      else to fill in.
+      saved with the sentence around it.
     </p>
     <p>
       <strong>The meaning arrives on its own.</strong> Wiktionary for the
@@ -93,24 +94,9 @@
       its own sitting, and switching between them is one click.
     </p>
     <p>
-      <strong>Turkish on the back, when there is one.</strong> Wiktionary keeps
-      translation tables written by people, one per sense, so
-      <em>prudent</em> comes back as ihtiyatl&#x131; for the careful sense and
-      tutumlu for the thrifty one. Four sources are asked in all. Where none of
-      them knows, it says so.
-    </p>
-    <p>
-      <strong>Three answers, not two.</strong> Not yet, Almost, Knew it. Not yet
-      leaves the card due today, Almost pushes it two days out, Knew it sixteen.
-      Flat gaps rather than a doubling ladder, because I study twice a day and a
-      ladder sent everything to next month by Thursday.
-    </p>
-    <p>
-      <strong>Real voices.</strong> English, Spanish and German recordings come
-      from Wikimedia Commons, made by people. German brings its phonetic
-      spelling with it. Where no recording exists the browser says the word in
-      that language&rsquo;s own voice, which is worse and still better than
-      guessing.
+      <strong>Three answers, not two.</strong> Not yet, Almost, Knew it. A card
+      you did not get stays due today. Almost brings it back in two days, and
+      Knew it sends it sixteen days out.
     </p>
     <p>
       <strong>German nouns carry their article.</strong> The card says
@@ -126,39 +112,38 @@
 
     <h2 id="lessons">What I learned</h2>
     <p>
-      <strong>A dictionary answers the word you asked about, not the word you
-      met.</strong> Save <em>vetted</em> and Wiktionary says &ldquo;past tense of
-      vet&rdquo;, so the card follows the pointer to <em>vet</em> and leads with
-      its first meaning, which is a veterinarian. The fix is to notice that only
-      verbs have a past tense, and put the verb senses first. Both are still
-      there. Only the order changed.
+      <strong>The word I save is not the word the dictionary has.</strong> I
+      save <em>vetted</em>. Wiktionary files it under <em>vet</em>, and
+      <em>vet</em> means a veterinarian before it means anything else, so the
+      card opened with an animal doctor and the sentence I had read was nowhere
+      on it. Only verbs have a past tense. The verb comes first now, and the
+      animal doctor is still there, underneath.
     </p>
     <p>
-      <strong>Machine translation is worse than no translation.</strong> I tried
-      it for the Turkish before the translation tables. It returned
-      <em>&ccedil;ekirdek</em> for quorum and <em>ubikuit&ouml;z</em> for
-      ubiquitous. A wrong answer in a vocabulary tool is worse than a blank,
-      because you will learn the wrong answer.
+      <strong>A wrong answer is worse than a blank one.</strong> I used machine
+      translation for the Turkish at first. It gave &ccedil;ekirdek for quorum.
+      A blank card sends you to go and look; a wrong card teaches you the wrong
+      word and you find out months later, in front of somebody.
     </p>
     <p>
-      <strong>A full stop is not a sentence boundary.</strong> The bookmarklet
-      grabs the sentence around the word, and the first version cut
-      &ldquo;$1.25 trillion&rdquo; in half and started the sentence at
-      &ldquo;25 trillion&rdquo;. A boundary is a stop, followed by a space, not
-      preceded by a digit or a lone capital letter.
+      <strong>The schedule has to fit how I actually study.</strong> Spaced
+      repetition doubles the gap every time you get a card right. I study twice
+      a day, so by Thursday everything I knew was due in February and there was
+      nothing left to open the app for. The gaps are flat now: today, two days,
+      sixteen days.
     </p>
     <p>
-      <strong>A deck that is only a label is not a deck.</strong> Decks started as
-      a word written on each card, so the list was assembled by reading every
-      card. Move the last word out of a deck and the deck did not become empty,
-      it stopped existing. You also could not make one in advance and fill it
-      later, because there was nothing to write the name on.
+      <strong>A full stop is not the end of a sentence.</strong> The bookmarklet
+      saves the sentence around the word, and the first version cut
+      &ldquo;$1.25 trillion&rdquo; at the decimal point, so the sentence it kept
+      began at &ldquo;25 trillion&rdquo;. A boundary is a stop, then a space,
+      and not after a digit or a single capital letter.
     </p>
     <p>
-      <strong>Storage you did not write is hostile.</strong> One malformed field
-      in the browser&rsquo;s own storage took the whole page down to a blank
-      screen. Everything read back out now goes through one sanitiser, which also
-      catches anything arriving from an import file.
+      <strong>Nothing I thought was finished was finished.</strong> Every one of
+      these was working when I stopped looking at it. They turned up weeks
+      later, on a real word I had really saved, which is the only test that ever
+      found anything.
     </p>
 
     <h2 id="stack">Stack</h2>
