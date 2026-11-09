@@ -212,6 +212,9 @@
        text-overflow:ellipsis;white-space:nowrap}
   .howto{margin:0;padding-left:20px;color:var(--muted);font-size:14px}
   .howto li{margin:3px 0}
+  .deckonly{margin:0 0 12px;font-size:13px;color:var(--muted);
+            display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .deckonly b{display:inline;color:var(--ink)}
   .deckname{font:inherit;font-weight:600;padding:5px 8px;border-radius:7px;
             border:1px solid var(--brand);background:var(--surface);
             color:var(--ink);width:100%;max-width:230px}
@@ -388,6 +391,8 @@
       w.gen = (GENDERED[w.lang] && /^[mfn]$/.test(w.gen)) ? w.gen : "";
       w.want = (w.want === "verb" || w.want === "noun" || w.want === "adjective")
              ? w.want : "";
+      w.root = typeof w.root === "string" ? w.root.slice(0, 60) : "";
+      w.miss = typeof w.miss === "number" ? w.miss : 0;
       /* An audio URL from a file is a URL like any other: http(s) only. */
       if (w.say && typeof w.say === "object") {
         w.say = { audio: safeUrl(w.say.audio).slice(0, 400),
@@ -399,7 +404,7 @@
       } else { delete w.say; }
       if (w.tr && typeof w.tr === "object") {
         var tb = Array.isArray(w.tr.blocks) ? w.tr.blocks : [];
-        w.tr = {
+      w.tr = {
           blocks: tb.filter(function (b) {
             return b && typeof b === "object" && Array.isArray(b.words) && b.words.length;
           }).slice(0, 4).map(function (b) {
@@ -413,7 +418,10 @@
                   .slice(0, 6).map(function (x) { return x.slice(0, 160); }),
           one: typeof w.tr.one === "string" ? w.tr.one.slice(0, 120) : "",
           oneNote: typeof w.tr.oneNote === "string" ? w.tr.oneNote.slice(0, 160) : "",
-          from: typeof w.tr.from === "string" ? w.tr.from.slice(0, 40) : ""
+          from: typeof w.tr.from === "string" ? w.tr.from.slice(0, 40) : "",
+          /* Kept, or every reload hands a stale "none" three fresh goes. */
+          miss: typeof w.tr.miss === "number" ? w.tr.miss : 0,
+          via: typeof w.tr.via === "string" ? w.tr.via.slice(0, 60) : ""
         };
       } else { delete w.tr; }
       if (w.eg && typeof w.eg === "object") {
@@ -699,7 +707,16 @@
 
   function seenAsLine(w) {
     var f = otherForms(w);
-    return f.length ? '<div class="seenas">met as ' + esc(f.join(", ")) + '</div>' : "";
+    var out = f.length
+      ? '<div class="seenas">met as ' + esc(f.join(", ")) + '</div>' : "";
+    /* The card shows the meaning of a shorter word, so it says so rather
+       than letting the reader assume the definition is of the word on the
+       front of it. */
+    if (w.root) {
+      out += '<div class="seenas">built on <b style="display:inline">'
+           + esc(w.root) + '</b>, which is what these meanings are of</div>';
+    }
+    return out;
   }
 
   /* Wiktionary files "plunged" as nothing but "past tense of plunge", so the
@@ -1023,8 +1040,56 @@
       .catch(function () { return null; });
   }
 
-  function trWiktionary(wikitext) {
-    var m = /\n==\s*İngilizce\s*==\s*\n([\s\S]*?)(?=\n==[^=]|$)/.exec("\n" + wikitext);
+  /* The English Wiktionary's own translation tables, which are the best
+     source there is: written by people, one table per sense, so "prudent"
+     gives ihtiyatli for the careful sense and tutumlu for the thrifty one.
+
+     This function was deleted by the commit that added the second Turkish
+     dictionary, and the call site kept calling it. The ReferenceError landed
+     in a .catch() that returns [], so the best of the four sources has been
+     silently dead ever since and only words that happen to be in the Turkish
+     Wiktionary or Wikidata came back with anything. "Mischief" has
+     {{t+|tr|muzirlik}} sitting right there in the table.
+
+     Scoped to one language section: a page like "casa" carries twenty
+     languages, and only one of them is the word she saved. */
+  function trBlocks(wikitext, code) {
+    var scope = section(wikitext, lang(code || "en").wikt);
+    if (!scope) return [];
+    var out = [], re = /\{\{trans-top[^}]*\}\}([\s\S]*?)\{\{trans-bottom\}\}/g, m;
+    var head = /\{\{trans-top\|([^}]*)\}\}/;
+    while ((m = re.exec(scope))) {
+      var h = head.exec(m[0]);
+      var sense = h ? h[1].replace(/^id=[^|]*\|/, "").trim() : "";
+      var inner = m[1], t = /\{\{t\+?\|tr\|([^}|]+)/g, hit, seen = {}, words = [];
+      while ((hit = t.exec(inner))) {
+        var word = hit[1].trim();
+        if (word && !seen[word]) { seen[word] = 1; words.push(word); }
+      }
+      if (words.length) out.push({ sense: sense, words: words.slice(0, 6) });
+      if (out.length >= 4) break;
+    }
+    /* Some entries list the translations without wrapping them in a table.
+       One block, no sense label, rather than nothing at all. */
+    if (!out.length) {
+      var all = /\{\{t\+?\|tr\|([^}|]+)/g, h2, s2 = {}, w2 = [];
+      while ((h2 = all.exec(scope))) {
+        var x = h2[1].trim();
+        if (x && !s2[x]) { s2[x] = 1; w2.push(x); }
+      }
+      if (w2.length) out.push({ sense: "", words: w2.slice(0, 6) });
+    }
+    return out;
+  }
+
+  function trWiktionary(wikitext, code) {
+    /* The Turkish Wiktionary heads each language in Turkish, so a Spanish
+       word is under Ispanyolca and a German one under Almanca. Reading only
+       the English heading meant the other three spaces never found anything
+       here at all. */
+    var name = lang(code || "en").trw;
+    var m = new RegExp("\\n==\\s*" + name + "\\s*==\\s*\\n([\\s\\S]*?)(?=\\n==[^=]|$)")
+              .exec("\n" + wikitext);
     if (!m) return [];
 
     /* The leading newline matters: a heading on the line straight after
@@ -1046,6 +1111,13 @@
         if (!/^#[^:*#]/.test(lines[j])) continue;
         var t = cleanWiki(lines[j].replace(/^#\s*/, ""));
         if (!t || t.length < 2 || !/[a-zçğıöşü]/i.test(t)) continue;
+        /* A usage example that survived the template stripper, carrying its
+           own translation after an equals sign: "GAP y H&M son las empresas
+           ...=\"GAP ile H&M, dünyanın en büyük moda şirketleridir.\"". A gloss
+           is a handful of words; this is a sentence and belongs to the
+           example line, not the meaning. */
+        if (t.indexOf("=") > -1) continue;
+        if (t.length > 90 || t.split(/\s+/).length > 10) continue;
         if (seen[t.toLowerCase()]) continue;
         seen[t.toLowerCase()] = 1;
         out.push(t.slice(0, 160));
@@ -1055,14 +1127,41 @@
     return out;
   }
 
-  function viaTurkish(term) {
+  /* The English gloss of a foreign word, when it is short enough to be a
+     word rather than a sentence. Non-English entries carry no translation
+     tables at all -- that is Wiktionary policy, not an oversight -- so the
+     only way to the Turkish for "casa" is through "house", which does have
+     one. Anything longer than two words is a definition, not a gloss, and
+     looking it up would answer a different question. */
+  function glossOf(senses, want) {
+    var list = senses || [], i, best = "";
+    for (i = 0; i < list.length; i++) {
+      var t = String(list[i].text || "")
+                .replace(/\([^)]*\)/g, " ")          /* (uncountable), (formal) */
+                .replace(/[;,].*$/, "")               /* first of a list */
+                .replace(/^(to|a|an|the)\s+/i, "")
+                .replace(/[.!?]\s*$/, "")
+                .trim();
+      if (!t || !/^[A-Za-z][A-Za-z' -]{1,24}$/.test(t)) continue;
+      if (t.split(/\s+/).length > 2) continue;
+      /* A noun's Turkish is wanted for a noun. "Unternehmen" lists the verb
+         sense first, so the plain first gloss asked about "undertake" and
+         came back with girismek rather than sirket. */
+      if (want && String(list[i].pos || "").toLowerCase() === want) return t;
+      if (!best) best = t;
+    }
+    return best;
+  }
+
+  function viaTurkish(term, code, gloss) {
     var reached = false;
+    code = code || "en";
 
     var english = getJSON(WIKT_RAW + encodeURIComponent(term))
       .then(function (j) {
         reached = true;
         var wt = j && j.parse && j.parse.wikitext ? j.parse.wikitext["*"] : "";
-        return trBlocks(wt || "");
+        return trBlocks(wt || "", code);
       })
       .catch(function (e) {
         if (e && e.status === 404) { reached = true; return []; }
@@ -1075,7 +1174,7 @@
       .then(function (j) {
         reached = true;
         var wt = j && j.parse && j.parse.wikitext ? j.parse.wikitext["*"] : "";
-        return trWiktionary(wt || "");
+        return trWiktionary(wt || "", code);
       })
       .catch(function (e) {
         if (e && e.status === 404) { reached = true; return []; }
@@ -1097,7 +1196,29 @@
                    from: blocks.length && more.length ? "Wiktionary \u00b7 T\u00fcrk\u00e7e Vikis\u00f6zl\u00fck"
                        : blocks.length ? "Wiktionary" : "T\u00fcrk\u00e7e Vikis\u00f6zl\u00fck" };
         }
-        /* Jargon lives here, where the dictionaries have nothing. */
+        /* Through the English word it means. Only for the other three
+           spaces, and only with the English word named on the card, because
+           a translation of a translation has to show its working. */
+        if (code !== "en" && gloss) {
+          return getJSON(WIKT_RAW + encodeURIComponent(gloss))
+            .then(function (j) {
+              var wt = j && j.parse && j.parse.wikitext ? j.parse.wikitext["*"] : "";
+              var b = trBlocks(wt || "", "en");
+              if (b.length) {
+                return { blocks: b, more: [], one: "",
+                         from: "Wiktionary, via " + gloss, via: gloss };
+              }
+              return viaJargon(term, reached);
+            })
+            .catch(function () { return viaJargon(term, reached); });
+        }
+        return viaJargon(term, reached);
+      });
+  }
+
+  /* Where both dictionaries have nothing: an encyclopaedia does, and
+     Wikidata holds a Turkish label even for concepts with no article. */
+  function viaJargon(term, reached) {
         return viaWikidata(term).then(function (wd) {
           if (wd) {
             return { blocks: [], more: [], one: wd.label, oneNote: wd.desc,
@@ -1118,7 +1239,6 @@
             return { blocks: [], more: [], one: "", from: "", unreachable: true };
           });
         });
-      });
   }
 
   /* ------------------------------------------------------------------
@@ -1214,13 +1334,22 @@
   /* Bumped whenever a new source is added. A "none" recorded before Turkish
      Wiktionary existed was true then and wrong now, and without this every
      word already asked about would keep showing the old verdict for ever. */
-  var TR_SOURCES = 3;
+  /* 4: the English translation tables came back from the dead, the Turkish
+     Wiktionary is read under the right language heading, and a foreign word
+     can reach Turkish through its English gloss. Every card that was told
+     "nobody knows this" by the old code asks again, once. */
+  var TR_SOURCES = 4;
 
   function ensureTurkish(w, after) {
     /* `from` is what makes it an answer: Wiktionary, Wikipedia, or none.
        A record saved by the older build has from:"" — that was a failure
        wearing an answer's clothes, so it is retried rather than believed. */
-    var settled = w.tr && w.tr.from && (w.tr.v || 0) >= TR_SOURCES;
+    /* "none" is a verdict the sources reached, but a rate-limited request
+       reaches it too, and the two are indistinguishable from here. So a
+       "none" is tried three times across three viewings before it is
+       believed, the same way a failed definition is. */
+    var ok = w.tr && w.tr.from && (w.tr.v || 0) >= TR_SOURCES;
+    var settled = ok && (w.tr.from !== "none" || (w.tr.miss || 0) >= LOOK_TRIES);
     if (settled || translating[w.id]) return;
     translating[w.id] = 1;
     /* The word the dictionary actually settled on: "Evals" resolves through
@@ -1230,7 +1359,13 @@
       var hops = w.via.split("\u2192");
       term = hops[hops.length - 1].trim() || w.term;
     }
-    viaTurkish(term.toLowerCase()).then(function (tr) {
+    /* A German noun is capitalised and its entry is too, so lower-casing it
+       asks for a page that does not exist. Only English is folded down. */
+    var wl = w.lang || "en";
+    var ask = wl === "en" ? term.toLowerCase() : term;
+    /* A word with a gender is a noun, which is the sense to translate. */
+    var want = w.gen ? "noun" : (w.want || "");
+    viaTurkish(ask, wl, glossOf(w.senses, want)).then(function (tr) {
       delete translating[w.id];
       if (tr.unreachable) {
         /* Not written down: the next press asks again. */
@@ -1238,6 +1373,11 @@
       } else {
         trFailed = false;
         tr.v = TR_SOURCES;
+        /* Carried across the retries, so three goes means three and not
+           three every time the card comes round. */
+        if (tr.from === "none") {
+          tr.miss = ((w.tr && w.tr.from === "none" && w.tr.miss) || 0) + 1;
+        }
         w.tr = tr;
         save();
       }
@@ -1557,6 +1697,60 @@
     });
   }
 
+  /* A word the dictionary does not list is often a word built out of one it
+     does. "Allegedly" is alleged plus -ly; "untraceable" is trace with a
+     prefix and a suffix on it. Rather than showing a blank card, the root is
+     looked up and the card says which root it came from, so the reader can
+     see the step that was taken. Nothing is invented: if the root has no
+     entry either, it still says so.
+
+     Ordered longest first, because -ation has to be tried before -ion. */
+  var ENDINGS = [
+    ["ations", "ate"], ["ation", "ate"], ["ically", "ical"], ["ically", "ic"],
+    ["iness", "y"], ["ingly", "ing"], ["edly", "ed"], ["ement", "e"],
+    ["ments", "ment"], ["ness", ""], ["ment", ""], ["ities", "ity"],
+    ["ity", "e"], ["ity", ""], ["ible", ""], ["able", "e"], ["able", ""],
+    ["ally", "al"], ["ingly", ""], ["ily", "y"], ["ly", ""],
+    ["ies", "y"], ["ied", "y"], ["ier", "y"], ["iest", "y"],
+    ["ing", "e"], ["ing", ""], ["ed", "e"], ["ed", ""],
+    ["es", ""], ["s", ""], ["er", ""], ["est", ""],
+    ["ful", ""], ["less", ""], ["ish", ""]
+  ];
+
+  function roots(term) {
+    var t = String(term || "").trim().toLowerCase(), out = [], seen = {}, i;
+    if (t.length < 5 || /\s/.test(t)) return out;
+    for (i = 0; i < ENDINGS.length; i++) {
+      var cut = ENDINGS[i][0], add = ENDINGS[i][1];
+      if (t.length <= cut.length + 2) continue;
+      if (t.slice(-cut.length) !== cut) continue;
+      var r = t.slice(0, t.length - cut.length) + add;
+      /* "running" loses one of its doubled letters: runn -> run. */
+      var dbl = /([bdfglmnprt])\1$/.test(r) ? r.slice(0, -1) : "";
+      [r, dbl].forEach(function (x) {
+        if (x && x.length > 2 && x !== t && !seen[x]) { seen[x] = 1; out.push(x); }
+      });
+      if (out.length >= 4) break;
+    }
+    return out;
+  }
+
+  /* Asked one at a time, stopping at the first that answers: four parallel
+     requests for a word that will be found on the first try is three
+     requests of nobody's business. */
+  function viaRoot(term, list, i) {
+    list = list || roots(term);
+    i = i || 0;
+    if (i >= list.length) return Promise.resolve(null);
+    var r = list[i];
+    return viaWiktionary(r).then(function (res) {
+      if (res && res.senses && res.senses.length) {
+        return { root: r, senses: res.senses };
+      }
+      return viaRoot(term, list, i + 1);
+    }).catch(function () { return viaRoot(term, list, i + 1); });
+  }
+
   /* Last resort for jargon and proper nouns no dictionary carries: an
      encyclopaedia does. "Evals" is not a dictionary word; "RAG" is not
      either, but both have an article. */
@@ -1584,15 +1778,24 @@
           r.senses.want = want;
           return r.senses;
         }
-        return viaWikipedia(term).then(function (w) {
-          if (w.length) return w;
-          /* one more: the singular, for plurals no dictionary lists */
-          var sing = term.trim().replace(/ies$/i, "y").replace(/(ses|xes|zes|ches|shes)$/i, "")
-                         .replace(/s$/i, "");
-          if (sing && sing.toLowerCase() !== term.trim().toLowerCase() && sing.length > 2) {
-            return viaWikipedia(sing);
+        /* Built out of a word the dictionary does have. Asked before the
+           encyclopaedia, because "allegedly" wants alleged, not an article. */
+        return viaRoot(term.trim()).then(function (rt) {
+          if (rt) {
+            resolved = rt.root;
+            rt.senses.root = rt.root;
+            return rt.senses;
           }
-          return [];
+          return viaWikipedia(term).then(function (w) {
+            if (w.length) return w;
+            /* one more: the singular, for plurals no dictionary lists */
+            var sing = term.trim().replace(/ies$/i, "y").replace(/(ses|xes|zes|ches|shes)$/i, "")
+                           .replace(/s$/i, "");
+            if (sing && sing.toLowerCase() !== term.trim().toLowerCase() && sing.length > 2) {
+              return viaWikipedia(sing);
+            }
+            return [];
+          });
         });
       })
       .then(function (senses) {
@@ -1627,7 +1830,17 @@
      already renamed changes nothing. */
   var LOOK_SOURCES = 2;
 
-  function needsLook(w) { return !w.looked || (w.lv || 0) < LOOK_SOURCES; }
+  /* Three goes before "nobody knows this word" is believed. One failed
+     request used to settle it forever: a rate limit or a dropped connection
+     while adding a batch of words left "allegedly" -- which Wiktionary
+     plainly has -- marked as unknown with no way back. */
+  var LOOK_TRIES = 3;
+
+  function needsLook(w) {
+    if (!w.looked) return true;
+    if ((w.lv || 0) < LOOK_SOURCES) return true;
+    return !(w.senses && w.senses.length) && (w.miss || 0) < LOOK_TRIES;
+  }
 
   function ensureLooked(w, after) {
     if (!needsLook(w) || looking[w.id]) { if (after) after(); return; }
@@ -1646,6 +1859,12 @@
          the word, because the plain-English senses are fetched separately
          and have to be put in the same order. */
       w.want = senses.want || "";
+      /* Which word the meaning actually came from, when it came from a
+         shorter one. Not a rename: she saved "allegedly" and that is the
+         word she wants to see. */
+      w.root = senses.root || "";
+      if (senses.length) w.miss = 0;
+      else w.miss = (w.miss || 0) + 1;
       if (again) w.plain = null;
       w.looked = true;
       w.lv = LOOK_SOURCES;
@@ -1706,11 +1925,19 @@
      A word saved before any of this has no language and is English, which is
      what it was.
      ------------------------------------------------------------------ */
+  /* wikt  — how the English Wiktionary heads this language's section.
+     trw   — how the Turkish Wiktionary heads it, in Turkish. Without this
+             the Turkish lookup read the English heading on every page, so
+             the other three spaces never found anything there at all. */
   var LANGS = [
-    { code: "en", label: "English",  wikt: "English", voice: "en-US" },
-    { code: "es", label: "Espa\u00f1ol", wikt: "Spanish", voice: "es-ES" },
-    { code: "de", label: "Deutsch",  wikt: "German",  voice: "de-DE" },
-    { code: "fr", label: "Fran\u00e7ais", wikt: "French", voice: "fr-FR" }
+    { code: "en", label: "English",  wikt: "English", voice: "en-US",
+      trw: "\u0130ngilizce" },
+    { code: "es", label: "Espa\u00f1ol", wikt: "Spanish", voice: "es-ES",
+      trw: "\u0130spanyolca" },
+    { code: "de", label: "Deutsch",  wikt: "German",  voice: "de-DE",
+      trw: "Almanca" },
+    { code: "fr", label: "Fran\u00e7ais", wikt: "French", voice: "fr-FR",
+      trw: "Frans\u0131zca" }
   ];
 
   var SPACE = "en";
@@ -1775,6 +2002,7 @@
   function setSpace(code) {
     if (code === SPACE) return;
     SPACE = code;
+    onlyDeck = "";                 /* a deck belongs to one language */
     try { localStorage.setItem("vocab.space", code); } catch (e) {}
     /* A sitting belongs to the language it started in. */
     session = []; done = 0; misses = {}; almost = {};
@@ -1783,9 +2011,26 @@
     renderAll(); renderDecks(); renderDue();
   }
 
+  /* A sitting can be narrowed to one deck. Kept outside the session so the
+     next round stays in the same deck, and cleared when she leaves it or
+     switches language -- a deck belongs to one space. */
+  var onlyDeck = "";
+
+  function inDeck(w) { return !onlyDeck || (w.deck || "Inbox") === onlyDeck; }
+
   function dueNow() {
     var t = today();
-    return here().filter(function (w) { return (w.due || t) <= t; });
+    return here().filter(function (w) { return inDeck(w) && (w.due || t) <= t; });
+  }
+
+  /* The deck still exists, and still has something in it. Deleting a deck
+     mid-sitting, or emptying it, must not leave the Study tab filtering on a
+     name nothing answers to. */
+  function checkDeck() {
+    if (!onlyDeck) return;
+    var live = false;
+    here().forEach(function (w) { if ((w.deck || "Inbox") === onlyDeck) live = true; });
+    if (!live && !deckRec(onlyDeck, SPACE)) onlyDeck = "";
   }
 
   /* ------------------------------------------------------------------
@@ -1884,8 +2129,18 @@
     renderDue();
   }
 
+  /* The one line that says a sitting is narrowed, with the way out of it.
+     Without this a deck with nothing due reads as a language with nothing
+     due, and there is no clue the filter is on. */
+  function deckBanner() {
+    if (!onlyDeck) return "";
+    return '<p class="deckonly">Studying <b>' + esc(onlyDeck) + '</b> only'
+         + ' <button class="btn-q" id="allDecks">Study everything</button></p>';
+  }
+
   function renderDue() {
     var el = $("p-due");
+    checkDeck();
 
     if (!here().length) {
       el.innerHTML = '<div class="card"><p class="empty"><b>No '
@@ -1919,13 +2174,24 @@
         body = nd + ' word' + (nd === 1 ? '' : 's') + ' waiting'
              + (nd > CAP ? ' \u2014 ' + CAP + ' in this sitting.' : '.');
         label = "Start";
+      } else if (onlyDeck) {
+        var inD = here().filter(function (w) {
+          return (w.deck || "Inbox") === onlyDeck;
+        }).length;
+        head = "Nothing due in " + esc(onlyDeck);
+        body = inD
+          ? 'All ' + inD + ' word' + (inD === 1 ? '' : 's') + ' in this deck '
+            + (inD === 1 ? 'is' : 'are') + ' waiting on a later day.'
+          : 'This deck is empty.';
+        label = "";
       } else {
         head = "Nothing due today";
         body = 'You have studied everything that came up. '
              + here().length + ' word' + (here().length === 1 ? '' : 's') + ' in total.';
         label = "";
       }
-      el.innerHTML = '<div class="card"><p class="empty"><b>' + head + '</b>'
+      el.innerHTML = deckBanner()
+        + '<div class="card"><p class="empty"><b>' + head + '</b>'
         + body + '</p>'
         + (label ? '<div style="text-align:center;padding-bottom:18px">'
                  + '<button class="btn" id="go">' + label + '</button></div>' : '')
@@ -1939,7 +2205,7 @@
        taking it away, so the ones she is getting wrong are the ones she
        keeps seeing. The count is done-and-left rather than "3 of 7",
        because a card coming round again makes that arithmetic a lie. */
-    var html = '<div class="study">'
+    var html = deckBanner() + '<div class="study">'
       + '<div class="progress">' + done + ' done \u00b7 ' + session.length + ' left'
       + (misses[w.id] ? ' \u00b7 again' : almost[w.id] ? ' \u00b7 once more' : '')
       + '</div>';
@@ -1970,7 +2236,13 @@
         html += '<p class="def" style="margin-top:12px;color:var(--muted)">Looking it up&hellip;</p>';
       } else if (!w.senses.length) {
         html += '<p class="def" style="margin-top:12px;color:var(--warn)">'
-              + 'No definition found &mdash; neither dictionary knows this one.</p>';
+              + 'No definition found yet. '
+              + ((w.miss || 0) >= LOOK_TRIES
+                  ? 'Asked ' + w.miss + ' times, so it is probably not in any '
+                    + 'of them.'
+                  : 'Tried ' + (w.miss || 1) + ' time'
+                    + ((w.miss || 1) === 1 ? '' : 's') + ' so far.')
+              + ' <button class="btn-q" id="lookAgain">Look again</button></p>';
       } else {
         /* One hop is already said by the line under the word. A longer chain
            is worth spelling out, because "Evals -> eval -> evaluation"
@@ -1990,11 +2262,7 @@
                 + (s.example ? '<p class="eg">&ldquo;' + esc(s.example) + '&rdquo;</p>' : '')
                 + '</div>';
         }
-        if (plain.length) {
-          html += '<div class="trfrom">'
-                + (fullOpen ? 'Wiktionary' : 'Plain English \u00b7 Simple Wiktionary')
-                + '</div>';
-        }
+
       }
       if (trOpen) {
         html += '<div class="yournote tr"><b>T\u00fcrk\u00e7e</b>';
@@ -2293,8 +2561,10 @@
       + '</div>';
   }
 
+  /* Offered on every card. The gate used to be English-only, which made the
+     Turkish a feature of one space out of four -- and Turkish is the first
+     language, so it is wanted most on the ones that are not English. */
   function trButton(w) {
-    if ((w.lang || "en") !== "en") return "";
     return '<button class="btn-q' + (trOpen ? ' is-on' : '') + '" id="trBtn">'
          + (trOpen ? 'Hide T\u00fcrk\u00e7e' : 'T\u00fcrk\u00e7e') + '</button>';
   }
@@ -2506,7 +2776,10 @@
          + (editing
              ? '<button class="btn-q" data-rensave="' + esc(d.name) + '">Save</button> '
                + '<button class="btn-q" data-rencancel="1">Cancel</button>'
-             : '<button class="btn-q" data-rename="' + esc(d.name) + '">Rename</button>'
+             : '<button class="btn-q" data-deckgo="' + esc(d.name) + '"'
+               + (d.n ? '' : ' disabled title="Nothing in this deck yet"')
+               + '>Study</button> '
+               + '<button class="btn-q" data-rename="' + esc(d.name) + '">Rename</button>'
                /* Inbox is where a word goes when it has nowhere else, so
                   there has to be one. Everything else can go. */
                + (d.name === "Inbox" ? ''
@@ -2796,7 +3069,40 @@
 
     var dd = get("data-deckdel");
     if (dd) { dropDeck(dd); return; }
+
+    var dg = get("data-deckgo");
+    if (dg) { studyDeck(dg); return; }
+
+    /* Asked again on purpose, so the three-try ceiling is not a dead end. */
+    if (e.target && e.target.id === "lookAgain") {
+      var lw = session[0];
+      if (lw) {
+        lw.miss = 0; lw.looked = false; lw.lv = 0;
+        save();
+        ensureLooked(lw, function () { renderDue(); });
+        renderDue();
+      }
+      return;
+    }
+
+    if (e.target && e.target.id === "allDecks") {
+      onlyDeck = "";
+      session = []; done = 0; misses = {}; almost = {};
+      counts(); renderDue();
+      return;
+    }
   });
+
+  /* Study one deck. The sitting restarts, because a round already under way
+     was built from a different set of words. */
+  function studyDeck(name) {
+    onlyDeck = name;
+    session = []; done = 0; misses = {}; almost = {};
+    var b = document.querySelector('.tab[data-tab="due"]');
+    if (b) b.click();
+    startSession();
+    if (!session.length) renderDue();
+  }
 
   function makeDeck() {
     var box = $("newDeck");
