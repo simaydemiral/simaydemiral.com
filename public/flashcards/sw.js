@@ -11,7 +11,7 @@
 /* The name changes with the address: a cache called vocab-19 belongs to
    an app that no longer lives here, and the shim left behind at /vocab/
    deletes anything named that way. */
-const VERSION = "flashcards-1";
+const VERSION = "flashcards-2";  /* bumped: one round per deck */
 const SHELL = [
   "/flashcards/",
   "/flashcards/manifest.webmanifest",

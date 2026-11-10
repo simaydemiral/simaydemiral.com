@@ -2348,13 +2348,17 @@
 
   function setSpace(code) {
     if (code === SPACE) return;
+    /* Before SPACE changes, or the round she is leaving is filed under the
+       language she is arriving at. */
+    saveSession();
     SPACE = code;
     onlyDeck = "";                 /* a deck belongs to one language */
     try { localStorage.setItem("vocab.space", code); } catch (e) {}
-    /* A sitting belongs to the language it started in. */
     session = []; done = 0; misses = {}; almost = {};
     flipped = false; noteOpen = false; trOpen = false;
-    saveSession();
+    /* A sitting belongs to the language it started in -- and is still there
+       when she comes back to that language. */
+    resumeLast();
     renderSpaces(); counts(); fillFilter();
     renderAll(); renderDecks(); renderDue();
   }
@@ -2531,48 +2535,88 @@
      Good for the day it was started and no longer. Tomorrow is a different
      set of words and should begin at the Start screen.
      ------------------------------------------------------------------ */
-  var SKEY = "vocab.session";
+  /* One round per deck, not one round.
+
+     Storing a single sitting was the whole bug. Pressing Study on a second
+     deck, or Study everything, overwrote it -- and because a deck round is
+     rebuilt from the words still *due*, every card already answered in the
+     first round had dropped out of the pool. So coming back to it rebuilt a
+     shorter round with the count at zero: "I did five cards and it forgot."
+     The mastery bar above remembered them, which made it worse, because the
+     two lines then contradicted each other on the same screen.
+
+     So each (language, deck) keeps its own round, all of them under one key
+     so a single write covers it, and the whole thing expires at the end of
+     the day it was started. "last" is where she was, per language, so a
+     reload comes back to the round she was actually in. */
+  var SKEY = "vocab.rounds";
+
+  function roundKey(deck) { return SPACE + "\u0000" + (deck || ""); }
+
+  function allRounds() {
+    var r = null;
+    try { r = JSON.parse(localStorage.getItem(SKEY) || "null"); } catch (e) { r = null; }
+    if (!r || r.day !== today() || !r.rounds || typeof r.rounds !== "object") {
+      return { day: today(), rounds: {}, last: {} };
+    }
+    if (!r.last || typeof r.last !== "object") r.last = {};
+    return r;
+  }
 
   function saveSession() {
     if (DEMO) return;
-    try {
-      if (!session.length) { localStorage.removeItem(SKEY); return; }
-      localStorage.setItem(SKEY, JSON.stringify({
-        day: today(), lang: SPACE, deck: onlyDeck, done: done, total: total,
+    var all = allRounds(), k = roundKey(onlyDeck), any = false, x;
+    if (!session.length) {
+      delete all.rounds[k];
+      if (all.last[SPACE] === (onlyDeck || "")) delete all.last[SPACE];
+    } else {
+      all.rounds[k] = {
+        done: done, total: total,
         ids: session.map(function (w) { return w.id; }),
         misses: misses, almost: almost
-      }));
+      };
+      all.last[SPACE] = onlyDeck || "";
+    }
+    for (x in all.rounds) { any = true; break; }
+    try {
+      if (any) localStorage.setItem(SKEY, JSON.stringify(all));
+      else localStorage.removeItem(SKEY);
     } catch (e) {}
   }
 
   /* Only the ids are stored, so every card comes back from the live list and
      a word edited, renamed or deleted in between is whatever it is now
      rather than a stale copy of what it was. */
-  function resumeSession() {
+  function resumeSession(deck) {
     if (DEMO) return false;
-    var s = null;
-    try { s = JSON.parse(localStorage.getItem(SKEY) || "null"); } catch (e) { return false; }
-    if (!s || s.day !== today() || !Array.isArray(s.ids)) return false;
-    if ((s.lang || "en") !== SPACE) return false;
+    var want = typeof deck === "string" ? deck : onlyDeck;
+    var rec = allRounds().rounds[roundKey(want)];
+    if (!rec || !Array.isArray(rec.ids)) return false;
     var by = {}, q = [], i, w;
     for (i = 0; i < db.words.length; i++) by[db.words[i].id] = db.words[i];
-    for (i = 0; i < s.ids.length; i++) {
-      w = by[s.ids[i]];
+    for (i = 0; i < rec.ids.length; i++) {
+      w = by[rec.ids[i]];
       if (w && (w.lang || "en") === SPACE && q.indexOf(w) < 0) q.push(w);
     }
-    if (!q.length) { try { localStorage.removeItem(SKEY); } catch (e) {} return false; }
-    onlyDeck = typeof s.deck === "string" ? s.deck : "";
+    if (!q.length) return false;
+    onlyDeck = want;
     session = q;
-    done = Math.max(0, Number(s.done) || 0);
-    total = Math.max(q.length, Number(s.total) || q.length);
-    misses = (s.misses && typeof s.misses === "object") ? s.misses : {};
-    almost = (s.almost && typeof s.almost === "object") ? s.almost : {};
+    done = Math.max(0, Number(rec.done) || 0);
+    total = Math.max(q.length, Number(rec.total) || q.length);
+    misses = (rec.misses && typeof rec.misses === "object") ? rec.misses : {};
+    almost = (rec.almost && typeof rec.almost === "object") ? rec.almost : {};
     /* Face up, whatever she was looking at when the tab went away: the
        answer she had not given yet is the one being resumed, and showing
        the meaning first would give it to her. */
     flipped = false;
     checkDeck();
     return true;
+  }
+
+  /* Where she was in this language when she last answered anything. */
+  function resumeLast() {
+    var all = allRounds();
+    return typeof all.last[SPACE] === "string" ? resumeSession(all.last[SPACE]) : false;
   }
 
   function startSession() {
@@ -3607,8 +3651,14 @@
     }
 
     if (e.target && e.target.id === "allDecks") {
+      /* The deck round is kept, not discarded -- she is stepping out of it,
+         not throwing it away. And "Study everything" now does: it used to
+         empty the sitting and leave her on the Start screen, which is not
+         what the button says. */
+      saveSession();
       onlyDeck = "";
       session = []; done = 0; misses = {}; almost = {};
+      if (!resumeSession("")) { startSession(); return; }
       saveSession();
       counts(); renderDue();
       return;
@@ -3623,14 +3673,15 @@
      once already. */
   function studyDeck(name) {
     var b = document.querySelector('.tab[data-tab="due"]');
-    if (onlyDeck === name && session.length) {
-      if (b) b.click();
-      renderDue();
-      return;
-    }
+    if (b) b.click();
+    if (onlyDeck === name && session.length) { renderDue(); return; }
+    /* Write down the round she is leaving before picking up the next one,
+       and do it while onlyDeck still says which round that was. */
+    saveSession();
     onlyDeck = name;
     session = []; done = 0; misses = {}; almost = {};
-    if (b) b.click();
+    /* Hers if she has one from earlier today; a new one otherwise. */
+    if (resumeSession(name)) { saveSession(); counts(); renderDue(); return; }
     startSession();
     if (!session.length) renderDue();
   }
@@ -3861,7 +3912,7 @@
   load();
   /* Before the first count, so a round left half-finished this morning is
      what the Study badge reports rather than the day's untouched total. */
-  if (!DEMO) resumeSession();
+  if (!DEMO) resumeLast();
   counts();
   fillFilter();
   /* One way in: the Start screen, which says how many are waiting and how
