@@ -160,7 +160,8 @@
   .pill{display:inline-block;font:500 11px/1 var(--f-mono);letter-spacing:.1em;
         text-transform:uppercase;padding:4px 8px;border-radius:999px;
         background:var(--sunken);color:var(--muted)}
-  .box-n{font-family:var(--f-mono);font-size:12px;color:var(--faint)}
+  /* --faint on the beige surface was too light to read the due count. */
+  .box-n{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
 
   textarea{width:100%;min-height:120px;font:inherit;font-size:14px;padding:11px;
            border:1px solid var(--line);border-radius:8px;resize:vertical;
@@ -233,8 +234,13 @@
   .ownit b{color:var(--ink)}
   .prog{margin:6px 0 0}
   .prog-num{font:500 11px/1.4 var(--f-mono);color:var(--muted);letter-spacing:.03em}
+  /* Not --line-soft: against --surface in light mode that is very nearly
+     the same beige, so the untouched part of a deck was invisible and the
+     bar looked like it stopped early. Mixed from the ink instead, so it has
+     contrast in both themes without a second token. */
   .prog-bar{display:flex;height:6px;margin-top:4px;border-radius:99px;
-            background:var(--line-soft);overflow:hidden}
+            background:color-mix(in srgb, var(--ink) 14%, transparent);
+            overflow:hidden}
   .prog-bar span{display:block;height:100%;flex:0 0 auto}
   .prog-bar .p-top{background:var(--go)}
   .prog-bar .p-mid{background:var(--warn)}
@@ -1256,22 +1262,32 @@
      only way to the Turkish for "casa" is through "house", which does have
      one. Anything longer than two words is a definition, not a gloss, and
      looking it up would answer a different question. */
-  function glossOf(senses, want) {
+  /* strict: do not settle for a gloss from a different part of speech.
+     "Vetted" is a verb, and vet's only gloss short enough to travel is the
+     noun "veterinarian" -- so a loose match would have put veteriner under
+     a card about checking people over. With nothing of the right kind to
+     hop through, saying nothing is the right answer. */
+  function glossOf(senses, want, strict) {
     var list = senses || [], i, best = "";
     for (i = 0; i < list.length; i++) {
       var t = String(list[i].text || "")
                 .replace(/\([^)]*\)/g, " ")          /* (uncountable), (formal) */
                 .replace(/[;,].*$/, "")               /* first of a list */
+                .replace(/\s+or\s+.*$/i, "")           /* first of a pair */
                 .replace(/^(to|a|an|the)\s+/i, "")
                 .replace(/[.!?]\s*$/, "")
                 .trim();
       if (!t || !/^[A-Za-z][A-Za-z' -]{1,24}$/.test(t)) continue;
       if (t.split(/\s+/).length > 2) continue;
-      /* A noun's Turkish is wanted for a noun. "Unternehmen" lists the verb
+      /* "A veterinarian or veterinary surgeon" is two ways of saying one
+         thing, and at thirty-three characters it was too long to travel --
+         so vet's gloss fell through to the second sense and asked about
+         "veteran". Taking the first of the pair is what reaches veteriner.
+         A noun's Turkish is wanted for a noun. "Unternehmen" lists the verb
          sense first, so the plain first gloss asked about "undertake" and
          came back with girismek rather than sirket. */
       if (want && String(list[i].pos || "").toLowerCase() === want) return t;
-      if (!best) best = t;
+      if (!best && !(strict && want)) best = t;
     }
     return best;
   }
@@ -1319,17 +1335,25 @@
                    from: blocks.length && more.length ? "Wiktionary \u00b7 T\u00fcrk\u00e7e Vikis\u00f6zl\u00fck"
                        : blocks.length ? "Wiktionary" : "T\u00fcrk\u00e7e Vikis\u00f6zl\u00fck" };
         }
-        /* Through the English word it means. Only for the other three
-           spaces, and only with the English word named on the card, because
-           a translation of a translation has to show its working. */
-        if (code !== "en" && gloss) {
+        /* Through the English word it means -- and, for an English card,
+           through the plainer English word it means. Turkish Wiktionary has
+           no entry for "vet" (its only "vet" is Dutch, for fat) and the
+           English page carries no Turkish row; "veterinarian" has both,
+           veteriner and baytar. Either way the card names the word it went
+           through, because a translation of a translation has to show its
+           working. */
+        if (gloss && gloss.toLowerCase() !== String(term).toLowerCase()) {
           return getJSON(WIKT_RAW + encodeURIComponent(gloss))
             .then(function (j) {
               var wt = j && j.parse && j.parse.wikitext ? j.parse.wikitext["*"] : "";
               var b = trBlocks(wt || "", "en");
               if (b.length) {
+                /* Just "Wiktionary" -- the line underneath already says
+                   which word it went through, and saying it twice read as
+                   "Wiktionary, via veterinarian - the Turkish for
+                   veterinarian". */
                 return { blocks: b, more: [], one: "",
-                         from: "Wiktionary, via " + gloss, via: gloss };
+                         from: "Wiktionary", via: gloss };
               }
               return viaJargon(term, reached);
             })
@@ -1708,7 +1732,7 @@
     var ask = wl === "en" ? term.toLowerCase() : term;
     /* A word with a gender is a noun, which is the sense to translate. */
     var want = w.gen ? "noun" : (w.want || "");
-    viaTurkish(ask, wl, glossOf(w.senses, want)).then(function (tr) {
+    viaTurkish(ask, wl, glossOf(w.senses, want, wl === "en")).then(function (tr) {
       /* Nothing for "acutely": Turkish Wiktionary has no entry, and the
          English one carries no Turkish row, which is usual for an adverb
          built on an adjective. "Acute" has both -- akut, siddetli, keskin.
@@ -2492,12 +2516,12 @@
      not been started, so three bands need only two spans. */
   function barHtml(b, label) {
     if (!b.n) return "";
-    /* The amber band has to be named. "0 of 6 mastered" over a bar with
-       amber in it reads as the bar being wrong -- the words in it are ones
-       she has answered right once or twice, which is not nothing and is not
-       mastery either. */
-    var num = b.top + " of " + b.n + " mastered"
-            + (b.mid ? " \u00b7 " + b.mid + " learning" : "");
+    /* All three bands, and the total they add up to. "0 of 6 mastered - 2
+       learning" left the other four to be inferred from the grey, and
+       invited the reader to check whether 0 and 2 made 6. Spelling out the
+       third number is what makes the line account for the deck. */
+    var num = b.top + " mastered \u00b7 " + b.mid + " learning \u00b7 "
+            + b.raw + " new \u2014 of " + b.n;
     var full = b.top + " mastered \u00b7 " + b.mid + " learning \u00b7 "
              + b.raw + " new or missed";
     /* One word out of forty-nine is half a pixel, which looks like a
@@ -2722,6 +2746,15 @@
   /* The one line that says a sitting is narrowed, with the way out of it.
      Without this a deck with nothing due reads as a language with nothing
      due, and there is no clue the filter is on. */
+  /* "18 in total" under a header reading "Finance - 3 of 8 mastered" is a
+     contradiction on one screen: 18 is the whole language, and she was
+     studying a deck. Whatever the round was scoped to is what gets counted. */
+  function scopeCount() {
+    var n = onlyDeck ? inDeckNamed(onlyDeck).length : here().length;
+    return n + ' word' + (n === 1 ? '' : 's')
+         + (onlyDeck ? ' in ' + esc(onlyDeck) : ' in total');
+  }
+
   function deckBanner() {
     if (!onlyDeck) return "";
     return '<p class="deckonly">Studying <b>' + esc(onlyDeck) + '</b> only'
@@ -2757,7 +2790,7 @@
       } else if (justFinished) {
         head = "All done";
         body = done + ' word' + (done === 1 ? '' : 's') + ' this round, and '
-             + 'nothing left due. ' + here().length + ' in total.';
+             + 'nothing left due. ' + scopeCount() + '.';
         label = "";
       } else if (nd) {
         head = "Ready when you are";
@@ -2776,8 +2809,7 @@
         label = "";
       } else {
         head = "Nothing due today";
-        body = 'You have studied everything that came up. '
-             + here().length + ' word' + (here().length === 1 ? '' : 's') + ' in total.';
+        body = 'You have studied everything that came up. ' + scopeCount() + '.';
         label = "";
       }
       el.innerHTML = deckBanner()

@@ -11,8 +11,8 @@
 /* The name changes with the address: a cache called vocab-19 belongs to
    an app that no longer lives here, and the shim left behind at /vocab/
    deletes anything named that way. */
-const VERSION = "flashcards-3";  /* bumped: tick the root sense, own-it prompt,
-                                   pointer senses hidden, Turkish labels */
+const VERSION = "flashcards-4";  /* bumped: the bar accounts for the deck, light-mode contrast,
+                                   Turkish through a plainer English word */
 const SHELL = [
   "/flashcards/",
   "/flashcards/manifest.webmanifest",
