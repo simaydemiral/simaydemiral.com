@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Dispatch — Sunday, November 8, 2026</title>
+<link href="https://api.fontshare.com/v2/css?f%5B%5D=switzer@400,500,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #171210;
+    color: #f5ebdd;
+    font-family: "Switzer", "Inter", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: 32px 16px 64px;
+    overflow-x: hidden;
+  }
+  .brief { max-width: 760px; margin: 0 auto; }
+
+  /* ---------- masthead ---------- */
+  .masthead {
+    text-align: center;
+    padding: 8px 0 28px;
+    border-bottom: 1px solid rgba(245, 235, 221, 0.15);
+    margin-bottom: 32px;
+  }
+  .masthead .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #e8935a;
+  }
+  .masthead h1 {
+    font-family: "Switzer", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    font-size: 52px;
+    line-height: 1.05;
+    margin: 12px 0 8px;
+  }
+  .masthead .dateline { font-size: 14px; color: rgba(245, 235, 221, 0.65); }
+  .masthead .tagline {
+    font-family: "Switzer", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 16px;
+    color: rgba(245, 235, 221, 0.75);
+    margin-top: 10px;
+  }
+
+  /* ---------- markets snapshot strip ---------- */
+  .markets-strip {
+    background: rgba(232, 147, 90, 0.12);
+    border: 1px solid rgba(232, 147, 90, 0.35);
+    border-left: 3px solid #e8935a;
+    border-radius: 12px;
+    padding: 14px 16px 12px;
+    margin-bottom: 32px;
+  }
+  .markets-strip-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .markets-strip-label {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #e8935a;
+  }
+  .markets-strip-asof {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: rgba(245, 235, 221, 0.65);
+  }
+  .markets-tiles {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .market-tile {
+    background: rgba(23, 18, 16, 0.38);
+    border: 1px solid rgba(232, 147, 90, 0.28);
+    border-radius: 10px;
+    padding: 12px 14px 11px;
+  }
+  .market-tile.down {
+    background: rgba(224, 135, 106, 0.16);
+    border-color: rgba(224, 135, 106, 0.45);
+  }
+  .market-tile.up {
+    background: rgba(150, 184, 119, 0.16);
+    border-color: rgba(150, 184, 119, 0.45);
+  }
+  .market-tile-label {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 500;
+    font-size: 10.5px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(245, 235, 221, 0.6);
+    margin-bottom: 6px;
+  }
+  .market-tile-value {
+    font-family: "Switzer", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: #fff;
+  }
+  .market-tile-delta {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    margin-top: 7px;
+  }
+  .market-tile-delta.down { color: #f0957a; }
+  .market-tile-delta.up { color: #a8cc8a; }
+  .market-tile-delta .arrow { font-size: 13px; }
+  @media (max-width: 560px) {
+    .markets-tiles { grid-template-columns: repeat(2, 1fr); }
+  }
+  .markets-strip-takeaway {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(232, 147, 90, 0.22);
+    font-size: 14px;
+    line-height: 1.5;
+    color: rgba(245, 235, 221, 0.92);
+  }
+  .markets-strip-takeaway strong { color: #e8935a; font-weight: 600; }
+
+  /* ---------- edition nav: today, and the two before it ---------- */
+  .edition-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin: -14px 0 30px;
+  }
+  .edition-nav a, .edition-nav span {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: #f5ebdd;
+    border: 1px solid rgba(245, 235, 221, 0.3);
+    border-radius: 999px;
+    padding: 8px 15px;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .edition-nav a:hover { border-color: #e8935a; color: #e8935a; }
+  .edition-nav .is-current {
+    background: #e8935a;
+    border-color: #e8935a;
+    color: #1d1512;
+  }
+
+  /* ---------- sections ---------- */
+  .section { margin-bottom: 44px; }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .section-head .num {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: #e8935a;
+  }
+  .section-head h2 {
+    font-family: "Switzer", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 500;
+    font-size: 26px;
+    letter-spacing: -0.03em;
+  }
+  .section-head .rule {
+    flex: 1;
+    border: none;
+    border-top: 1px solid rgba(245, 235, 221, 0.15);
+  }
+
+  /* ---------- AI & Tech: subtle circuit-board motif ---------- */
+  .section-ai { position: relative; }
+  .section-ai::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Cg fill='none' stroke='%23e8935a' stroke-width='1.2'%3E%3Cpath d='M24 64 H104 L140 100 H236'/%3E%3Cpath d='M64 276 V188 L100 152 V36'/%3E%3Cpath d='M276 220 H196 L160 184'/%3E%3Cpath d='M180 276 V240 L204 216'/%3E%3Cpath d='M252 36 V84 L276 108'/%3E%3Ccircle cx='236' cy='100' r='6'/%3E%3Ccircle cx='100' cy='36' r='6'/%3E%3C/g%3E%3Cg fill='%23e8935a'%3E%3Ccircle cx='236' cy='100' r='3'/%3E%3Ccircle cx='104' cy='64' r='2.5'/%3E%3Ccircle cx='100' cy='36' r='3'/%3E%3Ccircle cx='64' cy='188' r='2.5'/%3E%3Ccircle cx='196' cy='220' r='2.5'/%3E%3Ccircle cx='160' cy='184' r='3'/%3E%3Ccircle cx='204' cy='216' r='2.5'/%3E%3Ccircle cx='140' cy='100' r='2'/%3E%3Ccircle cx='276' cy='108' r='2.5'/%3E%3C/g%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 300px 300px;
+    opacity: 0.13;
+    pointer-events: none;
+  }
+  .section-ai > * { position: relative; }
+
+  /* ---------- rail nav ---------- */
+  .rail-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .drag-hint {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(245, 235, 221, 0.55);
+  }
+  .nav-btns { display: flex; gap: 8px; }
+  .nav-btn {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(245, 235, 221, 0.3);
+    background: transparent;
+    color: #f5ebdd;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .nav-btn:hover { background: #e8935a; border-color: #e8935a; color: #1d1512; }
+
+  /* ---------- horizontal rail: one card at a time + peek ---------- */
+  .rail {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 8px;
+    cursor: grab;
+    touch-action: pan-y;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .rail::-webkit-scrollbar { display: none; }
+  .rail.dragging { cursor: grabbing; scroll-snap-type: none; }
+  .rail.dragging a { pointer-events: none; }
+
+  /* ---------- progress bar ---------- */
+  .progress {
+    height: 3px;
+    background: rgba(245, 235, 221, 0.15);
+    border-radius: 2px;
+    margin-top: 12px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 33.333%;
+    background: #e8935a;
+    border-radius: 2px;
+    transition: width 0.25s ease;
+  }
+
+  /* ---------- cards ---------- */
+  .card {
+    flex: 0 0 88%;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    background: #f5ebdd;
+    color: #1d1512;
+    border-radius: 20px;
+    overflow: hidden;
+    text-decoration: none;
+    transition: transform 0.15s ease, box-shadow 0.3s ease;
+  }
+  .card:hover { transform: translateY(-3px); }
+  .card.active { box-shadow: 0 0 0 1px rgba(232, 147, 90, 0.55), 0 16px 40px rgba(0, 0, 0, 0.35); }
+  .card .thumb {
+    position: relative;
+    height: 75px;
+    display: flex;
+    align-items: flex-end;
+    padding: 14px 16px;
+    overflow: hidden;
+  }
+  .thumb-ai      { background: linear-gradient(135deg, #2b1a12 0%, #e8935a 130%); }
+  .thumb-markets  { background: linear-gradient(135deg, #20240f 0%, #a8b86a 130%); }
+  .thumb-turkey   { background: linear-gradient(135deg, #33161a 0%, #b03a3a 130%); }
+  .thumb-us       { background: linear-gradient(135deg, #101c2a 0%, #46688c 130%); }
+  .thumb-volley   { background: linear-gradient(135deg, #12262b 0%, #5aa39e 130%); }
+  .thumb .tag {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.85);
+  }
+  .card .body { padding: 20px 22px 18px; display: flex; flex-direction: column; flex: 1; }
+  .card .kicker {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #b06a35;
+    margin-bottom: 8px;
+  }
+  .card h3 {
+    font-family: "Switzer", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    font-size: 24px;
+    line-height: 1.25;
+    margin-bottom: 8px;
+  }
+  .card p {
+    font-size: 15px;
+    line-height: 1.6;
+    color: rgba(29, 21, 18, 0.78);
+  }
+  .key {
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: rgba(232, 147, 90, 0.12);
+    border-left: 2px solid #e8935a;
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    color: rgba(29, 21, 18, 0.85);
+  }
+  .card .meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: auto;
+    padding-top: 14px;
+    font-size: 12.5px;
+    color: rgba(29, 21, 18, 0.55);
+  }
+  .card .read { color: #b06a35; font-weight: 600; }
+
+  /* ---------- volleyball fixtures ---------- */
+  .fixture {
+    flex: 0 0 88%;
+    scroll-snap-align: start;
+    background: #241a15;
+    border: 1px solid rgba(232, 147, 90, 0.35);
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.3s ease;
+  }
+  .fixture.active { box-shadow: 0 0 0 1px rgba(232, 147, 90, 0.55), 0 16px 40px rgba(0, 0, 0, 0.35); }
+  .fixture .teams {
+    font-family: "Switzer", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    font-size: 21px;
+    line-height: 1.3;
+    padding: 20px 22px 0;
+  }
+  .fixture .teams span { color: #e8935a; }
+  .fixture .when {
+    margin-top: 10px;
+    padding: 0 22px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(245, 235, 221, 0.8);
+  }
+  .fixture .when b { color: #f5ebdd; }
+  .fixture .note {
+    margin-top: auto;
+    padding: 12px 22px 18px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: rgba(245, 235, 221, 0.6);
+  }
+  .fixture .actions { padding: 0 22px 20px; }
+  .cal-btn {
+    display: inline-block;
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #f5ebdd;
+    border: 1px solid rgba(245, 235, 221, 0.3);
+    border-radius: 999px;
+    padding: 9px 16px;
+    text-decoration: none;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .cal-btn:hover { background: #e8935a; border-color: #e8935a; color: #1d1512; }
+  .section-note {
+    font-size: 15px;
+    line-height: 1.6;
+    color: rgba(245, 235, 221, 0.75);
+    margin-bottom: 16px;
+  }
+
+  /* ---------- sports schedule ---------- */
+  .sport-tabs, .region-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .sport-tab, .region-tab {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #f5ebdd;
+    background: transparent;
+    border: 1px solid rgba(245, 235, 221, 0.3);
+    border-radius: 999px;
+    padding: 9px 16px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .sport-tab:hover, .region-tab:hover { border-color: #e8935a; color: #e8935a; }
+  .sport-tab.active, .region-tab.active { background: #e8935a; border-color: #e8935a; color: #1d1512; }
+  .sport-tab[hidden], .sport-panel[hidden], .hl-panel[hidden],
+  .region-tab[hidden], .region-panel[hidden], .highlights[hidden] { display: none; }
+  .thumb-soccer { background: linear-gradient(135deg, #12240f 0%, #6aa84f 130%); }
+  .thumb-nba    { background: linear-gradient(135deg, #241009 0%, #c75b39 130%); }
+  .thumb-f1     { background: linear-gradient(135deg, #17090c 0%, #a31621 130%); }
+
+  /* ---------- key highlights ---------- */
+  .highlights { margin-top: 28px; }
+  .highlights-head {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #e8935a;
+    margin-bottom: 4px;
+  }
+  .highlights ul { list-style: none; }
+  .highlights li {
+    position: relative;
+    font-size: 15px;
+    line-height: 1.6;
+    color: rgba(245, 235, 221, 0.85);
+    padding: 10px 0 10px 18px;
+  }
+  .highlights li + li { border-top: 1px solid rgba(245, 235, 221, 0.12); }
+  .highlights li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 19px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #e8935a;
+  }
+  .highlights li a {
+    color: #f5ebdd;
+    text-decoration: underline;
+    text-decoration-color: rgba(232, 147, 90, 0.6);
+    text-underline-offset: 3px;
+  }
+  .highlights li a:hover { color: #e8935a; }
+
+  /* ---------- edition archive nav ---------- */
+  .edition[hidden] { display: none; }
+  .edition-nav {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 30px;
+  }
+  .edition-btn {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #f5ebdd;
+    background: transparent;
+    border: 1px solid rgba(245, 235, 221, 0.3);
+    border-radius: 999px;
+    padding: 10px 18px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .edition-btn:hover { border-color: #e8935a; color: #e8935a; }
+  .edition-btn.active { background: #e8935a; border-color: #e8935a; color: #1d1512; }
+  div.card { cursor: default; }
+  div.card:hover { transform: none; }
+
+  /* ---------- footer ---------- */
+  .footer {
+    text-align: center;
+    padding-top: 24px;
+    border-top: 1px solid rgba(245, 235, 221, 0.15);
+    font-size: 13px;
+    line-height: 1.7;
+    color: rgba(245, 235, 221, 0.55);
+  }
+  @media (max-width: 560px) {
+    .masthead h1 { font-size: 38px; }
+  }
+</style>
+</head>
+<body>
+<div class="brief">
+  <header class="masthead">
+    <div class="eyebrow">Simay&rsquo;s Dispatch</div>
+    <h1>The Dispatch</h1>
+    <div class="dateline">Sunday, November 8, 2026</div>
+  </header>
+
+  <nav class="edition-nav" aria-label="Earlier editions">
+    <a href="/dispatch">Today</a>
+    <span class="is-current">Yesterday</span>
+    <a href="/dispatch/2026-11-07">Sat 7 Nov</a>
+  </nav>
+
+  <div class="markets-strip" aria-label="Markets snapshot">
+    <div class="markets-strip-head">
+      <span class="markets-strip-label">Markets Snapshot &middot; KEY</span>
+      <span class="markets-strip-asof">as of 2:04pm pt</span>
+    </div>
+    <div class="markets-tiles">
+      <div class="market-tile up">
+        <div class="market-tile-label">S&amp;P 500</div>
+        <div class="market-tile-value">7,376.86</div>
+        <div class="market-tile-delta up"><span class="arrow">&#9650;</span> +0.31%</div>
+      </div>
+      <div class="market-tile up">
+        <div class="market-tile-label">NASDAQ</div>
+        <div class="market-tile-value">24,579</div>
+        <div class="market-tile-delta up"><span class="arrow">&#9650;</span> +1.09%</div>
+      </div>
+      <div class="market-tile down">
+        <div class="market-tile-label">USD/TRY</div>
+        <div class="market-tile-value">50.15</div>
+        <div class="market-tile-delta down"><span class="arrow">&#9650;</span> +0.21%</div>
+      </div>
+      <div class="market-tile down">
+        <div class="market-tile-label">BTC</div>
+        <div class="market-tile-value">$74,588</div>
+        <div class="market-tile-delta down"><span class="arrow">&#9660;</span> -1.51%</div>
+      </div>
+    </div>
+    <div class="markets-strip-takeaway"><strong>Takeaway:</strong> Both US indices higher: S&amp;P +0.31%, Nasdaq +1.09%.</div>
+  </div>
+
+  <section class="section section-ai">
+    <div class="section-head">
+      <span class="num">01</span><h2>AI &amp; Tech</h2><hr class="rule">
+    </div>
+    <div class="rail-nav">
+      <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+      <span class="nav-btns">
+        <button class="nav-btn" data-dir="-1" aria-label="Previous story">&#8249;</button>
+        <button class="nav-btn" data-dir="1" aria-label="Next story">&#8250;</button>
+      </span>
+    </div>
+    <div class="rail">
+
+      <a class="card" href="https://www.theverge.com/ai-artificial-intelligence/1029562/nvidia-investigating-jensen-huang-relationship-chinese-spy">
+        <div class="thumb thumb-ai"><span class="tag">The Verge</span></div>
+        <div class="body">
+          <div class="kicker">Ai</div>
+          <h3>Nvidia board opens independent review of Huang contacts</h3>
+          <p>Nvidia&#x27;s board said it is starting an independent investigation, overseen by a committee of independent directors with outside counsel, after reports that CEO Jensen Huang was the target of a foreign intelligence effort involving Megaspeed executive Alice Huang, who was reportedly recruited by China&#x27;s Ministry of State Security. The board said it has no reason to believe national security or company secrets were compromised, and that Huang supports the review; Megaspeed, an Nvidia customer, is separately the subject of a Commerce Department investigation into alleged AI chip smuggling to China.</p>
+          <div class="key">KEY &nbsp; New York Times reported the &quot;close relationship&quot; last month &middot; Commerce Department must approve individual firms to handle the chips &middot; most powerful Nvidia chips still barred from Chinese firms</div>
+          <div class="meta"><span>The Verge</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://techcrunch.com/2026/11/08/techcrunch-mobility-the-cybertruck-experiment-is-over/">
+        <div class="thumb thumb-ai"><span class="tag">TechCrunch</span></div>
+        <div class="body">
+          <div class="kicker">Ai</div>
+          <h3>Tesla to stop making Cybertruck next year</h3>
+          <p>Musk said Friday that Tesla will end Cybertruck production next year, after reservations Musk put at 1 million never translated into sales — industry experts estimate about 71,000 have been sold since deliveries began in November 2023. TechCrunch attributes the shortfall partly to unmet promises of a 500-mile range and a sub-$40,000 price, while in mobility funding Zipline raised $1.5 billion at a $21.5 billion valuation and expanded its Walmart partnership.</p>
+          <div class="key">KEY &nbsp; ~71,000 sold since Nov 2023 &middot; 1M reservations claimed &middot; promised 500-mile range, under $40,000 &middot; Zipline $1.5B raise, $21.5B valuation, 300 new drone sites &middot; earlier Series H $600M + $200M &middot; Harbinger $240M Series D &middot; Humble Robotics $51M Series A</div>
+          <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.theverge.com/ai-artificial-intelligence/1029533/elvis-eminem-suno-ai-music-clone-lawsuit">
+        <div class="thumb thumb-ai"><span class="tag">The Verge</span></div>
+        <div class="body">
+          <div class="kicker">Ai</div>
+          <h3>Elvis and Eminem rights holders sue AI music firm Suno</h3>
+          <p>Rights holders of Elvis Presley&#x27;s music and a publisher of Eminem records filed suits alleging Suno illegally generates music and lyrics mimicking those artists, with the Presley claim brought under Tennessee&#x27;s ELVIS Act barring AI voice cloning. Suno&#x27;s spokesperson said the company exists to help people create original music, prohibits unauthorized use of artists&#x27; work, and blocks prompts naming specific artists and songs.</p>
+          <div class="key">KEY &nbsp; 2 new suits &middot; mirrors a September suit from Jason Isbell and others &middot; adds to claims from Sony, UMG, Reservoir Media and more</div>
+          <div class="meta"><span>The Verge</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.theverge.com/ai-artificial-intelligence/1029552/apple-siri-ai-agentic">
+        <div class="thumb thumb-ai"><span class="tag">The Verge</span></div>
+        <div class="body">
+          <div class="kicker">Ai</div>
+          <h3>Apple said to be accelerating agentic Siri roadmap</h3>
+          <p>Bloomberg&#x27;s Mark Gurman reports that CEO John Ternus is pressuring AI lead Craig Federighi to speed up Siri&#x27;s roadmap toward an agent competitive with OpenAI&#x27;s Dots and Meta&#x27;s Muse. Fine-grained control of Apple&#x27;s own apps is expected in iOS 27.3, third-party app actions such as Grubhub orders or OpenTable bookings are likely in the spring, and Gurman believes a more agentic Siri could arrive as early as next year.</p>
+          <div class="key">KEY &nbsp; iOS 27.3 for first-party app control &middot; third-party integration expected in the spring &middot; agentic Siri possibly next year</div>
+          <div class="meta"><span>The Verge</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://techcrunch.com/2026/11/08/the-ex-secret-service-agent-who-flipped-a-hacker-is-now-raising-a-second-250m-cybersecurity-fund/">
+        <div class="thumb thumb-ai"><span class="tag">TechCrunch</span></div>
+        <div class="body">
+          <div class="kicker">Ai</div>
+          <h3>Ex-Secret Service agent raising second cybersecurity fund solo</h3>
+          <p>Stephen Ward, who spent four years in the Coast Guard, nine in the Secret Service and served as CISO at TIAA and Home Depot, closed a $250 million debut fund at Brightmind Partners and is now raising a second of roughly the same size. He is doing so as sole general partner after co-founder Gur Talpaz left in April, and says openly that investors &quot;have to sell on the way up&quot; rather than assume every portfolio company reaches an IPO.</p>
+          <div class="key">KEY &nbsp; $250M debut fund closed late last year &middot; SGNL sold to CrowdStrike for $740M, agreed in January, 11 months after Brightmind led its Series A &middot; ~300 résumés mailed in 1998 &middot; informant run for about three years &middot; 18 months clearing his name</div>
+          <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://arstechnica.com/science/2026/11/physicists-listened-to-electrical-noise-to-crack-a-superconductor-mystery/">
+        <div class="thumb thumb-ai"><span class="tag">Ars Technica</span></div>
+        <div class="body">
+          <div class="kicker">Ai</div>
+          <h3>Electrical noise measurement points to pre-formed electron pairs</h3>
+          <p>A team led by Milan Allan of Ludwig Maximilian University of Munich and Ingmar Swart of Utrecht University used a scanning tunneling microscope to measure shot noise in a cuprate, a method that can show whether current is carried by single electrons or Cooper pairs. The Science study addresses the long-debated &quot;pseudogap&quot; state, where electrons appear to go missing above the superconducting temperature; in cuprates the pairing signal is weaker than in conventional superconductors because single electrons keep flowing alongside pairs.</p>
+          <div class="key">KEY &nbsp; cuprates found to superconduct at higher temperatures in the late 1980s &middot; unexplained for nearly 40 years &middot; conventional superconductors show a clean doubling of noise &middot; about four years of student work to make the instrument sensitive enough</div>
+          <div class="meta"><span>Ars Technica</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+    </div>
+    <div class="progress"><div class="progress-fill"></div></div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <span class="num">02</span><h2>Markets &amp; M&amp;A</h2><hr class="rule">
+    </div>
+    <div class="rail-nav">
+      <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+      <span class="nav-btns">
+        <button class="nav-btn" data-dir="-1" aria-label="Previous story">&#8249;</button>
+        <button class="nav-btn" data-dir="1" aria-label="Next story">&#8250;</button>
+      </span>
+    </div>
+    <div class="rail">
+
+      <a class="card" href="https://www.cnbc.com/2026/11/08/nvidia-jensen-huang-investigation-china-spy.html">
+        <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
+        <div class="body">
+          <div class="kicker">Markets</div>
+          <h3>Nvidia board investigates Huang ties to alleged Chinese spy</h3>
+          <p>Nvidia&#x27;s board has opened an independent investigation into allegations that CEO Jensen Huang was the target of a foreign intelligence effort involving a businesswoman whom U.S. intelligence agencies say is a Chinese spy, according to reports in The New York Times and the Financial Times. Huang told staff he had an affair with the woman, apologized, and an Nvidia spokesperson said he is committed to continuing as CEO; the board said it has no reason to believe national security or company secrets were compromised.</p>
+          <div class="key">KEY &nbsp; Q3 earnings Nov. 17 &middot; closed-door lawmaker briefing requested for Nov. 18 &middot; 3 House Republican committee chairs signed the letter</div>
+          <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://fortune.com/2026/11/08/stock-market-outlook-sp500-ai-capex-gdp-growth-productivity/">
+        <div class="thumb thumb-markets"><span class="tag">Fortune</span></div>
+        <div class="body">
+          <div class="kicker">Markets</div>
+          <h3>Capital Economics expects AI capex decline to hit stocks</h3>
+          <p>Capital Economics&#x27; Vicky Redwood wrote that AI investment should keep rising next year at a slower pace before falling outright in 2028, arguing that external AI revenues would need to grow roughly tenfold by 2030 to justify current spending. She expects equity markets to price the slowdown in earlier, with a modest GDP drag rather than a major downturn.</p>
+          <div class="key">KEY &nbsp; hyperscaler spend ~$800bn this year, double a year ago &middot; estimated $1tn+ in 2027 &middot; 2028 capex fall ~10% &middot; S&amp;P 500 seen 12% below current level by end-2027, 17% off early-October peak &middot; Taiwan GDP growth ~3pp lower next year, South Korea 1pp &middot; AI added 0.3pp to US GDP growth last year &middot; productivity gain ~1% a year</div>
+          <div class="meta"><span>Fortune</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.cnbc.com/investingclub/2026/11/08/here-are-the-2-big-things-were-watching-in-the-stock-market-in-the-week-ahead.html">
+        <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
+        <div class="body">
+          <div class="kicker">Markets</div>
+          <h3>CoreWeave earnings seen as test of AI trade</h3>
+          <p>CNBC&#x27;s Investing Club says the week&#x27;s central question is where AI stocks go after a difficult week tied to the midterm elections, in which gubernatorial candidates supporting data center restrictions won in states including Texas and Ohio and voters approved local measures that could slow AI construction. Jim Cramer called neocloud CoreWeave&#x27;s Tuesday night report the key read on whether the AI trade regains momentum, and the Club said it may further reduce AI exposure.</p>
+          <div class="key">KEY &nbsp; CoreWeave reports Tuesday night &middot; Nebius reports Thursday morning &middot; four-year-old bull market &middot; Club exited Corning in early September and Broadcom in late October &middot; added Kimberly-Clark and Bank of New York two months ago</div>
+          <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://fortune.com/2026/11/08/pentagon-fortress-critical-minerals-stockpile-tungsten-rare-earth/">
+        <div class="thumb thumb-markets"><span class="tag">Fortune</span></div>
+        <div class="body">
+          <div class="kicker">Markets</div>
+          <h3>Pentagon stockpile plan runs into rare-earth shortfall</h3>
+          <p>The Pentagon&#x27;s FORTRESS America initiative aims to hold enough critical minerals, fuel and munitions inside the United States to sustain a major war even if cyberattacks or sabotage disrupt domestic factories and power grids. Hudson Institute&#x27;s Bryan Clark told Fortune the planned scale is &quot;on par with what the DoD pursued during the Cold War,&quot; but domestic rare-earth magnet output remains a fraction of demand.</p>
+          <div class="key">KEY &nbsp; established Sept. 30 &middot; bases told to plan for 90 days without the grid &middot; US produces under 1% of the most common rare-earth magnet it uses &middot; 2025 demand ~48,000 metric tons vs 300 metric tons domestic supply &middot; ~5,000 metric tons US capacity expected by year-end &middot; about $60bn of non-rare-earth critical minerals imported in 2025 &middot; Ford idled its Chicago Explorer plant for a week in May 2025 &middot; Poland attacks hit ~30 renewable sites and a plant serving nearly 500,000 customers on Dec. 29, 2025</div>
+          <div class="meta"><span>Fortune</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.cnbc.com/2026/11/08/trump-iran-strikes-unlikely-talks-hormuz.html">
+        <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
+        <div class="body">
+          <div class="kicker">Markets</div>
+          <h3>Trump calls renewed Iran strikes highly unlikely amid talks</h3>
+          <p>In a CNN interview, President Trump said restarting open war with Iran is &quot;highly unlikely&quot; as long as talks on constraining its nuclear program and reopening the Strait of Hormuz progress, while repeating that he could still order strikes on bridges and power plants. He has demanded Iran fully open the strait and commit never to develop a nuclear weapon; an end to the war and the strait&#x27;s reopening would likely ease oil prices.</p>
+          <div class="key">KEY &nbsp; war more than eight months old &middot; three aircraft carriers in position &middot; 38 bridges identified as potential targets &middot; Task Force Iron Gate announced Saturday by Central Command &middot; Democrats won control of the House and Senate at the midterms</div>
+          <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+    </div>
+    <div class="progress"><div class="progress-fill"></div></div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <span class="num">03</span><h2>US &amp; Turkey</h2><hr class="rule">
+    </div>
+    <div class="region-tabs" role="tablist" aria-label="Filter stories by country">
+      <button class="region-tab active" data-region="us" role="tab">US</button>
+      <button class="region-tab" data-region="turkey" role="tab">Turkey</button>
+    </div>
+
+    <div class="region-panel" data-region="us">
+    <div class="rail-nav">
+      <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+      <span class="nav-btns">
+        <button class="nav-btn" data-dir="-1" aria-label="Previous story">&#8249;</button>
+        <button class="nav-btn" data-dir="1" aria-label="Next story">&#8250;</button>
+      </span>
+    </div>
+    <div class="rail">
+
+      <a class="card" href="https://www.bbc.co.uk/news/articles/c3dxw10rjn9no?at_medium=RSS&amp;at_campaign=rss">
+        <div class="thumb thumb-us"><span class="tag">BBC News</span></div>
+        <div class="body">
+          <div class="kicker">United States</div>
+          <h3>Nvidia board opens inquiry into Huang&#x27;s reported affair</h3>
+          <p>Nvidia&#x27;s board has launched an independent investigation after reports that CEO Jensen Huang had a relationship with a Chinese businesswoman, Alice Huang, whom US intelligence officials believed was working for China&#x27;s Ministry of State Security, according to the New York Times. Jensen Huang said he was unfaithful to his wife, took full responsibility and would cooperate fully; the board said it has no reason to believe Nvidia secrets or national security were compromised, and China has called the espionage allegations &quot;groundless speculation.&quot;</p>
+          <div class="key">KEY &nbsp; Nvidia worth some $4.5 trillion &middot; board inquiry independent &middot; chips supplied to OpenAI and Meta</div>
+          <div class="meta"><span>BBC News</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.bbc.co.uk/news/articles/cmg476w7wnl2o?at_medium=RSS&amp;at_campaign=rss">
+        <div class="thumb thumb-us"><span class="tag">BBC News</span></div>
+        <div class="body">
+          <div class="kicker">United States</div>
+          <h3>White House says deportation push continues after midterm losses</h3>
+          <p>The Trump administration told the BBC it will not slow arrests and deportations despite last week&#x27;s midterm defeat, a stance that appeared to harden after Stephen Miller was promoted to White House chief of staff on Friday. Vice-President JD Vance had written that he was open to shifting enforcement toward businesses hiring unauthorized labor, while US officials told CBS the losses were attributed to the economy, affordability and the war with Iran rather than immigration.</p>
+          <div class="key">KEY &nbsp; about 2,700 arrests per day targeted, up from 2,000 &middot; immigration third most important issue in exit polls &middot; two protesters, Renee Good and Alex Pretti, fatally shot by immigration agents</div>
+          <div class="meta"><span>BBC News</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.bbc.co.uk/news/articles/cj4g1nwx39wno?at_medium=RSS&amp;at_campaign=rss">
+        <div class="thumb thumb-us"><span class="tag">BBC News</span></div>
+        <div class="body">
+          <div class="kicker">United States</div>
+          <h3>Jeffries backs impeachment resolution against Defence Secretary Hegseth</h3>
+          <p>Hakeem Jeffries, the frontrunner for House Speaker, told ABC he is &quot;a hard yes&quot; on impeaching Pete Hegseth, saying he abused his power and engineered a reckless war of choice in Iran. Outgoing Republican Thomas Massie says he plans to introduce the resolution as early as Monday; the Pentagon said it followed the law and Hegseth has called the articles &quot;sham.&quot;</p>
+          <div class="key">KEY &nbsp; eight articles of impeachment &middot; 254-seat Democratic House majority vs 218 needed &middot; two-thirds Senate majority required to remove &middot; War Powers Resolution of 1973 &middot; nearly six-minute Hegseth video</div>
+          <div class="meta"><span>BBC News</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.npr.org/2026/11/08/nx-s1-6034014/europe-join-us-brokered-ukraine-talks-abu-dhabi-russia">
+        <div class="thumb thumb-us"><span class="tag">NPR</span></div>
+        <div class="body">
+          <div class="kicker">United States</div>
+          <h3>France says Europe will attend Abu Dhabi Ukraine talks</h3>
+          <p>French Foreign Minister Jean-Noël Barrot said European officials will attend this week&#x27;s US-mediated Russia-Ukraine talks in Abu Dhabi, days after Kremlin spokesman Dmitry Peskov said the agreed trilateral format left no role for European powers. Trump said after meeting Kremlin envoy Kirill Dmitriev that a coming agreement was &quot;going to involve more than Ukraine,&quot; while Zelenskyy told CNN he had not been given details and compared the situation to the 1945 Yalta conference.</p>
+          <div class="key">KEY &nbsp; talks Tuesday and Wednesday in Abu Dhabi &middot; fourth US-brokered round &middot; first since Geneva in February &middot; Russian delegation led by Vladimir Medinsky</div>
+          <div class="meta"><span>NPR</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+    </div>
+    <div class="progress"><div class="progress-fill"></div></div>
+    </div>
+
+    <div class="region-panel" data-region="turkey" hidden>
+    <div class="rail-nav">
+      <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+      <span class="nav-btns">
+        <button class="nav-btn" data-dir="-1" aria-label="Previous story">&#8249;</button>
+        <button class="nav-btn" data-dir="1" aria-label="Next story">&#8250;</button>
+      </span>
+    </div>
+    <div class="rail">
+
+      <a class="card" href="https://www.turkishminute.com/2026/11/07/foreign-investors-sell-3-65-billion-in-turkish-securities/">
+        <div class="thumb thumb-turkey"><span class="tag">Turkish Minute</span></div>
+        <div class="body">
+          <div class="kicker">Turkey</div>
+          <h3>Foreign investors net sellers of Turkish securities</h3>
+          <p>Foreign investors sold a net $3.65 billion in Turkish stocks and bonds over seven weeks through October 30, mostly in bonds, according to a report by the financial news website Ekonomim. The sales followed an investment fund crisis that began in mid-September, after which the Capital Markets Board ordered the liquidation of 131 funds; prosecutors are investigating allegations that fund managers bought thinly traded shares to inflate their prices, and Ekonomim&#x27;s analysis also pointed to lower domestic interest rates and expectations of tighter US monetary policy.</p>
+          <div class="key">KEY &nbsp; $3.65B net sales over 7 weeks to Oct 30 &middot; $1.67B corporate bonds &middot; $1.53B government bonds &middot; $444.3M stocks &middot; ~$879M in week to Oct 30 &middot; 131 funds at 7 companies liquidated from Sept 17 &middot; 455,758 individual investors &middot; BIST 100 down over 25% Sept 11–Oct 30, then +6.72% last week</div>
+          <div class="meta"><span>Turkish Minute</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.turkishminute.com/2026/11/07/turkish-fm-says-greece-cyprus-cable-dispute-resolved-after-turkey-challenges-surveys/">
+        <div class="thumb thumb-turkey"><span class="tag">Turkish Minute</span></div>
+        <div class="body">
+          <div class="kicker">Turkey</div>
+          <h3>Fidan says Greece-Cyprus cable survey dispute settled</h3>
+          <p>Turkish Foreign Minister Hakan Fidan told the Greek daily Kathimerini on Saturday that a disagreement over maritime notices for seabed surveys on the Greece-Cyprus electricity cable had been resolved, saying &quot;everything is normal,&quot; though he gave no details. Turkey&#x27;s foreign ministry had argued a day earlier that part of the survey area lies on its continental shelf and that the work was unauthorized, while Greek diplomatic sources told Proto Thema that Greece alone has authority to issue the permits.</p>
+          <div class="key">KEY &nbsp; €1.9B Great Sea Interconnector &middot; survey vessel Abeille Marengo expected to leave Heraklion Monday &middot; Cyprus divided since 1974</div>
+          <div class="meta"><span>Turkish Minute</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.turkishminute.com/2026/11/07/turkey-plans-to-shorten-undergraduate-degrees-to-three-years-citing-falling-birthrate/">
+        <div class="thumb thumb-turkey"><span class="tag">Turkish Minute</span></div>
+        <div class="body">
+          <div class="kicker">Turkey</div>
+          <h3>Higher education board weighs three-year undergraduate degrees</h3>
+          <p>Council of Higher Education President Erol Özvar said Saturday that Turkey is preparing to cut undergraduate degrees from four years to three, completed with 180 credits on European models, arguing that long study delays young people&#x27;s entry into working life at a time of falling fertility and later marriage. The proposal is in the preparatory stage with no implementation date given, and Özvar also called for fewer courses, more practical training and stronger student skills in artificial intelligence and digital technology.</p>
+          <div class="key">KEY &nbsp; 4 years → 3 years &middot; 180 credits &middot; 12 years of prior schooling &middot; men entering work at 26–27 &middot; fertility rate 1.42 in 2025 vs ~2.1 replacement &middot; below replacement since 2017 &middot; average age at first birth 27.5 &middot; &quot;Decade of Family and Population&quot; 2026–2035</div>
+          <div class="meta"><span>Turkish Minute</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.dailysabah.com/business/energy/turkiyes-defense-giant-aselsan-turns-to-solar-to-meet-all-energy-needs">
+        <div class="thumb thumb-turkey"><span class="tag">Daily Sabah</span></div>
+        <div class="body">
+          <div class="kicker">Turkey</div>
+          <h3>Aselsan says solar plants now cover its energy use</h3>
+          <p>The Ankara-based defense and electronics company Aselsan has commissioned two solar power plants that it says will supply all the energy used in its production, Anadolu Agency reported Sunday, with the plants deploying its in-house Pulsar inverters for the first time. CEO Ahmet Akyol said the clean power is expected to avoid roughly 121,000 tons of carbon dioxide emissions a year and that the company, which he described as among Europe&#x27;s fastest-growing defense firms over the past three years, has $3 billion in ongoing investments.</p>
+          <div class="key">KEY &nbsp; ~121,000 tons CO2 avoided annually &middot; equivalent to ~4 million trees &middot; 2 new solar plants &middot; average annual growth above 25% &middot; $3B ongoing investments</div>
+          <div class="meta"><span>Daily Sabah</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.dailysabah.com/business/tech/turkcell-to-showcase-green-technology-investments-at-cop31">
+        <div class="thumb thumb-turkey"><span class="tag">Daily Sabah</span></div>
+        <div class="body">
+          <div class="kicker">Turkey</div>
+          <h3>Turkcell to present climate investments at COP31</h3>
+          <p>Turkcell will showcase its renewable energy, energy efficiency and digital transformation investments as a sector partner at the COP31 climate summit, which Turkey is hosting, presenting its progress toward net-zero emissions by 2050. CEO Ali Taha Koç said the company is expanding digital infrastructure under a &quot;more bits, fewer watts&quot; approach and sees the summit as a way to connect climate targets with practical investments.</p>
+          <div class="key">KEY &nbsp; net-zero target by 2050 &middot; 115.45 MW active renewable capacity &middot; solar at over 2,400 base station sites &middot; 300 MW capacity target by end-2026 &middot; energy per unit of data traffic down ~23% in 2025 &middot; total energy consumption down 7.3% &middot; up to 85% energy savings per gigabyte on 5G</div>
+          <div class="meta"><span>Daily Sabah</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+    </div>
+    <div class="progress"><div class="progress-fill"></div></div>
+    </div>
+
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <span class="num">04</span><h2>Sports Schedule</h2><hr class="rule">
+    </div>
+    <p class="section-note">Upcoming fixtures, all in California time.</p>
+    <div class="sport-tabs" role="tablist" aria-label="Filter fixtures by sport">
+      <button class="sport-tab active" data-sport="soccer" role="tab">Soccer</button>
+      <button class="sport-tab" data-sport="nba" role="tab">NBA</button>
+    </div>
+
+    <div class="sport-panel" data-sport="soccer">
+      <div class="rail-nav">
+        <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+        <span class="nav-btns">
+          <button class="nav-btn" data-dir="-1" aria-label="Previous fixture">&#8249;</button>
+          <button class="nav-btn" data-dir="1" aria-label="Next fixture">&#8250;</button>
+        </span>
+      </div>
+      <div class="rail">
+
+        <div class="fixture">
+          <div class="thumb thumb-soccer"><span class="tag">La Liga</span></div>
+          <div class="teams">Sevilla <span>vs</span> Real Betis</div>
+          <div class="when">
+            <b>Saturday, Nov 21 · 9:30 AM PST</b> &nbsp;(8:30 PM Istanbul)<br>
+            La Liga
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Sevilla+vs+Real+Betis+%E2%80%94+La+Liga&amp;dates=20261121T173000Z%2F20261121T193000Z&amp;details=La+Liga" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-soccer"><span class="tag">Premier League</span></div>
+          <div class="teams">Newcastle United <span>vs</span> Arsenal</div>
+          <div class="when">
+            <b>Saturday, Nov 21 · 9:30 AM PST</b> &nbsp;(8:30 PM Istanbul)<br>
+            Premier League
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Newcastle+United+vs+Arsenal+%E2%80%94+Premier+League&amp;dates=20261121T173000Z%2F20261121T193000Z&amp;details=Premier+League" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-soccer"><span class="tag">Premier League</span></div>
+          <div class="teams">Liverpool <span>vs</span> Manchester United</div>
+          <div class="when">
+            <b>Sunday, Nov 22 · 8:30 AM PST</b> &nbsp;(7:30 PM Istanbul)<br>
+            Premier League
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Liverpool+vs+Manchester+United+%E2%80%94+Premier+League&amp;dates=20261122T163000Z%2F20261122T183000Z&amp;details=Premier+League" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-soccer"><span class="tag">Serie A</span></div>
+          <div class="teams">Atalanta <span>vs</span> Internazionale</div>
+          <div class="when">
+            <b>Sunday, Nov 22 · 11:45 AM PST</b> &nbsp;(10:45 PM Istanbul)<br>
+            Serie A
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Atalanta+vs+Internazionale+%E2%80%94+Serie+A&amp;dates=20261122T194500Z%2F20261122T214500Z&amp;details=Serie+A" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-soccer"><span class="tag">Champions League</span></div>
+          <div class="teams">Galatasaray <span>vs</span> Aston Villa</div>
+          <div class="when">
+            <b>Tuesday, Nov 24 · 9:45 AM PST</b> &nbsp;(8:45 PM Istanbul)<br>
+            Champions League
+          </div>
+        <div class="note">One of hers</div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Galatasaray+vs+Aston+Villa+%E2%80%94+Champions+League&amp;dates=20261124T174500Z%2F20261124T194500Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-soccer"><span class="tag">Champions League</span></div>
+          <div class="teams">Bodo/Glimt <span>vs</span> LASK Linz</div>
+          <div class="when">
+            <b>Tuesday, Nov 24 · 9:45 AM PST</b> &nbsp;(8:45 PM Istanbul)<br>
+            Champions League
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Bodo%2FGlimt+vs+LASK+Linz+%E2%80%94+Champions+League&amp;dates=20261124T174500Z%2F20261124T194500Z&amp;details=Champions+League" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-soccer"><span class="tag">Champions League</span></div>
+          <div class="teams">Shakhtar Donetsk <span>vs</span> Fenerbahce</div>
+          <div class="when">
+            <b>Wednesday, Nov 25 · 12:00 PM PST</b> &nbsp;(11:00 PM Istanbul)<br>
+            Champions League
+          </div>
+        <div class="note">One of hers</div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Shakhtar+Donetsk+vs+Fenerbahce+%E2%80%94+Champions+League&amp;dates=20261125T200000Z%2F20261125T220000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-soccer"><span class="tag">Champions League</span></div>
+          <div class="teams">Sabah FK <span>vs</span> Barcelona</div>
+          <div class="when">
+            <b>Wednesday, Nov 25 · 9:45 AM PST</b> &nbsp;(8:45 PM Istanbul)<br>
+            Champions League
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Sabah+FK+vs+Barcelona+%E2%80%94+Champions+League&amp;dates=20261125T174500Z%2F20261125T194500Z&amp;details=Champions+League" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-soccer"><span class="tag">Champions League</span></div>
+          <div class="teams">Slavia Prague <span>vs</span> Villarreal</div>
+          <div class="when">
+            <b>Wednesday, Nov 25 · 9:45 AM PST</b> &nbsp;(8:45 PM Istanbul)<br>
+            Champions League
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Slavia+Prague+vs+Villarreal+%E2%80%94+Champions+League&amp;dates=20261125T174500Z%2F20261125T194500Z&amp;details=Champions+League" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-soccer"><span class="tag">Süper Lig</span></div>
+          <div class="teams">Besiktas <span>vs</span> Galatasaray</div>
+          <div class="when">
+            <b>Monday, Nov 30 · 10:00 AM PST</b> &nbsp;(9:00 PM Istanbul)<br>
+            Süper Lig
+          </div>
+        <div class="note">One of hers</div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Besiktas+vs+Galatasaray+%E2%80%94+S%C3%BCper+Lig&amp;dates=20261130T180000Z%2F20261130T200000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+      </div>
+      <div class="progress"><div class="progress-fill"></div></div>
+    </div>
+
+    <div class="sport-panel" data-sport="nba" hidden>
+      <div class="rail-nav">
+        <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+        <span class="nav-btns">
+          <button class="nav-btn" data-dir="-1" aria-label="Previous fixture">&#8249;</button>
+          <button class="nav-btn" data-dir="1" aria-label="Next fixture">&#8250;</button>
+        </span>
+      </div>
+      <div class="rail">
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Detroit Pistons <span>at</span> Los Angeles Lakers</div>
+          <div class="when">
+            <b>Sunday, Nov 8 · 3:00 PM PST</b><br>
+            NBA
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Detroit+Pistons+at+Los+Angeles+Lakers+%E2%80%94+NBA&amp;dates=20261108T230000Z%2F20261109T010000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Minnesota Timberwolves <span>at</span> Utah Jazz</div>
+          <div class="when">
+            <b>Sunday, Nov 8 · 4:00 PM PST</b><br>
+            NBA
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Minnesota+Timberwolves+at+Utah+Jazz+%E2%80%94+NBA&amp;dates=20261109T000000Z%2F20261109T020000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Dallas Mavericks <span>at</span> Brooklyn Nets</div>
+          <div class="when">
+            <b>Sunday, Nov 8 · 4:30 PM PST</b><br>
+            NBA
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Dallas+Mavericks+at+Brooklyn+Nets+%E2%80%94+NBA&amp;dates=20261109T003000Z%2F20261109T023000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Milwaukee Bucks <span>at</span> Boston Celtics</div>
+          <div class="when">
+            <b>Sunday, Nov 8 · 5:00 PM PST</b><br>
+            NBA
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Milwaukee+Bucks+at+Boston+Celtics+%E2%80%94+NBA&amp;dates=20261109T010000Z%2F20261109T030000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Atlanta Hawks <span>at</span> Los Angeles Lakers</div>
+          <div class="when">
+            <b>Monday, Nov 9 · 4:00 PM PST</b><br>
+            NBA
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Atlanta+Hawks+at+Los+Angeles+Lakers+%E2%80%94+NBA&amp;dates=20261110T000000Z%2F20261110T020000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Charlotte Hornets <span>at</span> Cleveland Cavaliers</div>
+          <div class="when">
+            <b>Monday, Nov 9 · 4:00 PM PST</b><br>
+            NBA
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Charlotte+Hornets+at+Cleveland+Cavaliers+%E2%80%94+NBA&amp;dates=20261110T000000Z%2F20261110T020000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Detroit Pistons <span>at</span> Washington Wizards</div>
+          <div class="when">
+            <b>Monday, Nov 9 · 4:00 PM PST</b><br>
+            NBA
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Detroit+Pistons+at+Washington+Wizards+%E2%80%94+NBA&amp;dates=20261110T000000Z%2F20261110T020000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">New York Knicks <span>at</span> Milwaukee Bucks</div>
+          <div class="when">
+            <b>Tuesday, Nov 10 · 4:30 PM PST</b><br>
+            NBA
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=New+York+Knicks+at+Milwaukee+Bucks+%E2%80%94+NBA&amp;dates=20261111T003000Z%2F20261111T023000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Philadelphia 76ers <span>at</span> Boston Celtics</div>
+          <div class="when">
+            <b>Tuesday, Nov 10 · 5:00 PM PST</b><br>
+            NBA
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Philadelphia+76ers+at+Boston+Celtics+%E2%80%94+NBA&amp;dates=20261111T010000Z%2F20261111T030000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Phoenix Suns <span>at</span> LA Clippers</div>
+          <div class="when">
+            <b>Tuesday, Nov 10 · 6:00 PM PST</b><br>
+            NBA
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Phoenix+Suns+at+LA+Clippers+%E2%80%94+NBA&amp;dates=20261111T020000Z%2F20261111T040000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+      </div>
+      <div class="progress"><div class="progress-fill"></div></div>
+    </div>
+
+  </section>
+
+  <footer class="footer">
+    Updated every morning &middot; All times California (PDT) unless noted<br>
+    Every story links to its source &middot; The Dispatch, a Simay Demiral project<br>
+    <a href="/" style="color:#e8935a;text-decoration:none">&larr; simaydemiral.com</a>
+  </footer>
+</div>
+<script>
+(function () {
+  /* open all source links in a new tab */
+  document.querySelectorAll('a[href^="http"]').forEach(function (a) {
+    a.setAttribute('target', '_blank');
+    a.setAttribute('rel', 'noopener');
+  });
+
+  var rails = document.querySelectorAll('.rail');
+  rails.forEach(function (rail) {
+    var items = rail.querySelectorAll('.card, .fixture');
+    var progress = rail.nextElementSibling;
+    var fill = progress ? progress.querySelector('.progress-fill') : null;
+
+    /* progress bar + active-card glow track the visible card */
+    function update() {
+      if (!items.length) return;
+      var step = items[0].getBoundingClientRect().width + 16;
+      var idx = Math.round(rail.scrollLeft / step);
+      idx = Math.max(0, Math.min(items.length - 1, idx));
+      items.forEach(function (el, i) { el.classList.toggle('active', i === idx); });
+      if (fill) fill.style.width = ((idx + 1) / items.length * 100) + '%';
+    }
+    rail.addEventListener('scroll', function () { requestAnimationFrame(update); }, { passive: true });
+    update();
+
+    /* arrow buttons scroll one card at a time */
+    var nav = rail.previousElementSibling;
+    if (nav && nav.classList.contains('rail-nav')) {
+      nav.querySelectorAll('.nav-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var step = items[0].getBoundingClientRect().width + 16;
+          rail.scrollBy({ left: parseInt(btn.dataset.dir, 10) * step, behavior: 'smooth' });
+        });
+      });
+    }
+
+    /* drag to scroll (touch-safe): a dead zone swallows the tiny jitter of
+       a finger tap, so a tap never scrolls the rail nor counts as a drag;
+       a click is suppressed only when the rail actually scrolled */
+    var down = false, startX = 0, startScroll = 0, moved = false;
+    var DEAD_ZONE = 10;        /* px of pointer travel ignored before a drag starts */
+    var SCROLL_THRESHOLD = 6;  /* px the rail must actually move to count as a drag */
+    rail.addEventListener('pointerdown', function (e) {
+      down = true; moved = false;
+      startX = e.clientX; startScroll = rail.scrollLeft;
+    });
+    rail.addEventListener('pointermove', function (e) {
+      if (!down) return;
+      var dx = e.clientX - startX;
+      if (!moved && Math.abs(dx) <= DEAD_ZONE) return; /* still in the dead zone */
+      moved = true;
+      rail.classList.add('dragging');
+      rail.scrollLeft = startScroll - (dx - Math.sign(dx) * DEAD_ZONE);
+    });
+    function up() {
+      down = false;
+      rail.classList.remove('dragging');
+      /* did this gesture really scroll the rail? */
+      moved = Math.abs(rail.scrollLeft - startScroll) > SCROLL_THRESHOLD;
+      if (moved) {
+        /* the click event fires right after pointerup, so reset the flag
+           just after it has had its chance to be suppressed */
+        setTimeout(function () { moved = false; }, 0);
+      }
+    }
+    rail.addEventListener('pointerup', up);
+    rail.addEventListener('pointercancel', up);
+    /* don't follow links after a real drag, only after a real click */
+    rail.addEventListener('click', function (e) {
+      if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; }
+    }, true);
+  });
+
+  /* ---------- section 03: US / Turkey filter (scoped per section,
+     so each archived edition keeps its own working tabs) ---------- */
+  document.querySelectorAll('.section').forEach(function (section) {
+    var tabs = section.querySelectorAll('.region-tab');
+    if (!tabs.length) return;
+    var panels = section.querySelectorAll('.region-panel');
+
+    function showRegion(region) {
+      tabs.forEach(function (tab) {
+        tab.classList.toggle('active', tab.getAttribute('data-region') === region);
+      });
+      panels.forEach(function (panel) {
+        var isMatch = panel.getAttribute('data-region') === region;
+        panel.hidden = !isMatch;
+        if (isMatch) {
+          var rail = panel.querySelector('.rail');
+          if (rail) {
+            rail.scrollLeft = 0;
+            rail.dispatchEvent(new Event('scroll'));
+          }
+        }
+      });
+    }
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        showRegion(tab.getAttribute('data-region'));
+      });
+    });
+  });
+
+  /* ---------- sports schedule: filter tabs + per-sport highlights
+     (scoped per section, one instance per edition) ---------- */
+  document.querySelectorAll('.section').forEach(function (section) {
+    var tabs = section.querySelectorAll('.sport-tab');
+    if (!tabs.length) return;
+    var panels = section.querySelectorAll('.sport-panel');
+    var hlPanels = section.querySelectorAll('.hl-panel');
+
+    function panelFor(list, sport) {
+      for (var i = 0; i < list.length; i++) {
+        if (list[i].getAttribute('data-sport') === sport) return list[i];
+      }
+      return null;
+    }
+
+    /* a sport with no upcoming fixtures loses its tab entirely */
+    tabs.forEach(function (tab) {
+      var panel = panelFor(panels, tab.getAttribute('data-sport'));
+      if (!panel || !panel.querySelector('.fixture')) tab.hidden = true;
+    });
+
+    function showSport(sport) {
+      tabs.forEach(function (tab) {
+        tab.classList.toggle('active', tab.getAttribute('data-sport') === sport);
+      });
+      panels.forEach(function (panel) {
+        panel.hidden = panel.getAttribute('data-sport') !== sport;
+      });
+      var hlMatch = panelFor(hlPanels, sport);
+      hlPanels.forEach(function (panel) {
+        panel.hidden = panel.getAttribute('data-sport') !== sport;
+      });
+      /* hide the whole highlights block when this sport has none */
+      var hlBlock = section.querySelector('.highlights');
+      if (hlBlock) hlBlock.hidden = !hlMatch;
+      var panel = panelFor(panels, sport);
+      var rail = panel ? panel.querySelector('.rail') : null;
+      if (rail) {
+        rail.scrollLeft = 0;
+        rail.dispatchEvent(new Event('scroll'));
+      }
+    }
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        showSport(tab.getAttribute('data-sport'));
+      });
+    });
+
+    /* sync panels + highlights with the active tab; if the default tab
+       was hidden as empty, open the first sport that has fixtures */
+    var active = section.querySelector('.sport-tab.active');
+    if (!active || active.hidden) {
+      for (var i = 0; i < tabs.length; i++) {
+        if (!tabs[i].hidden) { active = tabs[i]; break; }
+      }
+    }
+    if (active) showSport(active.getAttribute('data-sport'));
+  });
+
+  /* ---------- edition archive: switch between kept editions ---------- */
+  var editionBtns = document.querySelectorAll('.edition-btn');
+  var editions = document.querySelectorAll('.edition');
+
+  function showEdition(id) {
+    var current = null;
+    editions.forEach(function (ed) {
+      var match = ed.getAttribute('data-edition') === id;
+      ed.hidden = !match;
+      if (match) current = ed;
+    });
+    editionBtns.forEach(function (btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-edition') === id);
+    });
+    if (current) {
+      var title = current.getAttribute('data-title');
+      if (title) document.title = title;
+      /* rails inside a hidden edition measure 0 wide; refresh their
+         progress bars and active-card glow now that they are visible */
+      current.querySelectorAll('.rail').forEach(function (rail) {
+        rail.dispatchEvent(new Event('scroll'));
+      });
+    }
+    window.scrollTo(0, 0);
+  }
+
+  editionBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      showEdition(btn.getAttribute('data-edition'));
+    });
+  });
+})();
+</script>
+</body>
+</html>
