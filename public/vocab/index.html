@@ -212,6 +212,24 @@
        text-overflow:ellipsis;white-space:nowrap}
   .howto{margin:0;padding-left:20px;color:var(--muted);font-size:14px}
   .howto li{margin:3px 0}
+  .rootdef{margin:8px 0 0 0;padding:8px 0 0;border-top:1px dashed var(--line);
+           font-size:14px;color:var(--ink-2)}
+  .rootdef b{display:block;font:500 10.5px/1 var(--f-mono);letter-spacing:.14em;
+             text-transform:uppercase;color:var(--brand);margin-bottom:5px}
+  .rootdef b span{color:var(--faint)}
+  .rootdef p{margin:0 0 3px}
+  .prog{margin:6px 0 0}
+  .prog-num{font:500 11px/1.4 var(--f-mono);color:var(--muted);letter-spacing:.03em}
+  .prog-bar{display:flex;height:6px;margin-top:4px;border-radius:99px;
+            background:var(--line-soft);overflow:hidden}
+  .prog-bar span{display:block;height:100%;min-width:0}
+  .prog-bar .p-top{background:var(--go)}
+  .prog-bar .p-mid{background:var(--warn)}
+  .study .prog{margin:0 0 10px;max-width:420px}
+  .deckacts{text-align:right;white-space:nowrap}
+  .prog-wrap{display:flex;justify-content:center;padding:0 20px 16px}
+  .prog-wrap .prog{flex:1;max-width:320px;margin:0}
+  .prog-wrap .prog-num{text-align:center}
   .deckonly{margin:0 0 12px;font-size:13px;color:var(--muted);
             display:flex;gap:10px;align-items:center;flex-wrap:wrap}
   .deckonly b{display:inline;color:var(--ink)}
@@ -272,6 +290,25 @@
     .col-due{display:none}
     .w-def{display:none}
     #tbl td:first-child{min-width:118px}
+    /* The Decks table is four columns, three of them tiny and one a row of
+       three buttons. At 375px that pushed Delete off the screen and took the
+       whole page sideways with it -- so below this width a deck stops being
+       a row and becomes a block: name and progress, then the two counts on
+       one line, then the buttons, wrapping. */
+    #p-decks thead{display:none}
+    #p-decks table,#p-decks tbody,#p-decks tr,#p-decks td{display:block;width:auto}
+    #p-decks tr{padding:12px 0;border-bottom:1px solid var(--line-soft)}
+    #p-decks tr:last-child{border-bottom:0}
+    #p-decks td{border:0;padding:2px 0}
+    #p-decks td[data-l]{display:inline-block;margin:4px 18px 0 0;
+                        font:500 12px/1.3 var(--f-mono);color:var(--ink-2)}
+    #p-decks td[data-l]::before{content:attr(data-l) "\00a0";
+                        font-size:10px;letter-spacing:.12em;
+                        text-transform:uppercase;color:var(--faint)}
+    #p-decks td.deckacts{text-align:left;white-space:normal;padding-top:10px}
+    #p-decks td.deckacts .btn-q{margin:0 6px 6px 0}
+    #p-decks .prog{max-width:260px}
+    #p-decks input.deckname{max-width:100%}
   }
 </style>
 </head>
@@ -426,8 +463,23 @@
       } else { delete w.tr; }
       if (w.eg && typeof w.eg === "object") {
         w.eg = { text: typeof w.eg.text === "string" ? w.eg.text.slice(0, 300) : "",
-                 from: typeof w.eg.from === "string" ? w.eg.from.slice(0, 20) : "" };
+                 from: typeof w.eg.from === "string" ? w.eg.from.slice(0, 24) : "",
+                 /* Kept, or every reload hands a settled "none" a fresh go. */
+                 v: Number(w.eg.v) || 0 };
       } else { delete w.eg; }
+      if (w.rootdef && typeof w.rootdef === "object") {
+        w.rootdef = {
+          term: String(w.rootdef.term || "").slice(0, 60),
+          senses: (Array.isArray(w.rootdef.senses) ? w.rootdef.senses : [])
+            .filter(function (x) { return x && typeof x === "object" && x.text; })
+            .slice(0, 3).map(function (x) {
+              return { pos: String(x.pos || "").slice(0, 40),
+                       text: String(x.text).slice(0, 400),
+                       example: String(x.example || "").slice(0, 300) };
+            }),
+          miss: Number(w.rootdef.miss) || 0
+        };
+      } else { delete w.rootdef; }
       src = (w.src && typeof w.src === "object") ? w.src : {};
       w.src = {
         url: safeUrl(src.url).slice(0, 400),
@@ -769,6 +821,11 @@
     if (keep.length === db.words.length) return false;
     db.words = keep;
     session = session.filter(function (x) { return db.words.indexOf(x) >= 0; });
+    /* Only when a round is actually live. Folding also happens inside
+       load(), before the saved round has been read back, and writing an
+       empty queue there would have deleted the very thing boot is about
+       to pick up. */
+    if (session.length) saveSession();
     return true;
   }
 
@@ -1296,17 +1353,182 @@
 
   var exampling = {};
 
-  /* Only asked for when the word has none of its own. */
+  /* The senses the card is actually showing. Simple Wiktionary writes for
+     learners and is what the back of the card leads with, so it is what
+     every question about what the reader can see has to ask. */
+  function shownSenses(w) {
+    var plain = Array.isArray(w.plain) ? w.plain : [];
+    return lendExamples(w, (plain.length && !fullOpen) ? plain : (w.senses || []));
+  }
+
+  /* Simple Wiktionary's examples are hit and miss; the full dictionary's are
+     not. "Gravitate" carries "Children naturally gravitate to such a big,
+     friendly man" there and nothing here, so the card showed a word with an
+     example and no example on it. Where the two lists line up sense for
+     sense the plain sense borrows the precise sense's. Only on a length
+     match: pairing by position is honest only if the lists are parallel, and
+     hanging the figurative example off the literal sense would be worse than
+     showing none at all. */
+  function lendExamples(w, shown) {
+    var full = w.senses || [];
+    if (shown === full || !shown.length || shown.length !== full.length) return shown;
+    var any = false;
+    var out = shown.map(function (s, i) {
+      if (s.example || !full[i] || !full[i].example) return s;
+      any = true;
+      return { pos: s.pos, text: s.text, example: full[i].example };
+    });
+    return any ? out : shown;
+  }
+
+  /* Only asked for when the card has none of its own -- and asked of what is
+     on screen, not of what is stored. The example lived on the precise
+     senses while the card was showing the plain ones, so a word that had one
+     was told it needed none and the box that would have shown it stayed
+     shut. That is why "gravitate" looked like a lookup failure. */
   function hasExample(w) {
     if (w.src && w.src.sentence) return true;
-    for (var i = 0; i < (w.senses || []).length; i++) {
-      if (w.senses[i].example) return true;
+    var shown = shownSenses(w);
+    for (var i = 0; i < shown.length; i++) {
+      if (shown[i].example) return true;
     }
     return false;
   }
 
+  /* ------------------------------------------------------------------
+     Hollow definitions.
+
+     "Acutely: in an acute manner." That is a sentence about how the word is
+     built, not about what it means, and it is all either dictionary has --
+     Simple English Wiktionary has no entry for it at all. Nothing is wrong
+     with the gloss; it just is not an answer on its own. So when the whole
+     card comes down to one of these, the word it leans on is looked up and
+     shown underneath, named, so it is plain which word the second line is
+     about. Nothing is invented and nothing is replaced.
+     ------------------------------------------------------------------ */
+  /* Each shape also names the part of speech the root will be found under.
+     "In an acute manner" is an adverb built on an adjective, and saying so
+     is what reaches "Intense; sensitive; sharp" instead of stopping at the
+     first two senses on the page, which are "Brief, quick, short" and "High
+     or shrill" -- true of the word, no use for this card. */
+  var W_ = "([a-z\u00c0-\u024f'-]+)";
+  var HOLLOW = [
+    { pos: "adjective",
+      re: new RegExp("^in an?\\s+" + W_ + "\\s+(?:manner|way|fashion)\\b", "i") },
+    { pos: "",
+      re: new RegExp("^in the manner of (?:an?\\s+)?" + W_ + "\\b", "i") },
+    { pos: "adjective",
+      re: new RegExp("^(?:the\\s+)?(?:state|quality|condition|property|characteristic)"
+                     + "\\s+of being\\s+(?:an?\\s+)?" + W_ + "\\b", "i") },
+    { pos: "verb",
+      re: new RegExp("^(?:one|a person|a man|a woman|somebody|someone)\\s+who\\s+"
+                     + "(?:is\\s+)?" + W_ + "\\b", "i") },
+    { pos: "noun",
+      re: new RegExp("^of or (?:relating|pertaining|belonging)\\s+to\\s+"
+                     + "(?:an?\\s+|the\\s+)?" + W_ + "\\b", "i") },
+    { pos: "noun",
+      re: new RegExp("^(?:having the|of the)\\s+(?:quality|nature|character|characteristics?)"
+                     + "\\s+of\\s+(?:an?\\s+)?" + W_ + "\\b", "i") },
+    { pos: "noun",
+      re: new RegExp("^characteri[sz]ed by\\s+(?:an?\\s+|the\\s+)?" + W_ + "\\b", "i") }
+  ];
+
+  /* The word a hollow gloss leans on, with the part of speech to look for it
+     under -- or nothing. A long sentence is saying something whatever shape
+     it starts in, a three-letter root sends the card off after "bad" or
+     "law", and a root that is the word itself helps nobody. */
+  function hollowRoot(text, term) {
+    var t = String(text || "").trim().replace(/^\([^)]*\)\s*/, ""), i, m, r;
+    if (!t || t.length > 72) return null;
+    for (i = 0; i < HOLLOW.length; i++) {
+      m = HOLLOW[i].re.exec(t);
+      if (!m) continue;
+      r = m[1].toLowerCase().replace(/[.,;:]+$/, "");
+      if (r.length < 4) return null;
+      if (r === String(term || "").toLowerCase()) return null;
+      return { root: r, pos: HOLLOW[i].pos };
+    }
+    return null;
+  }
+
+  /* Hollow only if nothing on the card is better than hollow. One real sense
+     beside it and the reader already has an answer. */
+  function needsRoot(w) {
+    var shown = shownSenses(w), i, hit, found = null;
+    if (!shown.length) return null;
+    for (i = 0; i < shown.length; i++) {
+      hit = hollowRoot(shown[i].text, w.term);
+      if (!hit) return null;
+      if (!found) found = hit;
+    }
+    return found;
+  }
+
+  /* An empty answer is not written off on the first go: Wiktionary swallows a
+     failed request and hands back an empty list, which looks exactly like a
+     word it has never heard of. Three tries, the same bargain the headword
+     lookup makes. */
+  function needsRootLook(w) {
+    var r = needsRoot(w);
+    if (!r) return null;
+    var d = w.rootdef;
+    if (!d || d.term !== r.root) return r;
+    if (d.senses && d.senses.length) return null;
+    return (d.miss || 0) < 3 ? r : null;
+  }
+
+  /* The root is fetched for itself rather than through wiktionary(), which
+     shares a budget of four senses across every part of speech so that a
+     card stays short. Here the part of speech is known, so the whole budget
+     goes to that one block. */
+  function rootSenses(term, want) {
+    var slug = encodeURIComponent(String(term).trim().replace(/\s+/g, "_"));
+    return getJSON(WIKT + slug).then(function (j) {
+      var langs = (j && j[SPACE]) || [], hit = [], rest = [], i, k, defs, pos, t;
+      for (i = 0; i < langs.length; i++) {
+        pos = String(stripTags(langs[i].partOfSpeech) || "").toLowerCase();
+        defs = langs[i].definitions || [];
+        for (k = 0; k < defs.length; k++) {
+          t = firstSentence(stripTags(defs[k].definition));
+          /* A root whose own definition is hollow too explains nothing, and
+             a pointer at some other entry explains less than that. */
+          if (!usable(t) || formOnly({ text: t }) || hollowRoot(t, term)) continue;
+          (want && pos === want ? hit : rest).push({ pos: pos, text: t });
+        }
+      }
+      return (hit.length ? hit : rest).slice(0, 3);
+    }).catch(function () { return []; });
+  }
+
+  var rooting = {};
+
+  function ensureRoot(w, after) {
+    if (rooting[w.id]) return;
+    var r = needsRootLook(w);
+    if (!r) return;
+    rooting[w.id] = 1;
+    rootSenses(r.root, r.pos).then(function (senses) {
+      delete rooting[w.id];
+      if (senses.length) w.rootdef = { term: r.root, senses: senses, miss: 0 };
+      else w.rootdef = { term: r.root, senses: [],
+                         miss: ((w.rootdef && w.rootdef.miss) || 0) + 1 };
+      save();
+      if (after) after();
+    }).catch(function () { delete rooting[w.id]; });
+  }
+
+  /* Bumped when a source is added, so a card told "nobody writes a sentence
+     with this word" by the old code asks again, once. 2: the free dictionary
+     API is tried when Wiktionary's entry carries no usage example. */
+  var EG_SOURCES = 2;
+
+  function needsEg(w) {
+    if (hasExample(w)) return false;
+    return !(w.eg && w.eg.from && (w.eg.v || 0) >= EG_SOURCES);
+  }
+
   function ensureExample(w, after) {
-    if ((w.eg && w.eg.from) || exampling[w.id] || hasExample(w)) return;
+    if (exampling[w.id] || !needsEg(w)) return;
     exampling[w.id] = 1;
     var term = w.term;
     if (w.via) {
@@ -1319,10 +1541,42 @@
         return exampleFrom(wt || "", SPACE);
       })
       .then(function (eg) {
+        /* Wiktionary writes a usage example for most entries and for plenty
+           it does not. The free dictionary quotes one for a good many
+           English words Wiktionary leaves bare, so it is worth the second
+           ask before the card gives up and says there is none. */
+        if (eg || SPACE !== "en") return eg;
+        return getJSON(DICT + encodeURIComponent(term.toLowerCase()))
+          .then(function (d) {
+            var ms = (d && d[0] && d[0].meanings) || [], i, k, ds, t;
+            for (i = 0; i < ms.length; i++) {
+              ds = ms[i].definitions || [];
+              for (k = 0; k < ds.length; k++) {
+                t = String(ds[k].example || "").trim();
+                if (t.length > 12 && t.length < 240) {
+                  return { text: t, from: "Free Dictionary" };
+                }
+              }
+            }
+            return null;
+          })
+          .catch(function (e) {
+            /* 404 is an answer: no entry, so there is no sentence to find
+               and the card can stop asking. Anything else -- a timeout, a
+               rate limit, the service refusing the browser outright, which
+               it does often enough -- is not an answer, so it is thrown on
+               and nothing is written down. The next flip asks again rather
+               than showing a verdict that was never reached. */
+            if (e && e.status === 404) return null;
+            throw e;
+          });
+      })
+      .then(function (eg) {
         delete exampling[w.id];
         /* "none" is an answer and is kept; a failed request is not, so it is
            not written down and the next flip tries again. */
         w.eg = eg || { text: "", from: "none" };
+        w.eg.v = EG_SOURCES;
         save();
         if (after) after();
       })
@@ -2007,6 +2261,7 @@
     /* A sitting belongs to the language it started in. */
     session = []; done = 0; misses = {}; almost = {};
     flipped = false; noteOpen = false; trOpen = false;
+    saveSession();
     renderSpaces(); counts(); fillFilter();
     renderAll(); renderDecks(); renderDue();
   }
@@ -2021,6 +2276,51 @@
   function dueNow() {
     var t = today();
     return here().filter(function (w) { return inDeck(w) && (w.due || t) <= t; });
+  }
+
+  /* ------------------------------------------------------------------
+     How far through a deck she is.
+
+     Three bands rather than one percentage, because "30% done" hides whether
+     the other 70% is untouched or nearly there. Box 5 and 6 are words she
+     has answered "Knew it" four times or more without a miss in between,
+     which is the point at which the gap between sittings is long enough to
+     call the word learned. Box 1 is new, or just missed. Everything between
+     is in motion.
+     ------------------------------------------------------------------ */
+  var MASTER = 5;
+
+  function bands(list) {
+    var b = { n: list.length, top: 0, mid: 0, raw: 0 }, i, k;
+    for (i = 0; i < list.length; i++) {
+      k = list[i].box || 1;
+      if (k >= MASTER) b.top++;
+      else if (k >= 2) b.mid++;
+      else b.raw++;
+    }
+    return b;
+  }
+
+  function inDeckNamed(name) {
+    return here().filter(function (w) { return (w.deck || "Inbox") === name; });
+  }
+
+  /* The bar is the shape of the deck; the line above it is the answer to the
+     question. Two filled segments and the track showing through for what has
+     not been started, so three bands need only two spans. */
+  function barHtml(b, label) {
+    if (!b.n) return "";
+    var num = b.top + " of " + b.n + " mastered";
+    var full = b.top + " mastered \u00b7 " + b.mid + " learning \u00b7 "
+             + b.raw + " new or missed";
+    function w(x) { return (x * 100 / b.n).toFixed(1) + "%"; }
+    return '<div class="prog" title="' + esc(full) + '">'
+         + '<div class="prog-num">'
+         + (label ? esc(label) + ' \u00b7 ' : '') + esc(num) + '</div>'
+         + '<div class="prog-bar" role="img" aria-label="' + esc(full) + '">'
+         + '<span class="p-top" style="width:' + w(b.top) + '"></span>'
+         + '<span class="p-mid" style="width:' + w(b.mid) + '"></span>'
+         + '</div></div>';
   }
 
   /* The deck still exists, and still has something in it. Deleting a deck
@@ -2115,6 +2415,63 @@
   var trFailed = false;      /* the last lookup could not reach its sources */
   var fullOpen = false;      /* the precise senses instead of the plain ones */
 
+  /* ------------------------------------------------------------------
+     A sitting survives a reload.
+
+     Thirty cards is twenty minutes, and a phone that locks, a tab closed by
+     accident, or a reload after adding a word threw the whole round away and
+     started it again at the first card. So the queue is written down after
+     every answer. In this browser only: not in the word list, so it is not
+     something that syncs to the other device or turns up in an export -- a
+     half-finished round is a fact about this sitting, not about the words.
+
+     Good for the day it was started and no longer. Tomorrow is a different
+     set of words and should begin at the Start screen.
+     ------------------------------------------------------------------ */
+  var SKEY = "vocab.session";
+
+  function saveSession() {
+    if (DEMO) return;
+    try {
+      if (!session.length) { localStorage.removeItem(SKEY); return; }
+      localStorage.setItem(SKEY, JSON.stringify({
+        day: today(), lang: SPACE, deck: onlyDeck, done: done, total: total,
+        ids: session.map(function (w) { return w.id; }),
+        misses: misses, almost: almost
+      }));
+    } catch (e) {}
+  }
+
+  /* Only the ids are stored, so every card comes back from the live list and
+     a word edited, renamed or deleted in between is whatever it is now
+     rather than a stale copy of what it was. */
+  function resumeSession() {
+    if (DEMO) return false;
+    var s = null;
+    try { s = JSON.parse(localStorage.getItem(SKEY) || "null"); } catch (e) { return false; }
+    if (!s || s.day !== today() || !Array.isArray(s.ids)) return false;
+    if ((s.lang || "en") !== SPACE) return false;
+    var by = {}, q = [], i, w;
+    for (i = 0; i < db.words.length; i++) by[db.words[i].id] = db.words[i];
+    for (i = 0; i < s.ids.length; i++) {
+      w = by[s.ids[i]];
+      if (w && (w.lang || "en") === SPACE && q.indexOf(w) < 0) q.push(w);
+    }
+    if (!q.length) { try { localStorage.removeItem(SKEY); } catch (e) {} return false; }
+    onlyDeck = typeof s.deck === "string" ? s.deck : "";
+    session = q;
+    done = Math.max(0, Number(s.done) || 0);
+    total = Math.max(q.length, Number(s.total) || q.length);
+    misses = (s.misses && typeof s.misses === "object") ? s.misses : {};
+    almost = (s.almost && typeof s.almost === "object") ? s.almost : {};
+    /* Face up, whatever she was looking at when the tab went away: the
+       answer she had not given yet is the one being resumed, and showing
+       the meaning first would give it to her. */
+    flipped = false;
+    checkDeck();
+    return true;
+  }
+
   function startSession() {
     /* A word renamed to its lemma may now ask the same question as one
        already here, and this is the one moment with no card on screen. */
@@ -2125,6 +2482,7 @@
     flipped = false;
     misses = {};
     almost = {};
+    saveSession();
     counts();      /* the badge mirrors the sitting, so it changes on Start */
     renderDue();
   }
@@ -2193,6 +2551,12 @@
       el.innerHTML = deckBanner()
         + '<div class="card"><p class="empty"><b>' + head + '</b>'
         + body + '</p>'
+        /* Finishing a round is the moment she wants the number, so it is on
+           this screen as well as over the card. */
+        + '<div class="prog-wrap">'
+        + barHtml(bands(onlyDeck ? inDeckNamed(onlyDeck) : here()),
+                  onlyDeck || lang().label)
+        + '</div>'
         + (label ? '<div style="text-align:center;padding-bottom:18px">'
                  + '<button class="btn" id="go">' + label + '</button></div>' : '')
         + '</div>';
@@ -2205,7 +2569,11 @@
        taking it away, so the ones she is getting wrong are the ones she
        keeps seeing. The count is done-and-left rather than "3 of 7",
        because a card coming round again makes that arithmetic a lie. */
+    /* Scoped to whatever the sitting is scoped to, so it answers the same
+       question the banner above it asks. */
     var html = deckBanner() + '<div class="study">'
+      + barHtml(bands(onlyDeck ? inDeckNamed(onlyDeck) : here()),
+                onlyDeck || lang().label)
       + '<div class="progress">' + done + ' done \u00b7 ' + session.length + ' left'
       + (misses[w.id] ? ' \u00b7 again' : almost[w.id] ? ' \u00b7 once more' : '')
       + '</div>';
@@ -2252,8 +2620,7 @@
         }
         /* Plain English when there is any, the precise senses when she asks
            for them or when Simple Wiktionary has never heard of the word. */
-        var plain = Array.isArray(w.plain) ? w.plain : [];
-        var shown = (plain.length && !fullOpen) ? plain : w.senses;
+        var shown = shownSenses(w);
         for (var i = 0; i < shown.length; i++) {
           var s = shown[i];
           html += '<div class="sense">'
@@ -2262,7 +2629,22 @@
                 + (s.example ? '<p class="eg">&ldquo;' + esc(s.example) + '&rdquo;</p>' : '')
                 + '</div>';
         }
-
+        /* Under the gloss, not instead of it: "in an acute manner" is still
+           true, and the word it is about is what was missing. */
+        if (w.rootdef && w.rootdef.senses && w.rootdef.senses.length) {
+          html += '<div class="rootdef"><b>' + esc(w.rootdef.term)
+                + (w.rootdef.senses[0].pos
+                    ? ' <span>' + esc(w.rootdef.senses[0].pos) + '</span>' : '')
+                + '</b>';
+          for (i = 0; i < w.rootdef.senses.length; i++) {
+            html += '<p>' + esc(w.rootdef.senses[i].text) + '</p>';
+          }
+          html += '</div>';
+        } else if (w.plain !== null && needsRootLook(w)) {
+          html += '<div class="rootdef"><p style="color:var(--muted)">'
+                + 'Looking up <b style="display:inline">'
+                + esc(needsRootLook(w).root) + '</b>\u2026</p></div>';
+        }
       }
       if (trOpen) {
         html += '<div class="yournote tr"><b>T\u00fcrk\u00e7e</b>';
@@ -2337,7 +2719,7 @@
         if (w.eg && w.eg.text) {
           html += '<div class="egbox"><b>In a sentence</b>'
                 + '<span class="egtext">\u201c' + esc(w.eg.text) + '\u201d</span>'
-                + '<span class="egfrom">Wiktionary</span></div>';
+                + '<span class="egfrom">' + esc(w.eg.from || "Wiktionary") + '</span></div>';
         } else if (!w.eg) {
           html += '<div class="egbox"><span class="egtext" '
                 + 'style="color:var(--muted)">Looking for an example\u2026</span></div>';
@@ -2394,7 +2776,7 @@
         });
       }
       /* Quietly, while she is still trying to remember it. */
-      if (!(w.eg && w.eg.from) && !hasExample(w)) ensureExample(w);
+      if (needsEg(w)) ensureExample(w);
     } else {
       $("gNo").addEventListener("click", function () { answer("no"); });
       $("gMid").addEventListener("click", function () { answer("mid"); });
@@ -2420,12 +2802,17 @@
          for a word that already has one, redraws the back, and asks again —
          a redraw that never ends. */
       if (needsSay(w)) ensureSay(w, function () { if (flipped) renderDue(); });
-      if (!(w.eg && w.eg.from) && !hasExample(w)) {
+      if (needsEg(w)) {
         ensureExample(w, function () { if (flipped) renderDue(); });
       }
       /* Only once the headword has settled, or it asks about "plunged". */
       if (w.looked && !w.plain) {
         ensurePlain(w, function () { if (flipped) renderDue(); });
+      }
+      /* And only once the plain senses have settled too, because whether the
+         card is hollow depends on which list it ends up showing. */
+      if (w.looked && w.plain) {
+        ensureRoot(w, function () { if (flipped) renderDue(); });
       }
       if ($("fullBtn")) {
         $("fullBtn").addEventListener("click", function () {
@@ -2485,7 +2872,14 @@
      grade from the keyboard. */
   document.addEventListener("keydown", function (e) {
     var t = e.target.tagName;
-    if (t === "INPUT" || t === "TEXTAREA" || t === "SELECT" || t === "BUTTON") return;
+    /* Turning a card over with the keyboard parks focus on "Knew it", so
+       that Enter answers. The guard below then swallowed 1, 2 and 3 --
+       the three shortcuts the card advertises worked after a click of the
+       mouse and did nothing after a press of the space bar. The grade row
+       is exempt from it; Enter and space still belong to whichever button
+       is focused, which is the whole point of putting focus there. */
+    var onGrade = !!(e.target.closest && e.target.closest(".grade"));
+    if (!onGrade && (t === "INPUT" || t === "TEXTAREA" || t === "SELECT" || t === "BUTTON")) return;
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (!session.length) return;
 
@@ -2498,6 +2892,7 @@
       return;
     }
     if (e.target.id === "back") return;     /* its own handler has it */
+    if (onGrade && (e.key === "Enter" || e.key === " ")) return;
     if (e.key === " ") { e.preventDefault(); keyboarding = true; unflip(); return; }
     if (e.key === "1" || e.key === "ArrowLeft") {
       e.preventDefault(); keyboarding = true; answer("no");
@@ -2608,6 +3003,7 @@
     noteOpen = false;
     trOpen = false;
     fullOpen = false;
+    saveSession();
     counts();
     renderDue();
   }
@@ -2760,19 +3156,18 @@
          language she is in, and this one counted all three. The English
          Inbox, with nothing in it, reported three words due today -- they
          were German. */
-      var due = here().filter(function (w) {
-        return (w.deck || "Inbox") === d.name && (w.due || t) <= t;
-      }).length;
+      var mine = inDeckNamed(d.name);
+      var due = mine.filter(function (w) { return (w.due || t) <= t; }).length;
       var editing = renaming === d.name;
       h += '<tr><td class="w-term">'
          + (editing
              ? '<input class="deckname" id="deckName" type="text" value="'
                + esc(d.name) + '" aria-label="Deck name" maxlength="40">'
-             : esc(d.name))
+             : esc(d.name) + barHtml(bands(mine), ""))
          + '</td>'
-         + '<td>' + d.n + '</td>'
-         + '<td class="box-n">' + (due || "—") + '</td>'
-         + '<td style="text-align:right;white-space:nowrap">'
+         + '<td data-l="Words">' + d.n + '</td>'
+         + '<td class="box-n" data-l="Due today">' + (due || "—") + '</td>'
+         + '<td class="deckacts">'
          + (editing
              ? '<button class="btn-q" data-rensave="' + esc(d.name) + '">Save</button> '
                + '<button class="btn-q" data-rencancel="1">Cancel</button>'
@@ -3041,6 +3436,7 @@
       }
       db.words = db.words.filter(function (w) { return w.id !== del; });
       session = session.filter(function (w) { return w.id !== del; });
+      saveSession();
       if (editingNote === del) editingNote = null;
       /* Turn the study card back over. Leaving it flipped showed the next
          word's back, and the lookup only fires from the front, so that
@@ -3088,6 +3484,7 @@
     if (e.target && e.target.id === "allDecks") {
       onlyDeck = "";
       session = []; done = 0; misses = {}; almost = {};
+      saveSession();
       counts(); renderDue();
       return;
     }
@@ -3283,7 +3680,8 @@
     if (!confirm("Delete every word stored in this browser?")) return;
     db = { v: 1, words: [] };
     try { localStorage.removeItem(KEY); } catch (e) {}
-    session = []; flipped = false;
+    session = []; flipped = false; done = 0; misses = {}; almost = {};
+    saveSession();
     counts(); fillFilter(); renderAll(); renderDecks(); renderDue();
     toast("Cleared.");
   });
@@ -3327,6 +3725,9 @@
   } catch (e) {}
 
   load();
+  /* Before the first count, so a round left half-finished this morning is
+     what the Study badge reports rather than the day's untouched total. */
+  if (!DEMO) resumeSession();
   counts();
   fillFilter();
   /* One way in: the Start screen, which says how many are waiting and how
