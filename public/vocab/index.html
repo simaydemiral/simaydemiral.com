@@ -2268,16 +2268,35 @@
      Wiktionary writes the gender as the first letter of the head template's
      first argument: {{de-noun|n,,^er}}, {{de-noun|f}}, {{de-noun|n.sg}}.
      ------------------------------------------------------------------ */
-  /* German takes the definite article, because der/die/das never contract.
-     French takes the indefinite one: le and la both elide to l' in front of a
-     vowel, so "l'\u00e9cole" hides the very thing the article is there to show,
+  /* German and Spanish take the definite article: der/die/das and el/la
+     never contract, so the article always shows the gender. French takes
+     the indefinite one, because le and la both elide to l' in front of a
+     vowel -- "l'\u00e9cole" hides the very thing the article is there to show,
      while "une \u00e9cole" always says it. This is also how French textbooks
      write their word lists. */
   var ARTICLE = {
     de: { m: "der", f: "die", n: "das" },
+    es: { m: "el",  f: "la" },
     fr: { m: "un",  f: "une" }
   };
-  var GENDERED = { de: 1, fr: 1 };
+  var GENDERED = { de: 1, es: 1, fr: 1 };
+
+  /* A feminine Spanish noun beginning with a stressed a- takes "el" in the
+     singular: el agua, el arma, el hambre. The noun is still feminine --
+     "el agua fr\u00eda" -- which is why the card says "el agua" rather than the
+     wrong "la agua" and the gender it was looked up under is unchanged.
+
+     Written as a list rather than a rule on purpose. The rule turns on where
+     the stress falls, which is not in anything the card has: deciding it
+     would mean syllabifying Spanish in the browser and getting diphthongs
+     right, to serve a set of words small enough to write down. These are the
+     ones anybody meets; a feminine a- word outside the list gets "la", which
+     is right for almost all of them. */
+  var EL_FEM = {
+    agua: 1, "\u00e1guila": 1, ala: 1, alma: 1, ama: 1, ancla: 1, arca: 1,
+    area: 1, "\u00e1rea": 1, arma: 1, arpa: 1, asa: 1, asma: 1, aula: 1,
+    ave: 1, haba: 1, habla: 1, hacha: 1, hada: 1, hambre: 1
+  };
 
   function genderFrom(wikitext, code) {
     if (!GENDERED[code]) return "";
@@ -2292,6 +2311,7 @@
   function headword(w) {
     var set = w.gen ? ARTICLE[w.lang] : null;
     var a = set ? set[w.gen] : "";
+    if (a === "la" && EL_FEM[String(w.term).toLowerCase()]) a = "el";
     return a ? a + " " + w.term : w.term;
   }
 
