@@ -1,61 +1,28 @@
-/* Offline for the study page, and nothing more.
+/* FlashCards moved to /flashcards/. This worker exists only to get out of
+ * the way.
  *
- * Network first, always. A cache-first worker is how a page gets stuck on a
- * version from three deploys ago with no way for the user to tell; this one
- * only reaches for the cache when the network actually fails, which is the
- * case it exists for — a phone on the underground.
+ * A service worker outlives the page that registered it. The one that used
+ * to own /vocab/ was network-first, so it would not have trapped anybody on
+ * a stale page — but it would go on answering for an address with no app
+ * behind it, and its caches would sit there for good. So: claim, delete
+ * what belonged to the old app, and unregister.
  *
- * Scope is /vocab/, so the rest of the site is untouched. Sign-in and sync
- * are never cached: a stale answer there would be worse than no answer.
+ * Only the caches named for the old app. Cache storage is shared across the
+ * whole origin, so deleting everything would take the new app's cache with
+ * it — which is exactly the sort of thing that looks like it worked in a
+ * test and breaks on a phone with no signal.
  */
-const VERSION = "vocab-19";  /* bumped: the bar names its bands, Turkish through the root,
-                                 Study on the current deck no longer restarts it */
-const SHELL = [
-  "/vocab/",
-  "/vocab/manifest.webmanifest",
-  "/vocab/icon-192.png",
-  "/vocab/apple-touch-icon.png",
-];
-
-self.addEventListener("install", (e) => {
-  e.waitUntil(
-    caches.open(VERSION).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting())
-  );
-});
+self.addEventListener("install", () => self.skipWaiting());
 
 self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== VERSION).map((k) => caches.delete(k))))
-      .then(() => self.clients.claim())
+      .then((keys) => Promise.all(
+        keys.filter((k) => /^vocab-/.test(k)).map((k) => caches.delete(k))
+      ))
+      .then(() => self.registration.unregister())
+      .catch(() => {})
   );
 });
 
-self.addEventListener("fetch", (e) => {
-  const url = new URL(e.request.url);
-  if (e.request.method !== "GET") return;
-  if (url.origin !== self.location.origin) return;      /* Wiktionary etc. */
-  if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/auth/")) return;
-  if (!url.pathname.startsWith("/vocab/")) return;
-
-  /* A plain fetch() still consults the browser's HTTP cache, so "network
-     first" quietly meant "cache first" for the page itself and a rename sat
-     unseen behind a stale copy. The document is always fetched fresh; the
-     images and the manifest may come from the HTTP cache as usual. */
-  const ask = e.request.mode === "navigate"
-    ? fetch(new Request(e.request.url, { cache: "no-store", credentials: "same-origin" }))
-    : fetch(e.request);
-
-  e.respondWith(
-    ask
-      .then((res) => {
-        /* Keep a copy of what worked, for the next time it does not. */
-        if (res && res.ok) {
-          const copy = res.clone();
-          caches.open(VERSION).then((c) => c.put(e.request, copy)).catch(() => {});
-        }
-        return res;
-      })
-      .catch(() => caches.match(e.request).then((hit) => hit || caches.match("/vocab/")))
-  );
-});
+/* No fetch handler, so nothing here is between the browser and the network. */

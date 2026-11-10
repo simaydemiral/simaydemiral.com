@@ -15,7 +15,7 @@ categories, spots subscriptions by their rhythm, nets refunds against what
 you spent, and tells apart money arriving from money coming back. Nothing
 is uploaded: the file is parsed in the browser and stays there.
 
-**[FlashCards](public/vocab/index.html)** — `/vocab`
+**[FlashCards](public/flashcards/index.html)** — `/flashcards`
 Select a word on any page, click a bookmarklet, and it is saved with the
 sentence you met it in. Definitions come from Wiktionary, following
 "plural of" and "abbreviation of" pointers until it reaches a real meaning;
@@ -45,7 +45,7 @@ public/index.html              homepage
 public/style.css               all site styling; tokens in :root at the top
 public/tinkering/*.html        write-ups of how each tool was built
 public/ledger/                 the Ledger — index.html plus rules.js
-public/vocab/                  FlashCards and its capture page
+public/flashcards/             FlashCards and its capture page
 public/dispatch.html           today's Dispatch; public/dispatch/ is the archive
 wrangler.jsonc                 Cloudflare config
 ```

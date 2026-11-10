@@ -106,7 +106,7 @@ async function authCallback(req, env) {
   const code = u.searchParams.get("code");
   const state = u.searchParams.get("state");
   if (!code || !state || state !== cookieOf(req, "vstate")) {
-    return noStore(`${origin(req)}/vocab/?signin=failed`);
+    return noStore(`${origin(req)}/flashcards/?signin=failed`);
   }
 
   const body = new URLSearchParams({
@@ -122,7 +122,7 @@ async function authCallback(req, env) {
     body,
   }).then((r) => r.json()).catch(() => null);
   if (!tok || !tok.id_token) {
-    return noStore(`${origin(req)}/vocab/?signin=failed`);
+    return noStore(`${origin(req)}/flashcards/?signin=failed`);
   }
 
   /* The id_token comes straight from Google's token endpoint over TLS in
@@ -134,7 +134,7 @@ async function authCallback(req, env) {
     claims = JSON.parse(atob(part.padEnd(part.length + (4 - part.length % 4) % 4, "=")));
   } catch { claims = null; }
   if (!claims || !claims.sub || claims.aud !== env.GOOGLE_CLIENT_ID) {
-    return noStore(`${origin(req)}/vocab/?signin=failed`);
+    return noStore(`${origin(req)}/flashcards/?signin=failed`);
   }
 
   const existing = await env.vocab
@@ -150,7 +150,7 @@ async function authCallback(req, env) {
       .bind(claims.email, userId).run();
   }
 
-  return noStore(`${origin(req)}/vocab/?signin=ok`, [
+  return noStore(`${origin(req)}/flashcards/?signin=ok`, [
     setCookie(await sign(env.SESSION_SECRET, userId), 30 * DAY),
     "vstate=; Path=/auth; Max-Age=0",
   ]);
@@ -220,7 +220,7 @@ export default {
     if (path === "/auth/callback") return authCallback(req, env);
     if (path === "/auth/me") return whoami(req, env);
     if (path === "/auth/signout") {
-      return noStore("/vocab/", [setCookie("", 0)]);
+      return noStore("/flashcards/", [setCookie("", 0)]);
     }
     if (path === "/api/sync" && req.method === "POST") return sync(req, env);
 

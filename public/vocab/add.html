@@ -3,165 +3,65 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Saved</title>
+<title>FlashCards has moved</title>
 <meta name="robots" content="noindex">
+<link rel="canonical" href="/flashcards/">
 <!-- ============================================================
-  THE CROSSING.
+  FlashCards lives at /flashcards/ now. This page stays behind for the
+  home-screen app, the bookmarklet, and any link already in the wild.
 
-  localStorage belongs to one origin, so a bookmarklet running on a news
-  site cannot write to this one's. It opens this page instead: this page
-  IS simaydemiral.com, so it can write, and then it closes itself.
+  Three things before it sends you on:
 
-  The word arrives in the URL hash rather than the query string, which
-  means it is never sent to the server — not to Cloudflare, not to
-  anything. The same claim the Ledger makes, kept here too.
+  - the query and the hash are carried across. The bookmarklet puts the
+    captured word and the sentence it came from in the hash, and dropping
+    them would lose the word she just saved.
+  - the service worker that owned /vocab/ is unregistered, and its caches
+    are deleted by name. Only its own: cache storage belongs to the origin,
+    so a blanket delete would take the new app's offline copy with it.
+  - it leaves anyway. Every step above is wrapped, and a timer runs behind
+    all of it, because a redirect that waits on storage is a redirect that
+    hangs when storage is blocked.
 ============================================================ -->
 <style>
-  :root{
-    --ground:#d9cfbe; --surface:#f2ede2; --ink:#1f1c18; --muted:#6a6157;
-    --line:#d6cbb8; --brand:#c05a2a;
-    --f-body:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-  }
-  @media (prefers-color-scheme:dark){
-    :root{ --ground:#1f1a15; --surface:#2b241d; --ink:#f6f1e9;
-           --muted:#d4cabc; --line:#423830; --brand:#e08b52; }
-  }
-  *{box-sizing:border-box}
-  body{margin:0;min-height:100vh;display:grid;place-items:center;
-       background:var(--ground);color:var(--ink);
-       font:15px/1.55 var(--f-body);-webkit-font-smoothing:antialiased;padding:18px}
-  .box{background:var(--surface);border:1px solid var(--line);border-radius:12px;
-       padding:20px 22px;max-width:420px;width:100%;text-align:center}
-  .term{font-size:22px;font-weight:600;letter-spacing:-.01em;margin:2px 0 6px;
-        word-break:break-word}
-  .note{font-size:13px;color:var(--muted)}
-  .err{color:var(--brand);font-weight:600}
-  a{color:var(--brand)}
+  :root{color-scheme:light dark}
+  body{margin:0;min-height:100svh;display:flex;align-items:center;
+       justify-content:center;padding:24px;
+       background:#d9cfbe;color:#1f1c18;
+       font:400 17px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+  @media (prefers-color-scheme:dark){body{background:#1f1a15;color:#f6f1e9}}
+  p{margin:0;text-align:center;max-width:30rem}
+  a{color:#c05a2a}
+  @media (prefers-color-scheme:dark){a{color:#e08b52}}
 </style>
 </head>
 <body>
-<div class="box">
-  <div id="out"><div class="note">Saving&hellip;</div></div>
-</div>
+<p>FlashCards has moved to <a id="go" href="/flashcards/">simaydemiral.com/flashcards</a>.</p>
 <script>
 (function () {
-  var KEY = "vocab.v1";
-  var out = document.getElementById("out");
-
-  function esc(s){
-    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
-      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
-    });
-  }
-
-  function show(html){ out.innerHTML = html; }
-
-  /* Same id rule as the Ledger's rows: saving a word twice updates it
-     rather than making a second card. */
-  function idOf(term){
-    var s = term.toLowerCase(), h = 5381, i;
-    for (i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0;
-    return h.toString(36);
-  }
-
-  /* Only http(s) is kept. A "u=javascript:..." saved here would become a
-     live link on the study page, running script in this origin. */
-  function safeUrl(u){
-    var t = String(u == null ? "" : u).trim();
-    return /^https?:\/\//i.test(t) ? t : "";
-  }
-
-  function param(hash, k){
-    var m = new RegExp("(?:^|&)" + k + "=([^&]*)").exec(hash);
-    if (!m) return "";
-    try { return decodeURIComponent(m[1].replace(/\+/g, " ")); }
-    catch (e) { return ""; }
-  }
-
-  var hash = location.hash.replace(/^#/, "");
-  var term = param(hash, "w").trim().replace(/\s+/g, " ");
-
-  if (!term) {
-    show('<div class="term err">Nothing selected</div>'
-       + '<div class="note">Select a word on the page first, then click the '
-       + 'bookmarklet. <a href="/vocab/">Open the word list</a></div>');
-    return;
-  }
-  /* A sentence is not a vocabulary word. Guard against a stray paragraph
-     being saved because the selection ran away. */
-  if (term.length > 80) {
-    show('<div class="term err">That is too long</div>'
-       + '<div class="note">Select a word or a short phrase — up to about '
-       + 'eight words. <a href="/vocab/">Open the word list</a></div>');
-    return;
-  }
-
-  var rec = {
-    id: idOf(term),
-    term: term,
-    added: new Date().toISOString(),
-    deck: "Inbox",
-    box: 1,
-    /* Local date, matching the study page: a UTC date would make a word
-       captured after 5pm in California wait until tomorrow. */
-    due: (function (d) {
-      var m = d.getMonth() + 1, day = d.getDate();
-      return d.getFullYear() + "-" + (m < 10 ? "0" : "") + m
-                             + "-" + (day < 10 ? "0" : "") + day;
-    })(new Date()),
-    src: {
-      url: safeUrl(param(hash, "u")).slice(0, 400),
-      title: param(hash, "t").slice(0, 200),
-      sentence: param(hash, "s").slice(0, 400)
-    },
-    senses: [],
-    looked: false,
-    note: ""
-  };
-
-  var db;
+  var to = "/flashcards/add" + location.search + location.hash;
+  var link = document.getElementById("go");
+  if (link) link.href = to;
+  var left = false;
+  function leave() { if (!left) { left = true; location.replace(to); } }
+  var jobs = [];
   try {
-    db = JSON.parse(localStorage.getItem(KEY) || "null") || {};
-  } catch (e) { db = {}; }
-  if (!Array.isArray(db.words)) db = { v: 1, words: [] };
-
-  var existing = -1, i;
-  for (i = 0; i < db.words.length; i++) {
-    if (db.words[i].id === rec.id) { existing = i; break; }
-  }
-
-  var verb = "Saved";
-  if (existing > -1) {
-    /* Seen again: keep the schedule and anything looked up, but take the
-       fresher sentence — the newest encounter is the better example. */
-    var old = db.words[existing];
-    old.src = rec.src.sentence ? rec.src : old.src;
-    old.seen = (old.seen || 1) + 1;
-    verb = "Already saved";
-  } else {
-    db.words.unshift(rec);
-  }
-
-  try {
-    localStorage.setItem(KEY, JSON.stringify(db));
-  } catch (e) {
-    show('<div class="term err">Could not save</div>'
-       + '<div class="note">Browser storage is full or blocked.</div>');
-    return;
-  }
-
-  show('<div class="note">' + verb + '</div>'
-     + '<div class="term">' + esc(term) + '</div>'
-     + '<div class="note">' + db.words.length + ' word'
-     + (db.words.length === 1 ? "" : "s") + ' · '
-     + '<a href="/vocab/">open the list</a></div>');
-
-  /* Close the popup it was opened in — but only if it really is one. Chrome
-     will close a tab navigated here directly, which shut the whole tab before
-     the confirmation could be read. 700ms was too short for it anyway. */
-  if (window.opener) {
-    setTimeout(function () { try { window.close(); } catch (e) {} }, 1500);
-  }
+    if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+      jobs.push(navigator.serviceWorker.getRegistrations().then(function (rs) {
+        return Promise.all(rs.map(function (r) {
+          return r.scope.indexOf("/vocab/") > -1 ? r.unregister() : null;
+        }));
+      }));
+    }
+    if (window.caches && caches.keys) {
+      jobs.push(caches.keys().then(function (ks) {
+        return Promise.all(ks.filter(function (k) {
+          return /^vocab-/.test(k);
+        }).map(function (k) { return caches.delete(k); }));
+      }));
+    }
+  } catch (e) {}
+  Promise.all(jobs).catch(function () {}).then(leave);
+  setTimeout(leave, 1200);
 })();
 </script>
 </body>

@@ -1,0 +1,21 @@
+{
+  "name": "FlashCards",
+  "short_name": "FlashCards",
+  "description": "Save a word from any page you are reading, and study it later.",
+  "start_url": "/flashcards/",
+  "scope": "/flashcards/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#171210",
+  "theme_color": "#171210",
+  "icons": [
+    { "src": "/flashcards/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/flashcards/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/flashcards/icon-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "share_target": {
+    "action": "/flashcards/add",
+    "method": "GET",
+    "params": { "title": "t", "text": "w", "url": "u" }
+  }
+}
