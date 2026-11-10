@@ -10,3 +10,14 @@ Picture1.png
 
 # local-only secrets for wrangler dev; never committed
 .dev.vars
+
+# Work in progress — on this Mac only.
+#
+# Two separate hazards, and this covers the second one:
+#   deploying  — Cloudflare uploads public/ read from disk, not from git, and
+#                scripts/dispatch/run.py ends in `wrangler deploy`. Anything
+#                unfinished in public/ goes live on the next Dispatch edition.
+#                That is why preview/ sits outside public/.
+#   publishing — this repo is public on GitHub, so a commit is a publication
+#                of its own. Unfinished design does not belong there either.
+preview/
