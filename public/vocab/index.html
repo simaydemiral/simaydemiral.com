@@ -430,6 +430,7 @@
              ? w.want : "";
       w.root = typeof w.root === "string" ? w.root.slice(0, 60) : "";
       w.miss = typeof w.miss === "number" ? w.miss : 0;
+      w.pv = Number(w.pv) || 0;
       /* An audio URL from a file is a URL like any other: http(s) only. */
       if (w.say && typeof w.say === "object") {
         w.say = { audio: safeUrl(w.say.audio).slice(0, 400),
@@ -843,8 +844,17 @@
      them. "Evals" is capitalised and plural, so it 404s; "evals" answers
      "plural of eval", and "eval" answers "Abbreviation of evaluation" — two
      pointers and still no meaning. These are the pointers worth following. */
+  /* "(?:the |a |an )?" at the front because Simple English Wiktionary writes
+     its pointers as sentences -- "The present participle of plague." -- while
+     the full dictionary writes "present participle and gerund of plague".
+     Anchored without it, every Simple pointer read as a definition.
+
+     Never in front of a bare "form" or "inflection", though: "A form of
+     government" is a definition, and letting the article through there would
+     have sent the card off to look up "government". */
   var POINTER = new RegExp(
-    "^(plural|abbreviation|initialism|acronym|clipping|alternative form|" +
+    "^(?:(?:the|a|an)\\s+(?!form\\b|inflection\\b))?" +
+    "(plural|abbreviation|initialism|acronym|clipping|alternative form|" +
     "alternative spelling|present participle|gerund|past tense|past participle|" +
     "third-person singular|simple past|comparative|superlative|synonym|" +
     "misspelling|inflection|form)\\b[^.]*?\\bof\\s+([A-Za-z][A-Za-z'\\u2019-]*)", "i");
@@ -856,7 +866,8 @@
      not -- pointsTo() lets that one through, because the grammar jargon after
      the colon is long enough to look like an explanation. */
   var FORM_ONLY = new RegExp(
-    "^(plural|present participle|gerund|past tense|past participle|" +
+    "^(?:(?:the|a|an)\\s+(?!form\\b|inflection\\b))?" +
+    "(plural|present participle|gerund|past tense|past participle|" +
     "third-person singular|simple past|comparative|superlative|" +
     "inflection|form|alternative form|alternative spelling|misspelling)" +
     "\\b[^.]*?\\bof\\s", "i");
@@ -1865,7 +1876,11 @@
         last.example = t;
       }
     }
-    return out;
+    /* "The present participle of plague." is the whole Simple entry for
+       "plaguing", and the card leads with these, so it showed a pointer
+       where the meaning should be. Nothing is kept if nothing is left: the
+       precise senses then have the card, which is the right fallback. */
+    return out.filter(function (x) { return !formOnly(x); });
   }
 
   function viaSimple(term) {
@@ -2090,9 +2105,29 @@
      plainly has -- marked as unknown with no way back. */
   var LOOK_TRIES = 3;
 
+  /* A card whose every sense is a pointer and nothing else -- "the present
+     participle of plague", with the headword still reading "plaguing" -- was
+     read by a build that could not follow it, and nothing since has made it
+     ask again. Bumping LOOK_SOURCES would have every word in the list ask,
+     which is a lot of requests to repair a handful of cards; this asks only
+     the ones that are visibly stuck. Once each, because a pointer whose
+     target has no entry of its own would otherwise ask on every redraw. */
+  var STUCK_FIX = 1;
+
+  function stuckOnPointer(w) {
+    if (!w.looked) return false;
+    var shown = shownSenses(w), i;
+    if (!shown.length) return false;
+    for (i = 0; i < shown.length; i++) {
+      if (!formOnly(shown[i]) && !pointsTo(shown[i])) return false;
+    }
+    return true;
+  }
+
   function needsLook(w) {
     if (!w.looked) return true;
     if ((w.lv || 0) < LOOK_SOURCES) return true;
+    if ((w.pv || 0) < STUCK_FIX && stuckOnPointer(w)) return true;
     return !(w.senses && w.senses.length) && (w.miss || 0) < LOOK_TRIES;
   }
 
@@ -2122,6 +2157,7 @@
       if (again) w.plain = null;
       w.looked = true;
       w.lv = LOOK_SOURCES;
+      w.pv = STUCK_FIX;
       var renamed = relemma(w);
       /* Folding takes a card away, so it waits until none is on screen. */
       var folded = (renamed && !session.length) ? foldDuplicates() : false;
