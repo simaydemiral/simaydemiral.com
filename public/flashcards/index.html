@@ -172,7 +172,9 @@
   code{font-family:var(--f-mono);font-size:12.5px;background:var(--sunken);
        padding:1px 5px;border-radius:4px}
 
-  #toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,16px);
+  /* Clear of the grade row. At 22px it landed squarely on "Almost", which
+     on a phone is a mis-tap waiting to happen. */
+  #toast{position:fixed;left:50%;bottom:92px;transform:translate(-50%,16px);
          background:var(--ink);color:var(--ground);padding:10px 16px;
          border-radius:9px;font-size:13.5px;opacity:0;pointer-events:none;
          transition:opacity .18s,transform .18s;z-index:50}
@@ -218,6 +220,17 @@
              text-transform:uppercase;color:var(--brand);margin-bottom:5px}
   .rootdef b span{color:var(--faint)}
   .rootdef p{margin:0 0 3px}
+  .rootopt{display:flex;align-items:flex-start;gap:7px;margin:0 0 4px}
+  .rootopt .pin{flex:0 0 auto;width:19px;height:19px;margin-top:1px;padding:0;
+                border:1px solid var(--line);border-radius:5px;cursor:pointer;
+                background:var(--surface);color:var(--faint);
+                font:600 11px/1 var(--f-mono)}
+  .rootopt .pin:hover{border-color:var(--brand);color:var(--brand)}
+  .roothint{font-size:12px;color:var(--faint);margin:5px 0 0}
+  .rootpinned{cursor:pointer}
+  .rootpinned::after{content:" \2713";color:var(--go);font-family:var(--f-mono)}
+  .ownit{margin:12px 0 0;font-size:13px;color:var(--muted)}
+  .ownit b{color:var(--ink)}
   .prog{margin:6px 0 0}
   .prog-num{font:500 11px/1.4 var(--f-mono);color:var(--muted);letter-spacing:.03em}
   .prog-bar{display:flex;height:6px;margin-top:4px;border-radius:99px;
@@ -481,6 +494,8 @@
           miss: Number(w.rootdef.miss) || 0
         };
       } else { delete w.rootdef; }
+      w.rootpin = (typeof w.rootpin === "number" && w.rootpin >= 0)
+                ? Math.floor(w.rootpin) : -1;
       src = (w.src && typeof w.src === "object") ? w.src : {};
       w.src = {
         url: safeUrl(src.url).slice(0, 400),
@@ -961,6 +976,13 @@
         } else if (defs[j].examples && defs[j].examples.length) {
           eg = stripTags(defs[j].examples[0]);
         }
+        /* Quotations arrive with their templates half-rendered -- covenant
+           carried "Wet or Dry, {{" onto the card. cleanWiki takes the
+           brackets and the apostrophes out; anything still holding a brace
+           was cut off mid-template, and half a sentence teaches nothing, so
+           it goes. */
+        eg = cleanWiki(eg);
+        if (/[{}\[\]]/.test(eg)) eg = "";
         got.push({ pos: stripTags(langs[i].partOfSpeech) || "", text: text, example: eg });
       }
       if (got.length) blocks.push(got);
@@ -1199,7 +1221,17 @@
       var lines = blocks[i].body.split("\n");
       for (var j = 0; j < lines.length; j++) {
         if (!/^#[^:*#]/.test(lines[j])) continue;
-        var t = cleanWiki(lines[j].replace(/^#\s*/, ""));
+        var raw = lines[j].replace(/^#\s*/, "");
+        /* The domain label, kept. Turkish Wiktionary's only entry for
+           "obviate" is the linguistics term -- "ozne disi ucuncu kisi", the
+           obviative -- and it sat on the card as though it were the Turkish
+           for a verb about making things unnecessary. The label that says
+           otherwise was in the wikitext all along, as {{terim|dil bilimi}};
+           cleanWiki was taking it out along with the template. Same for the
+           good entries: acute's "tiz" is (dil bilimi) and its "siddetli" is
+           (tip), which is exactly what tells her which one she wants. */
+        var lab = /\{\{(?:t|terim|etiket)\|([^|}=]{2,30})[|}]/.exec(raw);
+        var t = cleanWiki(raw);
         if (!t || t.length < 2 || !/[a-zçğıöşü]/i.test(t)) continue;
         /* A usage example that survived the template stripper, carrying its
            own translation after an equals sign: "GAP y H&M son las empresas
@@ -1210,7 +1242,8 @@
         if (t.length > 90 || t.split(/\s+/).length > 10) continue;
         if (seen[t.toLowerCase()]) continue;
         seen[t.toLowerCase()] = 1;
-        out.push(t.slice(0, 160));
+        /* Deduped on the words, labelled on the way out. */
+        out.push(((lab ? "(" + lab[1].trim() + ") " : "") + t).slice(0, 160));
         if (out.length >= 6) return out;
       }
     }
@@ -1379,6 +1412,11 @@
     var q = /\|(?:passage|text)=([^|}]{25,240})/g;
     while ((m = q.exec(wikitext))) {
       out = cleanWiki(m[1]);
+      /* cleanWiki only removes templates it can see both ends of. A passage
+         cut at the character limit above keeps a dangling "{{", which is how
+         covenant put "Wet or Dry, {{" on the card. Half a sentence with a
+         brace on the end is not a usage example, so keep looking. */
+      if (/[{}\[\]]/.test(out)) continue;
       if (out.length > 25 && out.length < 240) return { text: out, from: "Wiktionary" };
     }
     return null;
@@ -1391,7 +1429,22 @@
      every question about what the reader can see has to ask. */
   function shownSenses(w) {
     var plain = Array.isArray(w.plain) ? w.plain : [];
-    return lendExamples(w, (plain.length && !fullOpen) ? plain : (w.senses || []));
+    return dropPointers(lendExamples(w, (plain.length && !fullOpen)
+                                        ? plain : (w.senses || [])));
+  }
+
+  /* "Synonym of obviative." twice, under a verb that means something else
+     entirely. A sense that is nothing but a pointer teaches nothing when a
+     real one sits beside it -- so it is hidden, not dropped: the first sense
+     is still what the headword lookup follows, and the precise list is still
+     what gets stored. If every sense is a pointer they all stay, because
+     then the pointer is all there is. */
+  function dropPointers(list) {
+    var keep = [], i;
+    for (i = 0; i < list.length; i++) {
+      if (!pointsTo(list[i]) && !formOnly(list[i])) keep.push(list[i]);
+    }
+    return keep.length ? keep : list;
   }
 
   /* Simple Wiktionary's examples are hit and miss; the full dictionary's are
@@ -1542,6 +1595,9 @@
     rooting[w.id] = 1;
     rootSenses(r.root, r.pos).then(function (senses) {
       delete rooting[w.id];
+      /* A different root means a different list, so a tick made against the
+         old one points at nothing meaningful. */
+      if (w.rootdef && w.rootdef.term !== r.root) w.rootpin = -1;
       if (senses.length) w.rootdef = { term: r.root, senses: senses, miss: 0 };
       else w.rootdef = { term: r.root, senses: [],
                          miss: ((w.rootdef && w.rootdef.miss) || 0) + 1 };
@@ -1896,8 +1952,17 @@
   var FRAME = /^(if |when |you use )/i;
   var ASIDE = /^(synonyms?|antonyms?|related words?|usage|other words?|notes?)\s*:/i;
 
-  function fromSimple(extract) {
+  function fromSimple(extract, term) {
     var lines = String(extract || "").split("\n"), out = [], pos = "", last = null, i, t, m;
+    /* Simple Wiktionary writes a definition as a sentence about the word --
+       "A plague is an unusual number of insects..." -- and puts nothing
+       between consecutive definitions. Without this the second was swallowed
+       as the first one's example, so the card showed a definition in italics
+       where a usage sentence belongs. */
+    var self = String(term || "").trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    var SELF = self
+      ? new RegExp("^(?:an?|the)?\\s*" + self + "s?\\s+(?:is|are|means)\\b", "i")
+      : null;
     for (i = 0; i < lines.length; i++) {
       t = lines[i].trim();
       if (!t) continue;
@@ -1906,7 +1971,7 @@
       /* any other heading -- Pronunciation, Etymology -- ends the section */
       if (t.charAt(0) === "=") { pos = ""; last = null; continue; }
       if (!pos || ASIDE.test(t)) continue;
-      if (!last || t.charAt(0) === "(" || FRAME.test(t)) {
+      if (!last || t.charAt(0) === "(" || FRAME.test(t) || (SELF && SELF.test(t))) {
         last = { pos: pos, text: t, example: "" };
         out.push(last);
       } else if (!last.example) {
@@ -1930,7 +1995,7 @@
       for (k in pages) {
         if (Object.prototype.hasOwnProperty.call(pages, k)) { p = pages[k]; break; }
       }
-      return (p && p.extract) ? fromSimple(p.extract) : [];
+      return (p && p.extract) ? fromSimple(p.extract, term) : [];
     }).catch(function () { return []; });
   }
 
@@ -2327,6 +2392,26 @@
 
   /* The word as it should be read and remembered, which for a German noun
      includes the article and for everything else is just the word. */
+  /* A card the dictionary has not really answered: no example to anchor the
+     word, or a single sense, or a gloss so hollow it had to go and look up
+     the root. These are the ones worth writing her own meaning on. */
+  function thinCard(w) {
+    if (w.note) return false;
+    var shown = shownSenses(w);
+    if (!shown.length) return false;
+    if (w.rootdef && w.rootdef.senses && w.rootdef.senses.length) return true;
+    if (!hasExample(w)) return true;
+    return shown.length < 2;
+  }
+
+  /* Which root sense she ticked, or -1. Checked against the list as it
+     stands, because a card whose root changed has a stale index. */
+  function rootPin(w) {
+    var n = (w.rootdef && w.rootdef.senses) ? w.rootdef.senses.length : 0;
+    var i = Number(w.rootpin);
+    return (n && i === Math.floor(i) && i >= 0 && i < n) ? i : -1;
+  }
+
   function headword(w) {
     var set = w.gen ? ARTICLE[w.lang] : null;
     var a = set ? set[w.gen] : "";
@@ -2779,12 +2864,35 @@
         /* Under the gloss, not instead of it: "in an acute manner" is still
            true, and the word it is about is what was missing. */
         if (w.rootdef && w.rootdef.senses && w.rootdef.senses.length) {
+          /* Dictionaries order senses by etymology, not by how often anybody
+             uses them, so "acute" leads with "Brief, quick, short" and the
+             sense that explains "acutely aware" is third. Nothing in the
+             data says which is which, and the other dictionary orders them
+             no better -- so rather than guess, the card lets her say. Tick
+             one and it is the only one shown from then on; a tap on it
+             gives the others back. */
+          var rs = w.rootdef.senses, pin = rootPin(w);
           html += '<div class="rootdef"><b>' + esc(w.rootdef.term)
-                + (w.rootdef.senses[0].pos
-                    ? ' <span>' + esc(w.rootdef.senses[0].pos) + '</span>' : '')
+                + (rs[0].pos ? ' <span>' + esc(rs[0].pos) + '</span>' : '')
                 + '</b>';
-          for (i = 0; i < w.rootdef.senses.length; i++) {
-            html += '<p>' + esc(w.rootdef.senses[i].text) + '</p>';
+          if (pin >= 0) {
+            html += '<p class="rootpinned" data-rootall="1" role="button" '
+                  + 'tabindex="0" title="Show the other meanings">'
+                  + esc(rs[pin].text) + '</p>';
+          } else {
+            for (i = 0; i < rs.length; i++) {
+              html += '<p class="rootopt">'
+                    + (rs.length > 1
+                        ? '<button class="pin" data-rootpin="' + i + '" '
+                          + 'title="This is the meaning I met" '
+                          + 'aria-label="Keep this meaning for '
+                          + esc(w.term) + '">\u2713</button>' : '')
+                    + '<span>' + esc(rs[i].text) + '</span></p>';
+            }
+            if (rs.length > 1) {
+              html += '<p class="roothint">Tick the one you actually met '
+                    + '\u2014 the card keeps it.</p>';
+            }
           }
           html += '</div>';
         } else if (w.plain !== null && needsRootLook(w)) {
@@ -2862,8 +2970,20 @@
               + trButton(w) + fullButton(w) + '</div>'
               + '</div>';
       } else {
+        /* Where the dictionary has not actually answered, say so and point
+           at the box. "Accretive" comes back as "relating to accretion" and
+           never mentions earnings; that sense is not in Wiktionary to be
+           found, so the honest move is to hand her the pen rather than
+           invent one. Only on the cards that need it. */
+        var thin = thinCard(w);
+        if (thin) {
+          html += '<p class="ownit">Not the meaning you met? '
+                + '<b style="display:inline">Write your own</b> \u2014 it goes '
+                + 'on the card and is what you see from then on.</p>';
+        }
         html += '<div class="noteacts" style="margin-top:12px">'
-              + '<button class="btn-q" id="noteBtn">Add a note</button>'
+              + '<button class="btn-q' + (thin ? ' is-on' : '')
+              + '" id="noteBtn">Add a note</button>'
               + trButton(w) + fullButton(w) + '</div>';
       }
       /* Only when nothing above carried one, so a word never shows two. */
@@ -3449,7 +3569,9 @@
     if (!added && !dup && !long && !junk) { toast("Nothing to add."); return; }
     save();
     $("paste").value = "";
-    counts(); renderAll(); renderDecks(); renderDue();
+    /* The pill carries a count too, and it was the one thing not redrawn --
+       the tab said 18 while the pill above it still said 17. */
+    renderSpaces(); counts(); renderAll(); renderDecks(); renderDue();
     toast(added + " added" + (dup ? ", " + dup + " already there" : "")
         + (long ? ", " + long + " too long to be a word" : "")
         + (junk ? ", " + junk + " with no letters in" : "") + ".");
@@ -3637,6 +3759,18 @@
 
     var dg = get("data-deckgo");
     if (dg) { studyDeck(dg); return; }
+
+    var rp = get("data-rootpin");
+    if (rp !== null && session[0]) {
+      session[0].rootpin = Number(rp);
+      mark(session[0].id); save(); renderDue();
+      return;
+    }
+    if (get("data-rootall") !== null && session[0]) {
+      session[0].rootpin = -1;
+      mark(session[0].id); save(); renderDue();
+      return;
+    }
 
     /* Asked again on purpose, so the three-try ceiling is not a dead end. */
     if (e.target && e.target.id === "lookAgain") {
