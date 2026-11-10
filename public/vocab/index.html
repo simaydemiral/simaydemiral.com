@@ -222,7 +222,7 @@
   .prog-num{font:500 11px/1.4 var(--f-mono);color:var(--muted);letter-spacing:.03em}
   .prog-bar{display:flex;height:6px;margin-top:4px;border-radius:99px;
             background:var(--line-soft);overflow:hidden}
-  .prog-bar span{display:block;height:100%;min-width:0}
+  .prog-bar span{display:block;height:100%;flex:0 0 auto}
   .prog-bar .p-top{background:var(--go)}
   .prog-bar .p-mid{background:var(--warn)}
   .study .prog{margin:0 0 10px;max-width:420px}
@@ -1128,7 +1128,10 @@
     var head = /\{\{trans-top\|([^}]*)\}\}/;
     while ((m = re.exec(scope))) {
       var h = head.exec(m[0]);
-      var sense = h ? h[1].replace(/^id=[^|]*\|/, "").trim() : "";
+      /* cleanWiki, not a bare trim: the label is raw wikitext and
+         "(''geometry'') of an angle" put two apostrophes either side of the
+         word on the card. */
+      var sense = h ? cleanWiki(h[1].replace(/^id=[^|]*\|/, "")) : "";
       var inner = m[1], t = /\{\{t\+?\|tr\|([^}|]+)/g, hit, seen = {}, words = [];
       while ((hit = t.exec(inner))) {
         var word = hit[1].trim();
@@ -1631,6 +1634,21 @@
     /* A word with a gender is a noun, which is the sense to translate. */
     var want = w.gen ? "noun" : (w.want || "");
     viaTurkish(ask, wl, glossOf(w.senses, want)).then(function (tr) {
+      /* Nothing for "acutely": Turkish Wiktionary has no entry, and the
+         English one carries no Turkish row, which is usual for an adverb
+         built on an adjective. "Acute" has both -- akut, siddetli, keskin.
+         So when the card already knows which word this one is built on,
+         that word is asked next and the answer says whose it is. */
+      if (tr.unreachable || (tr.from && tr.from !== "none")) return tr;
+      var root = w.rootdef && w.rootdef.term;
+      if (!root || root.toLowerCase() === String(ask).toLowerCase()) return tr;
+      return viaTurkish(wl === "en" ? root.toLowerCase() : root, wl,
+                        glossOf(w.rootdef.senses, "")).then(function (rt) {
+        if (!rt || rt.unreachable || !rt.from || rt.from === "none") return tr;
+        rt.via = root;
+        return rt;
+      });
+    }).then(function (tr) {
       delete translating[w.id];
       if (tr.unreachable) {
         /* Not written down: the next press asks again. */
@@ -2346,10 +2364,20 @@
      not been started, so three bands need only two spans. */
   function barHtml(b, label) {
     if (!b.n) return "";
-    var num = b.top + " of " + b.n + " mastered";
+    /* The amber band has to be named. "0 of 6 mastered" over a bar with
+       amber in it reads as the bar being wrong -- the words in it are ones
+       she has answered right once or twice, which is not nothing and is not
+       mastery either. */
+    var num = b.top + " of " + b.n + " mastered"
+            + (b.mid ? " \u00b7 " + b.mid + " learning" : "");
     var full = b.top + " mastered \u00b7 " + b.mid + " learning \u00b7 "
              + b.raw + " new or missed";
-    function w(x) { return (x * 100 / b.n).toFixed(1) + "%"; }
+    /* One word out of forty-nine is half a pixel, which looks like a
+       rendering fault rather than a count. A band that has anything in it is
+       wide enough to see. */
+    function w(x) {
+      return x ? "max(3px, " + (x * 100 / b.n).toFixed(1) + "%)" : "0";
+    }
     return '<div class="prog" title="' + esc(full) + '">'
          + '<div class="prog-num">'
          + (label ? esc(label) + ' \u00b7 ' : '') + esc(num) + '</div>'
@@ -2713,7 +2741,12 @@
             html += '<div class="trline"><span class="trwords">'
                   + esc(w.tr.more[ti]) + '</span></div>';
           }
-          html += '<div class="trfrom">' + esc(w.tr.from || "Wiktionary") + '</div>';
+          html += '<div class="trfrom">' + esc(w.tr.from || "Wiktionary")
+                /* Said plainly, because akut is the Turkish for acute and
+                   not for acutely, and the card should not pretend it is. */
+                + (w.tr.via ? ' \u00b7 the Turkish for <b style="display:inline">'
+                              + esc(w.tr.via) + '</b>' : '')
+                + '</div>';
         } else if (w.tr.one) {
           html += '<div class="trline"><span class="trwords">' + esc(w.tr.one) + '</span>'
                 + '<span class="trsense">'
@@ -3527,11 +3560,20 @@
   });
 
   /* Study one deck. The sitting restarts, because a round already under way
-     was built from a different set of words. */
+     was built from a different set of words -- unless it was built from
+     these ones. Pressing Study on the deck she is already in is how she
+     comes back to it after adding a word, not a request to begin again, and
+     restarting there threw away the count and the cards that had come round
+     once already. */
   function studyDeck(name) {
+    var b = document.querySelector('.tab[data-tab="due"]');
+    if (onlyDeck === name && session.length) {
+      if (b) b.click();
+      renderDue();
+      return;
+    }
     onlyDeck = name;
     session = []; done = 0; misses = {}; almost = {};
-    var b = document.querySelector('.tab[data-tab="due"]');
     if (b) b.click();
     startSession();
     if (!session.length) renderDue();
