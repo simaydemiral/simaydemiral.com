@@ -1930,9 +1930,19 @@
     } catch (e) {}
   }
 
+  /* A reply that never comes is indistinguishable, from the card's point of
+     view, from one that never will -- and fetch has no timeout of its own,
+     so the promise simply stays pending and the card waits for ever. */
+  var LOOK_TIMEOUT = 8000;
+
   function getJSON(url, tries) {
     tries = tries || 1;
-    return fetch(url, { mode: "cors" }).then(function (r) {
+    var ctl = typeof AbortController === "function" ? new AbortController() : null;
+    var bell = setTimeout(function () { if (ctl) ctl.abort(); }, LOOK_TIMEOUT);
+    var opts = { mode: "cors" };
+    if (ctl) opts.signal = ctl.signal;
+    return fetch(url, opts).then(function (r) {
+      clearTimeout(bell);
       if (!r.ok) {
         var err = new Error(r.status);
         err.status = r.status;           /* 404 means "no such page", which is
@@ -1941,6 +1951,7 @@
       }
       return r.json();
     }).catch(function (e) {
+      clearTimeout(bell);
       var worth = !e.status || e.status === 429 || e.status >= 500;
       if (tries >= 3 || !worth) throw e;
       return new Promise(function (go) { setTimeout(go, 600 * tries); })
@@ -2290,6 +2301,25 @@
       save();
       if (after) after();
       if (renamed || folded) { counts(); renderAll(); renderDecks(); }
+    }).catch(function () {
+      /* Nothing downstream of here was catching, so a source that rejected
+         -- a blocked request, a dropped connection, an extension refusing
+         the call -- left three things behind: the in-flight flag set, so
+         the card would never ask again; w.looked unset, so the front of the
+         card kept the "Looking it up..." line; and after() unrun, so even a
+         later answer could not redraw it. The card sat there for good.
+
+         Treated as a miss instead. That clears the flag, lets LOOK_TRIES
+         give it two more goes, and drops the card onto the "No definition
+         found yet -- Look again" state, which at least says what happened
+         and offers a way out. */
+      delete looking[w.id];
+      w.miss = (w.miss || 0) + 1;
+      w.looked = true;
+      w.lv = LOOK_SOURCES;
+      w.pv = STUCK_FIX;
+      save();
+      if (after) after();
     });
   }
 
