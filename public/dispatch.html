@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The Dispatch — Tuesday, November 10, 2026</title>
 <link href="https://api.fontshare.com/v2/css?f%5B%5D=switzer@400,500,600&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Abril+Fatface&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -16,15 +16,125 @@
     padding: 32px 16px 64px;
     overflow-x: hidden;
   }
-  .brief { max-width: 760px; margin: 0 auto; }
+  /* position, so the wire badge can be pinned to the column's top left
+     from outside the masthead — that element clips its overflow, which was
+     cutting the pulse ring off the side of the dot. */
+  .brief { max-width: 760px; margin: 0 auto; position: relative; }
+
+  /* ---------- the wire ----------
+
+     A live indicator at the top left, where the masthead's byline used to
+     be. The byline said what the title already says; this says the thing
+     the page could not: that it is written again every morning. */
+  .wire {
+    /* Pinned to the top left corner rather than sitting in the flow: the
+       masthead is centred text, and this is a marker on the page, not a
+       line of the title. Absolute so it costs the masthead no height. */
+    position: absolute;
+    top: 6px;
+    /* Indented a little rather than flush: hard against the column edge it
+       read as falling off the page. */
+    left: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #ef8a68;
+    z-index: 2;
+  }
+  .wire-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #e8503a;
+    box-shadow: 0 0 0 0 rgba(232, 80, 58, 0.55);
+    animation: wire-pulse 2.4s ease-out infinite;
+  }
+  /* A pulse rather than a blink. A hard on/off at the top of a page someone
+     reads every morning is a fire alarm; this breathes. */
+  @keyframes wire-pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(232, 80, 58, 0.5); opacity: 1; }
+    70%  { box-shadow: 0 0 0 7px rgba(232, 80, 58, 0); opacity: 0.72; }
+    100% { box-shadow: 0 0 0 0 rgba(232, 80, 58, 0); opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .wire-dot { animation: none; }
+  }
 
   /* ---------- masthead ---------- */
   .masthead {
+    position: relative;
+    /* The artwork stops at the rule under the dateline. It is taller than
+       this box and was running on behind the edition nav; clipping it here
+       means the line is the end of it rather than something it passes
+       through. The bottom of the image is already fading by that point, so
+       the cut lands in the fade rather than across the picture. */
+    overflow: hidden;
     text-align: center;
     padding: 8px 0 28px;
     border-bottom: 1px solid rgba(245, 235, 221, 0.15);
     margin-bottom: 32px;
   }
+
+  /* The globe, behind the title block only.
+
+     Not behind the page: this is eleven desks of small text that somebody
+     actually reads in the morning, and an image under all of it trades
+     legibility for atmosphere. Here it sets the tone and then stops.
+
+     The artwork is navy and cyan; this page is warm, #171210 with a peach
+     accent. Dropped in as it is, the top of the page would look borrowed
+     from another site. grayscale flattens it to tone, sepia pushes it warm,
+     and the hue and saturation land it in the peach the masthead already
+     uses — a wireframe image takes that well because it is mostly line and
+     glow rather than real colour. */
+  .masthead-art {
+    position: absolute;
+    left: 50%;
+    top: -18px;
+    /* The full width of the column, so it lines up with "The Dispatch"
+       above it rather than sitting in from the edges.
+
+       It was held at 600px before because the artwork is 2000x857: at the
+       column's full 760px it stood 326px tall and ran on down behind the
+       edition nav and into the markets strip. The height is fixed now and
+       the picture crops to it, so widening it shows more of the map either
+       side instead of making the whole thing taller. */
+    width: min(760px, 100%);
+    height: 258px;
+    overflow: hidden;
+    transform: translateX(-50%);
+    z-index: 0;
+    pointer-events: none;
+    user-select: none;
+  }
+  .masthead-art img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    /* Crops to the frame rather than setting it: a wider frame reveals more
+       of the dotted map to the left and right, which is the point. */
+    object-fit: cover;
+    object-position: 50% 46%;
+    opacity: 0.42;
+    filter: grayscale(1) sepia(0.85) saturate(2.1) hue-rotate(-12deg) brightness(0.85);
+    /* fades out at every edge, so it has no border and never ends in a line */
+    -webkit-mask-image:
+      radial-gradient(76% 70% at 50% 44%, #000 30%, transparent 76%),
+      linear-gradient(to bottom, #000 52%, transparent 88%);
+    -webkit-mask-composite: source-in;
+            mask-image:
+      radial-gradient(76% 70% at 50% 44%, #000 30%, transparent 76%),
+      linear-gradient(to bottom, #000 52%, transparent 88%);
+            mask-composite: intersect;
+  }
+  /* The words sit over it. */
+  .masthead .eyebrow, .masthead h1,
+  .masthead .dateline, .masthead .tagline { position: relative; z-index: 1; }
   .masthead .eyebrow {
     font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
     font-weight: 500;
@@ -34,12 +144,19 @@
     color: #e8935a;
   }
   .masthead h1 {
-    font-family: "Switzer", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-    font-weight: 500;
-    letter-spacing: -0.035em;
-    font-size: 52px;
-    line-height: 1.05;
-    margin: 12px 0 8px;
+    /* Abril Fatface for the masthead only. A heavy high-contrast didone:
+       this is a front page, and the title should read as one rather than as
+       another heading in the same sans the rest of the site uses.
+
+       It has one weight and already sits tight, so the -0.035em Switzer
+       needed would crowd it; and its own line box runs taller, hence the
+       smaller size and the pulled-in top margin. */
+    font-family: "Abril Fatface", Georgia, "Times New Roman", serif;
+    font-weight: 400;
+    letter-spacing: -0.012em;
+    font-size: 48px;
+    line-height: 1.08;
+    margin: 8px 0 10px;
   }
   .masthead .dateline { font-size: 14px; color: rgba(245, 235, 221, 0.65); }
   .masthead .tagline {
@@ -48,6 +165,58 @@
     color: rgba(245, 235, 221, 0.75);
     margin-top: 10px;
   }
+
+  /* ---------- US & Turkey, with the two cities behind it ----------
+
+     Behind the heading and the country tabs only, not behind the stories.
+     The artwork is navy and orange; the orange is already close to the
+     accent this page uses, so the duotone here is lighter-handed than the
+     globe's — enough to take the blue out of the sky and the water without
+     flattening the two skylines into one tone. */
+  .section--region { position: relative; }
+  .region-art {
+    position: absolute;
+    left: 50%;
+    top: -22px;
+    width: min(760px, 100%);
+    transform: translateX(-50%);
+    z-index: 0;
+    pointer-events: none;
+    user-select: none;
+    overflow: hidden;
+    /* A band rather than the whole picture: the heading and the tabs are
+       about 120px tall and the artwork is 3:2, so showing all of it would
+       put most of a photograph behind two lines of text. */
+    height: 150px;
+    border-radius: 10px;
+  }
+  .region-art img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Horizontally centred: the sunset between the two cities is the point
+       of the picture, and both bridges sit either side of it.
+
+       Vertically a little above the middle. This artwork is 2000x857 rather
+       than the 1920x1280 it replaced — panoramic instead of tall — so the
+       band no longer has to climb past a lot of water to reach the bridges.
+       It only needs to keep the towers and the skyline out of the crop. */
+    object-position: 50% 46%;
+    opacity: 0.3;
+    filter: grayscale(0.55) sepia(0.55) saturate(1.7) hue-rotate(-10deg) brightness(0.8);
+    -webkit-mask-image:
+      linear-gradient(to bottom, #000 62%, transparent 97%),
+      linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+    -webkit-mask-composite: source-in;
+            mask-image:
+      linear-gradient(to bottom, #000 62%, transparent 97%),
+      linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+            mask-composite: intersect;
+  }
+  /* The words sit over it. */
+  .section--region .section-head,
+  .section--region .region-tabs { position: relative; z-index: 1; }
 
   /* ---------- markets snapshot strip ---------- */
   .markets-strip {
@@ -512,14 +681,15 @@
     color: rgba(245, 235, 221, 0.55);
   }
   @media (max-width: 560px) {
-    .masthead h1 { font-size: 38px; }
+    .masthead h1 { font-size: 34px; }
   }
 </style>
 </head>
 <body>
 <div class="brief">
+  <div class="wire"><span class="wire-dot" aria-hidden="true"></span>The Wire</div>
   <header class="masthead">
-    <div class="eyebrow">Simay&rsquo;s Dispatch</div>
+    <div class="masthead-art" aria-hidden="true"><img src="/img/dispatch-globe.webp" alt="" width="2000" height="857" decoding="async"></div>
     <h1>The Dispatch</h1>
     <div class="dateline">Tuesday, November 10, 2026</div>
   </header>
@@ -715,7 +885,8 @@
     <div class="progress"><div class="progress-fill"></div></div>
   </section>
 
-  <section class="section">
+  <section class="section section--region">
+    <div class="region-art" aria-hidden="true"><img src="/img/dispatch-us-turkey-v2.webp" alt="" width="2000" height="857" loading="lazy" decoding="async"></div>
     <div class="section-head">
       <span class="num">03</span><h2>US &amp; Turkey</h2><hr class="rule">
     </div>
