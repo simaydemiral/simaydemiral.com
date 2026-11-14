@@ -1,0 +1,612 @@
+/* ===============================================================
+   SELECTED WORK — the shelf.
+
+   Four projects standing side by side; one is pulled out and open,
+   the rest are spines. Clicking a spine opens it and the previous
+   one folds back into the row.
+
+   Objects with thickness. Every spine is a solid block: a lit front
+   face, a darker side face turned away from the light, a highlight
+   along the top edge, and a shadow under it. No perspective camera
+   — nothing is rotated, so text stays sharp and the live demo in
+   the open panel is never rasterised. The depth is painted.
+
+   Loaded on top of the live /style.css, so everything here is a
+   difference from the real site and nothing is duplicated.
+   =============================================================== */
+
+/* The line that used to sit under the label is gone; the spines say how
+   many projects there are, and the open one says which is open. */
+
+/* The stage holds the row and the surface it stands on. */
+.shelf-stage { position: relative; }
+
+.shelf-rail {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: stretch;   /* the spines run the full height of the open one */
+  gap: 0.55rem;
+}
+
+/* The surface. Objects on a flat background never look solid however well
+   they are shaded, so there has to be something for them to stand on and
+   drop a shadow into. It sits at the bottom of the row whatever height the
+   open project happens to be. */
+.shelf-floor {
+  position: absolute;
+  left: -4%; right: -4%;
+  top: 100%;
+  height: 4.5rem;
+  background: linear-gradient(to bottom,
+      color-mix(in srgb, var(--sheet) 92%, #000) 0%,
+      transparent 76%);
+  border-top: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* flex: 0 0 auto, so a closed slot is exactly as wide as the spine in it.
+
+   Without it a slot defaults to flex-shrink: 1 and gives up width to the
+   open one beside it — but the spine inside is flex: 0 0 auto and does not
+   shrink with it, so it overflowed its own slot and lay across the panel
+   next door by about thirty pixels. That is what made the join between a
+   spine and the open project look wrong: the panel's lit top edge and its
+   coloured bar were running underneath the spine, and the spine's rounded
+   corners were silhouetted against the panel instead of the background. */
+.slot { display: flex; min-width: 0; flex: 0 0 auto; }
+.slot .open { display: none; }
+.slot[data-on] { flex: 1 1 auto; min-width: 0; }
+.slot[data-on] .spine { display: none; }
+.slot[data-on] .open { display: block; width: 100%; }
+
+/* ---------------------------------------------------------------- spine */
+.spine {
+  flex: 0 0 auto;
+  width: 3.4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+  padding: 1rem 0.3rem;
+  border: 0;
+  border-radius: 3px 8px 8px 3px;   /* bound edge one side, fore edge the other */
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+
+  /* front face lit from the left, side face falling away to the right */
+  background: linear-gradient(100deg,
+      color-mix(in srgb, var(--spine) 40%, var(--surface)) 0%,
+      color-mix(in srgb, var(--spine) 18%, var(--surface)) 44%,
+      color-mix(in srgb, #000 40%, var(--surface)) 100%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 20%, transparent),      /* top edge   */
+    inset -7px 0 9px -7px rgba(0, 0, 0, 0.85),                    /* side face  */
+    inset 2px 0 0 color-mix(in srgb, var(--spine) 85%, transparent),
+    0 6px 14px rgba(0, 0, 0, 0.38);                               /* on the floor */
+
+  /* No reflection. It was tried close and far, strong and faint, and it
+     looked cheap at every distance -- which is what a mirrored copy of a
+     flat-shaded rectangle does on a page with no other glossy surface on it.
+     The thickness is carried by the gradients and the shadow instead. */
+
+  /* Slides and lifts. Nothing rotates. */
+  transition: transform 0.34s cubic-bezier(.22, .61, .36, 1),
+              box-shadow 0.34s ease;
+}
+.spine:hover,
+.spine:focus-visible {
+  transform: translateY(-12px);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 28%, transparent),
+    inset -7px 0 9px -7px rgba(0, 0, 0, 0.85),
+    inset 2px 0 0 var(--spine),
+    0 14px 24px rgba(0, 0, 0, 0.46);
+}
+.spine:focus-visible { outline: 2px solid var(--spine); outline-offset: 4px; }
+
+.spine-t {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  writing-mode: vertical-rl;          /* reads bottom-to-top, as a spine does */
+  transform: rotate(180deg);
+  white-space: nowrap;
+  font: 500 0.98rem/1 var(--display);
+}
+/* The product's own mark, at the head of the spine. Her drawings are
+   three-tone — cream fill, near-black line, peach accent — so they are
+   placed as pictures rather than masked to a single colour, which would
+   flatten them to silhouettes and lose the drawing. */
+.spine-ico {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  background: var(--ico) center / contain no-repeat;
+}
+
+.spine-n {
+  font: 500 0.62rem/1 var(--mono);
+  letter-spacing: 0.14em;
+  color: color-mix(in srgb, var(--ink) 55%, transparent);
+}
+.spine-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--spine);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--spine) 70%, transparent);
+}
+.spine-s { display: none; }   /* the phone's short label; see the media query */
+
+/* ---------------------------------------------------------- the open one */
+.slot[data-on] .item {
+  margin: 0;
+  border-radius: 4px 12px 12px 4px;
+  /* the same block, turned to face you: lit top, bound edge down the left */
+  background: linear-gradient(168deg,
+      color-mix(in srgb, #fff 4%, var(--surface)) 0%,
+      var(--surface) 58%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 18%, transparent),
+    inset 3px 0 0 var(--spine),
+    0 12px 26px rgba(0, 0, 0, 0.4);
+}
+/* The three without a live demo share one height, set by the tallest of them,
+   so switching between them does not make the section grow and shrink. The
+   number is measured in the page and written onto the rail; see sizePanels.
+   Ledger is deliberately not in this set: it holds the running tool. */
+.slot[data-on]:not([data-k="ledger"]) .item { min-height: var(--panel-h, auto); }
+
+/* The card lifts on hover site-wide. On a panel this size that reads as the
+   whole section twitching, so it stops here. */
+.slot[data-on] .item:hover { transform: none; }
+
+/* The product's own mark stays on the screen it belongs to, in the colour it
+   has always been: --ink at 62%, warming to the accent on hover. Tinting it
+   per project tied the panel to its spine, and cost more than it bought --
+   four different colours of line art is four different drawings. */
+
+/* The demo, uncut.
+
+   The live rule gives the frame aspect-ratio 3/2 and caps it at 34rem, while
+   the page inside is laid out at 1340x900 and scaled by width alone. Past
+   about 816px of width the cap bites and the scaled page runs on past the
+   bottom of its frame — which is why the bottom of the Ledger was missing.
+   Matching the frame to the shape of the thing inside it means nothing is
+   cut; the demo still scrolls, because its own content is longer than one
+   screen regardless. */
+.slot[data-on] .showcase-frame {
+  aspect-ratio: 1340 / 900;
+  max-height: none;
+}
+
+/* Below 42rem the base sheet lays the demo out at phone width -- 420x680 --
+   and gives the frame a matching portrait ratio. The rule above is more
+   specific than that one, so it kept forcing the landscape ratio on a
+   phone: the frame came out 285x191 while the scaled page inside needed
+   461px, and two thirds of the demo was cut off. Hand it back. */
+@media (max-width: 42rem) {
+  .slot[data-on] .showcase-frame {
+    aspect-ratio: 420 / 680;
+  }
+}
+
+/* ------------------------------------------------------------- on a phone */
+/* Four spines plus an open project wants about 900px. Below that the shelf
+   lies down: the spines become a row of tabs along the top and the open
+   project takes the full width underneath, which is the only way the demo
+   gets enough room to be worth showing. */
+@media (max-width: 60rem) {
+  .shelf-rail {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.4rem;
+    align-items: start;
+  }
+  .slot { display: contents; }
+  .shelf-floor { display: none; }   /* nothing is standing up to cast into it */
+
+  .spine {
+    grid-row: 1;
+    width: auto;
+    flex-direction: row;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.62rem 0.4rem;
+    border-radius: 8px 8px 0 0;
+    background: linear-gradient(180deg,
+        color-mix(in srgb, var(--spine) 26%, var(--surface)),
+        color-mix(in srgb, #000 22%, var(--surface)));
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, #fff 16%, transparent),
+      inset 0 -3px 0 color-mix(in srgb, var(--spine) 70%, transparent);
+  }
+  .spine:hover, .spine:focus-visible { transform: none; }
+  /* The real titles do not fit four across a phone — "Personal AI Assistant"
+     came out as "onal AI Assi", clipped at both ends by the centring. Short
+     labels rather than an ellipsis, because a tab you cannot read is not a
+     tab. The full name is still the button's accessible name and the heading
+     of what opens. */
+  .spine-t { display: none; }
+  .spine-s { display: block; font: 500 0.78rem/1.1 var(--display); white-space: nowrap; }
+  /* The icon goes too. Four tabs across 325px leaves 76px each, and a
+     26px mark in front of "FlashCards" pushed the label 11px past its
+     own tab and under the next one's icon. The label is the part that
+     has to survive here. */
+  .spine-n, .spine-dot, .spine-ico { display: none; }
+
+  .slot[data-on] .spine {
+    display: flex;
+    background: linear-gradient(180deg,
+        color-mix(in srgb, var(--spine) 42%, var(--surface)),
+        color-mix(in srgb, var(--spine) 18%, var(--surface)));
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, #fff 24%, transparent),
+      inset 0 -3px 0 var(--spine);
+  }
+  .slot[data-on] .open { grid-row: 2; grid-column: 1 / -1; }
+  .slot[data-on] .item {
+    /* Stacked on a phone the panels are already full width and the section
+       is scrolled through rather than switched between, so a shared height
+       would only add empty space under the shorter ones. */
+    min-height: 0;
+    border-radius: 0 0 12px 12px;
+    box-shadow: inset 3px 0 0 var(--spine), 0 18px 34px rgba(0, 0, 0, 0.45);
+  }
+}
+
+/* Opening a project moves focus to its heading so a keyboard reader lands on
+   the content rather than on a button that just disappeared. That focus is
+   programmatic, and a heading is not a control, so it draws no ring. Chrome
+   treats a scripted focus as keyboard-initiated often enough that leaving
+   :focus-visible on put a loud orange box round the project title every time
+   she clicked a spine. */
+.open h3[tabindex]:focus,
+.open h3[tabindex]:focus-visible { outline: none; }
+
+/* Nothing here moves for a reader who asked for that. */
+@media (prefers-reduced-motion: reduce) {
+  .spine { transition: none; }
+  .spine:hover, .spine:focus-visible { transform: none; }
+}
+
+/* The product marks, re-declared here on purpose.
+
+   The live stylesheet carries `mask: var(--art)`, and this preview loads that
+   stylesheet from simaydemiral.com. A root-relative URL inside a custom
+   property resolves against the stylesheet that *uses* it, not the document
+   — so `/img/ledger.webp` was resolving to the live domain, the cross-origin
+   mask was dropped, and a dropped mask hides the element completely. Which is
+   why the four icons were simply absent.
+
+   Declaring the mask in this local file makes the same custom property
+   resolve against this folder instead. It only matters for the preview; once
+   this is on the real site, stylesheet and images share an origin again. */
+.plate-art {
+  -webkit-mask: var(--art) center / contain no-repeat;
+          mask: var(--art) center / contain no-repeat;
+}
+
+/* ===============================================================
+   THE HERO, AS A BAND
+
+   Where she is runs across the top. Under it, her face on the left
+   and everything else beside it: her name, what she is studying, what
+   she did before, and the way in. The canvas panel is gone, and the
+   portrait is beside the text rather than stacked above it — which is
+   where the height was going, 232px of it.
+   =============================================================== */
+
+.hero--band { display: block; margin-bottom: var(--section); }
+
+.hero-where { margin: 0 0 1rem; }
+
+/* A grid rather than a flex row, so the picture can be told to be exactly as
+   tall as the column beside it. The row's height comes from the text; the
+   picture stretches into it, starting level with her name and finishing
+   level with the buttons. */
+.hero-row {
+  display: grid;
+  /* auto, not a fixed width: the circle sets its own width from its height,
+     and its height is the row's. */
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: clamp(0.9rem, 2vw, 1.75rem);
+  align-items: stretch;
+}
+
+/* A circle, as tall as the column beside it.
+
+   Height comes from the row, width follows from the 1:1 ratio, so it starts
+   level with her name and finishes level with the buttons while staying
+   round. Capped, because the row grows when the paragraph wraps onto another
+   line on a narrow window and an unbounded circle would grow with it. The
+   source is a 640x640 square, which is the shape a circle wants, so nothing
+   is being cropped out of frame here. */
+.hero--band .portrait {
+  display: block;
+  align-self: start;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0;
+  /* Sized in script — see fitPortrait. These are the fallback before it
+     runs and after a fold to one column. */
+  width: clamp(7rem, 13vw, 12rem);
+  height: clamp(7rem, 13vw, 12rem);
+}
+
+.hero-said-col { flex: 1 1 0; min-width: 0; }
+
+
+.hero--band h1 {
+  /* Two things were crowding the line below. 1.05 leaves the box barely
+     taller than the capitals, so the descender of the y hangs past it and
+     the margin alone was holding them apart -- and 0.15rem, then 0.4rem,
+     was not enough margin to do it. The leading opens up as well, which
+     puts the room inside the heading's own box where it belongs. */
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.65rem, 3.5vw, 2.72rem);
+  line-height: 1.14;
+}
+
+.hero-role {
+  margin: 0 0 0.6rem;
+  font: 500 clamp(0.92rem, 1.3vw, 1.17rem)/1.3 var(--display);
+  font-style: italic;
+  color: var(--ink);
+}
+
+.hero-said {
+  margin: 0 0 0.9rem;
+  max-width: 62rem;     /* it runs beside the photo now, not in a column */
+  color: var(--body);
+}
+
+/* The buttons on the left, LinkedIn pushed out to the far edge. */
+.hero-acts {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.hero--band .actions { margin: 0; }
+.hero-socials { flex: 0 0 auto; display: flex; align-items: center; gap: 0.7rem; }
+.hero-in { flex: 0 0 auto; }
+
+/* Half the gap under the section label. Two rem of air between "Selected
+   work" and the line explaining it read as two separate things rather than
+   a heading and its own sentence. */
+.shelf .section-label { margin-bottom: 1rem; }
+
+/* Side by side needs the room. Below this it stacks in the same reading
+   order — place, face, name, what she did, buttons. */
+@media (max-width: 52rem) {
+  /* Stacked, nothing is beside it to match, so it goes back to a fixed
+     shape rather than stretching to whatever the text happens to need. */
+  .hero-row { grid-template-columns: minmax(0, 1fr); gap: 1.1rem; }
+  .hero--band .portrait {
+    width: clamp(7rem, 34vw, 11rem);
+    height: clamp(7rem, 34vw, 11rem);
+  }
+  .hero-acts { flex-wrap: wrap; justify-content: flex-start; gap: 1rem; }
+}
+
+/* ===============================================================
+   TIGHTENING THE VERTICAL RHYTHM
+
+   Three gaps that were doing nothing but pushing the work further
+   down the page. The numbers below are measured, not guessed.
+   =============================================================== */
+
+/* 1. Under the nav: 73px of it, all from the bar's own padding-bottom of
+      4.48rem. The nav is a thin row of links; it does not need most of a
+      hero's worth of air beneath it. */
+.sheet > nav { padding-bottom: 2.2rem; }
+
+/* 2. Between the hero and "Selected work": 89px. The hero carries
+      margin-bottom: var(--section) and the label carries margin-top of the
+      same, and the two collapse into one 5.5rem gap rather than adding up.
+      Halved, which is what she asked for on the label gap below it too. */
+.hero--band { margin-bottom: 2.75rem; }
+.shelf .section-label { margin-top: 2.75rem; }
+
+/* 3. Between the project's buttons and "Live demo — the real tool": 55px,
+      made of the illustrated card's 31px row gap plus the showcase's own
+      24px margin. The label belongs to the demo under it, so the air above
+      it was separating it from the thing it names. */
+.slot[data-on] .item--illustrated { row-gap: 1rem; }
+.slot[data-on] .showcase { margin-top: 0.6rem; }
+
+/* The pill buttons, shorter.
+
+   0.9rem top and bottom made them 50px tall, which is a touch-target size on
+   a page where they sit beside a one-line link. 0.62rem brings them to about
+   42px — still comfortably tappable, and no longer the tallest thing in the
+   row. The side padding is left alone: it is what keeps the label from
+   touching the edge of the pill.
+
+   This also pulls the photo in without a second rule. The circle's diameter
+   is the height of the column beside it, and the buttons are the last thing
+   in that column — so a shorter button is a smaller photo, still finishing
+   level with it. */
+.hero--band .btn,
+.slot[data-on] .btn { padding-top: 0.62rem; padding-bottom: 0.62rem; }
+
+/* ===============================================================
+   THE CONSTELLATION, BESIDE "GET IN TOUCH"
+
+   It has been three things now: a panel beside the hero, a backdrop
+   behind half the page, and this. Behind the page it was taking the
+   plain ground out from under the shelf and reading as the stock
+   background it looks like; here it sits next to the one line on the
+   site that asks the reader for something, which is where a bit of
+   life is worth having.
+   =============================================================== */
+
+/* One column again: the constellation that used to sit here has gone back
+   to the hero, and running the same artwork twice on one page says less
+   each time. */
+.contact-row { display: block; }
+
+.contact-copy { min-width: 0; }
+
+.contact-art {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  pointer-events: none;   /* it watches the cursor, it does not catch it */
+  /* Faded at every edge so it has no border and never ends in a line. The
+     canvas used to darken its own fill with a vignette to do this; with the
+     fill gone, a mask dissolves it into the page instead. */
+  -webkit-mask-image:
+    radial-gradient(70% 70% at 50% 50%, #000 42%, transparent 78%);
+          mask-image:
+    radial-gradient(70% 70% at 50% 50%, #000 42%, transparent 78%);
+  opacity: 0.85;
+}
+.contact-art canvas { display: block; width: 100%; height: 100%; }
+
+/* Stacked, it goes under the copy rather than beside it. */
+@media (max-width: 52rem) {
+  .contact-row { grid-template-columns: minmax(0, 1fr); }
+  .contact-art { aspect-ratio: 16 / 9; max-width: 22rem; }
+}
+
+/* Less air above "Get in touch". var(--section) is 5.5rem and the block
+   above it already ends in white space, so the two read as a gap in the
+   page rather than a change of subject. */
+#contact .section-label { margin-top: 2.5rem; }
+
+/* ===============================================================
+   THE GRID BEHIND THE HERO
+
+   A faint rule grid across the band that drifts as the cursor moves.
+   Only the lines move — nothing in the band shifts, and there is no
+   lamp following the pointer around.
+
+   The pointer writes two custom properties and CSS does the rest, so
+   nothing runs per frame and nothing animates while the mouse is
+   still. The easing is a transition rather than a loop: the lines
+   trail the cursor by a third of a second and stop on their own.
+   =============================================================== */
+
+/* The band is the grid's containing block. Without this the grid measures
+   itself against whatever is positioned further up the page. */
+.hero--band { position: relative; }
+
+/* A lattice of dots behind the band.
+
+   This replaced a grid of lines that bent under the cursor. The lines only
+   ever did anything for someone holding a mouse: the script that drew them
+   returned before building anything on a touch device, so a phone got an
+   empty band. These dots breathe on their own, which is the whole reason
+   for the change — the background is alive before anyone touches it.
+
+   Two stacked copies of one lattice. The lower breathes; the upper is
+   bigger and peach and is revealed only through a soft hole that follows
+   the cursor, so the cursor effect costs no per-frame work at all. The
+   pointer writes two custom properties and the mask does the rest. */
+.hero-dots {
+  position: absolute;
+  top: calc(var(--pad) * -1);
+  bottom: -1.25rem;
+  /* Held inside the sheet. It used to run out to the window edges at 100vw,
+     which put the field on the page either side of the panel. */
+  left: 0;
+  right: 0;
+  z-index: 0;
+  pointer-events: none;   /* it follows the cursor, it does not catch it */
+
+  /* Faded at every edge, so it has no border and never ends in a hard row. */
+  -webkit-mask-image:
+    linear-gradient(to bottom, transparent, #000 18%, #000 72%, transparent),
+    linear-gradient(to right,  transparent, #000 6%, #000 94%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to bottom, transparent, #000 18%, #000 72%, transparent),
+    linear-gradient(to right,  transparent, #000 6%, #000 94%, transparent);
+  mask-composite: intersect;
+}
+
+/* The band's own content sits over it. */
+.hero-where, .hero-row { position: relative; z-index: 1; }
+
+.hero-dots canvas { position: absolute; inset: 0; display: block; }
+
+
+/* =================================================================
+   CANVAS VARIANT  —  the hero carries the generative piece in a
+   frame on the right, instead of only the dot field behind it.
+   ================================================================= */
+
+/* Fixed, not measured. See fitPortrait in this file's page. */
+.hero--band .portrait {
+  width: clamp(8rem, 13vw, 11.5rem);
+  height: clamp(8rem, 13vw, 11.5rem);
+}
+
+.name-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  /* The heading's own bottom margin is cancelled below, so the room under
+     the name has to come from the row that now wraps it. */
+  margin: 0 0 0.35rem;
+}
+.name-row h1 { margin-bottom: 0; }
+
+.hero-socials--top { margin: 0; }
+
+/* Pinned to the band rather than given a column in the row, so it runs
+   the full height: level with the dateline at the top, down to where the
+   shelf begins. A column could only ever be as tall as the row, which
+   starts below the dateline.
+
+   vw rather than a percentage, so the width the panel takes and the room
+   the text leaves for it are the same number — percentages would resolve
+   against two different containing blocks. */
+.hero--band { --art-w: clamp(13rem, 21vw, 21rem); }
+
+.hero-art {
+  position: absolute;
+  top: 0;
+  right: 0;
+  /* A little past the band, so it finishes just short of the Selected work
+     label rather than level with the buttons. */
+  bottom: -1.4rem;
+  width: var(--art-w);
+  /* .hero-panel in the shared sheet sets 4/4.6, which wins over top and
+     bottom and had the panel running down over the shelf. */
+  aspect-ratio: auto;
+  z-index: 1;                 /* over the dot field, under nothing else */
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+/* The text keeps clear of it. */
+.hero--band .hero-where,
+.hero--band .hero-row {
+  padding-right: calc(var(--art-w) + clamp(1rem, 2.5vw, 2.5rem));
+}
+
+/* Under the fold-to-one-column width the canvas goes last and short, so
+   it never pushes the work further down on a phone. */
+@media (max-width: 52rem) {
+  .hero--band .hero-where,
+  .hero--band .hero-row { padding-right: 0; }
+  .hero-art {
+    /* relative, not static: .sd-hero-visual inside is absolute with
+       inset:0, so a static parent is not its containing block and the
+       drawing escaped up to the band and spanned the whole hero while
+       the frame sat correctly below the buttons. */
+    position: relative;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    width: 100%;
+    aspect-ratio: 16 / 7;
+    margin-top: 1.2rem;
+  }
+}

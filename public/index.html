@@ -26,6 +26,7 @@
   <link href="https://api.fontshare.com/v2/css?f%5B%5D=switzer@400,500,600&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/shelf.css?v=20261113212701">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="/icon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -36,6 +37,8 @@
 
 <!-- Everything lives inside this floating cream sheet. -->
 <div class="sheet">
+
+
 
   <!-- ==========================================================
        NAV
@@ -58,33 +61,66 @@
   <!-- ==========================================================
        HERO
        ========================================================== -->
-  <header class="hero">
+  <!-- A band, not a screen.
 
-    <div class="hero-copy">
+       This used to be a two-column grid with the portrait stacked above the
+       name, 616px of text beside a 480px canvas, and it pushed Selected work
+       105px below the fold — so the first thing a recruiter saw was entirely
+       biography and none of the things she built. Where she is runs across
+       the top; her face sits beside everything else. The canvas is gone: it
+       was the only moving thing up here, but a running Ledger further down
+       says the same thing better and the canvas was taking the width this
+       needs. -->
+  <header class="hero hero--band">
+
+    <!-- A field of dots behind the band. The lower layer breathes on its
+         own; the upper one is revealed through a hole that follows the
+         cursor. Nothing is drawn per frame: the pointer writes two custom
+         properties and the paint is all CSS. -->
+    <div class="hero-dots" aria-hidden="true"></div>
+
+    <p class="eyebrow hero-where"><span class="dash"></span>Bay Area, California &middot; MBA 2028</p>
+
+    <div class="hero-row">
       <img class="portrait" src="/simay.jpg" alt="Simay Demiral" width="640" height="640">
 
-      <p class="eyebrow"><span class="dash"></span>Bay Area, California &middot; MBA 2028</p>
-
-      <h1>Simay Demiral</h1>
-
-      <p class="lede">
-        <span class="lede-top">MBA candidate at UC Berkeley Haas</span>
-        Prior to business school, 3+ years at McKinsey &amp; Company working across
-        healthcare, energy and consumer clients — building AI products, running
-        digital transformations, and optimizing costs and processes. Now
-        tinkering with AI.
-      </p>
-
-      <div class="actions">
-        <a class="btn" href="#work">See the work <span aria-hidden="true">&rarr;</span></a>
-        <a class="btn-plain" href="#contact">Get in touch</a>
+      <div class="hero-said-col">
+        <div class="name-row">
+          <h1>Simay Demiral</h1>
+          <div class="hero-socials hero-socials--top">
+          <a class="icon-link hero-in" href="https://www.linkedin.com/in/simay-demiral/" aria-label="Simay Demiral on LinkedIn" title="LinkedIn">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3.1 9.25h3.76V21H3.1zM9.4 9.25h3.6v1.6h.05c.5-.93 1.73-1.92 3.56-1.92 3.8 0 4.5 2.45 4.5 5.64V21h-3.75v-5.66c0-1.35-.02-3.09-1.9-3.09-1.9 0-2.19 1.47-2.19 2.99V21H9.4z"/>
+            </svg>
+          </a>
+          <a class="icon-link hero-in" href="https://github.com/simaydemiral" aria-label="Simay Demiral on GitHub" title="GitHub">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 1.8a10.2 10.2 0 0 0-3.23 19.88c.51.1.7-.22.7-.49l-.01-1.9c-2.84.62-3.44-1.2-3.44-1.2-.46-1.19-1.13-1.5-1.13-1.5-.93-.63.07-.62.07-.62 1.02.07 1.56 1.06 1.56 1.06.91 1.56 2.39 1.11 2.98.85.09-.66.36-1.11.65-1.37-2.27-.26-4.65-1.14-4.65-5.05 0-1.12.4-2.03 1.05-2.75-.1-.26-.46-1.3.1-2.72 0 0 .86-.27 2.8 1.05a9.7 9.7 0 0 1 5.1 0c1.94-1.32 2.8-1.05 2.8-1.05.56 1.42.21 2.46.1 2.72.66.72 1.05 1.63 1.05 2.75 0 3.92-2.38 4.78-4.66 5.04.37.32.69.94.69 1.89l-.01 2.8c0 .27.19.59.7.49A10.2 10.2 0 0 0 12 1.8z"/>
+            </svg>
+          </a>
+          </div>
+        </div>
+        <p class="hero-role">MBA candidate at UC Berkeley Haas</p>
+        <p class="hero-said">
+          Prior to Haas, I spent 3+ years at McKinsey &amp; Company building AI
+          products, running digital transformations, and optimizing costs and
+          processes. Now tinkering with AI.
+        </p>
+        <div class="hero-acts">
+          <div class="actions">
+            <a class="btn" href="#work">See the work <span aria-hidden="true">&rarr;</span></a>
+            <a class="btn-plain" href="#contact">Get in touch</a>
+          </div>
+        </div>
       </div>
+
     </div>
 
-    <!-- The panel on the right.
-         To use a photo, put the file in public/ and set the background on
-         .hero-panel in style.css:  background-image: url("/simay.jpg"); -->
-    <div class="hero-panel hero-panel--canvas">
+    <!-- The generative piece, given a frame of its own rather than run
+         behind the text. Outside the row, because it is pinned to the whole
+         band: the row begins below the dateline, and the panel is meant to
+         start level with it. -->
+    <div class="hero-art hero-panel hero-panel--canvas">
       <div class="sd-hero-visual">
         <canvas id="sdHeroCanvas" aria-hidden="true"></canvas>
       </div>
@@ -97,113 +133,163 @@
        WORK — each item is a <article class="item">.
        Add, remove, or reorder them freely.
        ========================================================== -->
-  <main id="work">
+  <main id="work" class="shelf">
     <p class="section-label"><span class="dash"></span>Selected work</p>
-
+    <div class="shelf-stage">
+    <div class="shelf-rail" id="shelf-rail">
+      <div class="slot" data-k="ledger" data-on="" style="--spine:#c05a2a">
+        <button class="spine" type="button" id="tab-ledger"
+                aria-controls="panel-ledger" aria-expanded="true">
+          <span class="spine-ico" aria-hidden="true" style="--ico:url('/img/spine/ledger.png')"></span>
+          <span class="spine-n">01</span>
+          <span class="spine-t">Ledger</span>
+          <span class="spine-s" aria-hidden="true">Ledger</span>
+          <span class="spine-dot" aria-hidden="true"></span>
+        </button>
+        <div class="open" id="panel-ledger" role="region" aria-labelledby="tab-ledger">
     <article class="item item--illustrated item--live">
 
-      <div class="item-body">
-      <h3><a class="item-link" href="/tinkering/ledger">Ledger</a></h3>
-      <p class="meta">Client-side web app &middot; CSV parsing &middot; 2026</p>
-      <p>
-        Much more than a bank app can show you. Drop in a statement for spending
-        patterns, subscriptions and refunds, categories you can correct, and a
-        flag when a charge looks doubled.
-      </p>
-      <p class="actions actions--tight">
-        <a class="btn" href="/ledger/">Try it with your own statement <span aria-hidden="true">&rarr;</span></a>
-        <a class="item-more" href="/tinkering/ledger">Read the case study &rarr;</a>
-      </p>
-      </div>
+          <div class="item-body">
+          <h3><a class="item-link" href="/tinkering/ledger">Ledger</a></h3>
+          <p class="meta">Client-side web app &middot; CSV parsing &middot; 2026</p>
+          <p>
+            Much more than a bank app can show you. Drop in a statement for spending
+            patterns, subscriptions and refunds, categories you can correct, and a
+            flag when a charge looks doubled.
+          </p>
+          <p class="actions actions--tight">
+            <a class="btn" href="/ledger/">Try it with your own statement <span aria-hidden="true">&rarr;</span></a>
+            <a class="item-more" href="/tinkering/ledger">Read the case study &rarr;</a>
+          </p>
+          </div>
 
-      <a class="plate" href="/ledger/" aria-hidden="true" tabindex="-1">
-        <span class="plate-art" style="--art:url('/img/ledger.webp');--art-ratio:1943/461"></span>
-      </a>
+          <a class="plate" href="/ledger/" aria-hidden="true" tabindex="-1">
+            <span class="plate-art" style="--art:url('/img/ledger.webp');--art-ratio:1943/461"></span>
+          </a>
 
-      <!-- The tool itself, on invented data, writing nothing. ?demo=1 keeps it
-           away from the browser storage a real visitor's ledger lives in. -->
-      <figure class="showcase">
-        <p class="showcase-label"><span class="dash"></span>Live demo &mdash; the real tool</p>
-        <div class="showcase-frame">
-          <!-- Not lazy. It has to be loaded and parked on the drop zone before
-               the reader arrives, or the animation they came for starts late
-               or not at all; it is a small same-origin page. -->
-          <!-- Scrollable on purpose: a wheel or a finger inside this
-               rectangle moves the demo, and only carries on down the page
-               once the demo has nothing left to show. -->
-          <iframe src="/ledger/?demo=1" title="Ledger, running on sample data"></iframe>
+          <!-- The tool itself, on invented data, writing nothing. ?demo=1 keeps it
+               away from the browser storage a real visitor's ledger lives in. -->
+          <figure class="showcase">
+            <p class="showcase-label"><span class="dash"></span>Live demo &mdash; the real tool</p>
+            <div class="showcase-frame">
+              <!-- Not lazy. It has to be loaded and parked on the drop zone before
+                   the reader arrives, or the animation they came for starts late
+                   or not at all; it is a small same-origin page. -->
+              <!-- Scrollable on purpose: a wheel or a finger inside this
+                   rectangle moves the demo, and only carries on down the page
+                   once the demo has nothing left to show. -->
+              <iframe src="/ledger/?demo=1" title="Ledger, running on sample data"></iframe>
+            </div>
+            <figcaption>Four months of a made-up statement, categorised the moment
+              it lands. Scroll it, open a tab, click a figure &mdash; it all
+              works.</figcaption>
+          </figure>
+        </article>
         </div>
-        <figcaption>Four months of a made-up statement, categorised the moment
-          it lands. Scroll it, open a tab, click a figure &mdash; it all
-          works.</figcaption>
-      </figure>
-    </article>
-
-
-    <article class="item item--illustrated">
-
-      <div class="item-body">
-      <h3><a class="item-link" href="/dispatch">The Dispatch</a></h3>
-      <p class="meta">Daily edition &middot; Four desks &middot; 2026</p>
-      <p>
-        The eleven tabs I open every morning, on one page. AI and tech, markets
-        and M&amp;A, news about the US and Turkey (my home country), and the
-        fixtures worth getting up for, such as the Champions League, Sultanlar
-        Ligi and the NBA.
-      </p>
-      <p class="actions actions--tight">
-        <a class="btn" href="/dispatch">Read today&rsquo;s edition <span aria-hidden="true">&rarr;</span></a>
-      </p>
       </div>
 
-      <a class="plate" href="/dispatch" aria-hidden="true" tabindex="-1">
-        <span class="plate-art" style="--art:url('/img/dispatch.webp');--art-ratio:1826/624"></span>
-      </a>
-    </article>
-
+      <div class="slot" data-k="dispatch" style="--spine:#5a7f91">
+        <button class="spine" type="button" id="tab-dispatch"
+                aria-controls="panel-dispatch" aria-expanded="false">
+          <span class="spine-ico" aria-hidden="true" style="--ico:url('/img/spine/dispatch.png')"></span>
+          <span class="spine-n">02</span>
+          <span class="spine-t">The Dispatch</span>
+          <span class="spine-s" aria-hidden="true">Dispatch</span>
+          <span class="spine-dot" aria-hidden="true"></span>
+        </button>
+        <div class="open" id="panel-dispatch" role="region" aria-labelledby="tab-dispatch">
     <article class="item item--illustrated">
 
-      <div class="item-body">
-      <h3><a class="item-link" href="/tinkering/personal-ai-assistant">Personal AI Assistant</a></h3>
-      <p class="meta">Scheduled job &middot; Canvas + Calendar + SMTP &middot; 2026</p>
-      <p>
-        One email every morning with everything I need to act on that day, pulled
-        from Canvas, my calendar, my tracker and my events file.
-        <a class="item-more" href="/tinkering/personal-ai-assistant">Read the case study &rarr;</a>
-      </p>
+          <div class="item-body">
+          <h3><a class="item-link" href="/dispatch">The Dispatch</a></h3>
+          <p class="meta">Daily edition &middot; Four desks &middot; 2026</p>
+          <p>
+            The eleven tabs I open every morning, on one page. AI and tech, markets
+            and M&amp;A, news about the US and Turkey (my home country), and the
+            fixtures worth getting up for, such as the Champions League, Sultanlar
+            Ligi and the NBA.
+          </p>
+          <p class="actions actions--tight">
+            <a class="btn" href="/dispatch">Read today&rsquo;s edition <span aria-hidden="true">&rarr;</span></a>
+          </p>
+          </div>
+
+          <a class="plate" href="/dispatch" aria-hidden="true" tabindex="-1">
+            <span class="plate-art" style="--art:url('/img/dispatch.webp');--art-ratio:1826/624"></span>
+          </a>
+        </article>
+        </div>
       </div>
 
-      <a class="plate" href="/tinkering/personal-ai-assistant" aria-hidden="true" tabindex="-1">
-        <span class="plate-art" style="--art:url('/img/assistant.webp');--art-ratio:1838/609"></span>
-      </a>
-    </article>
-
+      <div class="slot" data-k="assistant" style="--spine:#7d6c9e">
+        <button class="spine" type="button" id="tab-assistant"
+                aria-controls="panel-assistant" aria-expanded="false">
+          <span class="spine-ico" aria-hidden="true" style="--ico:url('/img/spine/assistant.png')"></span>
+          <span class="spine-n">03</span>
+          <span class="spine-t">Personal AI Assistant</span>
+          <span class="spine-s" aria-hidden="true">Assistant</span>
+          <span class="spine-dot" aria-hidden="true"></span>
+        </button>
+        <div class="open" id="panel-assistant" role="region" aria-labelledby="tab-assistant">
     <article class="item item--illustrated">
 
-      <div class="item-body">
-      <h3><a class="item-link" href="/tinkering/flashcards">FlashCards</a></h3>
-      <p class="meta">Client-side web app &middot; Wiktionary &middot; 2026</p>
-      <p>
-        Select a word on any page, click the bookmarklet, and it is saved with
-        the sentence you met it in. The meaning, an example sentence and a
-        recording all arrive on their own. Currently works well in English,
-        Spanish, German and French.
-      </p>
-      <p class="actions actions--tight">
-        <a class="btn" href="/flashcards/">Open FlashCards <span aria-hidden="true">&rarr;</span></a>
-        <a class="item-more" href="/tinkering/flashcards">Read the case study &rarr;</a>
-      </p>
+          <div class="item-body">
+          <h3><a class="item-link" href="/tinkering/personal-ai-assistant">Personal AI Assistant</a></h3>
+          <p class="meta">Scheduled job &middot; Canvas + Calendar + SMTP &middot; 2026</p>
+          <p>
+            One email every morning with everything I need to act on that day, pulled
+            from Canvas, my calendar, my tracker and my events file.
+            <a class="item-more" href="/tinkering/personal-ai-assistant">Read the case study &rarr;</a>
+          </p>
+          </div>
+
+          <a class="plate" href="/tinkering/personal-ai-assistant" aria-hidden="true" tabindex="-1">
+            <span class="plate-art" style="--art:url('/img/assistant.webp');--art-ratio:1838/609"></span>
+          </a>
+        </article>
+        </div>
       </div>
 
-      <a class="plate" href="/flashcards/" aria-hidden="true" tabindex="-1">
-        <span class="plate-art" style="--art:url('/img/flashcards.svg');--art-ratio:1800/600"></span>
-      </a>
-    </article>
+      <div class="slot" data-k="flashcards" style="--spine:#5f8a63">
+        <button class="spine" type="button" id="tab-flashcards"
+                aria-controls="panel-flashcards" aria-expanded="false">
+          <span class="spine-ico" aria-hidden="true" style="--ico:url('/img/spine/flashcards.png')"></span>
+          <span class="spine-n">04</span>
+          <span class="spine-t">FlashCards</span>
+          <span class="spine-s" aria-hidden="true">FlashCards</span>
+          <span class="spine-dot" aria-hidden="true"></span>
+        </button>
+        <div class="open" id="panel-flashcards" role="region" aria-labelledby="tab-flashcards">
+    <article class="item item--illustrated">
+
+          <div class="item-body">
+          <h3><a class="item-link" href="/tinkering/flashcards">FlashCards</a></h3>
+          <p class="meta">Client-side web app &middot; Wiktionary &middot; 2026</p>
+          <p>
+            Select a word on any page, click the bookmarklet, and it is saved with
+            the sentence you met it in. The meaning, an example sentence and a
+            recording all arrive on their own. Currently works well in English,
+            Spanish, German and French.
+          </p>
+          <p class="actions actions--tight">
+            <a class="btn" href="/flashcards/">Open FlashCards <span aria-hidden="true">&rarr;</span></a>
+            <a class="item-more" href="/tinkering/flashcards">Read the case study &rarr;</a>
+          </p>
+          </div>
+
+          <a class="plate" href="/flashcards/" aria-hidden="true" tabindex="-1">
+            <span class="plate-art" style="--art:url('/img/flashcards.svg');--art-ratio:1800/600"></span>
+          </a>
+        </article>
+        </div>
+      </div>
+    </div>
+    <div class="shelf-floor" aria-hidden="true"></div>
+    </div>
 
     <article class="item item--empty">
       <p class="placeholder-label">More to come</p>
     </article>
-
   </main>
 
 
@@ -306,12 +392,14 @@
   <!-- ==========================================================
        CONTACT
        ========================================================== -->
-  <footer id="contact">
+  <footer id="contact" class="contact--art">
     <p class="section-label"><span class="dash"></span>Get in touch</p>
 
-    <h2 class="closing">
-      Looking for a <em>Summer 2027</em> product or strategy internship.
-    </h2>
+    <div class="contact-row">
+      <div class="contact-copy">
+        <h2 class="closing">
+          Looking for a <em>Summer 2027</em> product or strategy internship.
+        </h2>
 
     <!-- Icon buttons. The SVGs are drawn inline so there is nothing to load
          and they inherit the page colours automatically. -->
@@ -338,6 +426,9 @@
       </a>
 
       <a class="contact-address" href="mailto:simay_demiral@berkeley.edu">simay_demiral@berkeley.edu</a>
+    </div>
+      </div>
+
     </div>
 
     <p class="fineprint">&copy; 2026 Simay Demiral</p>
@@ -399,6 +490,412 @@
     new IntersectionObserver(maybePlay, { threshold: [0, 0.3, 0.6] }).observe(frame);
   maybePlay();
 })();
+/* The hero constellation used to live here, drawing into a panel on the
+   right. It is now a background behind the whole band and its adapted
+   copy is at the bottom of this script — transparent, paused when it is
+   off screen, and with its star pushed out of the way of the text. This
+   one is removed rather than left to return early: with the canvas back
+   in the markup both copies would claim it, and this one still paints
+   the opaque ground that stopped it being a background at all. */
+/* ---------------------------------------------------------------- the shelf
+
+   One project open, the rest spines. Click a spine and it opens; the one
+   that was open folds back into the row.
+
+   The whole thing is a progressive enhancement: with JS off every panel is
+   simply visible, because `display:none` on the closed ones is applied by
+   the stylesheet only once this script has marked the section as live. The
+   section is readable either way, which matters on a page whose job is to
+   be read by a recruiter. */
+(function () {
+  var rail = document.getElementById('shelf-rail');
+  if (!rail) return;
+  var slots = [].slice.call(rail.querySelectorAll('.slot'));
+  if (!slots.length) return;
+
+  var frame  = document.querySelector('.showcase-frame');
+  var iframe = frame && frame.querySelector('iframe');
+  var told   = false;   /* has the embed been told a parent is driving it? */
+
+  function post(msg) {
+    if (!iframe || !iframe.contentWindow) return;
+    try { iframe.contentWindow.postMessage(msg, window.location.origin); }
+    catch (e) {}
+  }
+
+  /* The demo has a play/reset handshake. Taking it over means it no longer
+     starts itself on its own timer, so it cannot run through while its
+     panel is folded away and then refuse to replay when she comes back. */
+  function drive() {
+    if (told || !iframe) return;
+    var d;
+    try { d = iframe.contentDocument; } catch (e) { return; }
+    if (!d || d.readyState !== 'complete') return;
+    told = true;
+    post('ledger:rail');
+  }
+
+  function onScreen(el) {
+    var r = el.getBoundingClientRect(), vh = window.innerHeight || 0;
+    return r.top < vh * 0.9 && r.bottom > vh * 0.1;
+  }
+
+  var current = 'ledger', played = false;
+
+  function show(k, moveFocus) {
+    if (k === current) return;
+    var was = current;
+    current = k;
+    slots.forEach(function (s) {
+      var on = s.getAttribute('data-k') === k;
+      if (on) s.setAttribute('data-on', '');
+      else s.removeAttribute('data-on');
+      var b = s.querySelector('.spine');
+      if (b) b.setAttribute('aria-expanded', on ? 'true' : 'false');
+    });
+
+    drive();
+    /* Leaving it rewinds it, so coming back is a fresh run rather than a
+       dashboard she has already watched arrive. */
+    if (was === 'ledger') { post('ledger:reset'); played = false; }
+    maybe();
+
+    /* Focus the heading of what just opened, so a keyboard reader is put
+       where the content is rather than left on a button that vanished. */
+    if (moveFocus) {
+      var h = document.querySelector('#panel-' + k + ' h3');
+      if (h) { h.setAttribute('tabindex', '-1'); h.focus(); }
+    }
+    try { history.replaceState(null, '', '#work-' + k); } catch (e) {}
+    sizePanels();
+  }
+
+  /* One height for the three without a live demo.
+
+     Their panels are different lengths of text, so switching between them
+     made the whole section grow and shrink and the page jump under the
+     reader. They are given the tallest of the three instead — which is the
+     Dispatch — so moving between them changes nothing but the words. Ledger
+     is left out of it on purpose: it carries the running tool and needs the
+     room, and forcing the other three up to its height would leave three
+     panels mostly empty.
+
+     Measured rather than written down as a number, because the answer
+     depends on how the text wraps, which depends on the width. Each hidden
+     panel is laid out off-screen at the width the open one actually gets —
+     the same for all of them, since there are always three spines beside
+     it — and the tallest wins. */
+  function sizePanels() {
+    var open = rail.querySelector('.slot[data-on] .open');
+    if (!open) return;
+    var w = open.getBoundingClientRect().width;
+    if (!w) return;
+    var tallest = 0;
+    slots.forEach(function (s) {
+      if (s.getAttribute('data-k') === 'ledger') return;
+      var panel = s.querySelector('.open');
+      var item = panel && panel.querySelector('.item');
+      if (!item) return;
+      var live = s.hasAttribute('data-on');
+      var saved = panel.getAttribute('style');
+      if (!live) {
+        panel.style.cssText = 'display:block;position:absolute;visibility:hidden;'
+                            + 'left:-99999px;top:0;width:' + w + 'px';
+      }
+      var had = item.style.minHeight;
+      item.style.minHeight = '0';          /* natural height, not the one set */
+      tallest = Math.max(tallest, item.offsetHeight);
+      item.style.minHeight = had;
+      if (!live) {
+        if (saved === null) panel.removeAttribute('style');
+        else panel.setAttribute('style', saved);
+      }
+    });
+    if (tallest) rail.style.setProperty('--panel-h', Math.ceil(tallest) + 'px');
+  }
+
+  rail.addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('.spine') : null;
+    if (!b) return;
+    var slot = b.parentNode;
+    show(slot.getAttribute('data-k'), true);
+  });
+
+  /* Left and right walk the shelf, the way arrow keys walk a row of tabs. */
+  rail.addEventListener('keydown', function (e) {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    var b = e.target.closest ? e.target.closest('.spine') : null;
+    if (!b) return;
+    var order = slots.map(function (s) { return s.getAttribute('data-k'); });
+    var i = order.indexOf(b.parentNode.getAttribute('data-k'));
+    var n = i + (e.key === 'ArrowRight' ? 1 : -1);
+    if (n < 0 || n >= order.length) return;
+    e.preventDefault();
+    show(order[n], true);
+  });
+
+  /* Deep link: /#work-flashcards opens that one. */
+  var want = (location.hash || '').replace('#work-', '');
+  if (want) {
+    for (var i = 0; i < slots.length; i++) {
+      if (slots[i].getAttribute('data-k') === want) { show(want, false); break; }
+    }
+  }
+
+  /* Ledger is open from the start, so the demo only waits for the reader to
+     reach it. */
+  /* The listener stays on for the life of the page. Taking it off after the
+     first run was the obvious economy and the wrong one: opening another
+     project and coming back left nothing listening, so the demo sat on its
+     drop zone and never started again. A flag per run is what should have
+     been guarding it. */
+  function maybe() {
+    if (current !== 'ledger' || !frame || played) return;
+    drive();
+    if (told && onScreen(frame)) { post('ledger:play'); played = true; }
+  }
+  window.addEventListener('scroll', maybe, { passive: true });
+  window.addEventListener('resize', maybe);
+  if (iframe) iframe.addEventListener('load', function () { told = false; played = false; maybe(); });
+  maybe();
+  setTimeout(maybe, 600);
+  setTimeout(maybe, 1800);
+
+  /* The photograph is exactly as tall as the column beside it, so it starts
+     level with her name and finishes level with the buttons.
+
+     Settled rather than calculated: the picture is as wide as it is tall, a
+     wider picture leaves the paragraph less room, and less room wraps it
+     onto another line that wants a taller picture. So it is measured,
+     applied and measured again until two passes agree. This converges with
+     two columns and diverged with three — when the constellation had a
+     column of its own the photograph ran away to 606px — which is why the
+     loop is capped at four passes either way. */
+  /* Deliberately inert in this variant. Measuring the photograph against
+     the text column converged while the row held two columns and diverged
+     the moment it held three: a wider photo leaves the paragraph less room,
+     less room wraps it taller, and a taller row wants a wider photo. It ran
+     away to 606px and pushed the shelf off the screen. With the canvas here
+     the photograph is sized by CSS and left alone. */
+  function fitPortrait() { return; }
+
+  function fitPortraitUnused() {
+    var img = document.querySelector('.hero--band .portrait');
+    var h1  = document.querySelector('.hero--band h1');
+    var acts = document.querySelector('.hero-acts');
+    if (!img || !h1 || !acts || !window.matchMedia) return;
+    if (window.matchMedia('(max-width: 52rem)').matches) {
+      img.style.width = ''; img.style.height = '';
+      return;
+    }
+    var h = 0, prev = -1, i;
+    for (i = 0; i < 4 && h !== prev; i++) {
+      prev = h;
+      h = Math.round(acts.getBoundingClientRect().bottom
+                   - h1.getBoundingClientRect().top);
+      if (h <= 0) { img.style.width = ''; img.style.height = ''; return; }
+      img.style.width = h + 'px';
+      img.style.height = h + 'px';
+    }
+  }
+  fitPortrait();
+  window.addEventListener('resize', fitPortrait);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(fitPortrait).catch(function () {});
+  }
+  setTimeout(fitPortrait, 400);
+
+  /* Once now, once when the webfonts have settled — the headings are set in
+     a face that loads late, and a panel measured before it arrives is a
+     panel measured in the fallback. */
+  sizePanels();
+  window.addEventListener('resize', sizePanels);
+  setTimeout(sizePanels, 400);
+  setTimeout(sizePanels, 1500);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(sizePanels).catch(function () {});
+  }
+})();
+
+/* The constellation's script lived here. There is no canvas left on the
+   page for it to draw into, and a 285-line block that returns on its first
+   line is worse than no block at all. */
+
+
+
+/* ------------------------------------------------------------- hero dots
+
+   A lattice of dots behind the band. Each swells and subsides, and the
+   swell travels across the field as a diagonal wave. Near the cursor the
+   dots grow and turn peach.
+
+   Drawn on a canvas, which is the second attempt. The first gave every dot
+   its own CSS animation on an SVG <circle>, on the reasoning that CSS
+   costs no per-frame JavaScript. That was the wrong trade: browsers do not
+   hand SVG transform and opacity animations to the compositor, so each
+   frame restyled and re-laid-out the whole SVG. Removing the field from
+   the page took a forced layout pass from 12.5ms to 5.3ms, against a
+   16.7ms budget for the entire frame -- the dots alone were well over half
+   of it, and the cost grew with every dot added. Here the same field is a
+   few hundred fills on one canvas, which skips layout altogether.
+
+   The loop is gated on being on screen and on the tab being in front. */
+(function () {
+  var host = document.querySelector('.hero-dots');
+  var band = host && host.closest('.hero--band');
+  if (!host || !band) return;
+
+  var cv = document.createElement('canvas');
+  cv.setAttribute('aria-hidden', 'true');
+  host.appendChild(cv);
+  var cx = cv.getContext('2d');
+  if (!cx) return;
+
+  var CELL = 42;    /* lattice spacing; cheap again, so back to the dense one */
+  var R    = 1.8;   /* radius at full swell */
+  var LITR = 170;   /* how far the cursor reaches */
+  var still = window.matchMedia
+           && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var dots = [], W = 0, H = 0, DPR = 1;
+  var INK = [245, 237, 224], ACC = [232, 147, 90];
+
+  /* The palette lives in custom properties on :root, and a canvas cannot
+     read one. Resolved through a throwaway element, once per theme. */
+  function readColour(name, fallback) {
+    var probe = document.createElement('span');
+    probe.style.cssText = 'position:absolute;visibility:hidden;color:var(' + name + ')';
+    document.body.appendChild(probe);
+    var m = getComputedStyle(probe).color.match(/\d+/g);
+    probe.remove();
+    return m ? [+m[0], +m[1], +m[2]] : fallback;
+  }
+  function readTheme() {
+    INK = readColour('--ink', INK);
+    ACC = readColour('--accent', ACC);
+  }
+
+  function build() {
+    var r = host.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = Math.round(r.width); H = Math.round(r.height);
+    cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+    cv.style.width = W + 'px'; cv.style.height = H + 'px';
+    cx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+    dots = [];
+    /* Grown from the centre, so the lattice stays put under the text when
+       the window is resized rather than crawling across it. */
+    var ox = (W % CELL) / 2, oy = (H % CELL) / 2, x, y, j;
+    for (y = oy; y <= H; y += CELL) {
+      for (x = ox; x <= W; x += CELL) {
+        /* Deterministic jitter rather than Math.random, so the field is the
+           same on every load and does not reshuffle on a resize. */
+        j = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
+        j = j - Math.floor(j);
+        dots.push({ x: x, y: y, dur: 4.2 + j * 3.4, off: (x + y) / 190 + j * 1.6 });
+      }
+    }
+  }
+
+  /* The soft hole the cursor carries, matching the gradient the old CSS
+     mask used: solid to the middle, half way out, gone at three quarters. */
+  function reach(d) {
+    var u = d / LITR;
+    if (u >= 0.74) return 0;
+    if (u <= 0.48) return 1 - 0.9375 * u;
+    return 0.55 * (1 - (u - 0.48) / 0.26);
+  }
+
+  var mx = -9999, my = -9999, litTarget = 0, lit = 0, last = 0;
+
+  function paint(now) {
+    var t = now / 1000, i, d, ph, s, a, f, dx, dy, dist, rad, col;
+    cx.clearRect(0, 0, W, H);
+    for (i = 0; i < dots.length; i++) {
+      d = dots[i];
+      if (still) { s = 0.72; a = 0.6; }
+      else {
+        /* the ease-in-out of the keyframes, as a cosine */
+        ph = ((t - d.off) / d.dur) % 1; if (ph < 0) ph += 1;
+        s = 0.5 - 0.5 * Math.cos(ph * 6.283185);
+        a = 0.22 + 0.56 * s;
+        s = 0.40 + 0.60 * s;
+      }
+      f = 0;
+      if (lit > 0.002) {
+        dx = d.x - mx; dy = d.y - my;
+        dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < LITR) f = reach(dist) * lit;
+      }
+      rad = R * s * (1 + 0.55 * f);
+      /* The two stacked layers became one fill: the cream sat at 16% and
+         the peach over it at 60%, so the dot walks between those weights
+         as the cursor arrives, and between the two colours with it. */
+      col = f > 0.002 ? ACC : INK;
+      cx.globalAlpha = Math.min(a * (0.16 + 0.44 * f), 1);
+      cx.fillStyle = 'rgb(' + col[0] + ',' + col[1] + ',' + col[2] + ')';
+      cx.beginPath();
+      cx.arc(d.x, d.y, rad, 0, 6.283185);
+      cx.fill();
+    }
+    cx.globalAlpha = 1;
+  }
+
+  var rafId = 0, onScreen = true, pageOn = true;
+
+  function frame(now) {
+    var dt = last ? Math.min((now - last) / 1000, 0.1) : 0;
+    last = now;
+    /* the 0.36s ease the opacity transition used to do */
+    lit += (litTarget - lit) * Math.min(dt / 0.12, 1);
+    paint(now);
+    rafId = requestAnimationFrame(frame);
+  }
+  function sync() {
+    var want = onScreen && pageOn && !still;
+    if (want && !rafId) { last = 0; rafId = requestAnimationFrame(frame); }
+    else if (!want && rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+    if (!want) paint(performance.now());
+  }
+
+  band.addEventListener('pointermove', function (e) {
+    /* A touch drag reports pointermove too, and lighting a patch under a
+       finger that has already moved on looks like a smudge. */
+    if (e.pointerType === 'touch') return;
+    var r = host.getBoundingClientRect();
+    mx = e.clientX - r.left; my = e.clientY - r.top;
+    litTarget = 1;
+    if (still) paint(performance.now());
+  }, { passive: true });
+
+  band.addEventListener('pointerleave', function () { litTarget = 0; });
+  window.addEventListener('blur', function () { litTarget = 0; });
+
+  window.addEventListener('resize', function () { build(); if (!rafId) paint(performance.now()); });
+  if (window.IntersectionObserver) {
+    new IntersectionObserver(function (es) { onScreen = es[0].isIntersecting; sync(); },
+                             { threshold: 0 }).observe(host);
+  }
+  document.addEventListener('visibilitychange', function () {
+    pageOn = !document.hidden; sync();
+  });
+  new MutationObserver(function () { readTheme(); if (!rafId) paint(performance.now()); })
+    .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  readTheme();
+  build();
+  /* One frame straight away, before any of the gating is consulted. The
+     field used to appear only once the loop had decided to run, so
+     anything that delayed the first requestAnimationFrame -- a background
+     tab, a throttled window -- left the canvas blank rather than merely
+     still. */
+  paint(performance.now());
+  sync();
+})();
+
+
 (function () {
   var canvas = document.getElementById('sdHeroCanvas');
   if (!canvas) return;
@@ -455,13 +952,26 @@
      composition toward it, and each layer follows by a different amount, so
      the shapes sit in front of the constellation rather than on it. Eased
      rather than tracked, so it drifts instead of twitching. */
-  var PARALLAX = 26, px = 0, py = 0, tx = 0, ty = 0;
+  /* 26 was chosen when this filled a column of its own. In a panel a fifth
+     of that size it reads as the whole composition lurching, so it is down
+     to 9. */
+  var PARALLAX = 9, px = 0, py = 0, tx = 0, ty = 0;
 
   function aim(e) {
     var rect = canvas.parentElement.getBoundingClientRect();
     if (!rect.width || !rect.height) return;
-    tx = ((e.clientX - rect.left) / rect.width  - 0.5) * 2 * PARALLAX;
-    ty = ((e.clientY - rect.top)  / rect.height - 0.5) * 2 * PARALLAX;
+    /* Clamped, which it never was. The listener is on the window, so the
+       offset was measured against a box the cursor is usually nowhere
+       near: with the panel in the corner of a wide screen, a pointer on
+       the far side of the page put the figure three and a half panel
+       widths out and drove the shift past 190px, sliding the drawing out
+       of its own frame. Held to the panel's own extent now. */
+    var nx = (e.clientX - rect.left) / rect.width  - 0.5;
+    var ny = (e.clientY - rect.top)  / rect.height - 0.5;
+    nx = Math.max(-0.5, Math.min(0.5, nx));
+    ny = Math.max(-0.5, Math.min(0.5, ny));
+    tx = nx * 2 * PARALLAX;
+    ty = ny * 2 * PARALLAX;
   }
   function release() { tx = 0; ty = 0; }
 
@@ -652,8 +1162,8 @@
 
   function draw(t) {
     /* ease toward the pointer: a tenth of the remaining distance each frame */
-    px += (tx - px) * 0.06;
-    py += (ty - py) * 0.06;
+    px += (tx - px) * 0.035;   /* drifts rather than tracks */
+    py += (ty - py) * 0.035;
 
     var g = ctx.createRadialGradient(CX, CY, 0, CX, CY, Math.max(W, H) * 0.7);
     g.addColorStop(0, CFG.bgInner); g.addColorStop(1, CFG.bgOuter);
@@ -681,7 +1191,37 @@
   if (reduceMotion) {
     draw(CFG.breatheMs * 0.375);
   } else {
-    (function loop(t) { draw(t || 0); requestAnimationFrame(loop); })();
+    /* It used to call requestAnimationFrame unconditionally, so it kept
+       painting while scrolled past and while the tab sat in the background
+       -- for a panel a third of the way up a long page, that is most of the
+       time. Gated on both now: visible on screen, and the tab in front. */
+    var rafId = 0, onScreen = true, pageOn = true;
+
+    function frame(t) {
+      draw(t || 0);
+      rafId = requestAnimationFrame(frame);
+    }
+    function sync() {
+      var want = onScreen && pageOn;
+      if (want && !rafId) rafId = requestAnimationFrame(frame);
+      else if (!want && rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+    }
+    if (window.IntersectionObserver) {
+      new IntersectionObserver(function (es) {
+        onScreen = es[0].isIntersecting;
+        sync();
+      }, { threshold: 0 }).observe(canvas);
+    }
+    document.addEventListener('visibilitychange', function () {
+      pageOn = !document.hidden;
+      sync();
+    });
+    /* One frame before any of the gating is consulted, for the same reason
+       the dot field needs one: painting only from inside the loop leaves
+       the panel empty, not merely still, whenever the first animation
+       frame is delayed. */
+    draw(performance.now());
+    sync();
   }
 })();
 </script>

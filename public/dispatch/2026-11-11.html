@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The Dispatch — Wednesday, November 4, 2026</title>
+<title>The Dispatch — Wednesday, November 11, 2026</title>
 <link href="https://api.fontshare.com/v2/css?f%5B%5D=switzer@400,500,600&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Abril+Fatface&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -16,15 +16,125 @@
     padding: 32px 16px 64px;
     overflow-x: hidden;
   }
-  .brief { max-width: 760px; margin: 0 auto; }
+  /* position, so the wire badge can be pinned to the column's top left
+     from outside the masthead — that element clips its overflow, which was
+     cutting the pulse ring off the side of the dot. */
+  .brief { max-width: 760px; margin: 0 auto; position: relative; }
+
+  /* ---------- the wire ----------
+
+     A live indicator at the top left, where the masthead's byline used to
+     be. The byline said what the title already says; this says the thing
+     the page could not: that it is written again every morning. */
+  .wire {
+    /* Pinned to the top left corner rather than sitting in the flow: the
+       masthead is centred text, and this is a marker on the page, not a
+       line of the title. Absolute so it costs the masthead no height. */
+    position: absolute;
+    top: 6px;
+    /* Indented a little rather than flush: hard against the column edge it
+       read as falling off the page. */
+    left: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #ef8a68;
+    z-index: 2;
+  }
+  .wire-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #e8503a;
+    box-shadow: 0 0 0 0 rgba(232, 80, 58, 0.55);
+    animation: wire-pulse 2.4s ease-out infinite;
+  }
+  /* A pulse rather than a blink. A hard on/off at the top of a page someone
+     reads every morning is a fire alarm; this breathes. */
+  @keyframes wire-pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(232, 80, 58, 0.5); opacity: 1; }
+    70%  { box-shadow: 0 0 0 7px rgba(232, 80, 58, 0); opacity: 0.72; }
+    100% { box-shadow: 0 0 0 0 rgba(232, 80, 58, 0); opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .wire-dot { animation: none; }
+  }
 
   /* ---------- masthead ---------- */
   .masthead {
+    position: relative;
+    /* The artwork stops at the rule under the dateline. It is taller than
+       this box and was running on behind the edition nav; clipping it here
+       means the line is the end of it rather than something it passes
+       through. The bottom of the image is already fading by that point, so
+       the cut lands in the fade rather than across the picture. */
+    overflow: hidden;
     text-align: center;
     padding: 8px 0 28px;
     border-bottom: 1px solid rgba(245, 235, 221, 0.15);
     margin-bottom: 32px;
   }
+
+  /* The globe, behind the title block only.
+
+     Not behind the page: this is eleven desks of small text that somebody
+     actually reads in the morning, and an image under all of it trades
+     legibility for atmosphere. Here it sets the tone and then stops.
+
+     The artwork is navy and cyan; this page is warm, #171210 with a peach
+     accent. Dropped in as it is, the top of the page would look borrowed
+     from another site. grayscale flattens it to tone, sepia pushes it warm,
+     and the hue and saturation land it in the peach the masthead already
+     uses — a wireframe image takes that well because it is mostly line and
+     glow rather than real colour. */
+  .masthead-art {
+    position: absolute;
+    left: 50%;
+    top: -18px;
+    /* The full width of the column, so it lines up with "The Dispatch"
+       above it rather than sitting in from the edges.
+
+       It was held at 600px before because the artwork is 2000x857: at the
+       column's full 760px it stood 326px tall and ran on down behind the
+       edition nav and into the markets strip. The height is fixed now and
+       the picture crops to it, so widening it shows more of the map either
+       side instead of making the whole thing taller. */
+    width: min(760px, 100%);
+    height: 258px;
+    overflow: hidden;
+    transform: translateX(-50%);
+    z-index: 0;
+    pointer-events: none;
+    user-select: none;
+  }
+  .masthead-art img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    /* Crops to the frame rather than setting it: a wider frame reveals more
+       of the dotted map to the left and right, which is the point. */
+    object-fit: cover;
+    object-position: 50% 46%;
+    opacity: 0.42;
+    filter: grayscale(1) sepia(0.85) saturate(2.1) hue-rotate(-12deg) brightness(0.85);
+    /* fades out at every edge, so it has no border and never ends in a line */
+    -webkit-mask-image:
+      radial-gradient(76% 70% at 50% 44%, #000 30%, transparent 76%),
+      linear-gradient(to bottom, #000 52%, transparent 88%);
+    -webkit-mask-composite: source-in;
+            mask-image:
+      radial-gradient(76% 70% at 50% 44%, #000 30%, transparent 76%),
+      linear-gradient(to bottom, #000 52%, transparent 88%);
+            mask-composite: intersect;
+  }
+  /* The words sit over it. */
+  .masthead .eyebrow, .masthead h1,
+  .masthead .dateline, .masthead .tagline { position: relative; z-index: 1; }
   .masthead .eyebrow {
     font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
     font-weight: 500;
@@ -34,12 +144,19 @@
     color: #e8935a;
   }
   .masthead h1 {
-    font-family: "Switzer", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-    font-weight: 500;
-    letter-spacing: -0.035em;
-    font-size: 52px;
-    line-height: 1.05;
-    margin: 12px 0 8px;
+    /* Abril Fatface for the masthead only. A heavy high-contrast didone:
+       this is a front page, and the title should read as one rather than as
+       another heading in the same sans the rest of the site uses.
+
+       It has one weight and already sits tight, so the -0.035em Switzer
+       needed would crowd it; and its own line box runs taller, hence the
+       smaller size and the pulled-in top margin. */
+    font-family: "Abril Fatface", Georgia, "Times New Roman", serif;
+    font-weight: 400;
+    letter-spacing: -0.012em;
+    font-size: 48px;
+    line-height: 1.08;
+    margin: 8px 0 10px;
   }
   .masthead .dateline { font-size: 14px; color: rgba(245, 235, 221, 0.65); }
   .masthead .tagline {
@@ -48,6 +165,58 @@
     color: rgba(245, 235, 221, 0.75);
     margin-top: 10px;
   }
+
+  /* ---------- US & Turkey, with the two cities behind it ----------
+
+     Behind the heading and the country tabs only, not behind the stories.
+     The artwork is navy and orange; the orange is already close to the
+     accent this page uses, so the duotone here is lighter-handed than the
+     globe's — enough to take the blue out of the sky and the water without
+     flattening the two skylines into one tone. */
+  .section--region { position: relative; }
+  .region-art {
+    position: absolute;
+    left: 50%;
+    top: -22px;
+    width: min(760px, 100%);
+    transform: translateX(-50%);
+    z-index: 0;
+    pointer-events: none;
+    user-select: none;
+    overflow: hidden;
+    /* A band rather than the whole picture: the heading and the tabs are
+       about 120px tall and the artwork is 3:2, so showing all of it would
+       put most of a photograph behind two lines of text. */
+    height: 150px;
+    border-radius: 10px;
+  }
+  .region-art img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Horizontally centred: the sunset between the two cities is the point
+       of the picture, and both bridges sit either side of it.
+
+       Vertically a little above the middle. This artwork is 2000x857 rather
+       than the 1920x1280 it replaced — panoramic instead of tall — so the
+       band no longer has to climb past a lot of water to reach the bridges.
+       It only needs to keep the towers and the skyline out of the crop. */
+    object-position: 50% 46%;
+    opacity: 0.3;
+    filter: grayscale(0.55) sepia(0.55) saturate(1.7) hue-rotate(-10deg) brightness(0.8);
+    -webkit-mask-image:
+      linear-gradient(to bottom, #000 62%, transparent 97%),
+      linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+    -webkit-mask-composite: source-in;
+            mask-image:
+      linear-gradient(to bottom, #000 62%, transparent 97%),
+      linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+            mask-composite: intersect;
+  }
+  /* The words sit over it. */
+  .section--region .section-head,
+  .section--region .region-tabs { position: relative; z-index: 1; }
 
   /* ---------- markets snapshot strip ---------- */
   .markets-strip {
@@ -512,52 +681,53 @@
     color: rgba(245, 235, 221, 0.55);
   }
   @media (max-width: 560px) {
-    .masthead h1 { font-size: 38px; }
+    .masthead h1 { font-size: 34px; }
   }
 </style>
 </head>
 <body>
 <div class="brief">
+  <div class="wire"><span class="wire-dot" aria-hidden="true"></span>The Wire</div>
   <header class="masthead">
-    <div class="eyebrow">Simay&rsquo;s Dispatch</div>
+    <div class="masthead-art" aria-hidden="true"><img src="/img/dispatch-globe.webp" alt="" width="2000" height="857" decoding="async"></div>
     <h1>The Dispatch</h1>
-    <div class="dateline">Wednesday, November 4, 2026</div>
+    <div class="dateline">Wednesday, November 11, 2026</div>
   </header>
 
   <nav class="edition-nav" aria-label="Earlier editions">
     <a href="/dispatch">Today</a>
-    <a href="/dispatch/2026-11-05">Yesterday</a>
-    <span class="is-current">Wed 4 Nov</span>
+    <a href="/dispatch/2026-11-12">Yesterday</a>
+    <span class="is-current">Wed 11 Nov</span>
   </nav>
 
   <div class="markets-strip" aria-label="Markets snapshot">
     <div class="markets-strip-head">
       <span class="markets-strip-label">Markets Snapshot &middot; KEY</span>
-      <span class="markets-strip-asof">as of 3:32pm pt</span>
+      <span class="markets-strip-asof">as of 6:38am pt</span>
     </div>
     <div class="markets-tiles">
       <div class="market-tile up">
         <div class="market-tile-label">S&amp;P 500</div>
-        <div class="market-tile-value">7,688.62</div>
-        <div class="market-tile-delta up"><span class="arrow">&#9650;</span> +1.58%</div>
+        <div class="market-tile-value">7,592.83</div>
+        <div class="market-tile-delta up"><span class="arrow">&#9650;</span> +0.96%</div>
       </div>
       <div class="market-tile up">
         <div class="market-tile-label">NASDAQ</div>
-        <div class="market-tile-value">25,736</div>
-        <div class="market-tile-delta up"><span class="arrow">&#9650;</span> +1.44%</div>
+        <div class="market-tile-value">25,475</div>
+        <div class="market-tile-delta up"><span class="arrow">&#9650;</span> +1.63%</div>
       </div>
       <div class="market-tile down">
         <div class="market-tile-label">USD/TRY</div>
-        <div class="market-tile-value">50.02</div>
-        <div class="market-tile-delta down"><span class="arrow">&#9650;</span> +0.05%</div>
+        <div class="market-tile-value">50.22</div>
+        <div class="market-tile-delta down"><span class="arrow">&#9650;</span> +0.17%</div>
       </div>
-      <div class="market-tile up">
+      <div class="market-tile down">
         <div class="market-tile-label">BTC</div>
-        <div class="market-tile-value">$80,405</div>
-        <div class="market-tile-delta up"><span class="arrow">&#9650;</span> +4.86%</div>
+        <div class="market-tile-value">$73,626</div>
+        <div class="market-tile-delta down"><span class="arrow">&#9660;</span> -2.17%</div>
       </div>
     </div>
-    <div class="markets-strip-takeaway"><strong>Takeaway:</strong> Both US indices higher: S&amp;P +1.58%, Nasdaq +1.44%.</div>
+    <div class="markets-strip-takeaway"><strong>Takeaway:</strong> Both US indices higher: S&amp;P +0.96%, Nasdaq +1.63%.</div>
   </div>
 
   <section class="section section-ai">
@@ -573,69 +743,69 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://arstechnica.com/tech-policy/2026/11/big-tech-claims-voters-ai-backlash-is-anti-trump-not-anti-tech/">
-        <div class="thumb thumb-ai"><span class="tag">Ars Technica</span></div>
-        <div class="body">
-          <div class="kicker">Ai</div>
-          <h3>Voters back data center restrictions in key AI states</h3>
-          <p>Polling firm Redbud Consulting reported that 38 of 44 ballot measures seeking to restrict data centers passed across 10 states, while anti-AI candidates won governor races in Texas, Arizona, Georgia and Ohio. Analysts quoted by Bloomberg and Axios said projects already approved through 2027 are largely unaffected, with the exposure falling on 2028 capacity; Texas governor-elect Gina Hinojosa plans delays pending legislation on water, electricity, air and property rights.</p>
-          <div class="key">KEY &nbsp; 38 of 44 measures passed &middot; 10 states &middot; Texas expected to account for over 41% of added 2028 capacity &middot; about 13 gigawatts exposed &middot; 12 to 18 month slippage for projects lacking state environmental permits &middot; nearly two-thirds of 2028 capacity possibly delayed &middot; AI boom estimated by Gartner at nearly $5 trillion short of paying for itself</div>
-          <div class="meta"><span>Ars Technica</span><span class="read">Read &rarr;</span></div>
-        </div>
-      </a>
-
-      <a class="card" href="https://arstechnica.com/gadgets/2026/11/amds-record-quarter-data-center-business-doubles-while-gaming-craters/">
-        <div class="thumb thumb-ai"><span class="tag">Ars Technica</span></div>
-        <div class="body">
-          <div class="kicker">Ai</div>
-          <h3>AMD posts record quarter as data center revenue nearly doubles</h3>
-          <p>AMD reported record third-quarter revenue of $13.4 billion, up 45 percent year over year, with the data center segment nearly doubling on EPYC server CPUs and the Instinct MI450 launch, while gaming revenue fell 40 percent. CFO Jean Hu guided to roughly $17 billion in the fourth quarter, which, if Intel also lands within its own guidance, would put AMD above Intel&#x27;s revenue for the first time.</p>
-          <div class="key">KEY &nbsp; Q3 revenue $13.4B, +45% YoY &middot; data center $8.5B, +97% &middot; data center operating income $2.88B, +168% &middot; operating margin 25% to 34% &middot; client $2.95B, +7% &middot; gaming $773M, -40% &middot; embedded $1.1B, +29% &middot; Q4 guidance about $17B ±3%, about 66% YoY growth &middot; Intel Q4 guidance $15–16B</div>
-          <div class="meta"><span>Ars Technica</span><span class="read">Read &rarr;</span></div>
-        </div>
-      </a>
-
-      <a class="card" href="https://arstechnica.com/space/2026/11/elon-musk-moved-spacex-to-red-texas-now-its-blue-what-happens-next/">
-        <div class="thumb thumb-ai"><span class="tag">Ars Technica</span></div>
-        <div class="body">
-          <div class="kicker">Ai</div>
-          <h3>Musk&#x27;s Texas bet after the state&#x27;s election results</h3>
-          <p>Elon Musk moved to Texas in 2020 and has since concentrated Starship, Starlink manufacturing, SpaceX&#x27;s headquarters and a planned chip factory in the state, citing its regulatory and political environment. After Republicans lost statewide races on Tuesday, Musk stayed largely quiet before posting &quot;Data centers in space looking pretty appealing right now,&quot; and Ars Technica writes that what he does next is unclear.</p>
-          <div class="key">KEY &nbsp; Moved to Texas 2020 &middot; Starbase naming 2021 &middot; SpaceX HQ relocation announced July 2024 &middot; Terafab planned in Grimes County with more than 100 million square feet &middot; estimated $474M spent on 2026 Republican campaigns per The New York Times, nearly half in Texas &middot; first post 12 minutes after midnight</div>
-          <div class="meta"><span>Ars Technica</span><span class="read">Read &rarr;</span></div>
-        </div>
-      </a>
-
-      <a class="card" href="https://techcrunch.com/2026/11/04/almost-no-one-uses-ai-agents-to-book-their-uber-company-says/">
-        <div class="thumb thumb-ai"><span class="tag">TechCrunch</span></div>
-        <div class="body">
-          <div class="kicker">Ai</div>
-          <h3>Uber says AI agents booked four rides in October</h3>
-          <p>On Uber&#x27;s third-quarter earnings call, executives said only four rides were ordered through an AI agent during the week of Halloween, its busiest week, alongside 500 agent-placed Uber Eats orders. CEO Dara Khosrowshahi called the traction &quot;very, very early and very limited&quot; but said he expects agents to be a net positive for demand; DoorDash reported a similar pattern last week.</p>
-          <div class="key">KEY &nbsp; 4 AI-agent rides &middot; 500 AI-agent Uber Eats orders &middot; about 320 million total trips and orders that week &middot; 50 seconds average in-app booking time &middot; 90 seconds to re-order food &middot; DoorDash a few hundred agent orders to date &middot; Instinct last raised at a $10B valuation &middot; Meta&#x27;s Muse topped 10 million users &middot; about 8 major AI assistants, expected to exceed 10</div>
-          <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
-        </div>
-      </a>
-
-      <a class="card" href="https://www.theverge.com/ai-artificial-intelligence/1026867/qualcomm-earnings-data-centers">
+      <a class="card" href="https://www.theverge.com/gadgets/1031284/oura-counsel-health-acquisition">
         <div class="thumb thumb-ai"><span class="tag">The Verge</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Qualcomm pivots toward data centers as phone sales decline</h3>
-          <p>With smartphone sales down roughly 20 percent against 2025, Qualcomm used its Q4 2026 earnings call to detail an AI data center push built on partnerships announced earlier this year with Amazon and Meta. The company expects data center chips to eventually make up about 30 percent of its business, a less aggressive target than AMD&#x27;s stated expectation of over 80 percent.</p>
-          <div class="key">KEY &nbsp; Smartphone sales down about 20% vs 2025 &middot; about $650M data center revenue forecast for Q1 2027 &middot; $5B by end of 2027 &middot; $15B by 2029 &middot; total 2026 revenue $10.4B &middot; about 30% of business eventually &middot; AMD target over 80%</div>
+          <h3>Oura to buy AI health chatbot Counsel Health</h3>
+          <p>Oura said alongside quarterly earnings that it has agreed to acquire Counsel Health, an &quot;AI-native primary care company&quot; whose chatbot was added to the Oura app earlier this year, for $625 million. CEO Tom Hale told Bloomberg the aim is to link wearables, clinical AI and doctor access, with Counsel&#x27;s CEO Muthu Alagappan becoming Oura&#x27;s chief clinical AI officer.</p>
+          <div class="key">KEY &nbsp; $625 million &middot; deal expected to close before end of year &middot; about 50 on-demand physicians &middot; 70 employees joining Oura &middot; 3 care focus areas</div>
           <div class="meta"><span>The Verge</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
-      <a class="card" href="https://techcrunch.com/2026/11/04/meta-acquires-ai-coding-startup-conductor/">
+      <a class="card" href="https://techcrunch.com/2026/11/10/openai-acquires-odessia-travel-startup-created-by-sonder-founder/">
         <div class="thumb thumb-ai"><span class="tag">TechCrunch</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Meta acquires agentic coding startup Conductor</h3>
-          <p>Meta has acquired Conductor, a startup whose platform deploys multiple third-party coding agents into parallel workspaces, with founder and CEO Charlie Holtz announcing the move on the company blog; Meta confirmed the deal to TechCrunch but declined to give terms. Conductor&#x27;s core features continue until early next year, though its cloud service shuts down on November 20, after which user cloud data will be deleted.</p>
-          <div class="key">KEY &nbsp; Conductor founded 2024, core product launched last summer &middot; cloud shutdown November 20 &middot; Muse Code launched in August &middot; Muse agents surpassed 10 million users per Meta &middot; news first reported by Axios</div>
+          <h3>OpenAI acquires AI travel startup Odessia in acqui-hire</h3>
+          <p>OpenAI has acquired Odessia, an AI travel agent founded by Sonder founder Francis Davidson, who says he has joined OpenAI to work on the future of travel; terms were not disclosed and the article describes it as an apparent acqui-hire. Odessia&#x27;s tool has already been shut down, and OpenAI has not announced any travel-specific products, though it counts Booking.com, Expedia and KAYAK among customers or partners.</p>
+          <div class="key">KEY &nbsp; $6 million pre-seed led by Sequoia &middot; company one year old &middot; agent launched about 5 months ago &middot; 1.2 billion weekly ChatGPT users claimed &middot; Sonder founded 2014, $143 million revenues</div>
           <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://arstechnica.com/ai/2026/11/signals-encryption-just-passed-an-ai-powered-mathematical-checkup/">
+        <div class="thumb thumb-ai"><span class="tag">Ars Technica</span></div>
+        <div class="body">
+          <div class="kicker">Ai</div>
+          <h3>DeepMind formally verifies parts of Signal protocol</h3>
+          <p>Google DeepMind researchers used agentic AI to mathematically verify several of the Signal protocol&#x27;s cryptographic guarantees, using a framework called AlphaProof Code. The work did not cover the full Signal mobile app, and researchers say scaling the approach broadly remains a long way off, though on older Signal versions the tool correctly flagged known, long-fixed vulnerabilities.</p>
+          <div class="key">KEY &nbsp; 4-week project &middot; 0 new vulnerabilities found &middot; specification and proof being released publicly</div>
+          <div class="meta"><span>Ars Technica</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://techcrunch.com/2026/11/11/plurai-wants-to-help-ai-agents-work-better-using-the-same-approach-that-helped-get-self-driving-cars-to-roads/">
+        <div class="thumb thumb-ai"><span class="tag">TechCrunch</span></div>
+        <div class="body">
+          <div class="kicker">Ai</div>
+          <h3>Plurai raises seed round for AI agent simulations</h3>
+          <p>Plurai, founded by two former Nexar employees, raised seed funding to build a simulation layer that stress-tests AI agents against edge cases using synthetic digital twins of a company&#x27;s systems — borrowing the approach used to validate self-driving software. Co-founder Ilan Kadar says the gathered data can also post-train smaller open-weight models, which tests with Nvidia and Nebius reportedly showed outperforming mid-tier frontier models at lower cost.</p>
+          <div class="key">KEY &nbsp; $13 million seed led by Team8 &middot; LiveBench 2.0: 82.9 and 75.6 of 100 tasks &middot; Claude Opus 4.8 at 76.8% accuracy in EON test &middot; claimed 1–2 orders of magnitude cost reduction</div>
+          <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://techcrunch.com/2026/11/10/proximal-ventures-raises-debut-fund-to-back-startups-bringing-ai-to-drug-development/">
+        <div class="thumb thumb-ai"><span class="tag">TechCrunch</span></div>
+        <div class="body">
+          <div class="kicker">Ai</div>
+          <h3>First-time manager raises fund for AI in pharma</h3>
+          <p>Former SignalFire investor Sahir Raoof closed a debut solo fund for Proximal Ventures, betting AI can automate the outsourced services pharmaceutical companies buy — from compound synthesis to clinical trial data analysis. He argues AI&#x27;s gains in law and finance will repeat in pharma services, a thesis that drew backing from SignalFire, Kleiner Perkins, Bertelsmann Healthcare Investments and former FDA deputy commissioner Amy Abernethy.</p>
+          <div class="key">KEY &nbsp; $27.5 million first fund &middot; checks of $500,000–$1.5 million &middot; 7 startups backed &middot; pre-seed and seed stage &middot; Flatiron Health sold to Roche for $1.9 billion in 2018</div>
+          <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://www.theverge.com/transportation/1030902/serve-robotics-open-developer-api-sidewalk-delivery">
+        <div class="thumb thumb-ai"><span class="tag">The Verge</span></div>
+        <div class="body">
+          <div class="kicker">Ai</div>
+          <h3>Serve Robotics opens delivery fleet to outside developers</h3>
+          <p>Serve Robotics launched an AV Delivery Developer Portal letting third-party developers, small businesses and AI agents dispatch its sidewalk robots directly, bypassing the major food delivery apps. CEO Ali Kashani says the move diversifies demand away from dominant platforms and fills idle time between lunch and dinner, with pay-per-delivery or hourly pricing he describes as a fraction of human courier cost.</p>
+          <div class="key">KEY &nbsp; 2,000-robot fleet &middot; 150 neighborhoods &middot; top speed about 6 mph &middot; delivery apps take 15–30% per order &middot; spun out of Postmates in 2021</div>
+          <div class="meta"><span>The Verge</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
@@ -656,58 +826,58 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://www.cnbc.com/2026/11/04/cvs-to-split-off-drugstore-business.html">
+      <a class="card" href="https://www.cnbc.com/2026/11/11/goolsbee-october-inflation-fed-rates-disturbing-distressing.html">
         <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>CVS to split retail pharmacy from insurance by 2028</h3>
-          <p>CVS Health said Wednesday it plans to separate into two public companies by the first half of 2028, unwinding the vertically integrated model it built with its Aetna purchase in 2018. CEO David Joyner, who will run the insurance and pharmacy-benefit company, told CNBC the decision was made &quot;out of a position of strength&quot;; the retail business will be called CVS Pharmacy under Prem Shah.</p>
-          <div class="key">KEY &nbsp; Split by H1 2028 &middot; reverses $78B Aetna deal &middot; ~9,000 retail pharmacies &middot; shares closed more than 12% lower &middot; market value $117B &middot; shares up ~70% since Oct 2024 &middot; Q3 sales $108.40B vs $102.87B &middot; 2025 pharmacy sales $37.66B, insurance $36.29B, health services $51.24B &middot; $2B cost cuts</div>
+          <h3>Fed officials weigh larger December hike after hot CPI</h3>
+          <p>Chicago Fed President Austan Goolsbee called October&#x27;s inflation report &quot;borderline disturbing&quot; after the consumer price index rose 0.4%, the third consecutive month of outsized increases and above economists&#x27; expectations. Governor Christopher Waller said a hot print could push him toward a half-point December increase, while Dallas Fed President Lorie Logan said she sees a need for two more quarter-point moves.</p>
+          <div class="key">KEY &nbsp; CPI +0.4% in October &middot; third straight outsized month &middot; current range 3.75%-4% &middot; quarter-point hike in September, hold in October &middot; futures put half-point December odds at 15%</div>
           <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
-      <a class="card" href="https://www.cnbc.com/2026/11/04/qualcomm-qcom-earnings-report-q4-2026.html">
+      <a class="card" href="https://www.cnbc.com/2026/11/11/nvidia-stock-jensen-huang-affair-china.html">
         <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>Qualcomm guidance trails estimates as memory costs bite</h3>
-          <p>Qualcomm beat Wall Street estimates for the quarter but guided current-quarter earnings and revenue below consensus, and the stock fell 6% in extended trading. Handset chip sales dropped as rising memory costs push phone makers to raise prices, while automotive revenue grew sharply and CEO Cristiano Amon said the data center constraint is supply, not demand.</p>
-          <div class="key">KEY &nbsp; Stock -6% after hours &middot; guidance EPS $2.15–$2.35 on revenue $10.4B–$11.2B vs $2.27 and $10.48B expected &middot; adjusted revenue -7% y/y &middot; handset chips -26% to $5.14B vs $5.21B estimate &middot; automotive +89% to $1.99B &middot; IoT +4% to $1.88B &middot; QTL -7% to $1.3B &middot; data center $650M, $5B expected in fiscal 2027</div>
+          <h3>Nvidia shares recover 3% as law firm investigates</h3>
+          <p>Nvidia stock rose 3% Wednesday after two days of declines tied to reports of CEO Jensen Huang&#x27;s affair with an alleged Chinese spy, and the company has hired Wachtell, Lipton, Rosen &amp; Katz to investigate whether company secrets or national security were compromised. Morgan Stanley removed Nvidia from its top-pick list, and Bank of America&#x27;s Vivek Arya laid out three scenarios ranging from contained impact to adverse findings requiring earnings reassessment.</p>
+          <div class="key">KEY &nbsp; +3% Wednesday &middot; -5.47% Tuesday &middot; -4.3% Monday &middot; down more than 25% since Oct. 2 &middot; earnings due Nov. 17</div>
           <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
-      <a class="card" href="https://fortune.com/2026/11/04/meta-states-release-claims-cambridge-analytica-25-billion-fine/">
+      <a class="card" href="https://www.cnbc.com/2026/11/10/polymarket-annualized-revenue-us-growth.html">
+        <div class="thumb thumb-markets"><span class="tag">CNBC Finance</span></div>
+        <div class="body">
+          <div class="kicker">Markets</div>
+          <h3>Polymarket revenue run rate passes $1.8 billion</h3>
+          <p>Polymarket told CNBC its annualized revenue has topped $1.8 billion, up from the $1 billion run rate it disclosed in June, driven by its US exchange launched in May and by sports events including the FIFA World Cup and the NFL season. The CFTC is conducting a broad investigation into the company over advertising practices and whether it previously violated a settlement barring US residents from its international platform.</p>
+          <div class="key">KEY &nbsp; $1.8B annualized revenue, up from $1B in June &middot; $14.5B October notional volume vs $4B in June &middot; Combo contracts over 70% of Sunday volume &middot; $1B round at $21B valuation</div>
+          <div class="meta"><span>CNBC Finance</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://fortune.com/2026/11/11/rox-series-b-100-million-funding-take-on-salesforce/">
         <div class="thumb thumb-markets"><span class="tag">Fortune</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>Judge orders $25 billion Meta data privacy penalty</h3>
-          <p>A New Mexico judge ordered Meta to pay what is described as one of the largest data privacy penalties in US history over statements that deceived users about its data practices and its response to the Cambridge Analytica episode, rather than over the alleged harms from how the harvested data was used. Meta said it would appeal; the article&#x27;s author, a political communication scholar who worked on exposing the scandal, contends the company has largely escaped accountability for the underlying political exploitation of the data.</p>
-          <div class="key">KEY &nbsp; $25B penalty &middot; $459M for Cambridge Analytica claims &middot; data tied to 2016 presidential election targeting &middot; judge found users not notified about thousands of apps associated with data misuse</div>
+          <h3>AI sales startup Rox raises $100 million</h3>
+          <p>Rox raised a $100 million Series B at a $1.3 billion valuation co-led by General Catalyst and March Capital, with Sequoia and GV returning and Prosperity7 joining, to build AI agents that research accounts and prepare outreach instead of simply storing CRM data. Cofounder Ishan Mukherjee argues Salesforce&#x27;s moat is weakening as large customers such as Nvidia and Intel move data into their own environments, though General Catalyst&#x27;s Marc Bhargava acknowledged a &quot;graveyard&quot; of startups that tried to displace incumbents.</p>
+          <div class="key">KEY &nbsp; $100M Series B at $1.3B valuation &middot; Salesforce market cap $172B &middot; Salesforce fiscal 2026 revenue $41.5B &middot; Pixie Labs sold to New Relic for roughly $150M in 2020 &middot; General Catalyst invested pre-product in 2024</div>
           <div class="meta"><span>Fortune</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
-      <a class="card" href="https://www.cnbc.com/2026/11/04/stock-market-rally-trump-midterms.html">
+      <a class="card" href="https://www.cnbc.com/2026/11/11/measles-outbreak-us-economic-cost.html">
         <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>Stocks rally after Trump says he accepts results</h3>
-          <p>Equities climbed Wednesday following the Democratic sweep in the midterms, with strategists attributing much of the move to Trump telling the New York Times and Wall Street Journal that he accepted the outcome and would work with Democrats. Deutsche Bank&#x27;s George Saravelos said the acceptance should bring down risk premia if it holds, while Freedom Capital Markets&#x27; Jay Woods cautioned the president remains an &quot;X factor&quot; alongside energy-driven inflation risks from the Middle East conflict.</p>
-          <div class="key">KEY &nbsp; S&amp;P 500 gained more than 1% &middot; CNBC Fed Survey of 30 respondents: 63% saw &quot;some&quot; market risk from legal challenges, up from 61% in September; 14% saw &quot;significant&quot; risk, up from 7% &middot; S&amp;P 500 at 8,000 would imply roughly a 4% further gain</div>
+          <h3>US measles cases hit three-decade high, costs mount</h3>
+          <p>More than 5,100 measles cases have been reported in the US in 2026 as of early November, and the country is expected to lose its official elimination status following a Pan American Health Organization review this week. A new Johns Hopkins tool estimates the outbreaks carry an economic cost of nearly $83 million, though researchers say the figures are estimates rather than a definitive accounting.</p>
+          <div class="key">KEY &nbsp; 5,100+ cases in 2026 &middot; 8 confirmed deaths (6 Pennsylvania, 1 New York, 1 Wisconsin) &middot; ~$83M estimated cost: $56M public health response, ~$25M lost productivity, $1.8M+ direct medical &middot; 2025: 2,289 cases, $37M+</div>
           <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
-        </div>
-      </a>
-
-      <a class="card" href="https://www.cnbc.com/2026/11/04/euro-zone-cpi-inflation-october-ecb-rate-hike.html">
-        <div class="thumb thumb-markets"><span class="tag">CNBC Markets</span></div>
-        <div class="body">
-          <div class="kicker">Markets</div>
-          <h3>Euro zone inflation hits 4% as ECB hike nears</h3>
-          <p>A flash estimate put euro area inflation at a three-year high of 4% in October, in line with a Reuters poll of economists and driven largely by energy costs that have risen since the start of the Iran war. Markets raised the implied odds of a December ECB rate increase after the release, though Validus Risk Management&#x27;s Robert Mertens said turmoil in the French bond market is constraining the central bank&#x27;s room to tighten.</p>
-          <div class="key">KEY &nbsp; 4% in October vs 3.8% in September &middot; highest since Sept 2023&#x27;s 4.3% &middot; energy inflation 20.8% from 18.9% &middot; Lithuania 6.1% highest, Malta 2.3% lowest &middot; all 21 members above the 2% target &middot; ECB key rate 2.5% after a 25bp September hike &middot; December hike odds 71.8% before the print, more than 72% after &middot; euro +0.6% vs dollar</div>
-          <div class="meta"><span>CNBC Markets</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
@@ -715,7 +885,8 @@
     <div class="progress"><div class="progress-fill"></div></div>
   </section>
 
-  <section class="section">
+  <section class="section section--region">
+    <div class="region-art" aria-hidden="true"><img src="/img/dispatch-us-turkey-v2.webp" alt="" width="2000" height="857" loading="lazy" decoding="async"></div>
     <div class="section-head">
       <span class="num">03</span><h2>US &amp; Turkey</h2><hr class="rule">
     </div>
@@ -734,46 +905,46 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://www.npr.org/2026/11/04/g-s1-151833/2026-midterms-chuck-schumer-senate-democrats">
+      <a class="card" href="https://www.npr.org/2026/11/11/g-s1-152954/russia-ukraine-war-talks">
         <div class="thumb thumb-us"><span class="tag">NPR</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>Schumer claims mandate as Democrats take 54-seat Senate</h3>
-          <p>Senate Minority Leader Chuck Schumer, set to become majority leader in January, told reporters the midterms amounted to a &quot;generational remake of the Senate map,&quot; citing gains in Iowa, Ohio, South Carolina and Texas. He said Democrats will focus on cost of living, ending the Iran war, and investigations into the White House over corruption allegations, while Trump has signaled both veto threats and some openness to deals.</p>
-          <div class="key">KEY &nbsp; 54-seat Democratic majority including 2 independents &middot; 2 races uncalled (Alaska, Mississippi) &middot; Kansas&#x27;s first Democratic senator in 94 years &middot; leadership change in January</div>
+          <h3>Russia and Ukraine agree to large prisoner exchange</h3>
+          <p>Officials at U.S.-mediated talks in Abu Dhabi said the two sides agreed to what Jared Kushner called the biggest humanitarian release of prisoners, with numbers to be finalized the following day; Russian delegation head Vladimir Medinsky and Ukraine&#x27;s Rustem Umerov confirmed the planned swap. Kushner said he and envoy Steve Witkoff would travel to Moscow to meet Putin and then to Dublin to meet Zelenskyy, while Secretary of State Marco Rubio called the meeting productive but cautioned that ending the war will take time.</p>
+          <div class="key">KEY &nbsp; First talks in 9 months &middot; war nearly 5 years old &middot; 7 civilians wounded in Zaporizhzhia and Kharkiv &middot; 627 Ukrainian drones downed overnight, per Russia&#x27;s Defense Ministry &middot; 150 over the St. Petersburg region &middot; 3 workers injured at Ust-Luga port</div>
           <div class="meta"><span>NPR</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
-      <a class="card" href="https://www.bbc.co.uk/news/articles/cmpdg093e589o?at_medium=RSS&amp;at_campaign=rss">
+      <a class="card" href="https://www.bbc.co.uk/news/articles/c6ly0y8r54pqo?at_medium=RSS&amp;at_campaign=rss">
         <div class="thumb thumb-us"><span class="tag">BBC News</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>Trump keeps executive powers after midterm losses</h3>
-          <p>BBC analysis argues Trump retains broad executive authority — tariffs, military operations in Venezuela and Iran, unilateral spending cuts — plus a veto that Democrats&#x27; majorities are too small to override. The constraint may come from his own party: Vice-President JD Vance publicly blamed the Iran war for Tuesday&#x27;s defeat, and CBS News reported Trump has asked advisers whether to replace Defence Secretary Pete Hegseth, which the president denied.</p>
-          <div class="key">KEY &nbsp; final 2 years of term &middot; 2006 precedent: Bush replaced Rumsfeld after midterm losses</div>
+          <h3>Mississippi Senate race still uncalled, Democrat narrowly ahead</h3>
+          <p>Democrat Scott Colom leads Republican incumbent Cindy Hyde-Smith by about 2,500 ballots, under 1%, with thousands of postal and affidavit ballots still uncounted ahead of Friday&#x27;s certification deadline. A Colom win would give Mississippi its first Democratic senator in nearly four decades and its first Black senator in over 140 years; both parties have sent lawyers to the state, raising the prospect of legal challenges.</p>
+          <div class="key">KEY &nbsp; Lead about 2,500 ballots, less than 1% &middot; 12,000–20,000 affidavit ballots estimated, roughly 15,500 processed as of Tuesday morning &middot; Democratic Senate majority-elect would reach 55 seats &middot; Trump won the state by over 22 points in 2024 &middot; Republican streak dating to 1982 &middot; 72% for Trump in Lincoln County</div>
           <div class="meta"><span>BBC News</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
-      <a class="card" href="https://www.npr.org/2026/11/04/g-s1-151868/democratic-leaders-election-results-reactions-takeaways">
+      <a class="card" href="https://www.npr.org/2026/11/11/g-s1-152949/up-first-newsletter-pete-hegseth-jim-jordan-iran-backed-trio-us-bases">
         <div class="thumb thumb-us"><span class="tag">NPR</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>Democrats flip deep-red states, win historic firsts</h3>
-          <p>Democrats took both chambers of Congress and won governorships in Georgia, Ohio and Texas, with Senate flips in states including Texas, Kansas and Iowa described as the first in decades. Eric Holder, chairman of the National Democratic Redistricting Committee, said Republican mid-decade gerrymandering efforts &quot;didn&#x27;t just fail — they were dismantled,&quot; while Michigan&#x27;s Abdul El-Sayed became the first Muslim elected to the Senate and Georgia&#x27;s Keisha Lance Bottoms the first Black woman elected governor.</p>
-          <div class="key">KEY &nbsp; at least 28 governorships &middot; control of House and Senate heading into 2027 &middot; roughly $4bn in annual US military aid to Israel scheduled to end</div>
+          <h3>House sends Hegseth impeachment articles back to committee</h3>
+          <p>The House voted 211 to 204 to refer Rep. Thomas Massie&#x27;s articles of impeachment against Defense Secretary Pete Hegseth to the Judiciary Committee, avoiding a floor vote and making action before the session ends unlikely; Massie had accused Hegseth of high crimes tied to the war with Iran and strikes on drug boats. Separately, House Republicans chose Rep. Jim Jordan as minority leader after Speaker Mike Johnson said he would step down, and federal prosecutors indicted three men described as Iran-backed operatives allegedly involved in nearly 20 attacks and attempted attacks in Europe and the U.S.</p>
+          <div class="key">KEY &nbsp; Vote 211–204 &middot; Jordan is 62 &middot; 3 men indicted over nearly 20 alleged attacks &middot; at least 80 veterans in the next Congress &middot; more than 50 signed the With Honor pledge &middot; veterans down to 15% from 19%</div>
           <div class="meta"><span>NPR</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
-      <a class="card" href="https://www.npr.org/2026/11/04/nx-s1-6017757/democrats-republicans-doctors-acton-andrews-blue-wave">
+      <a class="card" href="https://www.npr.org/2026/11/11/nx-s1-6036790/swing-voters-swing-states-democrats-congress">
         <div class="thumb thumb-us"><span class="tag">NPR</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>Physician candidates win Senate and House seats</h3>
-          <p>Pediatrician Annie Andrews&#x27;s win in South Carolina means the Senate will have a Democratic practicing physician for the first time since 1938, part of a broader shift in which doctor-candidates increasingly run as Democrats on public health and affordability rather than as small-business Republicans. Many were recruited and funded by 314 Action, whose president Shaughnessy Naughton says the group handles strategy, media training and fundraising for science-background candidates.</p>
-          <div class="key">KEY &nbsp; first Democratic practicing physician in Senate since 1938 &middot; 4 current Senate physicians, all Republicans &middot; 2 of them lost reelection &middot; 6 House Democratic doctors joined by at least 2 more &middot; 314 Action invested more than $30 million across 48 physicians</div>
+          <h3>Swing voters want costs addressed, not investigations</h3>
+          <p>Voters in NPR&#x27;s Swing Shift project said after the midterms that they want the incoming Democratic Congress to focus on the cost of living rather than gridlock or impeachment, with participants from Pennsylvania, North Carolina, Georgia and Michigan describing mixed reactions to the results. Several had backed Trump in 2024 before splitting tickets or swinging to Democrats this year, and one said voters should hold Democrats to tangible change rather than promises.</p>
+          <div class="key">KEY &nbsp; Voters profiled from 4 states &middot; one backed Biden in 2020 and Trump in 2024 &middot; election-night voice memo sent at 9:56 PM &middot; 2-year window before the next election</div>
           <div class="meta"><span>NPR</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
@@ -792,58 +963,36 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://www.turkishminute.com/2026/11/04/eu-warns-turkeys-democratic-decline-is-widening-gap-with-membership-ambitions/">
-        <div class="thumb thumb-turkey"><span class="tag">Turkish Minute</span></div>
-        <div class="body">
-          <div class="kicker">Turkey</div>
-          <h3>EU report says Turkey drifting from membership standards</h3>
-          <p>The European Commission&#x27;s annual enlargement report said intensified legal proceedings against elected officials, opposition politicians and civil society have widened the gap between Ankara&#x27;s stated membership ambitions and the political criteria for accession, even as cooperation with Brussels has increased. Turkey&#x27;s Foreign Ministry rejected the findings on political criteria, the judiciary and fundamental rights as baseless and called the EU&#x27;s approach &quot;prejudiced and unfair.&quot;</p>
-          <div class="key">KEY &nbsp; EU candidate since 1999 &middot; accession talks opened 2005 &middot; negotiations at a standstill since 2018 &middot; Cyprus divided since 1974</div>
-          <div class="meta"><span>Turkish Minute</span><span class="read">Read &rarr;</span></div>
-        </div>
-      </a>
-
-      <a class="card" href="https://www.dailysabah.com/business/economy/will-turkish-central-bank-continue-easing-analysts-are-split">
+      <a class="card" href="https://www.dailysabah.com/business/tech/turkiye-ai-summit-held-under-agents-are-among-us-theme">
         <div class="thumb thumb-turkey"><span class="tag">Daily Sabah</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>Analysts split on Turkish rate cut in December</h3>
-          <p>After an eight-month pause, the central bank cut its policy rate by 100 basis points to 36% last month, but October inflation came in above market consensus and left institutions divided on the next move. ING said it still expects cuts to continue in December, while BBVA Research, Goldman Sachs and Akbank reportedly see rates held, citing energy prices and a decline in reserves.</p>
-          <div class="key">KEY &nbsp; policy rate 36% &middot; 100 bps cut &middot; monthly inflation 2.58% (ING call 2.4%) &middot; annual 29.77% in October vs 29.73% in September &middot; MPC meets Dec. 10 &middot; inflation report due Nov. 12 &middot; BBVA year-end 2026 forecast 30%</div>
+          <h3>Istanbul AI summit focuses on agents in business</h3>
+          <p>The ninth Türkiye AI Summit, organized by TRAI, was held in Istanbul on Wednesday under the theme &quot;Agents Are Among Us,&quot; with executives from Zorlu Holding, Sabancı Holding and Trendyol Group among the speakers. Founder Halil Aksu presented two new studies and said turning Türkiye&#x27;s AI potential into economic value depends on clear strategy, reliable data and employee engagement.</p>
+          <div class="key">KEY &nbsp; 9th edition &middot; organized since 2018 &middot; 420 institutions &middot; over 2,000 participants &middot; TRAI AI Survey 2026 drew more than 350 institutions &middot; second day online and free</div>
           <div class="meta"><span>Daily Sabah</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
-      <a class="card" href="https://www.turkishminute.com/2026/11/04/rights-groups-urge-european-court-to-scrutinize-political-motives-behind-imamoglus-detention/">
-        <div class="thumb thumb-turkey"><span class="tag">Turkish Minute</span></div>
-        <div class="body">
-          <div class="kicker">Turkey</div>
-          <h3>Rights groups intervene in İmamoğlu case at Strasbourg</h3>
-          <p>Human Rights Watch, the Turkey Litigation Support Project and the International Commission of Jurists published a joint third-party submission asking the European Court of Human Rights to examine the İstanbul mayor&#x27;s detention as part of what they describe as a pattern of politically motivated prosecutions. İmamoğlu denies the corruption charges and says the case is meant to keep him from challenging President Erdoğan, while the government denies political interference in the judiciary.</p>
-          <div class="key">KEY &nbsp; jailed since March 2025 &middot; detained March 19, 2025 &middot; jailed pending trial March 23 &middot; intervention permitted July 9 &middot; submission dated Sept. 14, published Nov. 3 &middot; 436 defendants &middot; 46 in pretrial detention after 7 releases in October &middot; up to 2,430 years sought</div>
-          <div class="meta"><span>Turkish Minute</span><span class="read">Read &rarr;</span></div>
-        </div>
-      </a>
-
-      <a class="card" href="https://www.dailysabah.com/business/defense/bayraktar-tb2-hits-targets-with-kamikaze-drones-in-new-test">
+      <a class="card" href="https://www.dailysabah.com/business/economy/tpao-baker-hughes-ink-deal-to-develop-turkiyes-geothermal-potential">
         <div class="thumb thumb-turkey"><span class="tag">Daily Sabah</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>Baykar tests TB2 carrying FPV kamikaze drones</h3>
-          <p>Baykar said its Bayraktar TB2 took off from the Keşan test center carrying 16 Skydagger first-person-view kamikaze drones, released two over the test range and relayed their control link to ground operators, who struck the designated targets. The company presents the trial as evidence the TB2 can act as an airborne launch and communications hub for smaller strike drones.</p>
-          <div class="key">KEY &nbsp; 16 Skydagger drones carried, 2 released &middot; $2.2 billion exports reported in 2025 &middot; third consecutive year as largest drone exporter, per the company &middot; exports ~90% of revenue &middot; about one-third of Turkish defense and aerospace exports in 2023, one-quarter in 2024 &middot; TB2 deals with 36 countries, AKINCI with 16, 39 partners total</div>
+          <h3>TPAO and Baker Hughes sign geothermal development deal</h3>
+          <p>State-owned TPAO signed a cooperation agreement with U.S. energy services firm Baker Hughes to assess Türkiye&#x27;s geothermal potential, Energy Minister Alparslan Bayraktar said on X. The deal was signed on the sidelines of the COP31 summit in Antalya and will draw on data held by TPAO and the state mineral research directorate MTA before exploring commercial-scale development at suitable wells.</p>
+          <div class="key">KEY &nbsp; Signed Wednesday &middot; at COP31 in Antalya &middot; partners TPAO and Baker Hughes &middot; data from TPAO and MTA &middot; Baker Hughes CEO Lorenzo Simonelli</div>
           <div class="meta"><span>Daily Sabah</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
-      <a class="card" href="https://www.dailysabah.com/business/economy/turkish-fund-crisis-impact-varies-effect-on-real-sector-limited">
-        <div class="thumb thumb-turkey"><span class="tag">Daily Sabah</span></div>
+      <a class="card" href="https://bianet.org/haber/limited-access-for-accredited-media-at-the-cop31-leaders-summit-325316">
+        <div class="thumb thumb-turkey"><span class="tag">Bianet</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>Fitch and central bank see contained fund-crisis fallout</h3>
-          <p>Fitch Ratings said the turmoil&#x27;s impact varies and hits securities firms hardest through lower trading volumes, while estimating that banks&#x27; direct exposure to the affected funds is negligible. The central bank said the fund market can affect the real economy through various channels but that the current impact on the real sector remains limited.</p>
-          <div class="key">KEY &nbsp; 131 funds in liquidation, worth about TL 900 billion ($18 billion) &middot; nearly half a million investors &middot; two asset manager defaults in the week to Sept. 18 &middot; ~3,000 real sector firms held TL 116 billion, of which TL 57 billion in money market funds &middot; affected firms about 1.2% of real sector assets, 0.6% of employment, 0.9% of turnover, 1.1% of exports, 0.9% of commercial loans</div>
-          <div class="meta"><span>Daily Sabah</span><span class="read">Read &rarr;</span></div>
+          <h3>Most accredited journalists barred from COP31 leaders&#x27; hall</h3>
+          <p>Journalists accredited for COP31 in Antalya cannot use that accreditation to cover the November 11–12 Leaders&#x27; Summit from inside the hall, with entry limited to a press pool selected jointly by UN Climate Change and Turkish government media teams. The COP31 press desk told bianet about 20 journalists chosen for geographical representation would be admitted alongside those accompanying leaders, and the UN team said similar restrictions had been applied at other COPs.</p>
+          <div class="key">KEY &nbsp; COP31 runs November 9–20 &middot; Leaders&#x27; Summit November 11–12 &middot; about 20 pool journalists &middot; 102 leaders from 95 countries expected &middot; 196 parties plus the EU &middot; total admitted not disclosed</div>
+          <div class="meta"><span>Bianet</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
@@ -862,7 +1011,6 @@
       <button class="sport-tab active" data-sport="soccer" role="tab">Soccer</button>
       <button class="sport-tab" data-sport="volleyball" role="tab">Volleyball</button>
       <button class="sport-tab" data-sport="nba" role="tab">NBA</button>
-      <button class="sport-tab" data-sport="f1" role="tab">Formula 1</button>
     </div>
 
     <div class="sport-panel" data-sport="soccer">
@@ -874,26 +1022,6 @@
         </span>
       </div>
       <div class="rail">
-
-        <div class="fixture">
-          <div class="thumb thumb-soccer"><span class="tag">Serie A</span></div>
-          <div class="teams">Napoli <span>vs</span> Lazio</div>
-          <div class="when">
-            <b>Sunday, Nov 8 · 3:30 AM PST</b> &nbsp;(2:30 PM Istanbul)<br>
-            Serie A
-          </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Napoli+vs+Lazio+%E2%80%94+Serie+A&amp;dates=20261108T113000Z%2F20261108T133000Z&amp;details=Serie+A" target="_blank" rel="noopener">Add to Calendar</a></div>
-        </div>
-
-        <div class="fixture">
-          <div class="thumb thumb-soccer"><span class="tag">Premier League</span></div>
-          <div class="teams">Manchester United <span>vs</span> Aston Villa</div>
-          <div class="when">
-            <b>Sunday, Nov 8 · 8:30 AM PST</b> &nbsp;(7:30 PM Istanbul)<br>
-            Premier League
-          </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Manchester+United+vs+Aston+Villa+%E2%80%94+Premier+League&amp;dates=20261108T163000Z%2F20261108T183000Z&amp;details=Premier+League" target="_blank" rel="noopener">Add to Calendar</a></div>
-        </div>
 
         <div class="fixture">
           <div class="thumb thumb-soccer"><span class="tag">La Liga</span></div>
@@ -968,6 +1096,26 @@
         </div>
 
         <div class="fixture">
+          <div class="thumb thumb-soccer"><span class="tag">Champions League</span></div>
+          <div class="teams">Sabah FK <span>vs</span> Barcelona</div>
+          <div class="when">
+            <b>Wednesday, Nov 25 · 9:45 AM PST</b> &nbsp;(8:45 PM Istanbul)<br>
+            Champions League
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Sabah+FK+vs+Barcelona+%E2%80%94+Champions+League&amp;dates=20261125T174500Z%2F20261125T194500Z&amp;details=Champions+League" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-soccer"><span class="tag">Champions League</span></div>
+          <div class="teams">Slavia Prague <span>vs</span> Villarreal</div>
+          <div class="when">
+            <b>Wednesday, Nov 25 · 9:45 AM PST</b> &nbsp;(8:45 PM Istanbul)<br>
+            Champions League
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Slavia+Prague+vs+Villarreal+%E2%80%94+Champions+League&amp;dates=20261125T174500Z%2F20261125T194500Z&amp;details=Champions+League" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
           <div class="thumb thumb-soccer"><span class="tag">Süper Lig</span></div>
           <div class="teams">Besiktas <span>vs</span> Galatasaray</div>
           <div class="when">
@@ -994,97 +1142,99 @@
 
         <div class="fixture">
           <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
-          <div class="teams">Fenerbahçe Medicana <span>vs</span> Afyon Bld.</div>
+          <div class="teams">Fenerbahçe Medicana <span>vs</span> Nilüfer Bld.</div>
           <div class="when">
-            <b>Thursday, Nov 5 · 3:00 AM PST</b> &nbsp;(2:00 PM Istanbul)<br>
+            <b>Sunday, Nov 15 · 2:00 AM PST</b> &nbsp;(1:00 PM Istanbul)<br>
             Sultanlar Ligi
           </div>
         <div class="note">One of hers</div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Fenerbah%C3%A7e+Medicana+vs+Afyon+Bld.+%E2%80%94+Sultanlar+Ligi&amp;dates=20261105T110000Z%2F20261105T130000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Fenerbah%C3%A7e+Medicana+vs+Nil%C3%BCfer+Bld.+%E2%80%94+Sultanlar+Ligi&amp;dates=20261115T100000Z%2F20261115T120000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
         <div class="fixture">
           <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
-          <div class="teams">İlbank <span>vs</span> Nilüfer Bld.</div>
+          <div class="teams">Zeren Spor <span>vs</span> Eczacıbaşı Peron İstanbul</div>
           <div class="when">
-            <b>Thursday, Nov 5 · 8:00 AM PST</b> &nbsp;(7:00 PM Istanbul)<br>
-            Sultanlar Ligi
-          </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=%C4%B0lbank+vs+Nil%C3%BCfer+Bld.+%E2%80%94+Sultanlar+Ligi&amp;dates=20261105T160000Z%2F20261105T180000Z&amp;details=Sultanlar+Ligi" target="_blank" rel="noopener">Add to Calendar</a></div>
-        </div>
-
-        <div class="fixture">
-          <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
-          <div class="teams">Galatasaray Daikin <span>vs</span> Beşiktaş</div>
-          <div class="when">
-            <b>Sunday, Nov 8 · 3:00 AM PST</b> &nbsp;(2:00 PM Istanbul)<br>
+            <b>Sunday, Nov 15 · 3:00 AM PST</b> &nbsp;(2:00 PM Istanbul)<br>
             Sultanlar Ligi
           </div>
         <div class="note">One of hers</div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Galatasaray+Daikin+vs+Be%C5%9Fikta%C5%9F+%E2%80%94+Sultanlar+Ligi&amp;dates=20261108T110000Z%2F20261108T130000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Zeren+Spor+vs+Eczac%C4%B1ba%C5%9F%C4%B1+Peron+%C4%B0stanbul+%E2%80%94+Sultanlar+Ligi&amp;dates=20261115T110000Z%2F20261115T130000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
         <div class="fixture">
           <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
-          <div class="teams">Eczacıbaşı Peron İstanbul <span>vs</span> Göztepe</div>
+          <div class="teams">VakıfBank <span>vs</span> Aras Kargo</div>
           <div class="when">
-            <b>Sunday, Nov 8 · 4:00 AM PST</b> &nbsp;(3:00 PM Istanbul)<br>
+            <b>Sunday, Nov 15 · 3:00 AM PST</b> &nbsp;(2:00 PM Istanbul)<br>
             Sultanlar Ligi
           </div>
         <div class="note">One of hers</div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Eczac%C4%B1ba%C5%9F%C4%B1+Peron+%C4%B0stanbul+vs+G%C3%B6ztepe+%E2%80%94+Sultanlar+Ligi&amp;dates=20261108T120000Z%2F20261108T140000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Vak%C4%B1fBank+vs+Aras+Kargo+%E2%80%94+Sultanlar+Ligi&amp;dates=20261115T110000Z%2F20261115T130000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
         <div class="fixture">
           <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
-          <div class="teams">Nilüfer Bld. <span>vs</span> VakıfBank</div>
+          <div class="teams">Göztepe <span>vs</span> Galatasaray Daikin</div>
           <div class="when">
-            <b>Sunday, Nov 8 · 5:00 AM PST</b> &nbsp;(4:00 PM Istanbul)<br>
+            <b>Sunday, Nov 15 · 5:00 AM PST</b> &nbsp;(4:00 PM Istanbul)<br>
             Sultanlar Ligi
           </div>
         <div class="note">One of hers</div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Nil%C3%BCfer+Bld.+vs+Vak%C4%B1fBank+%E2%80%94+Sultanlar+Ligi&amp;dates=20261108T130000Z%2F20261108T150000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=G%C3%B6ztepe+vs+Galatasaray+Daikin+%E2%80%94+Sultanlar+Ligi&amp;dates=20261115T130000Z%2F20261115T150000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
         <div class="fixture">
           <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
-          <div class="teams">Türk Hava Yolları <span>vs</span> Fenerbahçe Medicana</div>
+          <div class="teams">Manisa BB <span>vs</span> Türk Hava Yolları</div>
           <div class="when">
-            <b>Sunday, Nov 8 · 8:00 AM PST</b> &nbsp;(7:00 PM Istanbul)<br>
+            <b>Sunday, Nov 15 · 5:00 AM PST</b> &nbsp;(4:00 PM Istanbul)<br>
             Sultanlar Ligi
           </div>
         <div class="note">One of hers</div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=T%C3%BCrk+Hava+Yollar%C4%B1+vs+Fenerbah%C3%A7e+Medicana+%E2%80%94+Sultanlar+Ligi&amp;dates=20261108T160000Z%2F20261108T180000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Manisa+BB+vs+T%C3%BCrk+Hava+Yollar%C4%B1+%E2%80%94+Sultanlar+Ligi&amp;dates=20261115T130000Z%2F20261115T150000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
         <div class="fixture">
           <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
-          <div class="teams">Afyon Bld. <span>vs</span> Manisa BB</div>
+          <div class="teams">Kuzeyboru <span>vs</span> İlbank</div>
           <div class="when">
-            <b>Sunday, Nov 8 · 4:00 AM PST</b> &nbsp;(3:00 PM Istanbul)<br>
+            <b>Sunday, Nov 15 · 6:00 AM PST</b> &nbsp;(5:00 PM Istanbul)<br>
             Sultanlar Ligi
           </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Afyon+Bld.+vs+Manisa+BB+%E2%80%94+Sultanlar+Ligi&amp;dates=20261108T120000Z%2F20261108T140000Z&amp;details=Sultanlar+Ligi" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Kuzeyboru+vs+%C4%B0lbank+%E2%80%94+Sultanlar+Ligi&amp;dates=20261115T140000Z%2F20261115T160000Z&amp;details=Sultanlar+Ligi" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
         <div class="fixture">
           <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
-          <div class="teams">Aras Kargo <span>vs</span> İlbank</div>
+          <div class="teams">Beşiktaş <span>vs</span> Afyon Bld.</div>
           <div class="when">
-            <b>Sunday, Nov 8 · 5:00 AM PST</b> &nbsp;(4:00 PM Istanbul)<br>
+            <b>Sunday, Nov 15 · 8:00 AM PST</b> &nbsp;(7:00 PM Istanbul)<br>
             Sultanlar Ligi
           </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Aras+Kargo+vs+%C4%B0lbank+%E2%80%94+Sultanlar+Ligi&amp;dates=20261108T130000Z%2F20261108T150000Z&amp;details=Sultanlar+Ligi" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Be%C5%9Fikta%C5%9F+vs+Afyon+Bld.+%E2%80%94+Sultanlar+Ligi&amp;dates=20261115T160000Z%2F20261115T180000Z&amp;details=Sultanlar+Ligi" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
         <div class="fixture">
           <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
-          <div class="teams">Zeren Spor <span>vs</span> Kuzeyboru</div>
+          <div class="teams">Eczacıbaşı Peron İstanbul <span>vs</span> Kuzeyboru</div>
           <div class="when">
-            <b>Sunday, Nov 8 · 5:00 AM PST</b> &nbsp;(4:00 PM Istanbul)<br>
+            <b>Saturday, Nov 21 · 3:00 AM PST</b> &nbsp;(2:00 PM Istanbul)<br>
             Sultanlar Ligi
           </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Zeren+Spor+vs+Kuzeyboru+%E2%80%94+Sultanlar+Ligi&amp;dates=20261108T130000Z%2F20261108T150000Z&amp;details=Sultanlar+Ligi" target="_blank" rel="noopener">Add to Calendar</a></div>
+        <div class="note">One of hers</div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Eczac%C4%B1ba%C5%9F%C4%B1+Peron+%C4%B0stanbul+vs+Kuzeyboru+%E2%80%94+Sultanlar+Ligi&amp;dates=20261121T110000Z%2F20261121T130000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
+          <div class="teams">Aras Kargo <span>vs</span> Fenerbahçe Medicana</div>
+          <div class="when">
+            <b>Saturday, Nov 21 · 4:00 AM PST</b> &nbsp;(3:00 PM Istanbul)<br>
+            Sultanlar Ligi
+          </div>
+        <div class="note">One of hers</div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Aras+Kargo+vs+Fenerbah%C3%A7e+Medicana+%E2%80%94+Sultanlar+Ligi&amp;dates=20261121T120000Z%2F20261121T140000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
       </div>
@@ -1103,129 +1253,105 @@
 
         <div class="fixture">
           <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
-          <div class="teams">Detroit Pistons <span>at</span> Philadelphia 76ers</div>
+          <div class="teams">Indiana Pacers <span>at</span> Washington Wizards</div>
           <div class="when">
-            <b>Wednesday, Nov 4 · 4:00 PM PST</b><br>
+            <b>Wednesday, Nov 11 · 4:00 PM PST</b><br>
             NBA
           </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Detroit+Pistons+at+Philadelphia+76ers+%E2%80%94+NBA&amp;dates=20261105T000000Z%2F20261105T020000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Indiana+Pacers+at+Washington+Wizards+%E2%80%94+NBA&amp;dates=20261112T000000Z%2F20261112T020000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
         <div class="fixture">
           <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
-          <div class="teams">Washington Wizards <span>at</span> Atlanta Hawks</div>
+          <div class="teams">New York Knicks <span>at</span> Cleveland Cavaliers</div>
           <div class="when">
-            <b>Wednesday, Nov 4 · 4:00 PM PST</b><br>
+            <b>Wednesday, Nov 11 · 4:00 PM PST</b><br>
             NBA
           </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Washington+Wizards+at+Atlanta+Hawks+%E2%80%94+NBA&amp;dates=20261105T000000Z%2F20261105T020000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=New+York+Knicks+at+Cleveland+Cavaliers+%E2%80%94+NBA&amp;dates=20261112T000000Z%2F20261112T020000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
         <div class="fixture">
           <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
-          <div class="teams">Boston Celtics <span>at</span> Milwaukee Bucks</div>
+          <div class="teams">Toronto Raptors <span>at</span> Boston Celtics</div>
           <div class="when">
-            <b>Wednesday, Nov 4 · 4:30 PM PST</b><br>
+            <b>Wednesday, Nov 11 · 4:00 PM PST</b><br>
             NBA
           </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Boston+Celtics+at+Milwaukee+Bucks+%E2%80%94+NBA&amp;dates=20261105T003000Z%2F20261105T023000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Toronto+Raptors+at+Boston+Celtics+%E2%80%94+NBA&amp;dates=20261112T000000Z%2F20261112T020000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
         <div class="fixture">
           <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
-          <div class="teams">Phoenix Suns <span>at</span> Orlando Magic</div>
+          <div class="teams">Philadelphia 76ers <span>at</span> Toronto Raptors</div>
           <div class="when">
-            <b>Thursday, Nov 5 · 6:00 PM PST</b><br>
+            <b>Thursday, Nov 12 · 4:00 PM PST</b><br>
             NBA
           </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Phoenix+Suns+at+Orlando+Magic+%E2%80%94+NBA&amp;dates=20261106T020000Z%2F20261106T040000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Philadelphia+76ers+at+Toronto+Raptors+%E2%80%94+NBA&amp;dates=20261113T000000Z%2F20261113T020000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
         <div class="fixture">
           <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
-          <div class="teams">Golden State Warriors <span>at</span> Miami Heat</div>
+          <div class="teams">Washington Wizards <span>at</span> Detroit Pistons</div>
           <div class="when">
-            <b>Thursday, Nov 5 · 7:00 PM PST</b><br>
+            <b>Thursday, Nov 12 · 4:00 PM PST</b><br>
             NBA
           </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Golden+State+Warriors+at+Miami+Heat+%E2%80%94+NBA&amp;dates=20261106T030000Z%2F20261106T050000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Washington+Wizards+at+Detroit+Pistons+%E2%80%94+NBA&amp;dates=20261113T000000Z%2F20261113T020000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
         <div class="fixture">
           <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
-          <div class="teams">Atlanta Hawks <span>at</span> Washington Wizards</div>
+          <div class="teams">Minnesota Timberwolves <span>at</span> Dallas Mavericks</div>
           <div class="when">
-            <b>Friday, Nov 6 · 4:00 PM PST</b><br>
+            <b>Thursday, Nov 12 · 5:00 PM PST</b><br>
+            NBA
+          </div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Minnesota+Timberwolves+at+Dallas+Mavericks+%E2%80%94+NBA&amp;dates=20261113T010000Z%2F20261113T030000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
+        <div class="fixture">
+          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
+          <div class="teams">Indiana Pacers <span>at</span> New York Knicks</div>
+          <div class="when">
+            <b>Friday, Nov 13 · 4:00 PM PST</b><br>
             NBA
           </div>
         <div class="note">NBA Cup - Group Play</div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Atlanta+Hawks+at+Washington+Wizards+%E2%80%94+NBA&amp;dates=20261107T000000Z%2F20261107T020000Z&amp;details=NBA+Cup+-+Group+Play" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Indiana+Pacers+at+New+York+Knicks+%E2%80%94+NBA&amp;dates=20261114T000000Z%2F20261114T020000Z&amp;details=NBA+Cup+-+Group+Play" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
         <div class="fixture">
           <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
-          <div class="teams">Charlotte Hornets <span>at</span> Boston Celtics</div>
+          <div class="teams">Orlando Magic <span>at</span> Milwaukee Bucks</div>
           <div class="when">
-            <b>Friday, Nov 6 · 4:00 PM PST</b><br>
+            <b>Friday, Nov 13 · 4:00 PM PST</b><br>
             NBA
           </div>
         <div class="note">NBA Cup - Group Play</div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Charlotte+Hornets+at+Boston+Celtics+%E2%80%94+NBA&amp;dates=20261107T000000Z%2F20261107T020000Z&amp;details=NBA+Cup+-+Group+Play" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Orlando+Magic+at+Milwaukee+Bucks+%E2%80%94+NBA&amp;dates=20261114T000000Z%2F20261114T020000Z&amp;details=NBA+Cup+-+Group+Play" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
         <div class="fixture">
           <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
-          <div class="teams">Cleveland Cavaliers <span>at</span> Philadelphia 76ers</div>
+          <div class="teams">Miami Heat <span>at</span> Cleveland Cavaliers</div>
           <div class="when">
-            <b>Friday, Nov 6 · 4:30 PM PST</b><br>
+            <b>Friday, Nov 13 · 5:00 PM PST</b><br>
             NBA
           </div>
         <div class="note">NBA Cup - Group Play</div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Cleveland+Cavaliers+at+Philadelphia+76ers+%E2%80%94+NBA&amp;dates=20261107T003000Z%2F20261107T023000Z&amp;details=NBA+Cup+-+Group+Play" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Miami+Heat+at+Cleveland+Cavaliers+%E2%80%94+NBA&amp;dates=20261114T010000Z%2F20261114T030000Z&amp;details=NBA+Cup+-+Group+Play" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
         <div class="fixture">
           <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
-          <div class="teams">Atlanta Hawks <span>at</span> Brooklyn Nets</div>
+          <div class="teams">New Orleans Pelicans <span>at</span> Denver Nuggets</div>
           <div class="when">
-            <b>Saturday, Nov 7 · 4:30 PM PST</b><br>
+            <b>Saturday, Nov 14 · 4:00 PM PST</b><br>
             NBA
           </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Atlanta+Hawks+at+Brooklyn+Nets+%E2%80%94+NBA&amp;dates=20261108T003000Z%2F20261108T023000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
-        </div>
-
-        <div class="fixture">
-          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
-          <div class="teams">Cleveland Cavaliers <span>at</span> New York Knicks</div>
-          <div class="when">
-            <b>Saturday, Nov 7 · 5:00 PM PST</b><br>
-            NBA
-          </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Cleveland+Cavaliers+at+New+York+Knicks+%E2%80%94+NBA&amp;dates=20261108T010000Z%2F20261108T030000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
-        </div>
-
-      </div>
-      <div class="progress"><div class="progress-fill"></div></div>
-    </div>
-
-    <div class="sport-panel" data-sport="f1" hidden>
-      <div class="rail-nav">
-        <span class="drag-hint">&larr; Drag to explore &rarr;</span>
-        <span class="nav-btns">
-          <button class="nav-btn" data-dir="-1" aria-label="Previous fixture">&#8249;</button>
-          <button class="nav-btn" data-dir="1" aria-label="Next fixture">&#8250;</button>
-        </span>
-      </div>
-      <div class="rail">
-
-        <div class="fixture">
-          <div class="thumb thumb-f1"><span class="tag">Formula 1</span></div>
-          <div class="teams">MSC Cruises São Paulo Grand Prix </div>
-          <div class="when">
-            <b>Friday, Nov 6 · 7:30 AM PST</b><br>
-            Formula 1
-          </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=MSC+Cruises+S%C3%A3o+Paulo+Grand+Prix+++%E2%80%94+Formula+1&amp;dates=20261106T153000Z%2F20261106T173000Z&amp;details=Formula+1" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=New+Orleans+Pelicans+at+Denver+Nuggets+%E2%80%94+NBA&amp;dates=20261115T000000Z%2F20261115T020000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
       </div>
