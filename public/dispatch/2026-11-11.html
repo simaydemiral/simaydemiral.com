@@ -451,6 +451,12 @@
     transition: transform 0.15s ease, box-shadow 0.3s ease;
   }
   .card:hover { transform: translateY(-3px); }
+  .card { cursor: pointer; }
+  /* the card is a div, not a link, so its summary can be selected and
+     copied; the headline and "Read" carry the real anchors */
+  .card .card-head { color: inherit; text-decoration: none; }
+  .card .card-head:hover { text-decoration: underline; }
+  .card a.read { text-decoration: none; }
   .card.active { box-shadow: 0 0 0 1px rgba(232, 147, 90, 0.55), 0 16px 40px rgba(0, 0, 0, 0.35); }
   .card .thumb {
     position: relative;
@@ -668,8 +674,6 @@
   }
   .edition-btn:hover { border-color: #e8935a; color: #e8935a; }
   .edition-btn.active { background: #e8935a; border-color: #e8935a; color: #1d1512; }
-  div.card { cursor: default; }
-  div.card:hover { transform: none; }
 
   /* ---------- footer ---------- */
   .footer {
@@ -743,71 +747,71 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://www.theverge.com/gadgets/1031284/oura-counsel-health-acquisition">
+      <div class="card" data-href="https://www.theverge.com/gadgets/1031284/oura-counsel-health-acquisition">
         <div class="thumb thumb-ai"><span class="tag">The Verge</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Oura to buy AI health chatbot Counsel Health</h3>
+          <h3><a class="card-head" href="https://www.theverge.com/gadgets/1031284/oura-counsel-health-acquisition">Oura to buy AI health chatbot Counsel Health</a></h3>
           <p>Oura said alongside quarterly earnings that it has agreed to acquire Counsel Health, an &quot;AI-native primary care company&quot; whose chatbot was added to the Oura app earlier this year, for $625 million. CEO Tom Hale told Bloomberg the aim is to link wearables, clinical AI and doctor access, with Counsel&#x27;s CEO Muthu Alagappan becoming Oura&#x27;s chief clinical AI officer.</p>
           <div class="key">KEY &nbsp; $625 million &middot; deal expected to close before end of year &middot; about 50 on-demand physicians &middot; 70 employees joining Oura &middot; 3 care focus areas</div>
-          <div class="meta"><span>The Verge</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>The Verge</span><a class="read" href="https://www.theverge.com/gadgets/1031284/oura-counsel-health-acquisition">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://techcrunch.com/2026/11/10/openai-acquires-odessia-travel-startup-created-by-sonder-founder/">
+      <div class="card" data-href="https://techcrunch.com/2026/11/10/openai-acquires-odessia-travel-startup-created-by-sonder-founder/">
         <div class="thumb thumb-ai"><span class="tag">TechCrunch</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>OpenAI acquires AI travel startup Odessia in acqui-hire</h3>
+          <h3><a class="card-head" href="https://techcrunch.com/2026/11/10/openai-acquires-odessia-travel-startup-created-by-sonder-founder/">OpenAI acquires AI travel startup Odessia in acqui-hire</a></h3>
           <p>OpenAI has acquired Odessia, an AI travel agent founded by Sonder founder Francis Davidson, who says he has joined OpenAI to work on the future of travel; terms were not disclosed and the article describes it as an apparent acqui-hire. Odessia&#x27;s tool has already been shut down, and OpenAI has not announced any travel-specific products, though it counts Booking.com, Expedia and KAYAK among customers or partners.</p>
           <div class="key">KEY &nbsp; $6 million pre-seed led by Sequoia &middot; company one year old &middot; agent launched about 5 months ago &middot; 1.2 billion weekly ChatGPT users claimed &middot; Sonder founded 2014, $143 million revenues</div>
-          <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>TechCrunch</span><a class="read" href="https://techcrunch.com/2026/11/10/openai-acquires-odessia-travel-startup-created-by-sonder-founder/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://arstechnica.com/ai/2026/11/signals-encryption-just-passed-an-ai-powered-mathematical-checkup/">
+      <div class="card" data-href="https://arstechnica.com/ai/2026/11/signals-encryption-just-passed-an-ai-powered-mathematical-checkup/">
         <div class="thumb thumb-ai"><span class="tag">Ars Technica</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>DeepMind formally verifies parts of Signal protocol</h3>
+          <h3><a class="card-head" href="https://arstechnica.com/ai/2026/11/signals-encryption-just-passed-an-ai-powered-mathematical-checkup/">DeepMind formally verifies parts of Signal protocol</a></h3>
           <p>Google DeepMind researchers used agentic AI to mathematically verify several of the Signal protocol&#x27;s cryptographic guarantees, using a framework called AlphaProof Code. The work did not cover the full Signal mobile app, and researchers say scaling the approach broadly remains a long way off, though on older Signal versions the tool correctly flagged known, long-fixed vulnerabilities.</p>
           <div class="key">KEY &nbsp; 4-week project &middot; 0 new vulnerabilities found &middot; specification and proof being released publicly</div>
-          <div class="meta"><span>Ars Technica</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Ars Technica</span><a class="read" href="https://arstechnica.com/ai/2026/11/signals-encryption-just-passed-an-ai-powered-mathematical-checkup/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://techcrunch.com/2026/11/11/plurai-wants-to-help-ai-agents-work-better-using-the-same-approach-that-helped-get-self-driving-cars-to-roads/">
+      <div class="card" data-href="https://techcrunch.com/2026/11/11/plurai-wants-to-help-ai-agents-work-better-using-the-same-approach-that-helped-get-self-driving-cars-to-roads/">
         <div class="thumb thumb-ai"><span class="tag">TechCrunch</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Plurai raises seed round for AI agent simulations</h3>
+          <h3><a class="card-head" href="https://techcrunch.com/2026/11/11/plurai-wants-to-help-ai-agents-work-better-using-the-same-approach-that-helped-get-self-driving-cars-to-roads/">Plurai raises seed round for AI agent simulations</a></h3>
           <p>Plurai, founded by two former Nexar employees, raised seed funding to build a simulation layer that stress-tests AI agents against edge cases using synthetic digital twins of a company&#x27;s systems — borrowing the approach used to validate self-driving software. Co-founder Ilan Kadar says the gathered data can also post-train smaller open-weight models, which tests with Nvidia and Nebius reportedly showed outperforming mid-tier frontier models at lower cost.</p>
           <div class="key">KEY &nbsp; $13 million seed led by Team8 &middot; LiveBench 2.0: 82.9 and 75.6 of 100 tasks &middot; Claude Opus 4.8 at 76.8% accuracy in EON test &middot; claimed 1–2 orders of magnitude cost reduction</div>
-          <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>TechCrunch</span><a class="read" href="https://techcrunch.com/2026/11/11/plurai-wants-to-help-ai-agents-work-better-using-the-same-approach-that-helped-get-self-driving-cars-to-roads/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://techcrunch.com/2026/11/10/proximal-ventures-raises-debut-fund-to-back-startups-bringing-ai-to-drug-development/">
+      <div class="card" data-href="https://techcrunch.com/2026/11/10/proximal-ventures-raises-debut-fund-to-back-startups-bringing-ai-to-drug-development/">
         <div class="thumb thumb-ai"><span class="tag">TechCrunch</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>First-time manager raises fund for AI in pharma</h3>
+          <h3><a class="card-head" href="https://techcrunch.com/2026/11/10/proximal-ventures-raises-debut-fund-to-back-startups-bringing-ai-to-drug-development/">First-time manager raises fund for AI in pharma</a></h3>
           <p>Former SignalFire investor Sahir Raoof closed a debut solo fund for Proximal Ventures, betting AI can automate the outsourced services pharmaceutical companies buy — from compound synthesis to clinical trial data analysis. He argues AI&#x27;s gains in law and finance will repeat in pharma services, a thesis that drew backing from SignalFire, Kleiner Perkins, Bertelsmann Healthcare Investments and former FDA deputy commissioner Amy Abernethy.</p>
           <div class="key">KEY &nbsp; $27.5 million first fund &middot; checks of $500,000–$1.5 million &middot; 7 startups backed &middot; pre-seed and seed stage &middot; Flatiron Health sold to Roche for $1.9 billion in 2018</div>
-          <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>TechCrunch</span><a class="read" href="https://techcrunch.com/2026/11/10/proximal-ventures-raises-debut-fund-to-back-startups-bringing-ai-to-drug-development/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.theverge.com/transportation/1030902/serve-robotics-open-developer-api-sidewalk-delivery">
+      <div class="card" data-href="https://www.theverge.com/transportation/1030902/serve-robotics-open-developer-api-sidewalk-delivery">
         <div class="thumb thumb-ai"><span class="tag">The Verge</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Serve Robotics opens delivery fleet to outside developers</h3>
+          <h3><a class="card-head" href="https://www.theverge.com/transportation/1030902/serve-robotics-open-developer-api-sidewalk-delivery">Serve Robotics opens delivery fleet to outside developers</a></h3>
           <p>Serve Robotics launched an AV Delivery Developer Portal letting third-party developers, small businesses and AI agents dispatch its sidewalk robots directly, bypassing the major food delivery apps. CEO Ali Kashani says the move diversifies demand away from dominant platforms and fills idle time between lunch and dinner, with pay-per-delivery or hourly pricing he describes as a fraction of human courier cost.</p>
           <div class="key">KEY &nbsp; 2,000-robot fleet &middot; 150 neighborhoods &middot; top speed about 6 mph &middot; delivery apps take 15–30% per order &middot; spun out of Postmates in 2021</div>
-          <div class="meta"><span>The Verge</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>The Verge</span><a class="read" href="https://www.theverge.com/transportation/1030902/serve-robotics-open-developer-api-sidewalk-delivery">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
     </div>
     <div class="progress"><div class="progress-fill"></div></div>
@@ -826,60 +830,60 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://www.cnbc.com/2026/11/11/goolsbee-october-inflation-fed-rates-disturbing-distressing.html">
+      <div class="card" data-href="https://www.cnbc.com/2026/11/11/goolsbee-october-inflation-fed-rates-disturbing-distressing.html">
         <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>Fed officials weigh larger December hike after hot CPI</h3>
+          <h3><a class="card-head" href="https://www.cnbc.com/2026/11/11/goolsbee-october-inflation-fed-rates-disturbing-distressing.html">Fed officials weigh larger December hike after hot CPI</a></h3>
           <p>Chicago Fed President Austan Goolsbee called October&#x27;s inflation report &quot;borderline disturbing&quot; after the consumer price index rose 0.4%, the third consecutive month of outsized increases and above economists&#x27; expectations. Governor Christopher Waller said a hot print could push him toward a half-point December increase, while Dallas Fed President Lorie Logan said she sees a need for two more quarter-point moves.</p>
           <div class="key">KEY &nbsp; CPI +0.4% in October &middot; third straight outsized month &middot; current range 3.75%-4% &middot; quarter-point hike in September, hold in October &middot; futures put half-point December odds at 15%</div>
-          <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>CNBC</span><a class="read" href="https://www.cnbc.com/2026/11/11/goolsbee-october-inflation-fed-rates-disturbing-distressing.html">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.cnbc.com/2026/11/11/nvidia-stock-jensen-huang-affair-china.html">
+      <div class="card" data-href="https://www.cnbc.com/2026/11/11/nvidia-stock-jensen-huang-affair-china.html">
         <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>Nvidia shares recover 3% as law firm investigates</h3>
+          <h3><a class="card-head" href="https://www.cnbc.com/2026/11/11/nvidia-stock-jensen-huang-affair-china.html">Nvidia shares recover 3% as law firm investigates</a></h3>
           <p>Nvidia stock rose 3% Wednesday after two days of declines tied to reports of CEO Jensen Huang&#x27;s affair with an alleged Chinese spy, and the company has hired Wachtell, Lipton, Rosen &amp; Katz to investigate whether company secrets or national security were compromised. Morgan Stanley removed Nvidia from its top-pick list, and Bank of America&#x27;s Vivek Arya laid out three scenarios ranging from contained impact to adverse findings requiring earnings reassessment.</p>
           <div class="key">KEY &nbsp; +3% Wednesday &middot; -5.47% Tuesday &middot; -4.3% Monday &middot; down more than 25% since Oct. 2 &middot; earnings due Nov. 17</div>
-          <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>CNBC</span><a class="read" href="https://www.cnbc.com/2026/11/11/nvidia-stock-jensen-huang-affair-china.html">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.cnbc.com/2026/11/10/polymarket-annualized-revenue-us-growth.html">
+      <div class="card" data-href="https://www.cnbc.com/2026/11/10/polymarket-annualized-revenue-us-growth.html">
         <div class="thumb thumb-markets"><span class="tag">CNBC Finance</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>Polymarket revenue run rate passes $1.8 billion</h3>
+          <h3><a class="card-head" href="https://www.cnbc.com/2026/11/10/polymarket-annualized-revenue-us-growth.html">Polymarket revenue run rate passes $1.8 billion</a></h3>
           <p>Polymarket told CNBC its annualized revenue has topped $1.8 billion, up from the $1 billion run rate it disclosed in June, driven by its US exchange launched in May and by sports events including the FIFA World Cup and the NFL season. The CFTC is conducting a broad investigation into the company over advertising practices and whether it previously violated a settlement barring US residents from its international platform.</p>
           <div class="key">KEY &nbsp; $1.8B annualized revenue, up from $1B in June &middot; $14.5B October notional volume vs $4B in June &middot; Combo contracts over 70% of Sunday volume &middot; $1B round at $21B valuation</div>
-          <div class="meta"><span>CNBC Finance</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>CNBC Finance</span><a class="read" href="https://www.cnbc.com/2026/11/10/polymarket-annualized-revenue-us-growth.html">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://fortune.com/2026/11/11/rox-series-b-100-million-funding-take-on-salesforce/">
+      <div class="card" data-href="https://fortune.com/2026/11/11/rox-series-b-100-million-funding-take-on-salesforce/">
         <div class="thumb thumb-markets"><span class="tag">Fortune</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>AI sales startup Rox raises $100 million</h3>
+          <h3><a class="card-head" href="https://fortune.com/2026/11/11/rox-series-b-100-million-funding-take-on-salesforce/">AI sales startup Rox raises $100 million</a></h3>
           <p>Rox raised a $100 million Series B at a $1.3 billion valuation co-led by General Catalyst and March Capital, with Sequoia and GV returning and Prosperity7 joining, to build AI agents that research accounts and prepare outreach instead of simply storing CRM data. Cofounder Ishan Mukherjee argues Salesforce&#x27;s moat is weakening as large customers such as Nvidia and Intel move data into their own environments, though General Catalyst&#x27;s Marc Bhargava acknowledged a &quot;graveyard&quot; of startups that tried to displace incumbents.</p>
           <div class="key">KEY &nbsp; $100M Series B at $1.3B valuation &middot; Salesforce market cap $172B &middot; Salesforce fiscal 2026 revenue $41.5B &middot; Pixie Labs sold to New Relic for roughly $150M in 2020 &middot; General Catalyst invested pre-product in 2024</div>
-          <div class="meta"><span>Fortune</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Fortune</span><a class="read" href="https://fortune.com/2026/11/11/rox-series-b-100-million-funding-take-on-salesforce/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.cnbc.com/2026/11/11/measles-outbreak-us-economic-cost.html">
+      <div class="card" data-href="https://www.cnbc.com/2026/11/11/measles-outbreak-us-economic-cost.html">
         <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>US measles cases hit three-decade high, costs mount</h3>
+          <h3><a class="card-head" href="https://www.cnbc.com/2026/11/11/measles-outbreak-us-economic-cost.html">US measles cases hit three-decade high, costs mount</a></h3>
           <p>More than 5,100 measles cases have been reported in the US in 2026 as of early November, and the country is expected to lose its official elimination status following a Pan American Health Organization review this week. A new Johns Hopkins tool estimates the outbreaks carry an economic cost of nearly $83 million, though researchers say the figures are estimates rather than a definitive accounting.</p>
           <div class="key">KEY &nbsp; 5,100+ cases in 2026 &middot; 8 confirmed deaths (6 Pennsylvania, 1 New York, 1 Wisconsin) &middot; ~$83M estimated cost: $56M public health response, ~$25M lost productivity, $1.8M+ direct medical &middot; 2025: 2,289 cases, $37M+</div>
-          <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>CNBC</span><a class="read" href="https://www.cnbc.com/2026/11/11/measles-outbreak-us-economic-cost.html">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
     </div>
     <div class="progress"><div class="progress-fill"></div></div>
@@ -905,49 +909,49 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://www.npr.org/2026/11/11/g-s1-152954/russia-ukraine-war-talks">
+      <div class="card" data-href="https://www.npr.org/2026/11/11/g-s1-152954/russia-ukraine-war-talks">
         <div class="thumb thumb-us"><span class="tag">NPR</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>Russia and Ukraine agree to large prisoner exchange</h3>
+          <h3><a class="card-head" href="https://www.npr.org/2026/11/11/g-s1-152954/russia-ukraine-war-talks">Russia and Ukraine agree to large prisoner exchange</a></h3>
           <p>Officials at U.S.-mediated talks in Abu Dhabi said the two sides agreed to what Jared Kushner called the biggest humanitarian release of prisoners, with numbers to be finalized the following day; Russian delegation head Vladimir Medinsky and Ukraine&#x27;s Rustem Umerov confirmed the planned swap. Kushner said he and envoy Steve Witkoff would travel to Moscow to meet Putin and then to Dublin to meet Zelenskyy, while Secretary of State Marco Rubio called the meeting productive but cautioned that ending the war will take time.</p>
           <div class="key">KEY &nbsp; First talks in 9 months &middot; war nearly 5 years old &middot; 7 civilians wounded in Zaporizhzhia and Kharkiv &middot; 627 Ukrainian drones downed overnight, per Russia&#x27;s Defense Ministry &middot; 150 over the St. Petersburg region &middot; 3 workers injured at Ust-Luga port</div>
-          <div class="meta"><span>NPR</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>NPR</span><a class="read" href="https://www.npr.org/2026/11/11/g-s1-152954/russia-ukraine-war-talks">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.bbc.co.uk/news/articles/c6ly0y8r54pqo?at_medium=RSS&amp;at_campaign=rss">
+      <div class="card" data-href="https://www.bbc.co.uk/news/articles/c6ly0y8r54pqo?at_medium=RSS&amp;at_campaign=rss">
         <div class="thumb thumb-us"><span class="tag">BBC News</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>Mississippi Senate race still uncalled, Democrat narrowly ahead</h3>
+          <h3><a class="card-head" href="https://www.bbc.co.uk/news/articles/c6ly0y8r54pqo?at_medium=RSS&amp;at_campaign=rss">Mississippi Senate race still uncalled, Democrat narrowly ahead</a></h3>
           <p>Democrat Scott Colom leads Republican incumbent Cindy Hyde-Smith by about 2,500 ballots, under 1%, with thousands of postal and affidavit ballots still uncounted ahead of Friday&#x27;s certification deadline. A Colom win would give Mississippi its first Democratic senator in nearly four decades and its first Black senator in over 140 years; both parties have sent lawyers to the state, raising the prospect of legal challenges.</p>
           <div class="key">KEY &nbsp; Lead about 2,500 ballots, less than 1% &middot; 12,000–20,000 affidavit ballots estimated, roughly 15,500 processed as of Tuesday morning &middot; Democratic Senate majority-elect would reach 55 seats &middot; Trump won the state by over 22 points in 2024 &middot; Republican streak dating to 1982 &middot; 72% for Trump in Lincoln County</div>
-          <div class="meta"><span>BBC News</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>BBC News</span><a class="read" href="https://www.bbc.co.uk/news/articles/c6ly0y8r54pqo?at_medium=RSS&amp;at_campaign=rss">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.npr.org/2026/11/11/g-s1-152949/up-first-newsletter-pete-hegseth-jim-jordan-iran-backed-trio-us-bases">
+      <div class="card" data-href="https://www.npr.org/2026/11/11/g-s1-152949/up-first-newsletter-pete-hegseth-jim-jordan-iran-backed-trio-us-bases">
         <div class="thumb thumb-us"><span class="tag">NPR</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>House sends Hegseth impeachment articles back to committee</h3>
+          <h3><a class="card-head" href="https://www.npr.org/2026/11/11/g-s1-152949/up-first-newsletter-pete-hegseth-jim-jordan-iran-backed-trio-us-bases">House sends Hegseth impeachment articles back to committee</a></h3>
           <p>The House voted 211 to 204 to refer Rep. Thomas Massie&#x27;s articles of impeachment against Defense Secretary Pete Hegseth to the Judiciary Committee, avoiding a floor vote and making action before the session ends unlikely; Massie had accused Hegseth of high crimes tied to the war with Iran and strikes on drug boats. Separately, House Republicans chose Rep. Jim Jordan as minority leader after Speaker Mike Johnson said he would step down, and federal prosecutors indicted three men described as Iran-backed operatives allegedly involved in nearly 20 attacks and attempted attacks in Europe and the U.S.</p>
           <div class="key">KEY &nbsp; Vote 211–204 &middot; Jordan is 62 &middot; 3 men indicted over nearly 20 alleged attacks &middot; at least 80 veterans in the next Congress &middot; more than 50 signed the With Honor pledge &middot; veterans down to 15% from 19%</div>
-          <div class="meta"><span>NPR</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>NPR</span><a class="read" href="https://www.npr.org/2026/11/11/g-s1-152949/up-first-newsletter-pete-hegseth-jim-jordan-iran-backed-trio-us-bases">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.npr.org/2026/11/11/nx-s1-6036790/swing-voters-swing-states-democrats-congress">
+      <div class="card" data-href="https://www.npr.org/2026/11/11/nx-s1-6036790/swing-voters-swing-states-democrats-congress">
         <div class="thumb thumb-us"><span class="tag">NPR</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>Swing voters want costs addressed, not investigations</h3>
+          <h3><a class="card-head" href="https://www.npr.org/2026/11/11/nx-s1-6036790/swing-voters-swing-states-democrats-congress">Swing voters want costs addressed, not investigations</a></h3>
           <p>Voters in NPR&#x27;s Swing Shift project said after the midterms that they want the incoming Democratic Congress to focus on the cost of living rather than gridlock or impeachment, with participants from Pennsylvania, North Carolina, Georgia and Michigan describing mixed reactions to the results. Several had backed Trump in 2024 before splitting tickets or swinging to Democrats this year, and one said voters should hold Democrats to tangible change rather than promises.</p>
           <div class="key">KEY &nbsp; Voters profiled from 4 states &middot; one backed Biden in 2020 and Trump in 2024 &middot; election-night voice memo sent at 9:56 PM &middot; 2-year window before the next election</div>
-          <div class="meta"><span>NPR</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>NPR</span><a class="read" href="https://www.npr.org/2026/11/11/nx-s1-6036790/swing-voters-swing-states-democrats-congress">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
     </div>
     <div class="progress"><div class="progress-fill"></div></div>
@@ -963,38 +967,38 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://www.dailysabah.com/business/tech/turkiye-ai-summit-held-under-agents-are-among-us-theme">
+      <div class="card" data-href="https://www.dailysabah.com/business/tech/turkiye-ai-summit-held-under-agents-are-among-us-theme">
         <div class="thumb thumb-turkey"><span class="tag">Daily Sabah</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>Istanbul AI summit focuses on agents in business</h3>
+          <h3><a class="card-head" href="https://www.dailysabah.com/business/tech/turkiye-ai-summit-held-under-agents-are-among-us-theme">Istanbul AI summit focuses on agents in business</a></h3>
           <p>The ninth Türkiye AI Summit, organized by TRAI, was held in Istanbul on Wednesday under the theme &quot;Agents Are Among Us,&quot; with executives from Zorlu Holding, Sabancı Holding and Trendyol Group among the speakers. Founder Halil Aksu presented two new studies and said turning Türkiye&#x27;s AI potential into economic value depends on clear strategy, reliable data and employee engagement.</p>
           <div class="key">KEY &nbsp; 9th edition &middot; organized since 2018 &middot; 420 institutions &middot; over 2,000 participants &middot; TRAI AI Survey 2026 drew more than 350 institutions &middot; second day online and free</div>
-          <div class="meta"><span>Daily Sabah</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Daily Sabah</span><a class="read" href="https://www.dailysabah.com/business/tech/turkiye-ai-summit-held-under-agents-are-among-us-theme">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.dailysabah.com/business/economy/tpao-baker-hughes-ink-deal-to-develop-turkiyes-geothermal-potential">
+      <div class="card" data-href="https://www.dailysabah.com/business/economy/tpao-baker-hughes-ink-deal-to-develop-turkiyes-geothermal-potential">
         <div class="thumb thumb-turkey"><span class="tag">Daily Sabah</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>TPAO and Baker Hughes sign geothermal development deal</h3>
+          <h3><a class="card-head" href="https://www.dailysabah.com/business/economy/tpao-baker-hughes-ink-deal-to-develop-turkiyes-geothermal-potential">TPAO and Baker Hughes sign geothermal development deal</a></h3>
           <p>State-owned TPAO signed a cooperation agreement with U.S. energy services firm Baker Hughes to assess Türkiye&#x27;s geothermal potential, Energy Minister Alparslan Bayraktar said on X. The deal was signed on the sidelines of the COP31 summit in Antalya and will draw on data held by TPAO and the state mineral research directorate MTA before exploring commercial-scale development at suitable wells.</p>
           <div class="key">KEY &nbsp; Signed Wednesday &middot; at COP31 in Antalya &middot; partners TPAO and Baker Hughes &middot; data from TPAO and MTA &middot; Baker Hughes CEO Lorenzo Simonelli</div>
-          <div class="meta"><span>Daily Sabah</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Daily Sabah</span><a class="read" href="https://www.dailysabah.com/business/economy/tpao-baker-hughes-ink-deal-to-develop-turkiyes-geothermal-potential">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://bianet.org/haber/limited-access-for-accredited-media-at-the-cop31-leaders-summit-325316">
+      <div class="card" data-href="https://bianet.org/haber/limited-access-for-accredited-media-at-the-cop31-leaders-summit-325316">
         <div class="thumb thumb-turkey"><span class="tag">Bianet</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>Most accredited journalists barred from COP31 leaders&#x27; hall</h3>
+          <h3><a class="card-head" href="https://bianet.org/haber/limited-access-for-accredited-media-at-the-cop31-leaders-summit-325316">Most accredited journalists barred from COP31 leaders&#x27; hall</a></h3>
           <p>Journalists accredited for COP31 in Antalya cannot use that accreditation to cover the November 11–12 Leaders&#x27; Summit from inside the hall, with entry limited to a press pool selected jointly by UN Climate Change and Turkish government media teams. The COP31 press desk told bianet about 20 journalists chosen for geographical representation would be admitted alongside those accompanying leaders, and the UN team said similar restrictions had been applied at other COPs.</p>
           <div class="key">KEY &nbsp; COP31 runs November 9–20 &middot; Leaders&#x27; Summit November 11–12 &middot; about 20 pool journalists &middot; 102 leaders from 95 countries expected &middot; 196 parties plus the EU &middot; total admitted not disclosed</div>
-          <div class="meta"><span>Bianet</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Bianet</span><a class="read" href="https://bianet.org/haber/limited-access-for-accredited-media-at-the-cop31-leaders-summit-325316">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
     </div>
     <div class="progress"><div class="progress-fill"></div></div>
@@ -1374,6 +1378,18 @@
     a.setAttribute('rel', 'noopener');
   });
 
+  /* a card is a div so its text stays selectable; a plain click still opens
+     the source, a click that ends a selection does not. The rail's own
+     capture-phase handler has already swallowed clicks that ended a drag. */
+  document.querySelectorAll('.card[data-href]').forEach(function (card) {
+    card.addEventListener('click', function (e) {
+      if (e.target.closest('a')) return;
+      var sel = window.getSelection();
+      if (sel && String(sel).trim()) return;
+      window.open(card.getAttribute('data-href'), '_blank', 'noopener');
+    });
+  });
+
   var rails = document.querySelectorAll('.rail');
   rails.forEach(function (rail) {
     var items = rail.querySelectorAll('.card, .fixture');
@@ -1410,6 +1426,9 @@
     var DEAD_ZONE = 10;        /* px of pointer travel ignored before a drag starts */
     var SCROLL_THRESHOLD = 6;  /* px the rail must actually move to count as a drag */
     rail.addEventListener('pointerdown', function (e) {
+      /* a mouse drag that starts on a card's text is someone selecting a
+         sentence, not someone scrolling the rail -- leave it to the browser. */
+      if (e.pointerType === 'mouse' && e.target.closest('.card .body')) return;
       down = true; moved = false;
       startX = e.clientX; startScroll = rail.scrollLeft;
     });

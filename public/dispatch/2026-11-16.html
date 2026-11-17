@@ -451,6 +451,12 @@
     transition: transform 0.15s ease, box-shadow 0.3s ease;
   }
   .card:hover { transform: translateY(-3px); }
+  .card { cursor: pointer; }
+  /* the card is a div, not a link, so its summary can be selected and
+     copied; the headline and "Read" carry the real anchors */
+  .card .card-head { color: inherit; text-decoration: none; }
+  .card .card-head:hover { text-decoration: underline; }
+  .card a.read { text-decoration: none; }
   .card.active { box-shadow: 0 0 0 1px rgba(232, 147, 90, 0.55), 0 16px 40px rgba(0, 0, 0, 0.35); }
   .card .thumb {
     position: relative;
@@ -668,8 +674,6 @@
   }
   .edition-btn:hover { border-color: #e8935a; color: #e8935a; }
   .edition-btn.active { background: #e8935a; border-color: #e8935a; color: #1d1512; }
-  div.card { cursor: default; }
-  div.card:hover { transform: none; }
 
   /* ---------- footer ---------- */
   .footer {
@@ -743,71 +747,71 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://arstechnica.com/ai/2026/11/jensen-huang-allies-build-a-war-room-to-get-him-back-at-nvidia/">
+      <div class="card" data-href="https://arstechnica.com/ai/2026/11/jensen-huang-allies-build-a-war-room-to-get-him-back-at-nvidia/">
         <div class="thumb thumb-ai"><span class="tag">Ars Technica</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Allies press Nvidia board to reinstate Huang</h3>
+          <h3><a class="card-head" href="https://arstechnica.com/ai/2026/11/jensen-huang-allies-build-a-war-room-to-get-him-back-at-nvidia/">Allies press Nvidia board to reinstate Huang</a></h3>
           <p>Jensen Huang is reportedly weighing a return as Nvidia chief executive days after resigning over reports of affairs with a suspected Chinese spy and with a subordinate, while an independent board probe continues. One ally told the FT they were assembling a &quot;war room&quot; of Silicon Valley executives to lobby for his return; Treasury Secretary Scott Bessent has called instead for a &quot;dramatic shake-up&quot; in the company&#x27;s leadership.</p>
           <div class="key">KEY &nbsp; $4 trillion company &middot; quarterly results Tuesday &middot; interim CEO Colette Kress &middot; open letter backed by Elon Musk and Tim Sweeney &middot; Arm CEO Rene Haas approached as potential successor</div>
-          <div class="meta"><span>Ars Technica</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Ars Technica</span><a class="read" href="https://arstechnica.com/ai/2026/11/jensen-huang-allies-build-a-war-room-to-get-him-back-at-nvidia/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://arstechnica.com/space/2026/11/vulcan-rocket-fails-during-launch-dealing-major-blow-to-spacex-competitors/">
+      <div class="card" data-href="https://arstechnica.com/space/2026/11/vulcan-rocket-fails-during-launch-dealing-major-blow-to-spacex-competitors/">
         <div class="thumb thumb-ai"><span class="tag">Ars Technica</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Vulcan rocket fails, grounding Amazon satellite campaign</h3>
+          <h3><a class="card-head" href="https://arstechnica.com/space/2026/11/vulcan-rocket-fails-during-launch-dealing-major-blow-to-spacex-competitors/">Vulcan rocket fails, grounding Amazon satellite campaign</a></h3>
           <p>United Launch Alliance&#x27;s Vulcan rocket and its payload of Amazon Leo broadband satellites fell back to Earth minutes after a Sunday liftoff from Cape Canaveral, in what the company called an anomaly about 10 minutes into flight. Multiple sources told Ars the problem occurred in the booster stage; ULA said it did not immediately have specific data on the cause, and the rocket is expected to be grounded indefinitely.</p>
           <div class="key">KEY &nbsp; 40 Amazon Leo satellites lost &middot; first of 38 booked Amazon launches &middot; roughly half of US national security space missions contracted to Vulcan &middot; liftoff 12:40 pm EDT &middot; two BE-4 engines fired at least 30 seconds beyond plan &middot; first total mission failure in ULA&#x27;s 20-year history</div>
-          <div class="meta"><span>Ars Technica</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Ars Technica</span><a class="read" href="https://arstechnica.com/space/2026/11/vulcan-rocket-fails-during-launch-dealing-major-blow-to-spacex-competitors/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.theverge.com/transportation/1034039/faa-aviation-glitch-meltdown-ground-stop">
+      <div class="card" data-href="https://www.theverge.com/transportation/1034039/faa-aviation-glitch-meltdown-ground-stop">
         <div class="thumb thumb-ai"><span class="tag">The Verge</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Single router failure grounded every US flight</h3>
+          <h3><a class="card-head" href="https://www.theverge.com/transportation/1034039/faa-aviation-glitch-meltdown-ground-stop">Single router failure grounded every US flight</a></h3>
           <p>A telecommunications breakdown that began in the Midwest on Friday, November 13 spread into a nationwide FAA ground stop, halting all US takeoffs and stranding travelers across the country. The Verge reports that pilots and controllers first lost radio contact regionally, and that confusing official briefings afterward fed conspiracy theories rather than public confidence.</p>
           <div class="key">KEY &nbsp; 1.5 million flyers stranded &middot; radio problems reported from about 3:15PM ET &middot; nationwide ground stop at 3:54PM ET &middot; more than 600 Atlanta departures canceled &middot; 67 people killed in the 2025 Reagan National midair collision</div>
-          <div class="meta"><span>The Verge</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>The Verge</span><a class="read" href="https://www.theverge.com/transportation/1034039/faa-aviation-glitch-meltdown-ground-stop">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://techcrunch.com/2026/11/16/freshworks-alums-raise-53m-to-take-on-salesforce-hubspot-with-ai-native-crm/">
+      <div class="card" data-href="https://techcrunch.com/2026/11/16/freshworks-alums-raise-53m-to-take-on-salesforce-hubspot-with-ai-native-crm/">
         <div class="thumb thumb-ai"><span class="tag">TechCrunch</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Freshworks alums raise $53M for AI-native CRM</h3>
+          <h3><a class="card-head" href="https://techcrunch.com/2026/11/16/freshworks-alums-raise-53m-to-take-on-salesforce-hubspot-with-ai-native-crm/">Freshworks alums raise $53M for AI-native CRM</a></h3>
           <p>Dreamteam, founded in 2025 by former Freshworks and Salesforce executives, has raised seed and Series A funding led by Together Fund and Accel to build a CRM that captures customer context automatically rather than relying on manual entry. CEO Anand Venkatraman acknowledged Salesforce and HubSpot are unlikely to disappear soon, while a16z has argued incumbents will remain the system of record with AI tools layered on top.</p>
           <div class="key">KEY &nbsp; $53M total &middot; led by Together Fund and Accel, with Premji Invest &middot; 100+ customers across 13 countries in three months &middot; four built-in AI agents &middot; valuation and round sizes undisclosed</div>
-          <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>TechCrunch</span><a class="read" href="https://techcrunch.com/2026/11/16/freshworks-alums-raise-53m-to-take-on-salesforce-hubspot-with-ai-native-crm/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://techcrunch.com/2026/11/16/bedrock-energy-raises-24m-to-build-more-ai-enabled-geothermal-drill-rigs-for-enterprise-buildings/">
+      <div class="card" data-href="https://techcrunch.com/2026/11/16/bedrock-energy-raises-24m-to-build-more-ai-enabled-geothermal-drill-rigs-for-enterprise-buildings/">
         <div class="thumb thumb-ai"><span class="tag">TechCrunch</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Bedrock raises $24M for AI-guided geothermal drilling</h3>
+          <h3><a class="card-head" href="https://techcrunch.com/2026/11/16/bedrock-energy-raises-24m-to-build-more-ai-enabled-geothermal-drill-rigs-for-enterprise-buildings/">Bedrock raises $24M for AI-guided geothermal drilling</a></h3>
           <p>Bedrock Energy says its AI-directed rigs, which borrow directional drilling techniques from oil and gas, can cut drilling times for geothermal heat pumps by up to 80% and lower installation costs. CEO Joselyn Lai said the company is in talks with data center developers interested in the flat load profile, which deployed on neighboring properties could free up grid capacity.</p>
           <div class="key">KEY &nbsp; $24M round led by Clean Energy Ventures and Clearvision Ventures &middot; prior $12M Series A in 2025 and $8.5M seed in 2023 &middot; drilling times cut up to 80% &middot; boreholes up to about 1,000 feet &middot; nine sites drilled to date &middot; operating in Texas, Utah, Colorado, New York and Alberta</div>
-          <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>TechCrunch</span><a class="read" href="https://techcrunch.com/2026/11/16/bedrock-energy-raises-24m-to-build-more-ai-enabled-geothermal-drill-rigs-for-enterprise-buildings/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://techcrunch.com/2026/11/15/apple-launches-new-app-to-study-how-people-use-ai-for-health/">
+      <div class="card" data-href="https://techcrunch.com/2026/11/15/apple-launches-new-app-to-study-how-people-use-ai-for-health/">
         <div class="thumb thumb-ai"><span class="tag">TechCrunch</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Apple study tracks how people use health AI</h3>
+          <h3><a class="card-head" href="https://techcrunch.com/2026/11/15/apple-launches-new-app-to-study-how-people-use-ai-for-health/">Apple study tracks how people use health AI</a></h3>
           <p>Apple has launched a US study app built with OpenEvidence that answers health questions using clinical sources including the New England Journal of Medicine, JAMA and Nature, and asks participants to rate the responses. Apple says data will be anonymized, will not be used to train AI models, and that OpenEvidence deletes queries and responses after 24 hours.</p>
           <div class="key">KEY &nbsp; up to 200,000 participants &middot; more than 12 months &middot; US users over 21 on iPhone 15 or later with iOS 26 and Apple Intelligence &middot; monthly surveys &middot; 24-hour data deletion &middot; OpenAI reported over 300 million health queries weekly</div>
-          <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>TechCrunch</span><a class="read" href="https://techcrunch.com/2026/11/15/apple-launches-new-app-to-study-how-people-use-ai-for-health/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
     </div>
     <div class="progress"><div class="progress-fill"></div></div>
@@ -826,38 +830,38 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://www.cnbc.com/2026/11/16/anthropic-cfo-krishna-rao-ipo.html">
+      <div class="card" data-href="https://www.cnbc.com/2026/11/16/anthropic-cfo-krishna-rao-ipo.html">
         <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>Anthropic CFO Krishna Rao steps into IPO spotlight</h3>
+          <h3><a class="card-head" href="https://www.cnbc.com/2026/11/16/anthropic-cfo-krishna-rao-ipo.html">Anthropic CFO Krishna Rao steps into IPO spotlight</a></h3>
           <p>Krishna Rao, who joined Anthropic as its first CFO in 2024 and closed a $65 billion funding round in May, is preparing the company for a Nasdaq listing expected Thursday that could value it at roughly $1.4 trillion. Investors and former colleagues describe him as direct and accessible, though he has never taken a company public as CFO and declined to be interviewed.</p>
           <div class="key">KEY &nbsp; $65B funding round closed in May &middot; IPO could value Anthropic at roughly $1.4T &middot; Rao is 43, joined 2024 &middot; seven co-founders &middot; Nasdaq debut expected Thursday</div>
-          <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>CNBC</span><a class="read" href="https://www.cnbc.com/2026/11/16/anthropic-cfo-krishna-rao-ipo.html">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.cnbc.com/2026/11/16/prediction-market-odds-for-tesla-spacex-merger-by-april-2027-top-60percent.html">
+      <div class="card" data-href="https://www.cnbc.com/2026/11/16/prediction-market-odds-for-tesla-spacex-merger-by-april-2027-top-60percent.html">
         <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>Kalshi odds on Tesla-SpaceX merger reach 62%</h3>
+          <h3><a class="card-head" href="https://www.cnbc.com/2026/11/16/prediction-market-odds-for-tesla-spacex-merger-by-april-2027-top-60percent.html">Kalshi odds on Tesla-SpaceX merger reach 62%</a></h3>
           <p>Contracts on Kalshi putting a Tesla-SpaceX merger before March 2027 moved to 62% from 27% since Thursday, with settlement tied to news reports and SEC EDGAR filings. Musk biographer Walter Isaacson told CNBC he is confident a merger is coming, citing the Terafab semiconductor project, while a Jefferies note said a deal would likely face backlash after Democrats won control of Congress in this month&#x27;s midterms.</p>
           <div class="key">KEY &nbsp; 62% from 27% since Thursday &middot; merger before March 2027 &middot; Tesla 2026 annual shareholder meeting Dec. 3</div>
-          <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>CNBC</span><a class="read" href="https://www.cnbc.com/2026/11/16/prediction-market-odds-for-tesla-spacex-merger-by-april-2027-top-60percent.html">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.cnbc.com/2026/11/16/warren-buffett-donates-5point5-billion-thanksgiving.html">
+      <div class="card" data-href="https://www.cnbc.com/2026/11/16/warren-buffett-donates-5point5-billion-thanksgiving.html">
         <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>Buffett gives about $5.5 billion to family foundations</h3>
+          <h3><a class="card-head" href="https://www.cnbc.com/2026/11/16/warren-buffett-donates-5point5-billion-thanksgiving.html">Buffett gives about $5.5 billion to family foundations</a></h3>
           <p>Warren Buffett, 96, converted 6,150 Class A Berkshire shares into 9,225,000 Class B shares and donated them to four foundations run by his three children, increasing his annual giving from last year. In a short Thanksgiving letter he wrote that kindness &quot;compounds,&quot; reiterated that all his Berkshire shares will eventually go to the foundations, and voiced confidence in his children and CEO Greg Abel.</p>
           <div class="key">KEY &nbsp; ~$5.5B donated &middot; 6,150 Class A converted to 9,225,000 Class B &middot; 3,690,000 shares to Susan Thompson Buffett Foundation, 1,845,000 each to three others &middot; 182,140 Class A shares retained, roughly $162B &middot; Berkshire up more than 19% since Q4 start vs. S&amp;P 500 down 1.2% &middot; outperforming S&amp;P 500 by about 7.5 points for the year</div>
-          <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>CNBC</span><a class="read" href="https://www.cnbc.com/2026/11/16/warren-buffett-donates-5point5-billion-thanksgiving.html">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
     </div>
     <div class="progress"><div class="progress-fill"></div></div>
@@ -883,49 +887,49 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://www.npr.org/2026/11/16/nx-s1-6041738/trump-xi-and-putin-china-nvidia">
+      <div class="card" data-href="https://www.npr.org/2026/11/16/nx-s1-6041738/trump-xi-and-putin-china-nvidia">
         <div class="thumb thumb-us"><span class="tag">NPR</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>Trump to meet Xi and Putin in Asia trip</h3>
+          <h3><a class="card-head" href="https://www.npr.org/2026/11/16/nx-s1-6041738/trump-xi-and-putin-china-nvidia">Trump to meet Xi and Putin in Asia trip</a></h3>
           <p>President Trump travels to Asia this week for a trilateral summit with Chinese President Xi Jinping and Russian leader Vladimir Putin, with a stop at the ASEAN summit in Manila beforehand. A White House official said no denuclearization agreement is expected, calling the meeting an &quot;entry point,&quot; and the trip follows the resignation of Nvidia CEO Jensen Huang over an extramarital affair with a woman U.S. intelligence officials believe was recruited by China&#x27;s top spy agency, according to The New York Times.</p>
           <div class="key">KEY &nbsp; Trump&#x27;s second China visit this year &middot; about three days in the region &middot; Russia&#x27;s war with Ukraine nearing its five-year mark</div>
-          <div class="meta"><span>NPR</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>NPR</span><a class="read" href="https://www.npr.org/2026/11/16/nx-s1-6041738/trump-xi-and-putin-china-nvidia">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.bbc.co.uk/news/articles/cw1mdlv0k2r4o?at_medium=RSS&amp;at_campaign=rss">
+      <div class="card" data-href="https://www.bbc.co.uk/news/articles/cw1mdlv0k2r4o?at_medium=RSS&amp;at_campaign=rss">
         <div class="thumb thumb-us"><span class="tag">BBC News</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>Air travel returning to normal after system failure</h3>
+          <h3><a class="card-head" href="https://www.bbc.co.uk/news/articles/cw1mdlv0k2r4o?at_medium=RSS&amp;at_campaign=rss">Air travel returning to normal after system failure</a></h3>
           <p>Transportation Secretary Sean Duffy said US flights should be running at &quot;full capacity&quot; from Monday after a technical failure triggered the longest nationwide grounding since 11 September 2001. Duffy said a router installed during a copper-to-fibre upgrade in El Dorado, Arkansas began sending faulty signals, though investigators are still determining the root cause.</p>
           <div class="key">KEY &nbsp; 17,000+ cancellations by Sunday (Bloomberg, citing aviation data providers) &middot; ground stop lasted more than four hours &middot; tens of billions of dollars sought for upgrades</div>
-          <div class="meta"><span>BBC News</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>BBC News</span><a class="read" href="https://www.bbc.co.uk/news/articles/cw1mdlv0k2r4o?at_medium=RSS&amp;at_campaign=rss">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.npr.org/2026/11/16/nx-s1-6041687/chris-van-hollen-chuck-schumer-senate-leader">
+      <div class="card" data-href="https://www.npr.org/2026/11/16/nx-s1-6041687/chris-van-hollen-chuck-schumer-senate-leader">
         <div class="thumb thumb-us"><span class="tag">NPR</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>Van Hollen makes public case against Schumer</h3>
+          <h3><a class="card-head" href="https://www.npr.org/2026/11/16/nx-s1-6041687/chris-van-hollen-chuck-schumer-senate-leader">Van Hollen makes public case against Schumer</a></h3>
           <p>Sen. Chris Van Hollen of Maryland said Monday he is gaining ground in his bid to replace Chuck Schumer as Senate Democratic leader, calling himself the underdog while taking a normally private contest onto national television. He has broken with Schumer on military aid to Israel and wants leadership to stay out of contested primaries; Schumer says he already has the votes to remain leader.</p>
           <div class="key">KEY &nbsp; nearly 25 years on Capitol Hill &middot; Schumer has led Senate Democrats nearly a decade &middot; close to 30 votes needed, decided by secret ballot</div>
-          <div class="meta"><span>NPR</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>NPR</span><a class="read" href="https://www.npr.org/2026/11/16/nx-s1-6041687/chris-van-hollen-chuck-schumer-senate-leader">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.bbc.co.uk/sport/american-football/articles/cmjre22gz0wwo?at_medium=RSS&amp;at_campaign=rss">
+      <div class="card" data-href="https://www.bbc.co.uk/sport/american-football/articles/cmjre22gz0wwo?at_medium=RSS&amp;at_campaign=rss">
         <div class="thumb thumb-us"><span class="tag">BBC News</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>49ers beat Cowboys 46-40 in Dallas shootout</h3>
+          <h3><a class="card-head" href="https://www.bbc.co.uk/sport/american-football/articles/cmjre22gz0wwo?at_medium=RSS&amp;at_campaign=rss">49ers beat Cowboys 46-40 in Dallas shootout</a></h3>
           <p>San Francisco outscored Dallas 46-40 behind Brock Purdy and Christian McCaffrey, piling up the most yards the Cowboys have ever allowed at home. Elsewhere in week 10, Joe Burrow was involved in four touchdowns for a fifth straight game as Cincinnati beat Pittsburgh, and Buffalo and Jacksonville also won on the road.</p>
           <div class="key">KEY &nbsp; 584 yards of offence &middot; Purdy career-high 389 passing yards, three TDs &middot; McCaffrey 223 total yards, 161 receiving, three scores &middot; Burrow 409 passing yards &middot; Chase 231 yards on 11 catches &middot; 49ers and Bills 8-1</div>
-          <div class="meta"><span>BBC News</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>BBC News</span><a class="read" href="https://www.bbc.co.uk/sport/american-football/articles/cmjre22gz0wwo?at_medium=RSS&amp;at_campaign=rss">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
     </div>
     <div class="progress"><div class="progress-fill"></div></div>
@@ -941,60 +945,60 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://www.turkishminute.com/2026/11/16/mother-who-fled-to-us-after-sons-fatal-crash-plans-to-drop-extradition-appeal/">
+      <div class="card" data-href="https://www.turkishminute.com/2026/11/16/mother-who-fled-to-us-after-sons-fatal-crash-plans-to-drop-extradition-appeal/">
         <div class="thumb thumb-turkey"><span class="tag">Turkish Minute</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>Mother in İstanbul crash case plans to return home</h3>
+          <h3><a class="card-head" href="https://www.turkishminute.com/2026/11/16/mother-who-fled-to-us-after-sons-fatal-crash-plans-to-drop-extradition-appeal/">Mother in İstanbul crash case plans to return home</a></h3>
           <p>Eylem Tok, who left for the United States with her teenage son after he caused a fatal crash in İstanbul, intends to withdraw her appeal against extradition and appear for trial in Turkey, the Gerçek Gündem news website reported Monday. Her lawyers&#x27; petition also asks the court to lift an outstanding arrest warrant and release her under judicial supervision with a cash bond; it describes intentions rather than steps already completed.</p>
           <div class="key">KEY &nbsp; Crash March 1, 2024 &middot; 1 person killed, aged 29 &middot; 4 injured &middot; petition filed Nov. 13 &middot; arrested in Boston June 14, 2024 &middot; extradition certified Feb. 11, 2025</div>
-          <div class="meta"><span>Turkish Minute</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Turkish Minute</span><a class="read" href="https://www.turkishminute.com/2026/11/16/mother-who-fled-to-us-after-sons-fatal-crash-plans-to-drop-extradition-appeal/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.turkishminute.com/2026/11/16/turkeys-main-opposition-leader-re-elected-as-7-jailed-mayors-join-his-party/">
+      <div class="card" data-href="https://www.turkishminute.com/2026/11/16/turkeys-main-opposition-leader-re-elected-as-7-jailed-mayors-join-his-party/">
         <div class="thumb thumb-turkey"><span class="tag">Turkish Minute</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>Özel re-elected as seven jailed mayors join New Party</h3>
+          <h3><a class="card-head" href="https://www.turkishminute.com/2026/11/16/turkeys-main-opposition-leader-re-elected-as-7-jailed-mayors-join-his-party/">Özel re-elected as seven jailed mayors join New Party</a></h3>
           <p>Özgür Özel was re-elected leader of Turkey&#x27;s main opposition New Party at its founding congress in Ankara, running unopposed, and delegates approved his lists for the party&#x27;s governing bodies. Seven jailed mayors announced in a letter read at the congress that they were joining the party, which adopted a declaration pledging a return to a parliamentary system and an end to government trustees replacing elected local officials.</p>
           <div class="key">KEY &nbsp; 1,154 valid votes, all for Özel &middot; 160-member Party Council &middot; 15-member disciplinary board &middot; 7 jailed mayors &middot; party launched in July &middot; 2028 presidential election</div>
-          <div class="meta"><span>Turkish Minute</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Turkish Minute</span><a class="read" href="https://www.turkishminute.com/2026/11/16/turkeys-main-opposition-leader-re-elected-as-7-jailed-mayors-join-his-party/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.dailysabah.com/business/economy/eu-imposes-anti-dumping-duties-on-steel-from-turkiye-4-other-countries">
+      <div class="card" data-href="https://www.dailysabah.com/business/economy/eu-imposes-anti-dumping-duties-on-steel-from-turkiye-4-other-countries">
         <div class="thumb thumb-turkey"><span class="tag">Daily Sabah</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>EU sets anti-dumping duties on Turkish cold-rolled steel</h3>
+          <h3><a class="card-head" href="https://www.dailysabah.com/business/economy/eu-imposes-anti-dumping-duties-on-steel-from-turkiye-4-other-countries">EU sets anti-dumping duties on Turkish cold-rolled steel</a></h3>
           <p>The European Commission said Monday it is imposing anti-dumping duties on certain cold-rolled flat steel products from Türkiye, India, Japan, Taiwan and Vietnam, after an investigation found the goods were entering the bloc at what it called dumped prices. Turkish products drew the lowest rate of the five countries.</p>
           <div class="key">KEY &nbsp; Türkiye 3%–7.8% &middot; India 9.5% &middot; Japan 27.9% &middot; Taiwan 20.7%–27% &middot; Vietnam 16% &middot; total imports about €1.77 bn ($1.95 bn) &middot; Türkiye €240 mn</div>
-          <div class="meta"><span>Daily Sabah</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Daily Sabah</span><a class="read" href="https://www.dailysabah.com/business/economy/eu-imposes-anti-dumping-duties-on-steel-from-turkiye-4-other-countries">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.dailysabah.com/business/economy/turkiyes-auto-exports-reach-352b-despite-lower-production">
+      <div class="card" data-href="https://www.dailysabah.com/business/economy/turkiyes-auto-exports-reach-352b-despite-lower-production">
         <div class="thumb thumb-turkey"><span class="tag">Daily Sabah</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>Turkish auto exports hit $35.2 billion as output falls</h3>
+          <h3><a class="card-head" href="https://www.dailysabah.com/business/economy/turkiyes-auto-exports-reach-352b-despite-lower-production">Turkish auto exports hit $35.2 billion as output falls</a></h3>
           <p>Türkiye&#x27;s automotive production fell 6% in the first 10 months on a drop in passenger car manufacturing, while commercial vehicle output rose, the Automotive Manufacturers&#x27; Association said Monday. Export volumes declined but revenue rose 3% in value, and the sector remained the country&#x27;s largest exporter.</p>
           <div class="key">KEY &nbsp; Production ~1.09 mn units, -6% &middot; passenger cars 592,163, -17% &middot; commercial vehicles +12% &middot; exports 779,557 units, -9% &middot; export value $35.2 bn, +3% &middot; 17% of total exports &middot; capacity utilization 61% &middot; domestic market 916,149 units, -15%</div>
-          <div class="meta"><span>Daily Sabah</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Daily Sabah</span><a class="read" href="https://www.dailysabah.com/business/economy/turkiyes-auto-exports-reach-352b-despite-lower-production">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.turkishminute.com/2026/11/16/opposition-links-erdogan-allys-husband-brother-to-fund-scandal/">
+      <div class="card" data-href="https://www.turkishminute.com/2026/11/16/opposition-links-erdogan-allys-husband-brother-to-fund-scandal/">
         <div class="thumb thumb-turkey"><span class="tag">Turkish Minute</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>Opposition lawmaker names AKP deputy&#x27;s relatives in fund allegations</h3>
+          <h3><a class="card-head" href="https://www.turkishminute.com/2026/11/16/opposition-links-erdogan-allys-husband-brother-to-fund-scandal/">Opposition lawmaker names AKP deputy&#x27;s relatives in fund allegations</a></h3>
           <p>New Party lawmaker Ümit Özlale told a parliamentary news conference that the husband and brother of AKP lawmaker Çiğdem Karaaslan appear in company partnerships, share transactions and brokerage records connected to figures in Turkey&#x27;s investment fund scandal. Karaaslan said on X that neither she nor her family holds accounts or transactions in the funds, called the claims character assassination and threatened legal action, without addressing the partnerships or records cited.</p>
           <div class="key">KEY &nbsp; London-based Gainex Global partnership dated Feb. 28, 2022 &middot; Matriks independent director elected April 19, 2022, about 50 days later &middot; dealings dated 2022–2023 &middot; fund crisis erupted in September &middot; hundreds of thousands of investors seeking repayment</div>
-          <div class="meta"><span>Turkish Minute</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Turkish Minute</span><a class="read" href="https://www.turkishminute.com/2026/11/16/opposition-links-erdogan-allys-husband-brother-to-fund-scandal/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
     </div>
     <div class="progress"><div class="progress-fill"></div></div>
@@ -1260,6 +1264,18 @@
     a.setAttribute('rel', 'noopener');
   });
 
+  /* a card is a div so its text stays selectable; a plain click still opens
+     the source, a click that ends a selection does not. The rail's own
+     capture-phase handler has already swallowed clicks that ended a drag. */
+  document.querySelectorAll('.card[data-href]').forEach(function (card) {
+    card.addEventListener('click', function (e) {
+      if (e.target.closest('a')) return;
+      var sel = window.getSelection();
+      if (sel && String(sel).trim()) return;
+      window.open(card.getAttribute('data-href'), '_blank', 'noopener');
+    });
+  });
+
   var rails = document.querySelectorAll('.rail');
   rails.forEach(function (rail) {
     var items = rail.querySelectorAll('.card, .fixture');
@@ -1296,6 +1312,9 @@
     var DEAD_ZONE = 10;        /* px of pointer travel ignored before a drag starts */
     var SCROLL_THRESHOLD = 6;  /* px the rail must actually move to count as a drag */
     rail.addEventListener('pointerdown', function (e) {
+      /* a mouse drag that starts on a card's text is someone selecting a
+         sentence, not someone scrolling the rail -- leave it to the browser. */
+      if (e.pointerType === 'mouse' && e.target.closest('.card .body')) return;
       down = true; moved = false;
       startX = e.clientX; startScroll = rail.scrollLeft;
     });

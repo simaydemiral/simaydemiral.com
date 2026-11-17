@@ -451,6 +451,12 @@
     transition: transform 0.15s ease, box-shadow 0.3s ease;
   }
   .card:hover { transform: translateY(-3px); }
+  .card { cursor: pointer; }
+  /* the card is a div, not a link, so its summary can be selected and
+     copied; the headline and "Read" carry the real anchors */
+  .card .card-head { color: inherit; text-decoration: none; }
+  .card .card-head:hover { text-decoration: underline; }
+  .card a.read { text-decoration: none; }
   .card.active { box-shadow: 0 0 0 1px rgba(232, 147, 90, 0.55), 0 16px 40px rgba(0, 0, 0, 0.35); }
   .card .thumb {
     position: relative;
@@ -668,8 +674,6 @@
   }
   .edition-btn:hover { border-color: #e8935a; color: #e8935a; }
   .edition-btn.active { background: #e8935a; border-color: #e8935a; color: #1d1512; }
-  div.card { cursor: default; }
-  div.card:hover { transform: none; }
 
   /* ---------- footer ---------- */
   .footer {
@@ -743,60 +747,60 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://techcrunch.com/2026/11/15/is-bad-news-for-jensen-huang-also-bad-news-for-the-ai-industry/">
+      <div class="card" data-href="https://techcrunch.com/2026/11/15/is-bad-news-for-jensen-huang-also-bad-news-for-the-ai-industry/">
         <div class="thumb thumb-ai"><span class="tag">TechCrunch</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Huang resignation leaves Nvidia without a succession plan</h3>
+          <h3><a class="card-head" href="https://techcrunch.com/2026/11/15/is-bad-news-for-jensen-huang-also-bad-news-for-the-ai-industry/">Huang resignation leaves Nvidia without a succession plan</a></h3>
           <p>Jensen Huang resigned as Nvidia CEO on Thursday after reports of an affair with a former executive at Megaspeed, an Nvidia customer alleged to have ties to Chinese intelligence, plus a second reported affair with an Nvidia executive; CFO Collette Kress, a longtime board member, takes over as interim CEO. TechCrunch&#x27;s Equity hosts said they were surprised by how quickly his support eroded, described the Kress appointment as likely a caretaker role, and noted that no succession plan was in place at a company much of the AI economy rests on.</p>
           <div class="key">KEY &nbsp; Resigned Thursday &middot; 2 reported affairs &middot; concerns about the Megaspeed relationship reportedly circulating a year ago</div>
-          <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>TechCrunch</span><a class="read" href="https://techcrunch.com/2026/11/15/is-bad-news-for-jensen-huang-also-bad-news-for-the-ai-industry/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.theverge.com/ai-artificial-intelligence/1033984/congress-export-rules-ai-chips-china">
+      <div class="card" data-href="https://www.theverge.com/ai-artificial-intelligence/1033984/congress-export-rules-ai-chips-china">
         <div class="thumb thumb-ai"><span class="tag">The Verge</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Congress moves to tighten AI chip export rules</h3>
+          <h3><a class="card-head" href="https://www.theverge.com/ai-artificial-intelligence/1033984/congress-export-rules-ai-chips-china">Congress moves to tighten AI chip export rules</a></h3>
           <p>Lawmakers from both parties are pushing to restrict AI chip exports following the reports about Huang&#x27;s relationship with a suspected Chinese spy, and have asked Huang and other Nvidia leaders to testify. Senate Minority Leader Chuck Schumer said Huang and the Trump administration owe Congress answers, Senate Banking Chairman Tim Scott wrote to Huang and Commerce Secretary Howard Lutnick seeking public testimony, and the stalled Remote Access Security Act is drawing renewed interest.</p>
           <div class="key">KEY &nbsp; Remote Access Security Act introduced in the House April 2025, stalled in the Senate</div>
-          <div class="meta"><span>The Verge</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>The Verge</span><a class="read" href="https://www.theverge.com/ai-artificial-intelligence/1033984/congress-export-rules-ai-chips-china">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://techcrunch.com/2026/11/15/apple-launches-new-app-to-study-how-people-use-ai-for-health/">
+      <div class="card" data-href="https://techcrunch.com/2026/11/15/apple-launches-new-app-to-study-how-people-use-ai-for-health/">
         <div class="thumb thumb-ai"><span class="tag">TechCrunch</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Apple opens study of AI health answers</h3>
+          <h3><a class="card-head" href="https://techcrunch.com/2026/11/15/apple-launches-new-app-to-study-how-people-use-ai-for-health/">Apple opens study of AI health answers</a></h3>
           <p>Apple is partnering with OpenEvidence on a US study app that answers everyday health questions using clinical sources including The New England Journal of Medicine, JAMA and Nature, with users rating responses and taking monthly surveys. Apple says participants can optionally share HealthKit data such as resting heart rate, sleep or lab results, that data is anonymized before going to a third-party cloud provider and is not used to train AI models, and that OpenEvidence deletes queries and responses after 24 hours.</p>
           <div class="key">KEY &nbsp; up to 200,000 participants &middot; more than 12 months &middot; US users 21+ &middot; iPhone 15 or later, iOS 26 or later &middot; query data deleted after 24 hours &middot; OpenAI said earlier this year users ask 300M+ health queries weekly</div>
-          <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>TechCrunch</span><a class="read" href="https://techcrunch.com/2026/11/15/apple-launches-new-app-to-study-how-people-use-ai-for-health/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://techcrunch.com/2026/11/15/indian-chip-startup-bharat-semi-lands-24m-seed-round-as-it-eyes-global-ai-sensor-market/">
+      <div class="card" data-href="https://techcrunch.com/2026/11/15/indian-chip-startup-bharat-semi-lands-24m-seed-round-as-it-eyes-global-ai-sensor-market/">
         <div class="thumb thumb-ai"><span class="tag">TechCrunch</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Indian chip startup raises $24M for AI sensors</h3>
+          <h3><a class="card-head" href="https://techcrunch.com/2026/11/15/indian-chip-startup-bharat-semi-lands-24m-seed-round-as-it-eyes-global-ai-sensor-market/">Indian chip startup raises $24M for AI sensors</a></h3>
           <p>New Delhi-based Bharat Semi, pre-revenue and nearly five years old, raised a $24 million all-equity seed round led by Info Edge Group, South Park Commons and Indus Bridge Ventures to build programmable image sensors that combine capture, processing and AI on one chip. Co-founder Vrinda Kapoor said the design could cut system costs by at least 70% versus conventional setups, and the startup says it has design wins with General Atomics and Kaynes Semicon, though its sensors are still in development.</p>
           <div class="key">KEY &nbsp; $24M seed &middot; founded late 2021 &middot; initial commercial production targeted 2027 &middot; costs cut by at least 70% &middot; ~75 employees, 10–12 in the US &middot; US headcount to ~20 by mid-2027 &middot; second-gen prototypes expected mid-2027</div>
-          <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>TechCrunch</span><a class="read" href="https://techcrunch.com/2026/11/15/indian-chip-startup-bharat-semi-lands-24m-seed-round-as-it-eyes-global-ai-sensor-market/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://arstechnica.com/science/2026/11/how-the-worlds-fires-changed-while-humanity-hit-pause/">
+      <div class="card" data-href="https://arstechnica.com/science/2026/11/how-the-worlds-fires-changed-while-humanity-hit-pause/">
         <div class="thumb thumb-ai"><span class="tag">Ars Technica</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Covid lockdowns lowered global fire activity, study finds</h3>
+          <h3><a class="card-head" href="https://arstechnica.com/science/2026/11/how-the-worlds-fires-changed-while-humanity-hit-pause/">Covid lockdowns lowered global fire activity, study finds</a></h3>
           <p>A team led by Jianghao Wang of the Chinese Academy of Sciences used the early-2020 lockdowns as a natural experiment, since human mobility dropped sharply at different times across countries while weather did not shift in the same way. Their study in Cell Reports Sustainability reports that the lower human activity had the net effect of reducing average fire activity, drawing on regional lockdown orders, mobile phone location data and NASA and NOAA Suomi NPP satellite records.</p>
           <div class="key">KEY &nbsp; 2020 lockdown period &middot; 2019–2020 southeastern Australia bushfires &middot; 2025 Los Angeles wildfires</div>
-          <div class="meta"><span>Ars Technica</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Ars Technica</span><a class="read" href="https://arstechnica.com/science/2026/11/how-the-worlds-fires-changed-while-humanity-hit-pause/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
     </div>
     <div class="progress"><div class="progress-fill"></div></div>
@@ -815,60 +819,60 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://www.cnbc.com/2026/11/14/180-million-van-gogh-tests-the-art-market-and-collector-confidence-.html">
+      <div class="card" data-href="https://www.cnbc.com/2026/11/14/180-million-van-gogh-tests-the-art-market-and-collector-confidence-.html">
         <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>New York auctions expected near $2.4 billion</h3>
+          <h3><a class="card-head" href="https://www.cnbc.com/2026/11/14/180-million-van-gogh-tests-the-art-market-and-collector-confidence-.html">New York auctions expected near $2.4 billion</a></h3>
           <p>Sotheby&#x27;s, Christie&#x27;s and Phillips head into next week&#x27;s New York sales with estimates of roughly $2.4 billion, led by a Van Gogh landscape and a Cézanne that have not been publicly seen in about fifty years. Auction executives say top-end collectors are taking a long view, and Bank of America data shows first-half sales recovering from the 2023 and 2024 declines.</p>
           <div class="key">KEY &nbsp; $2.4B expected total &middot; Sotheby&#x27;s over $1.1B &middot; Blaquier-Arrieta Collection est. $450M &middot; Van Gogh est. $180M &middot; Cézanne est. $120M &middot; Kandinsky est. $60M–$80M &middot; H1 sales $6.8B, up 70% &middot; Impressionist &amp; Modern up 133%</div>
-          <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>CNBC</span><a class="read" href="https://www.cnbc.com/2026/11/14/180-million-van-gogh-tests-the-art-market-and-collector-confidence-.html">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://fortune.com/2026/11/15/cyberattack-hack-faa-air-traffic-control-communications-router-fbi-probe-sean-duffy-ground-stop/">
+      <div class="card" data-href="https://fortune.com/2026/11/15/cyberattack-hack-faa-air-traffic-control-communications-router-fbi-probe-sean-duffy-ground-stop/">
         <div class="thumb thumb-markets"><span class="tag">Fortune</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>FAA points to router; FBI assists investigation</h3>
+          <h3><a class="card-head" href="https://fortune.com/2026/11/15/cyberattack-hack-faa-air-traffic-control-communications-router-fbi-probe-sean-duffy-ground-stop/">FAA points to router; FBI assists investigation</a></h3>
           <p>Transportation Secretary Sean Duffy said the FAA has focused on a copper-to-fiber cable upgrade by contractor L3Harris that reportedly flooded air traffic routers with connection attempts, though he stopped short of fully ruling out a cyberattack. Homeland Security Secretary Markwayne Mullin said a cyberattack &quot;doesn&#x27;t appear&quot; to be involved while adding that &quot;there&#x27;s nothing certain right now.&quot;</p>
           <div class="key">KEY &nbsp; 1,000+ connection attempts every 4–5 seconds &middot; ground stop lifted after about four hours &middot; Nov. 13 incident &middot; two routers, El Dorado, Arkansas and Amarillo, Texas, now at an L3Harris lab in Florida</div>
-          <div class="meta"><span>Fortune</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Fortune</span><a class="read" href="https://fortune.com/2026/11/15/cyberattack-hack-faa-air-traffic-control-communications-router-fbi-probe-sean-duffy-ground-stop/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.cnbc.com/2026/11/15/flight-delays-ground-faa-stop.html">
+      <div class="card" data-href="https://www.cnbc.com/2026/11/15/flight-delays-ground-faa-stop.html">
         <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>Airlines expect near-normal schedules Monday after ground stop</h3>
+          <h3><a class="card-head" href="https://www.cnbc.com/2026/11/15/flight-delays-ground-faa-stop.html">Airlines expect near-normal schedules Monday after ground stop</a></h3>
           <p>U.S. carriers are set to run close to normal on Monday after the FAA halted departures nationwide for more than four hours on Friday, though cancellations and delays continued through Sunday. Duffy has asked Congress for as much as $50 billion for air traffic control upgrades, and Democratic lawmakers pushed back by citing unspent money from existing funding.</p>
           <div class="key">KEY &nbsp; Sunday: ~2,000 cancellations, 7,500+ delays &middot; Saturday: 6,697 cancellations, 9,000 delays &middot; Friday: 9,201 cancellations, 7,400+ delays &middot; American 805 (13%) &middot; Delta 360 (7%) &middot; JetBlue near one-third &middot; up to $50B requested &middot; $12.5B approved last year over five years</div>
-          <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>CNBC</span><a class="read" href="https://www.cnbc.com/2026/11/15/flight-delays-ground-faa-stop.html">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://fortune.com/2026/11/15/ramayana-box-office-india-most-expensive-film/">
+      <div class="card" data-href="https://fortune.com/2026/11/15/ramayana-box-office-india-most-expensive-film/">
         <div class="thumb thumb-markets"><span class="tag">Fortune</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>India&#x27;s $420 million Ramayana tests global crossover</h3>
+          <h3><a class="card-head" href="https://fortune.com/2026/11/15/ramayana-box-office-india-most-expensive-film/">India&#x27;s $420 million Ramayana tests global crossover</a></h3>
           <p>The two-part Ramayana, with a reported budget of 40 billion rupees, is the most expensive Indian film made and became the first Indian film to top the U.K. box office. Reviews were mixed on pacing and score, and the film&#x27;s use of AI has drawn concerns, making its international run a measure of Indian cinema&#x27;s global reach.</p>
           <div class="key">KEY &nbsp; Reported budget 40B rupees ($420M) &middot; $100M+ global box office, $67M from India &middot; $55.7M opening weekend (Variety) &middot; 77% critic / 94% audience on Rotten Tomatoes &middot; premiere Oct. 27, global debut Nov. 5, U.S. Nov. 6 &middot; Dangal $190M+ in China &middot; Secret Superstar $117.7M</div>
-          <div class="meta"><span>Fortune</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Fortune</span><a class="read" href="https://fortune.com/2026/11/15/ramayana-box-office-india-most-expensive-film/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://fortune.com/2026/11/15/professors-faculty-workload-tenure-review-states-55-hour-weeks/">
+      <div class="card" data-href="https://fortune.com/2026/11/15/professors-faculty-workload-tenure-review-states-55-hour-weeks/">
         <div class="thumb thumb-markets"><span class="tag">Fortune</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>States press public university faculty on workloads</h3>
+          <h3><a class="card-head" href="https://fortune.com/2026/11/15/professors-faculty-workload-tenure-review-states-55-hour-weeks/">States press public university faculty on workloads</a></h3>
           <p>Lawmakers and governing boards in states including Wisconsin, Utah, Ohio and Kansas have imposed minimum teaching loads and tougher post-tenure reviews, while professors interviewed describe 55-hour weeks against nine-month contracts that stipulate 40. The Kansas Board of Regents put the long-standing 40-40-20 split of teaching, research and service into written policy in January.</p>
           <div class="key">KEY &nbsp; 55-hour weeks described vs. 40-hour contracts &middot; 40-40-20 model &middot; Gallup: 38% confidence in higher education in 2026, down from 57% in 2015 &middot; very little/no confidence up from 10% to 25% &middot; Kansas Board of Regents governs six public universities, three of them research universities</div>
-          <div class="meta"><span>Fortune</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Fortune</span><a class="read" href="https://fortune.com/2026/11/15/professors-faculty-workload-tenure-review-states-55-hour-weeks/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
     </div>
     <div class="progress"><div class="progress-fill"></div></div>
@@ -894,49 +898,49 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://www.bbc.co.uk/news/articles/c6m25zg88k45o?at_medium=RSS&amp;at_campaign=rss">
+      <div class="card" data-href="https://www.bbc.co.uk/news/articles/c6m25zg88k45o?at_medium=RSS&amp;at_campaign=rss">
         <div class="thumb thumb-us"><span class="tag">BBC News</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>Zelensky asks US and Musk to lift Starlink limits</h3>
+          <h3><a class="card-head" href="https://www.bbc.co.uk/news/articles/c6m25zg88k45o?at_medium=RSS&amp;at_campaign=rss">Zelensky asks US and Musk to lift Starlink limits</a></h3>
           <p>President Volodymyr Zelensky said the military-grade Starshield service, developed by Elon Musk&#x27;s Starlink and supplied to Ukraine by the US government, is still running too slowly, which he said is hindering interception of Russian missiles and drones. Musk has said the US government controls Starshield, while President Donald Trump denied responsibility and said he had told Musk to &quot;put it back&quot;; the BBC has asked the White House and Starlink for comment.</p>
           <div class="key">KEY &nbsp; speed limits of about 161km/h (100mph) &middot; restrictions first identified in October &middot; two people killed in an attack in Chernihiv region&#x27;s Mena</div>
-          <div class="meta"><span>BBC News</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>BBC News</span><a class="read" href="https://www.bbc.co.uk/news/articles/c6m25zg88k45o?at_medium=RSS&amp;at_campaign=rss">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.bbc.co.uk/sport/ice-hockey/articles/cqkgm0jgv4mdo?at_medium=RSS&amp;at_campaign=rss">
+      <div class="card" data-href="https://www.bbc.co.uk/sport/ice-hockey/articles/cqkgm0jgv4mdo?at_medium=RSS&amp;at_campaign=rss">
         <div class="thumb thumb-us"><span class="tag">BBC News</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>Canada denies visas, barring Russia from junior hockey worlds</h3>
+          <h3><a class="card-head" href="https://www.bbc.co.uk/sport/ice-hockey/articles/cqkgm0jgv4mdo?at_medium=RSS&amp;at_campaign=rss">Canada denies visas, barring Russia from junior hockey worlds</a></h3>
           <p>The IIHF said Russia&#x27;s under-20 team cannot take part in the World Junior Championship after Canada said it would deny entry to Russian athletes over the war in Ukraine, and the tournament will stay in Edmonton and Red Deer. The Russian Ice Hockey Federation called the decision &quot;unacceptable and unlawful,&quot; said it was made solely for political reasons, and said it would appeal to the IOC.</p>
           <div class="key">KEY &nbsp; tournament 26 December 2026–5 January 2027 &middot; six European federations had refused to play Russia &middot; suspended since 2022 invasion, ban overturned last month by CAS &middot; Norway, Finland and Estonia also blocking visas</div>
-          <div class="meta"><span>BBC News</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>BBC News</span><a class="read" href="https://www.bbc.co.uk/sport/ice-hockey/articles/cqkgm0jgv4mdo?at_medium=RSS&amp;at_campaign=rss">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.bbc.co.uk/news/articles/c65y131w1534o?at_medium=RSS&amp;at_campaign=rss">
+      <div class="card" data-href="https://www.bbc.co.uk/news/articles/c65y131w1534o?at_medium=RSS&amp;at_campaign=rss">
         <div class="thumb thumb-us"><span class="tag">BBC News</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>NTSB cites steering failure in New Orleans collision</h3>
+          <h3><a class="card-head" href="https://www.bbc.co.uk/news/articles/c65y131w1534o?at_medium=RSS&amp;at_campaign=rss">NTSB cites steering failure in New Orleans collision</a></h3>
           <p>The NTSB said preliminary findings show the cargo vessel Atlantic Asphalt had a &quot;steering casualty&quot; that left its rudder at a starboard position before it struck the riverboat American Heritage docked in New Orleans, though the exact cause is undetermined. Investigator-in-charge Bart Barnum said the vessel veered toward the east bank, and voyage data recorder audio captured warning signals and orders to deploy anchors minutes before the collision.</p>
           <div class="key">KEY &nbsp; 32 people hospitalized with non-critical injuries &middot; about 129 passengers plus crew aboard &middot; calls began around 13:30 EST Friday &middot; eight-day cruise &middot; $1m lawsuit filed by the Port of New Orleans</div>
-          <div class="meta"><span>BBC News</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>BBC News</span><a class="read" href="https://www.bbc.co.uk/news/articles/c65y131w1534o?at_medium=RSS&amp;at_campaign=rss">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.npr.org/2026/11/15/nx-s1-6013327/sydney-sweeney-jeans-american-eagle-garment-industry">
+      <div class="card" data-href="https://www.npr.org/2026/11/15/nx-s1-6013327/sydney-sweeney-jeans-american-eagle-garment-industry">
         <div class="thumb thumb-us"><span class="tag">NPR</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>Workers describe conditions behind American Eagle denim</h3>
+          <h3><a class="card-head" href="https://www.npr.org/2026/11/15/nx-s1-6013327/sydney-sweeney-jeans-american-eagle-garment-industry">Workers describe conditions behind American Eagle denim</a></h3>
           <p>NPR interviewed around 20 garment workers in Karachi, Pakistan, including one identified only as S., who says she works at Artistic Garment Industries on American Eagle production lines and fears being fired if named. Artistic Garment Industries confirmed it makes clothes for American Eagle but says it does not push out workers who complain, citing a complaints system and frequent temperature checks; American Eagle said it takes the concerns raised very seriously.</p>
           <div class="key">KEY &nbsp; about $144 a month in pay &middot; 1,000–1,600 pieces checked a day &middot; fainted three times this year &middot; 106 F outside the factory &middot; around 20 workers interviewed</div>
-          <div class="meta"><span>NPR</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>NPR</span><a class="read" href="https://www.npr.org/2026/11/15/nx-s1-6013327/sydney-sweeney-jeans-american-eagle-garment-industry">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
     </div>
     <div class="progress"><div class="progress-fill"></div></div>
@@ -952,27 +956,27 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://www.dailysabah.com/business/economy/close-to-445000-investors-payed-in-turkish-fund-case-vp-yilmaz">
+      <div class="card" data-href="https://www.dailysabah.com/business/economy/close-to-445000-investors-payed-in-turkish-fund-case-vp-yilmaz">
         <div class="thumb thumb-turkey"><span class="tag">Daily Sabah</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>Türkiye pays TL 161 billion to fund crisis investors</h3>
+          <h3><a class="card-head" href="https://www.dailysabah.com/business/economy/close-to-445000-investors-payed-in-turkish-fund-case-vp-yilmaz">Türkiye pays TL 161 billion to fund crisis investors</a></h3>
           <p>Vice President Cevdet Yılmaz said interim payments have reached almost 445,000 individual investors affected by the September fund crisis, with no money drawn from the central government budget. He said authorities are pursuing judicial and administrative action to recover what he called excessive profits, while the Justice Minister has said the alleged stock manipulation probe now covers over 460 suspects.</p>
           <div class="key">KEY &nbsp; TL 161 billion (about $3.2 billion) &middot; 444,987 investors paid &middot; 10,771 unpaid &middot; 371,021 recovered full net investment &middot; TL 144.7 billion cash &middot; TL 16.2 billion in-kind &middot; 119 funds &middot; 131 funds ordered liquidated &middot; 97 in ordinary liquidation, 94 completed, 3 remaining &middot; interim payments capped at TL 1 million &middot; 460+ suspects</div>
-          <div class="meta"><span>Daily Sabah</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Daily Sabah</span><a class="read" href="https://www.dailysabah.com/business/economy/close-to-445000-investors-payed-in-turkish-fund-case-vp-yilmaz">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.dailysabah.com/business/defense/turkish-firms-system-neutralizes-51-drones-within-seconds">
+      <div class="card" data-href="https://www.dailysabah.com/business/defense/turkish-firms-system-neutralizes-51-drones-within-seconds">
         <div class="thumb thumb-turkey"><span class="tag">Daily Sabah</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>Aselsan says electromagnetic system downed 51 drones at once</h3>
+          <h3><a class="card-head" href="https://www.dailysabah.com/business/defense/turkish-firms-system-neutralizes-51-drones-within-seconds">Aselsan says electromagnetic system downed 51 drones at once</a></h3>
           <p>Aselsan said its Ejderha high-power electromagnetic counter-UAV system neutralized 51 simultaneously launched drones within seconds during a test marking the company&#x27;s 51st anniversary. The company said the system first disabled two tethered drones at roughly 1,000 meters, a target type it says conventional counter-UAV systems cannot address, and that Ejderha has entered mass production as part of Türkiye&#x27;s layered Steel Dome air defense architecture.</p>
           <div class="key">KEY &nbsp; 51 drones &middot; 51st anniversary &middot; 2 tethered drones &middot; approximately 1,000 meters &middot; 50 years of accumulated experience</div>
-          <div class="meta"><span>Daily Sabah</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Daily Sabah</span><a class="read" href="https://www.dailysabah.com/business/defense/turkish-firms-system-neutralizes-51-drones-within-seconds">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
     </div>
     <div class="progress"><div class="progress-fill"></div></div>
@@ -1238,6 +1242,18 @@
     a.setAttribute('rel', 'noopener');
   });
 
+  /* a card is a div so its text stays selectable; a plain click still opens
+     the source, a click that ends a selection does not. The rail's own
+     capture-phase handler has already swallowed clicks that ended a drag. */
+  document.querySelectorAll('.card[data-href]').forEach(function (card) {
+    card.addEventListener('click', function (e) {
+      if (e.target.closest('a')) return;
+      var sel = window.getSelection();
+      if (sel && String(sel).trim()) return;
+      window.open(card.getAttribute('data-href'), '_blank', 'noopener');
+    });
+  });
+
   var rails = document.querySelectorAll('.rail');
   rails.forEach(function (rail) {
     var items = rail.querySelectorAll('.card, .fixture');
@@ -1274,6 +1290,9 @@
     var DEAD_ZONE = 10;        /* px of pointer travel ignored before a drag starts */
     var SCROLL_THRESHOLD = 6;  /* px the rail must actually move to count as a drag */
     rail.addEventListener('pointerdown', function (e) {
+      /* a mouse drag that starts on a card's text is someone selecting a
+         sentence, not someone scrolling the rail -- leave it to the browser. */
+      if (e.pointerType === 'mouse' && e.target.closest('.card .body')) return;
       down = true; moved = false;
       startX = e.clientX; startScroll = rail.scrollLeft;
     });

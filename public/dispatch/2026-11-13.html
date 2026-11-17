@@ -451,6 +451,12 @@
     transition: transform 0.15s ease, box-shadow 0.3s ease;
   }
   .card:hover { transform: translateY(-3px); }
+  .card { cursor: pointer; }
+  /* the card is a div, not a link, so its summary can be selected and
+     copied; the headline and "Read" carry the real anchors */
+  .card .card-head { color: inherit; text-decoration: none; }
+  .card .card-head:hover { text-decoration: underline; }
+  .card a.read { text-decoration: none; }
   .card.active { box-shadow: 0 0 0 1px rgba(232, 147, 90, 0.55), 0 16px 40px rgba(0, 0, 0, 0.35); }
   .card .thumb {
     position: relative;
@@ -668,8 +674,6 @@
   }
   .edition-btn:hover { border-color: #e8935a; color: #e8935a; }
   .edition-btn.active { background: #e8935a; border-color: #e8935a; color: #1d1512; }
-  div.card { cursor: default; }
-  div.card:hover { transform: none; }
 
   /* ---------- footer ---------- */
   .footer {
@@ -743,71 +747,71 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://techcrunch.com/2026/11/13/export-banned-nvidia-chips-are-behind-chinas-most-powerful-ai-models-uh-oh-jensen/">
+      <div class="card" data-href="https://techcrunch.com/2026/11/13/export-banned-nvidia-chips-are-behind-chinas-most-powerful-ai-models-uh-oh-jensen/">
         <div class="thumb thumb-ai"><span class="tag">TechCrunch</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Chinese AI models reportedly trained on banned Nvidia chips</h3>
+          <h3><a class="card-head" href="https://techcrunch.com/2026/11/13/export-banned-nvidia-chips-are-behind-chinas-most-powerful-ai-models-uh-oh-jensen/">Chinese AI models reportedly trained on banned Nvidia chips</a></h3>
           <p>Researcher Will DePue of Unemployment Labs says he analyzed the weights of openly released Chinese models and found evidence that Moonshot&#x27;s Kimi K3 and DeepSeek&#x27;s V4 bear fingerprints of training on export-banned Blackwell GPUs. The report does not establish that export laws were broken, since the chips may have sat in offshore data centers, a route that China hawks say the rules fail to close.</p>
           <div class="key">KEY &nbsp; ~2 million advanced chips estimated into China in 2024-25 &middot; 275,000 Nvidia accelerators imported to Malaysia 2024-25 &middot; 25% tariff on routed H200 exports &middot; 4 labs analyzed: DeepSeek, Moonshot, MiniMax, Ant Group</div>
-          <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>TechCrunch</span><a class="read" href="https://techcrunch.com/2026/11/13/export-banned-nvidia-chips-are-behind-chinas-most-powerful-ai-models-uh-oh-jensen/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://arstechnica.com/tech-policy/2026/11/microsoft-blames-failed-server-health-checks-not-hackers-for-global-outage/">
+      <div class="card" data-href="https://arstechnica.com/tech-policy/2026/11/microsoft-blames-failed-server-health-checks-not-hackers-for-global-outage/">
         <div class="thumb thumb-ai"><span class="tag">Ars Technica</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Microsoft 365 outage disrupts hospitals, courts, banks worldwide</h3>
+          <h3><a class="card-head" href="https://arstechnica.com/tech-policy/2026/11/microsoft-blames-failed-server-health-checks-not-hackers-for-global-outage/">Microsoft 365 outage disrupts hospitals, courts, banks worldwide</a></h3>
           <p>A global Microsoft 365 failure that began midday Thursday was still ongoing Friday, hitting email, cloud and AI services and affecting hospitals, police departments, schools and government IT in Japan. Microsoft says it has no evidence of malicious activity and attributes the problem to servers failing automated health checks under elevated load.</p>
           <div class="key">KEY &nbsp; Email timeout extended to 48 hours &middot; 450 million+ paid Microsoft 365 commercial subscriptions estimated in January &middot; outage began midday Thursday</div>
-          <div class="meta"><span>Ars Technica</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Ars Technica</span><a class="read" href="https://arstechnica.com/tech-policy/2026/11/microsoft-blames-failed-server-health-checks-not-hackers-for-global-outage/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://techcrunch.com/2026/11/13/israels-vcs-see-opportunity-for-challengers-in-nvidias-turmoil/">
+      <div class="card" data-href="https://techcrunch.com/2026/11/13/israels-vcs-see-opportunity-for-challengers-in-nvidias-turmoil/">
         <div class="thumb thumb-ai"><span class="tag">TechCrunch</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Israeli investors weigh Nvidia opening for chip challengers</h3>
+          <h3><a class="card-head" href="https://techcrunch.com/2026/11/13/israels-vcs-see-opportunity-for-challengers-in-nvidias-turmoil/">Israeli investors weigh Nvidia opening for chip challengers</a></h3>
           <p>Jensen Huang&#x27;s resignation has raised questions in Israel, where Nvidia employs 6,000 people and runs its largest R&amp;D site outside the US, about whether the company stays as committed under new leadership. Venture investors told TechCrunch that slower decisions could give rivals an opening, though Vertex Ventures&#x27; Yanai Oron cautioned that the same uncertainty might shrink overall AI spending.</p>
           <div class="key">KEY &nbsp; $6.9 billion Mellanox acquisition in 2019 &middot; 6,000 Nvidia employees in Israel &middot; interim CEO Colette Kress</div>
-          <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>TechCrunch</span><a class="read" href="https://techcrunch.com/2026/11/13/israels-vcs-see-opportunity-for-challengers-in-nvidias-turmoil/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.technologyreview.com/2026/11/13/1148498/silicon-valley-claims-to-know-the-future-so-why-did-it-get-the-midterms-so-wrong/">
+      <div class="card" data-href="https://www.technologyreview.com/2026/11/13/1148498/silicon-valley-claims-to-know-the-future-so-why-did-it-get-the-midterms-so-wrong/">
         <div class="thumb thumb-ai"><span class="tag">MIT Tech Review</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Tech leaders misread midterms after backing Trump agenda</h3>
+          <h3><a class="card-head" href="https://www.technologyreview.com/2026/11/13/1148498/silicon-valley-claims-to-know-the-future-so-why-did-it-get-the-midterms-so-wrong/">Tech leaders misread midterms after backing Trump agenda</a></h3>
           <p>A commentary by consultant Aaron Zamost argues that Silicon Valley executives who appeared at the White House five weeks before the midterms to endorse Trump&#x27;s &quot;Super Intelligence&quot; agenda traded long-term corporate interests for short-term political access. He writes that workers at OpenAI, Meta and other firms report near-silence from leadership since the election, with concern focused on possible anti-data-center legislation.</p>
           <div class="key">KEY &nbsp; White House gathering 5 weeks before midterms &middot; leaders named include Altman, Musk, Zuckerberg, Brockman, Karp &middot; Zuckerberg&#x27;s 2016 Facebook roadmap spanned 10 years</div>
-          <div class="meta"><span>MIT Tech Review</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>MIT Tech Review</span><a class="read" href="https://www.technologyreview.com/2026/11/13/1148498/silicon-valley-claims-to-know-the-future-so-why-did-it-get-the-midterms-so-wrong/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://techcrunch.com/2026/11/13/chatgpts-new-wallet-lets-ai-agents-shop-and-check-out-for-you/">
+      <div class="card" data-href="https://techcrunch.com/2026/11/13/chatgpts-new-wallet-lets-ai-agents-shop-and-check-out-for-you/">
         <div class="thumb thumb-ai"><span class="tag">TechCrunch</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>OpenAI launches wallet letting ChatGPT agents buy things</h3>
+          <h3><a class="card-head" href="https://techcrunch.com/2026/11/13/chatgpts-new-wallet-lets-ai-agents-shop-and-check-out-for-you/">OpenAI launches wallet letting ChatGPT agents buy things</a></h3>
           <p>OpenAI released a ChatGPT Wallet that lets its agents, called dots, pick out items and complete checkout, with users reviewing the order and approving via Face ID or fingerprint. The card is charged through a payment token rather than real card details, and OpenAI plans to add spending limits and more retailers later.</p>
           <div class="key">KEY &nbsp; Limited rollout to US ChatGPT Pro subscribers 18+ &middot; Visa, Mastercard or Amex required &middot; Meta&#x27;s Muse has 10 million+ users &middot; Amazon is the largest retailer blocking AI agents</div>
-          <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>TechCrunch</span><a class="read" href="https://techcrunch.com/2026/11/13/chatgpts-new-wallet-lets-ai-agents-shop-and-check-out-for-you/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://arstechnica.com/ai/2026/11/ai-is-the-most-likely-reason-youll-die-openai-board-member-warns/">
+      <div class="card" data-href="https://arstechnica.com/ai/2026/11/ai-is-the-most-likely-reason-youll-die-openai-board-member-warns/">
         <div class="thumb thumb-ai"><span class="tag">Ars Technica</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>OpenAI board member warns of possible near-term AI takeover</h3>
+          <h3><a class="card-head" href="https://arstechnica.com/ai/2026/11/ai-is-the-most-likely-reason-youll-die-openai-board-member-warns/">OpenAI board member warns of possible near-term AI takeover</a></h3>
           <p>Paul Cristiano, an OpenAI Foundation board member and Alignment Research Center director, told a Toronto lecture audience that an AI accident is the most likely cause of death for most people in the room. He conceded there is no quantitative model for the risk, while saying that on the most rapid development trajectory humanity faces roughly a coin flip of an AI takeover.</p>
           <div class="key">KEY &nbsp; &quot;Meaningful risk&quot; cited for the next 6 to 12 months &middot; opening talk of a 3-part lecture series &middot; cites this summer&#x27;s OpenAI/Hugging Face hacking incident</div>
-          <div class="meta"><span>Ars Technica</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Ars Technica</span><a class="read" href="https://arstechnica.com/ai/2026/11/ai-is-the-most-likely-reason-youll-die-openai-board-member-warns/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
     </div>
     <div class="progress"><div class="progress-fill"></div></div>
@@ -826,49 +830,49 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://www.cnbc.com/2026/11/13/us-seizes-binance-hack-crypto.html">
+      <div class="card" data-href="https://www.cnbc.com/2026/11/13/us-seizes-binance-hack-crypto.html">
         <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>DOJ seizes $1.2 billion of Binance crypto theft</h3>
+          <h3><a class="card-head" href="https://www.cnbc.com/2026/11/13/us-seizes-binance-hack-crypto.html">DOJ seizes $1.2 billion of Binance crypto theft</a></h3>
           <p>The Justice Department said Thursday it has seized about $1.2 billion in virtual assets taken from Binance last month, in a hack the FBI attributes to North Korean military-linked actors it calls &quot;TraderTraitor.&quot; Authorities also seized cloud infrastructure behind &quot;FaceStealer,&quot; a deepfake-driven impersonation scam the DOJ says has taken more than $400 million in crypto, while tracing of the laundered Binance funds continues.</p>
           <div class="key">KEY &nbsp; $1.2B seized &middot; $6B+ stolen Oct. 29 &middot; $2.7B frozen &middot; $400M+ via FaceStealer over 18 months</div>
-          <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>CNBC</span><a class="read" href="https://www.cnbc.com/2026/11/13/us-seizes-binance-hack-crypto.html">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://fortune.com/2026/11/13/paraguay-ueno-bank-collapse-president-pena-dubai-south-america/">
+      <div class="card" data-href="https://fortune.com/2026/11/13/paraguay-ueno-bank-collapse-president-pena-dubai-south-america/">
         <div class="thumb thumb-markets"><span class="tag">Fortune</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>Paraguay bank collapse precedes president&#x27;s removal</h3>
+          <h3><a class="card-head" href="https://fortune.com/2026/11/13/paraguay-ueno-bank-collapse-president-pena-dubai-south-america/">Paraguay bank collapse precedes president&#x27;s removal</a></h3>
           <p>Paraguay&#x27;s central bank placed the digital lender Ueno into resolution on Nov. 2, and millions of customers found they could not access their money the following day, according to Fortune&#x27;s account. President Santiago Peña, who the article says had close ties to the bank, resigned on Nov. 5, was removed unanimously by the Senate, and was placed under house arrest and charged with corruption-related crimes.</p>
           <div class="key">KEY &nbsp; Founded 2021 &middot; nearly 3M customers, about half the population &middot; ~$146M in loans to three Grupo Vázquez-linked companies flagged June 2026 &middot; solvency ratio below half the legal minimum &middot; Peña elected 2023, resigned Nov. 5</div>
-          <div class="meta"><span>Fortune</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Fortune</span><a class="read" href="https://fortune.com/2026/11/13/paraguay-ueno-bank-collapse-president-pena-dubai-south-america/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.cnbc.com/2026/11/13/cnbcs-official-nhl-team-valuations-2026-how-the-32-clubs-stack-up.html">
+      <div class="card" data-href="https://www.cnbc.com/2026/11/13/cnbcs-official-nhl-team-valuations-2026-how-the-32-clubs-stack-up.html">
         <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>NHL valuations average $2.71 billion, up 23%</h3>
+          <h3><a class="card-head" href="https://www.cnbc.com/2026/11/13/cnbcs-official-nhl-team-valuations-2026-how-the-32-clubs-stack-up.html">NHL valuations average $2.71 billion, up 23%</a></h3>
           <p>CNBC&#x27;s 2026 NHL valuations put the Toronto Maple Leafs on top at $5.4 billion, with the average franchise at $2.71 billion, 23% higher than a year ago. Recent minority-stake deals, rising ratings and an expected jump in media rights are driving the marks, even as average team EBITDA fell on arena costs.</p>
           <div class="key">KEY &nbsp; Leafs $5.4B &middot; Rangers $4.7B &middot; Canadiens $4.1B &middot; average $2.71B, +23% &middot; Penguins sold for $1.8B &middot; Hurricanes 12.5% stake at $2.66B valuation &middot; Islanders 15% stake near $3B &middot; avg revenue $257M (+6%), EBITDA $48M (-11%) &middot; Rogers deal $7.79B over 12 years &middot; US media rights ~$650M a year</div>
-          <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>CNBC</span><a class="read" href="https://www.cnbc.com/2026/11/13/cnbcs-official-nhl-team-valuations-2026-how-the-32-clubs-stack-up.html">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://fortune.com/2026/11/13/gen-z-arizona-election-victory-sebastian-matta-college-sophomore-led-65-millon-dollar-budget-600-employees-living-at-home/">
+      <div class="card" data-href="https://fortune.com/2026/11/13/gen-z-arizona-election-victory-sebastian-matta-college-sophomore-led-65-millon-dollar-budget-600-employees-living-at-home/">
         <div class="thumb thumb-markets"><span class="tag">Fortune</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>19-year-old student elected Maricopa County court clerk</h3>
+          <h3><a class="card-head" href="https://fortune.com/2026/11/13/gen-z-arizona-election-victory-sebastian-matta-college-sophomore-led-65-millon-dollar-budget-600-employees-living-at-home/">19-year-old student elected Maricopa County court clerk</a></h3>
           <p>Arizona State sophomore Sebastian Matta won the clerkship of Maricopa County Superior Court, a role overseeing more than 600 employees and a $65 million budget in the country&#x27;s fourth-largest county. He told local outlets he will start by reassuring staff rather than making early changes, and plans to keep living at home and finish his degree part-time online.</p>
           <div class="key">KEY &nbsp; Age 19 &middot; 790,000+ votes, about 54% &middot; opponent Jeff Dial 680,000+ &middot; 600+ employees &middot; $65M budget &middot; $97,000 salary &middot; ~4,000 signatures &middot; about $20,000 raised</div>
-          <div class="meta"><span>Fortune</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Fortune</span><a class="read" href="https://fortune.com/2026/11/13/gen-z-arizona-election-victory-sebastian-matta-college-sophomore-led-65-millon-dollar-budget-600-employees-living-at-home/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
     </div>
     <div class="progress"><div class="progress-fill"></div></div>
@@ -894,49 +898,49 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://www.bbc.co.uk/news/articles/c67429m3vem3o?at_medium=RSS&amp;at_campaign=rss">
+      <div class="card" data-href="https://www.bbc.co.uk/news/articles/c67429m3vem3o?at_medium=RSS&amp;at_campaign=rss">
         <div class="thumb thumb-us"><span class="tag">BBC News</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>Nvidia chief&#x27;s reported affair raises export-control questions</h3>
+          <h3><a class="card-head" href="https://www.bbc.co.uk/news/articles/c67429m3vem3o?at_medium=RSS&amp;at_campaign=rss">Nvidia chief&#x27;s reported affair raises export-control questions</a></h3>
           <p>Jensen Huang&#x27;s reported affair with Alice Huang, a former executive at Singapore-based Megaspeed whom US intelligence reportedly suspects of links to Chinese intelligence, has drawn attention to how closely the Nvidia CEO worked with President Trump on chip policy. Scrutiny has shifted to Commerce Secretary Howard Lutnick, who received a highly classified memo about Megaspeed and resisted acting against the company; Beijing has rejected the allegations, Nvidia&#x27;s board says it has no reason to believe secrets or national security were compromised, and Megaspeed&#x27;s chief executive says the firm takes US export-control compliance &quot;extremely seriously.&quot;</p>
           <div class="key">KEY &nbsp; Export restrictions on advanced chips to China since 2022 &middot; Blackwell chips still off limits &middot; Trump allowed some China sales last year for a share of revenue</div>
-          <div class="meta"><span>BBC News</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>BBC News</span><a class="read" href="https://www.bbc.co.uk/news/articles/c67429m3vem3o?at_medium=RSS&amp;at_campaign=rss">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.bbc.co.uk/news/articles/cmy4930jq749o?at_medium=RSS&amp;at_campaign=rss">
+      <div class="card" data-href="https://www.bbc.co.uk/news/articles/cmy4930jq749o?at_medium=RSS&amp;at_campaign=rss">
         <div class="thumb thumb-us"><span class="tag">BBC News</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>Van Hollen challenges Schumer for Senate Democratic leader</h3>
+          <h3><a class="card-head" href="https://www.bbc.co.uk/news/articles/cmy4930jq749o?at_medium=RSS&amp;at_campaign=rss">Van Hollen challenges Schumer for Senate Democratic leader</a></h3>
           <p>Senator Chris Van Hollen of Maryland said on X that he will run against Chuck Schumer to lead Senate Democrats, arguing that voters asked for change in the midterms and that &quot;we need new leadership.&quot; Schumer said he welcomes discussion about the caucus&#x27;s future and has the votes to stay on; Bernie Sanders and Senator-elect Abdul El-Sayed back Van Hollen, who calls himself an underdog.</p>
           <div class="key">KEY &nbsp; Van Hollen 67 &middot; Schumer 75 &middot; Schumer led Democrats since 2017, in Senate since 1999 &middot; Closed-door vote early December &middot; Winner takes role 4 January</div>
-          <div class="meta"><span>BBC News</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>BBC News</span><a class="read" href="https://www.bbc.co.uk/news/articles/cmy4930jq749o?at_medium=RSS&amp;at_campaign=rss">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.bbc.co.uk/news/articles/cmr4gx6d9vp0o?at_medium=RSS&amp;at_campaign=rss">
+      <div class="card" data-href="https://www.bbc.co.uk/news/articles/cmr4gx6d9vp0o?at_medium=RSS&amp;at_campaign=rss">
         <div class="thumb thumb-us"><span class="tag">BBC News</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>Colom wins Mississippi Senate seat Democrats had conceded</h3>
+          <h3><a class="card-head" href="https://www.bbc.co.uk/news/articles/cmr4gx6d9vp0o?at_medium=RSS&amp;at_campaign=rss">Colom wins Mississippi Senate seat Democrats had conceded</a></h3>
           <p>Scott Colom&#x27;s win, called more than a week after election day, is the first Democratic victory in the seat in over 40 years and the first time a black politician has held it since 1881. Supporters gathered at the NAACP&#x27;s state headquarters in Jackson; Colom told NBC News on 5 November that national Democrats had long conceded the state.</p>
           <div class="key">KEY &nbsp; First Democratic hold in 40+ years &middot; First black holder since 1881 &middot; Mississippi almost 40% black &middot; Trump won the state by over 22 points two years ago &middot; Roughly $2m donation deficit</div>
-          <div class="meta"><span>BBC News</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>BBC News</span><a class="read" href="https://www.bbc.co.uk/news/articles/cmr4gx6d9vp0o?at_medium=RSS&amp;at_campaign=rss">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.npr.org/2026/11/13/nx-s1-6034016/voter-fraud-search-trump-california">
+      <div class="card" data-href="https://www.npr.org/2026/11/13/nx-s1-6034016/voter-fraud-search-trump-california">
         <div class="thumb thumb-us"><span class="tag">NPR</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>Voter roll investigations expected to continue after election</h3>
+          <h3><a class="card-head" href="https://www.npr.org/2026/11/13/nx-s1-6034016/voter-fraud-search-trump-california">Voter roll investigations expected to continue after election</a></h3>
           <p>Election officials and civil rights attorneys say they expect the Trump administration to keep searching state voter rolls for noncitizens, after federal prosecutors charged dozens of people with voting or registering without citizenship — conduct the article describes as exceptionally rare relative to overall turnout. The Justice Department dropped its California lawsuit last week but has not rescinded grand jury subpoenas sent to several counties, and Attorney General Todd Blanche said investigations continue regardless of the election results.</p>
           <div class="key">KEY &nbsp; 20,000 &quot;likely&quot; noncitizens alleged on California rolls in mid-October &middot; DOJ requests rejected by a federal judge and appeals court &middot; Supreme Court declined to intervene &middot; Pre-election ruling found DOJ and DHS lack authority to distribute such lists</div>
-          <div class="meta"><span>NPR</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>NPR</span><a class="read" href="https://www.npr.org/2026/11/13/nx-s1-6034016/voter-fraud-search-trump-california">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
     </div>
     <div class="progress"><div class="progress-fill"></div></div>
@@ -952,60 +956,60 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://www.dailysabah.com/business/economy/turkiye-posts-272b-current-account-surplus-as-deficit-narrows">
+      <div class="card" data-href="https://www.dailysabah.com/business/economy/turkiye-posts-272b-current-account-surplus-as-deficit-narrows">
         <div class="thumb thumb-turkey"><span class="tag">Daily Sabah</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>Current account posts September surplus as trade gap narrows</h3>
+          <h3><a class="card-head" href="https://www.dailysabah.com/business/economy/turkiye-posts-272b-current-account-surplus-as-deficit-narrows">Current account posts September surplus as trade gap narrows</a></h3>
           <p>Türkiye&#x27;s current account showed a $2.72 billion surplus in September, which official data and ING analysts attributed mainly to a smaller trade gap, softer domestic demand and lower net gold imports, offsetting a wider energy deficit. Finance Minister Mehmet Şimşek said the 12-month rolling deficit narrowed and that he expects it to reach 2.2 percent of national income this year.</p>
           <div class="key">KEY &nbsp; $2.72B September surplus &middot; $600M a year earlier &middot; $4.05B in August &middot; $2.75B Bloomberg median forecast &middot; 12-month deficit $39.2B from $41.3B &middot; ex-gold-and-energy surplus $7.34B &middot; trade deficit $3.64B vs $5.4B &middot; services inflows just over $9B &middot; travel $6.57B &middot; transport $3.1B &middot; net FDI $859M &middot; portfolio outflow $7.73B &middot; reserves down just over $10B &middot; exports topped $410B &middot; deficit 1.9% of GDP in 2025, 2.2% expected</div>
-          <div class="meta"><span>Daily Sabah</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Daily Sabah</span><a class="read" href="https://www.dailysabah.com/business/economy/turkiye-posts-272b-current-account-surplus-as-deficit-narrows">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.turkishminute.com/2026/11/13/turkeys-ruling-party-loses-support-after-fund-scandal-poll/">
+      <div class="card" data-href="https://www.turkishminute.com/2026/11/13/turkeys-ruling-party-loses-support-after-fund-scandal-poll/">
         <div class="thumb thumb-turkey"><span class="tag">Turkish Minute</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>AKP support falls after fund scandal, pro-government poll finds</h3>
+          <h3><a class="card-head" href="https://www.turkishminute.com/2026/11/13/turkeys-ruling-party-loses-support-after-fund-scandal-poll/">AKP support falls after fund scandal, pro-government poll finds</a></h3>
           <p>A survey by the pro-government pollster MAK Danışmanlık put AKP support at 27.5 percent, down 4.5 points since September when an investment fund scandal began, with the opposition New Party at 21 percent. The crisis followed funds failing to meet withdrawal requests, after which the Capital Markets Board ordered liquidations amid suspected share price manipulation.</p>
           <div class="key">KEY &nbsp; AKP 27.5% (-4.5 pts) &middot; New Party 21% (+1 pt) &middot; gap 12 pts in September to 6.5 pts in November &middot; 131 funds liquidated across 7 companies &middot; DEM 7.5% &middot; MHP 7.2% &middot; İYİ 7.1% &middot; CHP 6.5% &middot; 3,200 respondents, Nov 1–8 &middot; ±1.73 pts at 95% confidence &middot; separate Yöneylem survey: 71.8% found profiting allegations credible, 14.6% of AKP supporters less likely to vote</div>
-          <div class="meta"><span>Turkish Minute</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Turkish Minute</span><a class="read" href="https://www.turkishminute.com/2026/11/13/turkeys-ruling-party-loses-support-after-fund-scandal-poll/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.dailysabah.com/business/energy/turkiye-canadas-atkinsrealis-ink-deal-for-study-on-nuclear-plant">
+      <div class="card" data-href="https://www.dailysabah.com/business/energy/turkiye-canadas-atkinsrealis-ink-deal-for-study-on-nuclear-plant">
         <div class="thumb thumb-turkey"><span class="tag">Daily Sabah</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>Turkish nuclear firm signs CANDU feasibility deal with AtkinsRéalis</h3>
+          <h3><a class="card-head" href="https://www.dailysabah.com/business/energy/turkiye-canadas-atkinsrealis-ink-deal-for-study-on-nuclear-plant">Turkish nuclear firm signs CANDU feasibility deal with AtkinsRéalis</a></h3>
           <p>State-owned TÜNAŞ and AtkinsRéalis subsidiary Candu Energy signed an agreement at COP31 in Antalya for feasibility and front-end engineering design work on a potential multi-unit nuclear project. AtkinsRéalis Nuclear President Joe St. Julian told Reuters the parties are discussing a six-unit, 4.5-gigawatt plant, with an engineering design study planned for completion by 2028 ahead of a final investment decision.</p>
           <div class="key">KEY &nbsp; Study due by end-2027 &middot; six units, 4.5 GW discussed &middot; design study by 2028 &middot; Akkuyu 4.8 GW under construction by Rosatom &middot; target 10 GW nuclear capacity by 2040 &middot; 11% of electricity demand by then &middot; Sinop and Thrace candidate sites &middot; 2027 called a decision year</div>
-          <div class="meta"><span>Daily Sabah</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Daily Sabah</span><a class="read" href="https://www.dailysabah.com/business/energy/turkiye-canadas-atkinsrealis-ink-deal-for-study-on-nuclear-plant">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.turkishminute.com/2026/11/13/turkish-police-detain-29-over-alleged-gulen-links-in-raids-across-14-provinces/">
+      <div class="card" data-href="https://www.turkishminute.com/2026/11/13/turkish-police-detain-29-over-alleged-gulen-links-in-raids-across-14-provinces/">
         <div class="thumb thumb-turkey"><span class="tag">Turkish Minute</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>Police detain 29 over alleged Gülen links in 14 provinces</h3>
+          <h3><a class="card-head" href="https://www.turkishminute.com/2026/11/13/turkish-police-detain-29-over-alleged-gulen-links-in-raids-across-14-provinces/">Police detain 29 over alleged Gülen links in 14 provinces</a></h3>
           <p>Turkish police detained 29 of 32 people sought in raids across 14 provinces over alleged ties to what authorities described as the Gülen movement&#x27;s women&#x27;s education network, coordinated by the İzmir Chief Public Prosecutor&#x27;s Office, according to the state-run Anadolu news agency. Authorities did not specify the educational activities underlying the allegations, identify the detainees or describe the evidence; the movement denies involvement in the 2016 coup attempt or any terrorist activity.</p>
           <div class="key">KEY &nbsp; 29 detained of 32 targeted &middot; 3 reportedly abroad &middot; 14 provinces &middot; 11 detained earlier in the week, 5 accused of financial assistance &middot; more than 127,000 convicted &middot; proceedings against 720,338 since 2016 &middot; 10,485 still in prison &middot; 83,404 cases ongoing</div>
-          <div class="meta"><span>Turkish Minute</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Turkish Minute</span><a class="read" href="https://www.turkishminute.com/2026/11/13/turkish-police-detain-29-over-alleged-gulen-links-in-raids-across-14-provinces/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://bianet.org/haber/lambdaistanbul-office-sealed-over-alleged-unauthorized-venue-operation-325358">
+      <div class="card" data-href="https://bianet.org/haber/lambdaistanbul-office-sealed-over-alleged-unauthorized-venue-operation-325358">
         <div class="thumb thumb-turkey"><span class="tag">Bianet</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>İstanbul governor seals LGBTI+ association office</h3>
+          <h3><a class="card-head" href="https://bianet.org/haber/lambdaistanbul-office-sealed-over-alleged-unauthorized-venue-operation-325358">İstanbul governor seals LGBTI+ association office</a></h3>
           <p>The İstanbul Governor&#x27;s Office sealed the office of Lambdaistanbul LGBTI+ Solidarity Association on Nov 11 over an allegation that it was operating an &quot;unauthorized venue.&quot; The association, which has worked on LGBTI+ rights for 33 years, said the measure continues restrictions on LGBTI+ organizing spaces that followed the Sep 12 &quot;My Family Is Safe&quot; operations and rejected the grounds cited.</p>
           <div class="key">KEY &nbsp; Sealed Nov 11 &middot; 33 years of activity &middot; active since 1993 &middot; first office opened 2002 &middot; association status 2006 &middot; closure order overturned by Court of Cassation in 2009 &middot; left Beyoğlu premises 2014 &middot; culture center closed 2016 &middot; first İstanbul Pride March 2003</div>
-          <div class="meta"><span>Bianet</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Bianet</span><a class="read" href="https://bianet.org/haber/lambdaistanbul-office-sealed-over-alleged-unauthorized-venue-operation-325358">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
     </div>
     <div class="progress"><div class="progress-fill"></div></div>
@@ -1382,6 +1386,18 @@
     a.setAttribute('rel', 'noopener');
   });
 
+  /* a card is a div so its text stays selectable; a plain click still opens
+     the source, a click that ends a selection does not. The rail's own
+     capture-phase handler has already swallowed clicks that ended a drag. */
+  document.querySelectorAll('.card[data-href]').forEach(function (card) {
+    card.addEventListener('click', function (e) {
+      if (e.target.closest('a')) return;
+      var sel = window.getSelection();
+      if (sel && String(sel).trim()) return;
+      window.open(card.getAttribute('data-href'), '_blank', 'noopener');
+    });
+  });
+
   var rails = document.querySelectorAll('.rail');
   rails.forEach(function (rail) {
     var items = rail.querySelectorAll('.card, .fixture');
@@ -1418,6 +1434,9 @@
     var DEAD_ZONE = 10;        /* px of pointer travel ignored before a drag starts */
     var SCROLL_THRESHOLD = 6;  /* px the rail must actually move to count as a drag */
     rail.addEventListener('pointerdown', function (e) {
+      /* a mouse drag that starts on a card's text is someone selecting a
+         sentence, not someone scrolling the rail -- leave it to the browser. */
+      if (e.pointerType === 'mouse' && e.target.closest('.card .body')) return;
       down = true; moved = false;
       startX = e.clientX; startScroll = rail.scrollLeft;
     });

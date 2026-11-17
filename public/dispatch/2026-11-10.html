@@ -451,6 +451,12 @@
     transition: transform 0.15s ease, box-shadow 0.3s ease;
   }
   .card:hover { transform: translateY(-3px); }
+  .card { cursor: pointer; }
+  /* the card is a div, not a link, so its summary can be selected and
+     copied; the headline and "Read" carry the real anchors */
+  .card .card-head { color: inherit; text-decoration: none; }
+  .card .card-head:hover { text-decoration: underline; }
+  .card a.read { text-decoration: none; }
   .card.active { box-shadow: 0 0 0 1px rgba(232, 147, 90, 0.55), 0 16px 40px rgba(0, 0, 0, 0.35); }
   .card .thumb {
     position: relative;
@@ -668,8 +674,6 @@
   }
   .edition-btn:hover { border-color: #e8935a; color: #e8935a; }
   .edition-btn.active { background: #e8935a; border-color: #e8935a; color: #1d1512; }
-  div.card { cursor: default; }
-  div.card:hover { transform: none; }
 
   /* ---------- footer ---------- */
   .footer {
@@ -743,71 +747,71 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://www.theverge.com/ai-artificial-intelligence/1030703/anthropic-ipo-1-4-trillion">
+      <div class="card" data-href="https://www.theverge.com/ai-artificial-intelligence/1030703/anthropic-ipo-1-4-trillion">
         <div class="thumb thumb-ai"><span class="tag">The Verge</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Anthropic IPO could value it near $1.4 trillion</h3>
+          <h3><a class="card-head" href="https://www.theverge.com/ai-artificial-intelligence/1030703/anthropic-ipo-1-4-trillion">Anthropic IPO could value it near $1.4 trillion</a></h3>
           <p>Anthropic confirmed Tuesday that its offering could price between $70.00 and $78.00 a share, which the New York Times reports would value the company as high as $1.4 trillion — short of the roughly $2 trillion Reuters notes was previously expected. The Wall Street Journal, citing sources, says the company is aiming to start trading Thursday or Friday next week, listing Class A stock on Nasdaq under &quot;ANT.&quot;</p>
           <div class="key">KEY &nbsp; $70.00–$78.00 per share &middot; valuation up to $1.4 trillion &middot; previously expected up to $2 trillion &middot; OpenAI valued at $1.25 trillion as of last week &middot; ticker &quot;ANT&quot;</div>
-          <div class="meta"><span>The Verge</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>The Verge</span><a class="read" href="https://www.theverge.com/ai-artificial-intelligence/1030703/anthropic-ipo-1-4-trillion">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://arstechnica.com/tech-policy/2026/11/ceo-jensen-huang-admits-affair-as-nvidia-probes-possible-chinese-espionage/">
+      <div class="card" data-href="https://arstechnica.com/tech-policy/2026/11/ceo-jensen-huang-admits-affair-as-nvidia-probes-possible-chinese-espionage/">
         <div class="thumb thumb-ai"><span class="tag">Ars Technica</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Nvidia board opens inquiry after Huang confirms affair</h3>
+          <h3><a class="card-head" href="https://arstechnica.com/tech-policy/2026/11/ceo-jensen-huang-admits-affair-as-nvidia-probes-possible-chinese-espionage/">Nvidia board opens inquiry after Huang confirms affair</a></h3>
           <p>Jensen Huang told Nvidia employees in a Sunday internal message obtained by the FT that he had been unfaithful to his wife, two days after the paper reported an alleged relationship with Alice Huang, a Megaspeed executive whom US intelligence believes was recruited to spy for China&#x27;s Ministry of State Security. Nvidia&#x27;s board will open an independent investigation into what it called a foreign intelligence effort targeting its CEO; Trump told reporters Huang had done an &quot;amazing job&quot; and said he did not regret declining to act on the intelligence.</p>
           <div class="key">KEY &nbsp; Frankfurt-listed shares down more than 6% in early Monday trading &middot; first $5 trillion company &middot; FT report Friday, internal message Sunday &middot; US memo drafted just before Trump&#x27;s Beijing summit with Xi</div>
-          <div class="meta"><span>Ars Technica</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Ars Technica</span><a class="read" href="https://arstechnica.com/tech-policy/2026/11/ceo-jensen-huang-admits-affair-as-nvidia-probes-possible-chinese-espionage/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.technologyreview.com/2026/11/10/1148150/the-download-pelosi-successor-ai-regulation-data-center-backlash/">
+      <div class="card" data-href="https://www.technologyreview.com/2026/11/10/1148150/the-download-pelosi-successor-ai-regulation-data-center-backlash/">
         <div class="thumb thumb-ai"><span class="tag">MIT Tech Review</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Pelosi&#x27;s successor arrives in Congress focused on AI risk</h3>
+          <h3><a class="card-head" href="https://www.technologyreview.com/2026/11/10/1148150/the-download-pelosi-successor-ai-regulation-data-center-backlash/">Pelosi&#x27;s successor arrives in Congress focused on AI risk</a></h3>
           <p>Scott Wiener, who authored California legislation on advanced AI risks, won the tight race for Nancy Pelosi&#x27;s San Francisco seat and told MIT Technology Review &quot;we need to slow this down&quot; because &quot;we could sleepwalk into a disaster,&quot; describing himself as only cautiously optimistic about Congress acting. A separate dispatch from Ashburn, Virginia — the world&#x27;s largest data center hub — argues the real fault line in the national data center backlash is electricity, since both drawing it from the grid and generating it onsite provoke opposition.</p>
           <div class="key">KEY &nbsp; 20-minute interview &middot; used &quot;recursive self-improvement&quot; about six times &middot; Ashburn, Virginia, world&#x27;s largest data center hub &middot; two US cities, York, Maine and League City, Texas, voted to ban Flock cameras</div>
-          <div class="meta"><span>MIT Tech Review</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>MIT Tech Review</span><a class="read" href="https://www.technologyreview.com/2026/11/10/1148150/the-download-pelosi-successor-ai-regulation-data-center-backlash/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://arstechnica.com/gadgets/2026/11/ukraines-fiber-optic-drones-get-squeezed-by-ai-data-center-demand/">
+      <div class="card" data-href="https://arstechnica.com/gadgets/2026/11/ukraines-fiber-optic-drones-get-squeezed-by-ai-data-center-demand/">
         <div class="thumb thumb-ai"><span class="tag">Ars Technica</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>AI data centers squeeze Ukraine&#x27;s drone fiber supply</h3>
+          <h3><a class="card-head" href="https://arstechnica.com/gadgets/2026/11/ukraines-fiber-optic-drones-get-squeezed-by-ai-data-center-demand/">AI data centers squeeze Ukraine&#x27;s drone fiber supply</a></h3>
           <p>Fiber-optic drones, immune to battlefield jamming because a cable physically links them to their operator, have become a consumable of the war in Ukraine, but Chinese fiber has grown more expensive as AI data center buildout competes for the same limited supply. Chinese customs data cited by the Washington Post shows Russia importing vastly more cable than Ukraine, and Ukrainian maker BlueBird Tech described to Ars how it is adapting.</p>
           <div class="key">KEY &nbsp; estimated 50,000 fiber-optic drones a month from Russia and Ukraine combined &middot; Russia imported 328,000 miles from China in August 2025 vs 72 miles for Ukraine &middot; Russia bought over 37 million miles in 2025, more than 10% of world output, up from under 1% historically &middot; expected 111-million-mile global shortfall in 2026, per TrendForce &middot; drone ranges sometimes up to 62 miles</div>
-          <div class="meta"><span>Ars Technica</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Ars Technica</span><a class="read" href="https://arstechnica.com/gadgets/2026/11/ukraines-fiber-optic-drones-get-squeezed-by-ai-data-center-demand/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.theverge.com/tech/1030593/adobe-max-ai-agents-mcp-firefly-assistant-updates">
+      <div class="card" data-href="https://www.theverge.com/tech/1030593/adobe-max-ai-agents-mcp-firefly-assistant-updates">
         <div class="thumb thumb-ai"><span class="tag">The Verge</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Adobe opens Creative Cloud to outside AI agents</h3>
+          <h3><a class="card-head" href="https://www.theverge.com/tech/1030593/adobe-max-ai-agents-mcp-firefly-assistant-updates">Adobe opens Creative Cloud to outside AI agents</a></h3>
           <p>At its Max conference in Miami, Adobe previewed local Model Context Protocol integrations that would let third-party agents from OpenAI, Google and Anthropic edit native Photoshop, Illustrator, Premiere and After Effects files on a user&#x27;s machine, with all layers and sequences still manually editable. It also previewed &quot;always-on&quot; agents that run recurring work in the background for later approval, plus a Plan Mode and model selector for the Firefly AI Assistant beta.</p>
           <div class="key">KEY &nbsp; private beta for Creative Cloud local MCP expected early 2027 &middot; four named apps: Photoshop, Illustrator, Premiere, After Effects &middot; always-on agent timing unspecified, coming to Firefly AI Assistant first</div>
-          <div class="meta"><span>The Verge</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>The Verge</span><a class="read" href="https://www.theverge.com/tech/1030593/adobe-max-ai-agents-mcp-firefly-assistant-updates">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://techcrunch.com/2026/11/10/after-challenging-googles-android-with-cyanogen-its-co-founder-takes-aim-at-windows-for-ai-era/">
+      <div class="card" data-href="https://techcrunch.com/2026/11/10/after-challenging-googles-android-with-cyanogen-its-co-founder-takes-aim-at-windows-for-ai-era/">
         <div class="thumb thumb-ai"><span class="tag">TechCrunch</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Cyanogen co-founder targets Windows with AI-first operating system</h3>
+          <h3><a class="card-head" href="https://techcrunch.com/2026/11/10/after-challenging-googles-android-with-cyanogen-its-co-founder-takes-aim-at-windows-for-ai-era/">Cyanogen co-founder targets Windows with AI-first operating system</a></h3>
           <p>Kirt McMaster, who spent over five years at Cyanogen trying to loosen Google&#x27;s grip on Android, unveiled Kora, a Linux-based desktop OS that embeds AI models and autonomous agents so they can work across apps, read files and keep context between tasks. He is not chasing Windows&#x27; whole base — &quot;Microsoft can keep its billion users,&quot; he said — but the heavy AI users he estimates number 45 to 50 million today.</p>
           <div class="key">KEY &nbsp; expected 2027 launch, free to use &middot; about 50 engineers &middot; Windows about 77% of desktop OS share in October vs nearly 10% for OS X, per StatCounter &middot; 45–50 million heavy AI users now, expected above 200 million by 2033 &middot; development accelerated at least fivefold using Codex and Claude &middot; rebranded from Playtron in July 2025</div>
-          <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>TechCrunch</span><a class="read" href="https://techcrunch.com/2026/11/10/after-challenging-googles-android-with-cyanogen-its-co-founder-takes-aim-at-windows-for-ai-era/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
     </div>
     <div class="progress"><div class="progress-fill"></div></div>
@@ -826,60 +830,60 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://www.cnbc.com/2026/11/10/fed-governor-waller-sees-december-hike-likely.html">
+      <div class="card" data-href="https://www.cnbc.com/2026/11/10/fed-governor-waller-sees-december-hike-likely.html">
         <div class="thumb thumb-markets"><span class="tag">CNBC Finance</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>Waller leaning toward December increase, open to half point</h3>
+          <h3><a class="card-head" href="https://www.cnbc.com/2026/11/10/fed-governor-waller-sees-december-hike-likely.html">Waller leaning toward December increase, open to half point</a></h3>
           <p>Fed Governor Christopher Waller said in London he is leaning toward a rate increase in December even if October inflation data comes in softer than expected, and that a 50 basis point move should be considered if readings come in higher than forecast. He argued that failing to carry out hikes markets have already priced in would put the Fed&#x27;s credibility at risk, while describing the economy as growing at a healthy pace.</p>
           <div class="key">KEY &nbsp; 50bp vs 25bp &middot; 80%+ market odds of quarter point, no chance of half point (CME FedWatch) &middot; 2% inflation target &middot; Dec. 8-9 meeting &middot; 2 October dissents</div>
-          <div class="meta"><span>CNBC Finance</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>CNBC Finance</span><a class="read" href="https://www.cnbc.com/2026/11/10/fed-governor-waller-sees-december-hike-likely.html">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.cnbc.com/2026/11/10/softbank-2q-earnings-tech-selloff.html">
+      <div class="card" data-href="https://www.cnbc.com/2026/11/10/softbank-2q-earnings-tech-selloff.html">
         <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>SoftBank posts $7 billion quarterly net loss</h3>
+          <h3><a class="card-head" href="https://www.cnbc.com/2026/11/10/softbank-2q-earnings-tech-selloff.html">SoftBank posts $7 billion quarterly net loss</a></h3>
           <p>SoftBank reported a fiscal second-quarter net loss that it attributed to losses tied to U.S. AI data center power equipment procurement and declines in Intel shares, with the Vision Fund segment swinging to a loss from a large year-earlier profit. The company said a potential increase in OpenAI&#x27;s valuation following a new funding round has not yet been reflected and could appear in the fiscal third quarter.</p>
           <div class="key">KEY &nbsp; 1.12T yen ($7B) net loss &middot; 597.2B yen ($3.7B) six-month equipment loss &middot; $9.48B cumulative power-equipment payments &middot; OpenAI stake $54.6B invested, $99.6B fair value, $45B cumulative gain &middot; revenue +13.3% &middot; shares +13.9% Tuesday &middot; 20-year, 8GW OpenAI lease in Ohio</div>
-          <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>CNBC</span><a class="read" href="https://www.cnbc.com/2026/11/10/softbank-2q-earnings-tech-selloff.html">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.cnbc.com/2026/11/09/skydance-cost-savings-breakdown.html">
+      <div class="card" data-href="https://www.cnbc.com/2026/11/09/skydance-cost-savings-breakdown.html">
         <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>Skydance details $6 billion in planned cost savings</h3>
+          <h3><a class="card-head" href="https://www.cnbc.com/2026/11/09/skydance-cost-savings-breakdown.html">Skydance details $6 billion in planned cost savings</a></h3>
           <p>In a shareholder letter with third-quarter results, the company formed by combining Paramount Skydance and Warner Bros. Discovery broke down at least $6 billion of cost reductions over three years across corporate functions, marketing, streaming and third-party spend. Executives said AI would be used both in back-office work and to lower production costs, and the company flagged a fourth-quarter headwind from theatrical underperformance at Warner Bros.</p>
           <div class="key">KEY &nbsp; $6B savings over 3 years &middot; $2.2B back office &middot; $1.4B streaming/broadcast &middot; $1.4B third-party spend &middot; $1B marketing &middot; $50B+ expense base &middot; $30B+ annual content spend &middot; Q3 revenue $7.03B vs $7.04B est. &middot; adj. EBITDA $1B vs $913.5M est. &middot; adj. EPS 45 cents &middot; $200M Q4 headwind &middot; 8 executive departures</div>
-          <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>CNBC</span><a class="read" href="https://www.cnbc.com/2026/11/09/skydance-cost-savings-breakdown.html">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.cnbc.com/2026/11/10/polymarket-annualized-revenue-us-growth.html">
+      <div class="card" data-href="https://www.cnbc.com/2026/11/10/polymarket-annualized-revenue-us-growth.html">
         <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>Polymarket says annualized revenue tops $1.8 billion</h3>
+          <h3><a class="card-head" href="https://www.cnbc.com/2026/11/10/polymarket-annualized-revenue-us-growth.html">Polymarket says annualized revenue tops $1.8 billion</a></h3>
           <p>Polymarket told CNBC its annualized revenue has passed $1.8 billion, up from a run rate above $1 billion disclosed in June, with growth driven by the U.S. exchange it launched in May and heavily traded sports events. The CFTC is conducting a broad investigation into the company&#x27;s advertising practices and whether it previously violated a settlement barring U.S. residents from its international exchange; a spokesperson said the company welcomes scrutiny.</p>
           <div class="key">KEY &nbsp; $1.8B annualized revenue, up from $1B+ in June &middot; $14.5B October notional volume vs $4B in June (TickerTracker) &middot; 70%+ of Sunday volume in Combo contracts &middot; $1B funding round at $21B valuation</div>
-          <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>CNBC</span><a class="read" href="https://www.cnbc.com/2026/11/10/polymarket-annualized-revenue-us-growth.html">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.cnbc.com/2026/11/09/tokenization-platform-securitize-reports-gains-expands-into-asset-backed-finance.html">
+      <div class="card" data-href="https://www.cnbc.com/2026/11/09/tokenization-platform-securitize-reports-gains-expands-into-asset-backed-finance.html">
         <div class="thumb thumb-markets"><span class="tag">CNBC Earnings</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>Securitize gains postmarket, buys asset-backed finance platform</h3>
+          <h3><a class="card-head" href="https://www.cnbc.com/2026/11/09/tokenization-platform-securitize-reports-gains-expands-into-asset-backed-finance.html">Securitize gains postmarket, buys asset-backed finance platform</a></h3>
           <p>The tokenization platform rose about 10% after hours on third-quarter growth in revenue, tokenized assets and transaction volume, alongside sharply higher operating costs that CEO Carlos Domingo tied partly to going public and to building out finance, compliance, legal and cybersecurity. Its board authorized a $50 million buyback and it announced the acquisition of River One, an institutional asset-backed financing platform, on undisclosed terms.</p>
           <div class="key">KEY &nbsp; ~10% postmarket &middot; revenue $11.5M, +28% &middot; tokenized assets $4.8B, +9% &middot; transaction volume $4.3B, +20% &middot; adj. EBITDA -$2M vs +$3.6M year ago and -$5.5M in Q2 &middot; operating costs +183% &middot; $50M buyback &middot; $9T asset-backed finance market</div>
-          <div class="meta"><span>CNBC Earnings</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>CNBC Earnings</span><a class="read" href="https://www.cnbc.com/2026/11/09/tokenization-platform-securitize-reports-gains-expands-into-asset-backed-finance.html">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
     </div>
     <div class="progress"><div class="progress-fill"></div></div>
@@ -905,49 +909,49 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://www.npr.org/2026/11/10/g-s1-152777/up-first-newsletter-pete-hegseth-impeachment-trump-iran-nvidia-border-wall-texas">
+      <div class="card" data-href="https://www.npr.org/2026/11/10/g-s1-152777/up-first-newsletter-pete-hegseth-impeachment-trump-iran-nvidia-border-wall-texas">
         <div class="thumb thumb-us"><span class="tag">NPR</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>House may vote on impeaching Defense Secretary Hegseth</h3>
+          <h3><a class="card-head" href="https://www.npr.org/2026/11/10/g-s1-152777/up-first-newsletter-pete-hegseth-impeachment-trump-iran-nvidia-border-wall-texas">House may vote on impeaching Defense Secretary Hegseth</a></h3>
           <p>Rep. Thomas Massie (R-KY) has reintroduced articles of impeachment against Pete Hegseth, with eight charges that include illegally waging war against Iran, ignoring laws meant to minimize civilian casualties, overseeing extrajudicial killings of alleged drug boats, and capturing Venezuelan President Nicolás Maduro without congressional authorization; Hegseth has called the articles a sham. Separately, the Supreme Court allowed the administration to proceed with west Texas border barrier construction, holding that the judge who issued the injunction lacked authority to intervene.</p>
           <div class="key">KEY &nbsp; 8 impeachment charges &middot; 3 charges tied to the Iran war &middot; five-page Supreme Court decision &middot; hundreds of miles of planned barriers &middot; Nvidia stock -4.25% &middot; AMD shares +13%</div>
-          <div class="meta"><span>NPR</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>NPR</span><a class="read" href="https://www.npr.org/2026/11/10/g-s1-152777/up-first-newsletter-pete-hegseth-impeachment-trump-iran-nvidia-border-wall-texas">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.npr.org/2026/11/10/g-s1-152773/russia-ukraine-war-talks">
+      <div class="card" data-href="https://www.npr.org/2026/11/10/g-s1-152773/russia-ukraine-war-talks">
         <div class="thumb thumb-us"><span class="tag">NPR</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>Russia, Ukraine and US open Abu Dhabi talks</h3>
+          <h3><a class="card-head" href="https://www.npr.org/2026/11/10/g-s1-152773/russia-ukraine-war-talks">Russia, Ukraine and US open Abu Dhabi talks</a></h3>
           <p>Three-way talks mediated by the United States opened Tuesday in Abu Dhabi, the first such meeting since February, focused on future security guarantees for both countries. Jared Kushner said he believed there were &quot;some good ideas how to bridge&quot; the differences, while German Chancellor Friedrich Merz said he did not have &quot;overly high expectations.&quot;</p>
           <div class="key">KEY &nbsp; first day nearly 4 hours &middot; two-day session &middot; first meeting since February &middot; 3 previous rounds early this year &middot; war nearly 5 years old &middot; 162 Russian drones plus a ballistic missile overnight &middot; 155 Ukrainian drones reported shot down over 8 Russian regions &middot; Crimea annexed 2014</div>
-          <div class="meta"><span>NPR</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>NPR</span><a class="read" href="https://www.npr.org/2026/11/10/g-s1-152773/russia-ukraine-war-talks">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.npr.org/sections/planet-money/2026/11/10/g-s1-152755/why-did-californias-billionaire-tax-fail-to-surf-the-blue-wave">
+      <div class="card" data-href="https://www.npr.org/sections/planet-money/2026/11/10/g-s1-152755/why-did-californias-billionaire-tax-fail-to-surf-the-blue-wave">
         <div class="thumb thumb-us"><span class="tag">NPR</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>California voters reject Prop 40 billionaire wealth tax</h3>
+          <h3><a class="card-head" href="https://www.npr.org/sections/planet-money/2026/11/10/g-s1-152755/why-did-californias-billionaire-tax-fail-to-surf-the-blue-wave">California voters reject Prop 40 billionaire wealth tax</a></h3>
           <p>The Associated Press determined that California voters rejected Prop 40, a one-time 5% tax on the state&#x27;s billionaires, even as Democrats performed strongly in the midterms. Berkeley&#x27;s Gabriel Zucman attributes the loss to a lopsided spending gap, while Stanford&#x27;s Joshua Rauh, a critic of the measure, disagrees with him on what the result says about the politics of wealth taxes.</p>
           <div class="key">KEY &nbsp; one-time 5% tax &middot; nearly $400m spent by opponents, including competing ballot measures &middot; more than $300m on ads vs. what Zucman calls negligible sums opposing &middot; over 1,500,000 signatures collected to qualify &middot; Musk reportedly put more than $150m into defeating Talarico in Texas</div>
-          <div class="meta"><span>NPR</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>NPR</span><a class="read" href="https://www.npr.org/sections/planet-money/2026/11/10/g-s1-152755/why-did-californias-billionaire-tax-fail-to-surf-the-blue-wave">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.bbc.co.uk/news/articles/ck1l3le7q29vo?at_medium=RSS&amp;at_campaign=rss">
+      <div class="card" data-href="https://www.bbc.co.uk/news/articles/ck1l3le7q29vo?at_medium=RSS&amp;at_campaign=rss">
         <div class="thumb thumb-us"><span class="tag">BBC News</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>Judge clears path for retrial in Clancy case</h3>
+          <h3><a class="card-head" href="https://www.bbc.co.uk/news/articles/ck1l3le7q29vo?at_medium=RSS&amp;at_campaign=rss">Judge clears path for retrial in Clancy case</a></h3>
           <p>A Massachusetts judge denied a defense motion to dismiss the murder case against Lindsay Clancy, ruling that a retrial would not violate her double jeopardy protections because there was manifest necessity for the mistrial. Clancy has not denied killing her three children in 2023 but her defense argues she had severe postpartum psychosis, while prosecutors say the killings were intentional.</p>
           <div class="key">KEY &nbsp; 3 children, aged 5, 3 and eight months &middot; deaths on 24 January 2023 &middot; 26-day trial &middot; 12-person jury &middot; 11 jurors intended to acquit by reason of insanity, 1 voted to convict of first-degree murder &middot; mistrial declared 4 September &middot; 16 November set to discuss scheduling</div>
-          <div class="meta"><span>BBC News</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>BBC News</span><a class="read" href="https://www.bbc.co.uk/news/articles/ck1l3le7q29vo?at_medium=RSS&amp;at_campaign=rss">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
     </div>
     <div class="progress"><div class="progress-fill"></div></div>
@@ -963,60 +967,60 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://www.dailysabah.com/business/finance/number-of-suspects-in-turkish-fund-probe-reaches-464-minister-says">
+      <div class="card" data-href="https://www.dailysabah.com/business/finance/number-of-suspects-in-turkish-fund-probe-reaches-464-minister-says">
         <div class="thumb thumb-turkey"><span class="tag">Daily Sabah</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>Justice minister says fund probe now covers 464 suspects</h3>
+          <h3><a class="card-head" href="https://www.dailysabah.com/business/finance/number-of-suspects-in-turkish-fund-probe-reaches-464-minister-says">Justice minister says fund probe now covers 464 suspects</a></h3>
           <p>Justice Minister Akın Gürlek told the Parliamentary Planning and Budget Commission that the investigation opened after September&#x27;s fund crisis now involves 464 suspects, with 120 in custody and judicial control measures applied to 262 others. He said about TL 31.5 billion in cash, real estate and stocks has been returned under a voluntary program run by the Savings Deposit Insurance Fund, while stressing that voluntary return does not remove legal responsibility.</p>
           <div class="key">KEY &nbsp; 464 suspects &middot; 120 in custody &middot; 262 under judicial control &middot; 40 fugitive arrest warrants &middot; assets of 386 individuals and 116 legal entities targeted &middot; TL 31.5 billion ($627.6 million) returned &middot; 131 funds liquidated &middot; as of Nov. 9, 2026</div>
-          <div class="meta"><span>Daily Sabah</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Daily Sabah</span><a class="read" href="https://www.dailysabah.com/business/finance/number-of-suspects-in-turkish-fund-probe-reaches-464-minister-says">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.turkishminute.com/2026/11/10/6-suspects-detained-as-families-mourn-17-workers-killed-in-izmir-blast/">
+      <div class="card" data-href="https://www.turkishminute.com/2026/11/10/6-suspects-detained-as-families-mourn-17-workers-killed-in-izmir-blast/">
         <div class="thumb thumb-turkey"><span class="tag">Turkish Minute</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>Six detained after İzmir steel plant explosion killed 17</h3>
+          <h3><a class="card-head" href="https://www.turkishminute.com/2026/11/10/6-suspects-detained-as-families-mourn-17-workers-killed-in-izmir-blast/">Six detained after İzmir steel plant explosion killed 17</a></h3>
           <p>Six people were detained over Monday&#x27;s explosion and fire at the HABAŞ steel plant in Aliağa, İzmir province, which killed 17 workers, while Deputy Justice Minister Can Tuncay announced detention warrants for 11 people including the company&#x27;s board chairman. Families waited at the forensic institute for DNA identification before burials, and an Aliağa court imposed a publication ban on reporting and commentary until the investigation concludes.</p>
           <div class="key">KEY &nbsp; 17 killed &middot; 6 detained &middot; detention warrants for 11 &middot; 4 prosecutors assigned &middot; 6 injured discharged, 8 still in treatment &middot; Aliağa about 60 km north of İzmir &middot; one of the dead a 25-year-old engineer</div>
-          <div class="meta"><span>Turkish Minute</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Turkish Minute</span><a class="read" href="https://www.turkishminute.com/2026/11/10/6-suspects-detained-as-families-mourn-17-workers-killed-in-izmir-blast/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.turkishminute.com/2026/11/10/wife-of-turkish-opposition-mp-detained-on-espionage-allegation-amid-fund-scandal-row/">
+      <div class="card" data-href="https://www.turkishminute.com/2026/11/10/wife-of-turkish-opposition-mp-detained-on-espionage-allegation-amid-fund-scandal-row/">
         <div class="thumb thumb-turkey"><span class="tag">Turkish Minute</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>Opposition MP&#x27;s wife detained on espionage allegation</h3>
+          <h3><a class="card-head" href="https://www.turkishminute.com/2026/11/10/wife-of-turkish-opposition-mp-detained-on-espionage-allegation-amid-fund-scandal-row/">Opposition MP&#x27;s wife detained on espionage allegation</a></h3>
           <p>Police detained Yonca Verdioğlu Şık, Turkey program coordinator for the Heinrich Böll Foundation, on suspicion of political or military espionage, according to the BirGün daily, which reported that the allegations were not specified. Her husband, TİP deputy Ahmet Şık, has been pressing ministers over whether politically connected investors received preferential treatment in the fund scandal; his party called the allegation fabricated and said he had received threats to drop the case.</p>
           <div class="key">KEY &nbsp; scandal erupted in September &middot; nearly half a million individual investors affected &middot; 131 funds managed by 7 companies ordered liquidated &middot; former family minister Fatma Betül Sayan Kaya jailed pending trial Friday, denies wrongdoing</div>
-          <div class="meta"><span>Turkish Minute</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Turkish Minute</span><a class="read" href="https://www.turkishminute.com/2026/11/10/wife-of-turkish-opposition-mp-detained-on-espionage-allegation-amid-fund-scandal-row/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.turkishminute.com/2026/11/10/7-detained-in-probe-that-led-to-takeover-of-turkeys-pro-opposition-halk-tv/">
+      <div class="card" data-href="https://www.turkishminute.com/2026/11/10/7-detained-in-probe-that-led-to-takeover-of-turkeys-pro-opposition-halk-tv/">
         <div class="thumb thumb-turkey"><span class="tag">Turkish Minute</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>Seven detained in probe behind Halk TV takeover</h3>
+          <h3><a class="card-head" href="https://www.turkishminute.com/2026/11/10/7-detained-in-probe-that-led-to-takeover-of-turkeys-pro-opposition-halk-tv/">Seven detained in probe behind Halk TV takeover</a></h3>
           <p>Prosecutors ordered eight suspects detained in a bribery, money laundering and alleged bid-rigging investigation into Halk TV owner Cafer Mahiroğlu, with seven listed as detained and one still at large, the state-run Anadolu agency reported. Prosecutors allege a company called BUSTECH acted as a front that won İzmir municipal contracts and channeled proceeds to the broadcaster and Mahiroğlu&#x27;s other businesses; Mahiroğlu, who lives in London, denies wrongdoing and calls the case politically motivated.</p>
           <div class="key">KEY &nbsp; 8 detentions ordered, 7 detained, 1 at large &middot; raids in 4 provinces: İstanbul, Ankara, İzmir, Eskişehir &middot; headquarters raided October 14 &middot; BUSTECH established in İzmir in 2021 &middot; station acquired in 2020</div>
-          <div class="meta"><span>Turkish Minute</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Turkish Minute</span><a class="read" href="https://www.turkishminute.com/2026/11/10/7-detained-in-probe-that-led-to-takeover-of-turkeys-pro-opposition-halk-tv/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.dailysabah.com/business/energy/turkiye-azerbaijan-bulgaria-georgia-ink-clean-energy-pact-at-cop31">
+      <div class="card" data-href="https://www.dailysabah.com/business/energy/turkiye-azerbaijan-bulgaria-georgia-ink-clean-energy-pact-at-cop31">
         <div class="thumb thumb-turkey"><span class="tag">Daily Sabah</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>Four countries sign clean electricity pact at COP31</h3>
+          <h3><a class="card-head" href="https://www.dailysabah.com/business/energy/turkiye-azerbaijan-bulgaria-georgia-ink-clean-energy-pact-at-cop31">Four countries sign clean electricity pact at COP31</a></h3>
           <p>Türkiye, Azerbaijan, Bulgaria and Georgia signed a strategic partnership agreement on clean energy at the COP31 conference in Antalya, covering cross-border electricity transmission and trade, grid integration and supporting fiber-optic and data infrastructure. Energy Minister Alparslan Bayraktar described the project as the &quot;TANAP of electricity,&quot; saying it aims to carry clean power to European markets along the Azerbaijan-Georgia-Türkiye-Bulgaria route.</p>
           <div class="key">KEY &nbsp; 4 countries &middot; signed Tuesday at COP31 in Antalya &middot; builds on cooperation launched in 2024 and a memorandum of understanding signed in Baku in April 2025</div>
-          <div class="meta"><span>Daily Sabah</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Daily Sabah</span><a class="read" href="https://www.dailysabah.com/business/energy/turkiye-azerbaijan-bulgaria-georgia-ink-clean-energy-pact-at-cop31">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
     </div>
     <div class="progress"><div class="progress-fill"></div></div>
@@ -1372,6 +1376,18 @@
     a.setAttribute('rel', 'noopener');
   });
 
+  /* a card is a div so its text stays selectable; a plain click still opens
+     the source, a click that ends a selection does not. The rail's own
+     capture-phase handler has already swallowed clicks that ended a drag. */
+  document.querySelectorAll('.card[data-href]').forEach(function (card) {
+    card.addEventListener('click', function (e) {
+      if (e.target.closest('a')) return;
+      var sel = window.getSelection();
+      if (sel && String(sel).trim()) return;
+      window.open(card.getAttribute('data-href'), '_blank', 'noopener');
+    });
+  });
+
   var rails = document.querySelectorAll('.rail');
   rails.forEach(function (rail) {
     var items = rail.querySelectorAll('.card, .fixture');
@@ -1408,6 +1424,9 @@
     var DEAD_ZONE = 10;        /* px of pointer travel ignored before a drag starts */
     var SCROLL_THRESHOLD = 6;  /* px the rail must actually move to count as a drag */
     rail.addEventListener('pointerdown', function (e) {
+      /* a mouse drag that starts on a card's text is someone selecting a
+         sentence, not someone scrolling the rail -- leave it to the browser. */
+      if (e.pointerType === 'mouse' && e.target.closest('.card .body')) return;
       down = true; moved = false;
       startX = e.clientX; startScroll = rail.scrollLeft;
     });

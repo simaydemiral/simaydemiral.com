@@ -451,6 +451,12 @@
     transition: transform 0.15s ease, box-shadow 0.3s ease;
   }
   .card:hover { transform: translateY(-3px); }
+  .card { cursor: pointer; }
+  /* the card is a div, not a link, so its summary can be selected and
+     copied; the headline and "Read" carry the real anchors */
+  .card .card-head { color: inherit; text-decoration: none; }
+  .card .card-head:hover { text-decoration: underline; }
+  .card a.read { text-decoration: none; }
   .card.active { box-shadow: 0 0 0 1px rgba(232, 147, 90, 0.55), 0 16px 40px rgba(0, 0, 0, 0.35); }
   .card .thumb {
     position: relative;
@@ -668,8 +674,6 @@
   }
   .edition-btn:hover { border-color: #e8935a; color: #e8935a; }
   .edition-btn.active { background: #e8935a; border-color: #e8935a; color: #1d1512; }
-  div.card { cursor: default; }
-  div.card:hover { transform: none; }
 
   /* ---------- footer ---------- */
   .footer {
@@ -743,71 +747,71 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://arstechnica.com/gadgets/2026/11/ceo-jensen-huangs-job-is-suddenly-on-the-line-at-nvidia/">
+      <div class="card" data-href="https://arstechnica.com/gadgets/2026/11/ceo-jensen-huangs-job-is-suddenly-on-the-line-at-nvidia/">
         <div class="thumb thumb-ai"><span class="tag">Ars Technica</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Jensen Huang resigns as Nvidia chief executive</h3>
+          <h3><a class="card-head" href="https://arstechnica.com/gadgets/2026/11/ceo-jensen-huangs-job-is-suddenly-on-the-line-at-nvidia/">Jensen Huang resigns as Nvidia chief executive</a></h3>
           <p>Huang stepped down after revelations of two extramarital affairs, including one with a woman US authorities believe was a Chinese spy. Finance chief Colette Kress takes over as interim CEO, and Nvidia shares fell more than 10 percent in pre-market trading.</p>
           <div class="key">KEY &nbsp; shares −10.2% pre-market &middot; &gt;$400B market cap at stake &middot; Huang is 63 &middot; cofounded Nvidia 1993 &middot; 33+ year tenure</div>
-          <div class="meta"><span>Ars Technica</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Ars Technica</span><a class="read" href="https://arstechnica.com/gadgets/2026/11/ceo-jensen-huangs-job-is-suddenly-on-the-line-at-nvidia/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.theverge.com/ai-artificial-intelligence/1032069/jensen-huang-resignation-affair-chips-smuggling">
+      <div class="card" data-href="https://www.theverge.com/ai-artificial-intelligence/1032069/jensen-huang-resignation-affair-chips-smuggling">
         <div class="thumb thumb-ai"><span class="tag">The Verge</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Nvidia&#x27;s China exposure is the deeper question</h3>
+          <h3><a class="card-head" href="https://www.theverge.com/ai-artificial-intelligence/1032069/jensen-huang-resignation-affair-chips-smuggling">Nvidia&#x27;s China exposure is the deeper question</a></h3>
           <p>The Verge argues the second affair was a pretext and that the real risk sits with Megaspeed, the Southeast Asian buyer tied to Huang&#x27;s alleged spy affair partner, whose offices reporters found largely empty. Huang said in May that export controls left Nvidia with zero percent market share in China, while short seller Culper Research alleged a much larger figure routed through intermediaries.</p>
           <div class="key">KEY &nbsp; Culper alleges &gt;20% of FY2026 compute revenues China-driven &middot; Huang claimed 0% China share in May &middot; Straits Times visited Singapore office a month ago</div>
-          <div class="meta"><span>The Verge</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>The Verge</span><a class="read" href="https://www.theverge.com/ai-artificial-intelligence/1032069/jensen-huang-resignation-affair-chips-smuggling">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://techcrunch.com/2026/11/12/softbanks-billion-dollar-loss-may-have-put-a-cap-on-ais-natural-gas-ambitions/">
+      <div class="card" data-href="https://techcrunch.com/2026/11/12/softbanks-billion-dollar-loss-may-have-put-a-cap-on-ais-natural-gas-ambitions/">
         <div class="thumb thumb-ai"><span class="tag">TechCrunch</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>SoftBank writes down turbine bet on AI power</h3>
+          <h3><a class="card-head" href="https://techcrunch.com/2026/11/12/softbanks-billion-dollar-loss-may-have-put-a-cap-on-ais-natural-gas-ambitions/">SoftBank writes down turbine bet on AI power</a></h3>
           <p>SoftBank reported a quarterly loss with over half tied to power-generating equipment, after nonrefundable deposits on turbines it ordered well beyond its needs were deemed largely worthless. Analysts quoted say the overbooking was the only way to secure near-term supply, and that data centers may lean on grid connections and batteries rather than gas.</p>
           <div class="key">KEY &nbsp; $7.1B quarterly loss &middot; &gt;$3B misplaced bet &middot; 13+ GW of turbines ordered, ~50% more than needed &middot; $33B / 9.2 GW gas plant plan &middot; $30B OpenAI investment</div>
-          <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>TechCrunch</span><a class="read" href="https://techcrunch.com/2026/11/12/softbanks-billion-dollar-loss-may-have-put-a-cap-on-ais-natural-gas-ambitions/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.theverge.com/ai-artificial-intelligence/1032020/gemini-chatgpt-perplexity-shopping-test-risky-fake-websites-citations">
+      <div class="card" data-href="https://www.theverge.com/ai-artificial-intelligence/1032020/gemini-chatgpt-perplexity-shopping-test-risky-fake-websites-citations">
         <div class="thumb thumb-ai"><span class="tag">The Verge</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Study finds chatbots surfacing risky shopping sites</h3>
+          <h3><a class="card-head" href="https://www.theverge.com/ai-artificial-intelligence/1032020/gemini-chatgpt-perplexity-shopping-test-risky-fake-websites-citations">Study finds chatbots surfacing risky shopping sites</a></h3>
           <p>A study by IP protection firm Podqi, shared with The Verge, prompted ChatGPT, Gemini and Perplexity with shopping questions about 151 brands and found all three cited sites it classed as risky — impersonators, knockoff sellers, re-registered old domains or dead sites. Smaller brands appeared roughly twice as exposed as larger ones; Google said it was glad Gemini performed best and noted it displays source links.</p>
           <div class="key">KEY &nbsp; 6,795 answers tested &middot; 151 brands &middot; Perplexity 15% risky &middot; ChatGPT 8% &middot; Gemini 4% &middot; ChatGPT warned 24% of the time</div>
-          <div class="meta"><span>The Verge</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>The Verge</span><a class="read" href="https://www.theverge.com/ai-artificial-intelligence/1032020/gemini-chatgpt-perplexity-shopping-test-risky-fake-websites-citations">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://techcrunch.com/2026/11/12/united-airlines-blocks-ai-agents-from-booking-flights-citing-cybersecurity-risks/">
+      <div class="card" data-href="https://techcrunch.com/2026/11/12/united-airlines-blocks-ai-agents-from-booking-flights-citing-cybersecurity-risks/">
         <div class="thumb thumb-ai"><span class="tag">TechCrunch</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>United restricts third-party AI agents from bookings</h3>
+          <h3><a class="card-head" href="https://techcrunch.com/2026/11/12/united-airlines-blocks-ai-agents-from-booking-flights-citing-cybersecurity-risks/">United restricts third-party AI agents from bookings</a></h3>
           <p>United Airlines said it will block unauthorized third-party AI assistants from booking flights or managing reservations, citing credential-sharing security risks and possible conflicts with federal aviation rules such as human-completed check-ins. The restrictions extend to travel agencies and aggregators, and follow a similar warning from banks including Bank of America.</p>
           <div class="key">KEY &nbsp; No figures given in article &middot; bank warnings issued last week</div>
-          <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>TechCrunch</span><a class="read" href="https://techcrunch.com/2026/11/12/united-airlines-blocks-ai-agents-from-booking-flights-citing-cybersecurity-risks/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.theverge.com/transportation/1031991/elon-musk-cancels-cybertruck-tesla-fans-backlash">
+      <div class="card" data-href="https://www.theverge.com/transportation/1031991/elon-musk-cancels-cybertruck-tesla-fans-backlash">
         <div class="thumb thumb-ai"><span class="tag">The Verge</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Tesla fans question Musk over Cybertruck wind-down</h3>
+          <h3><a class="card-head" href="https://www.theverge.com/transportation/1031991/elon-musk-cancels-cybertruck-tesla-fans-backlash">Tesla fans question Musk over Cybertruck wind-down</a></h3>
           <p>Tesla plans to end Cybertruck production to free capacity at Giga Texas for the autonomous Cybercab, drawing unusual criticism from longtime supporters who say the truck was never properly marketed or priced. Musk disputed claims it was cancelled for being unprofitable, saying order rates exceed production, and an aftermarket firm has offered to build it under license.</p>
           <div class="key">KEY &nbsp; production winding down by end of summer 2027 &middot; 33-minute critique video &middot; ~500 Cybercabs cited by one critic &middot; Model 3 and Model Y the only consumer cars left</div>
-          <div class="meta"><span>The Verge</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>The Verge</span><a class="read" href="https://www.theverge.com/transportation/1031991/elon-musk-cancels-cybertruck-tesla-fans-backlash">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
     </div>
     <div class="progress"><div class="progress-fill"></div></div>
@@ -826,38 +830,38 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://www.cnbc.com/2026/11/12/inside-jensen-and-lori-huangs-jointly-controlled-nvidia-fortune.html">
+      <div class="card" data-href="https://www.cnbc.com/2026/11/12/inside-jensen-and-lori-huangs-jointly-controlled-nvidia-fortune.html">
         <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>Huang&#x27;s Nvidia stake held jointly with wife Lori</h3>
+          <h3><a class="card-head" href="https://www.cnbc.com/2026/11/12/inside-jensen-and-lori-huangs-jointly-controlled-nvidia-fortune.html">Huang&#x27;s Nvidia stake held jointly with wife Lori</a></h3>
           <p>Jensen Huang&#x27;s roughly $140 billion Nvidia holding is mostly held through trusts and LLCs he co-owns with his wife Lori, which attorneys say adds uncertainty after his resignation but may also slow any rapid selling. Lawyers quoted in the piece note that executives or their trusts commonly have agreements with the company restricting transfers, so a division of the shares would likely come with limits.</p>
           <div class="key">KEY &nbsp; ~$140B total stake &middot; ~800M jointly held shares worth ~$135B &middot; ~70M shares directly owned, ~$12B &middot; Living Trust (1995) 530M shares &middot; Huang 2012 Irrevocable Trust 31.4M shares &middot; Irrevocable Remainder Trust 109M shares &middot; LLCs 135M shares &middot; Foundation 69M shares, $9B net assets in 2024</div>
-          <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>CNBC</span><a class="read" href="https://www.cnbc.com/2026/11/12/inside-jensen-and-lori-huangs-jointly-controlled-nvidia-fortune.html">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.cnbc.com/2026/11/12/in-policy-switch-fed-says-its-october-2027-meeting-will-not-see-a-vote-on-interest-rates.html">
+      <div class="card" data-href="https://www.cnbc.com/2026/11/12/in-policy-switch-fed-says-its-october-2027-meeting-will-not-see-a-vote-on-interest-rates.html">
         <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>Fed drops rate vote from October 2027 meeting</h3>
+          <h3><a class="card-head" href="https://www.cnbc.com/2026/11/12/in-policy-switch-fed-says-its-october-2027-meeting-will-not-see-a-vote-on-interest-rates.html">Fed drops rate vote from October 2027 meeting</a></h3>
           <p>The Fed said Thursday that its Oct. 26-27, 2027 FOMC session will be reserved for discussing broad monetary policy strategy rather than a rate decision, leaving seven voting meetings that year. Chairman Kevin Warsh framed it as part of his effort to shrink the central bank&#x27;s market footprint and streamline communication, saying the committee needs time for longer-horizon questions.</p>
           <div class="key">KEY &nbsp; Oct. 26-27, 2027 session, no vote or post-meeting statement &middot; 7 voting meetings in 2027 vs. usual 8 &middot; final 2027 meeting moves to November from December &middot; nonvoting meetings to rise to 2 in 2028 &middot; press Q&amp;A cut to about 30 minutes from about 45 &middot; next FOMC Dec. 8-9 &middot; first 2027 meeting Jan. 26-27</div>
-          <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>CNBC</span><a class="read" href="https://www.cnbc.com/2026/11/12/in-policy-switch-fed-says-its-october-2027-meeting-will-not-see-a-vote-on-interest-rates.html">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.cnbc.com/2026/11/12/scout-motors-reservations-south-carolina-plant.html">
+      <div class="card" data-href="https://www.cnbc.com/2026/11/12/scout-motors-reservations-south-carolina-plant.html">
         <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>Scout Motors reports 212,000 reservations as plant nears completion</h3>
+          <h3><a class="card-head" href="https://www.cnbc.com/2026/11/12/scout-motors-reservations-south-carolina-plant.html">Scout Motors reports 212,000 reservations as plant nears completion</a></h3>
           <p>The Volkswagen-backed EV startup has taken roughly 212,000 reservations for its Terra pickup and Traveler SUV as its South Carolina plant approaches completion, CEO Scott Keogh told CNBC. CNBC notes reservations do not necessarily convert to sales, and Keogh said the priority is preselling initial production and reaching an order book of 12 to 18 months.</p>
           <div class="key">KEY &nbsp; ~212,000 reservations &middot; $2B plant, about 85% complete &middot; $300M supplier park &middot; 87% choosing EREV, 75% choosing the SUV &middot; both models expected to start under $60,000 &middot; 500+ miles EREV range vs. 300 miles all-electric &middot; full production expected next year, deliveries in 2028 &middot; reservations opened October 2024 &middot; Keogh sees a possible 400,000+ and targets 100,000 units</div>
-          <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>CNBC</span><a class="read" href="https://www.cnbc.com/2026/11/12/scout-motors-reservations-south-carolina-plant.html">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
     </div>
     <div class="progress"><div class="progress-fill"></div></div>
@@ -883,49 +887,49 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://www.bbc.co.uk/news/articles/cmze750zg0jeo?at_medium=RSS&amp;at_campaign=rss">
+      <div class="card" data-href="https://www.bbc.co.uk/news/articles/cmze750zg0jeo?at_medium=RSS&amp;at_campaign=rss">
         <div class="thumb thumb-us"><span class="tag">BBC News</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>Nvidia&#x27;s Jensen Huang resigns after two affair reports</h3>
+          <h3><a class="card-head" href="https://www.bbc.co.uk/news/articles/cmze750zg0jeo?at_medium=RSS&amp;at_campaign=rss">Nvidia&#x27;s Jensen Huang resigns after two affair reports</a></h3>
           <p>Huang stepped down on Thursday following back-to-back reports of two affairs, one with a businesswoman alleged to be a Chinese spy and another with an Nvidia colleague. The BBC says his departure adds uncertainty to a stock market already unsettled in recent weeks, given Nvidia&#x27;s central position in the US-China AI chip race.</p>
           <div class="key">KEY &nbsp; age 63 &middot; Nvidia valued at nearly $4 trillion &middot; world&#x27;s second most valuable company &middot; estimated fortune $145bn (£109bn), per Bloomberg Billionaires Index &middot; married since 1985</div>
-          <div class="meta"><span>BBC News</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>BBC News</span><a class="read" href="https://www.bbc.co.uk/news/articles/cmze750zg0jeo?at_medium=RSS&amp;at_campaign=rss">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.npr.org/2026/11/12/g-s1-153171/up-first-newsletter-scott-colom-trump-democrats-ukraine-russia">
+      <div class="card" data-href="https://www.npr.org/2026/11/12/g-s1-153171/up-first-newsletter-scott-colom-trump-democrats-ukraine-russia">
         <div class="thumb thumb-us"><span class="tag">NPR</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>Colom takes Mississippi Senate seat; Democrats reach 55</h3>
+          <h3><a class="card-head" href="https://www.npr.org/2026/11/12/g-s1-153171/up-first-newsletter-scott-colom-trump-democrats-ukraine-russia">Colom takes Mississippi Senate seat; Democrats reach 55</a></h3>
           <p>Democrat Scott Colom defeated Republican Sen. Cindy Hyde-Smith by a few thousand votes, becoming the first Black senator from Mississippi in nearly 150 years and expanding the Democratic majority in the new Congress. Separately, White House Counsel Will Scharf wrote to Rep. Robert Garcia that planned Democratic investigations could amount to &quot;blatant criminality,&quot; and Garcia said Democrats would not be deterred.</p>
           <div class="key">KEY &nbsp; margin of a few thousand votes &middot; 55 Senate seats &middot; first Black senator from Mississippi in nearly 150 years &middot; Alaska race undecided</div>
-          <div class="meta"><span>NPR</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>NPR</span><a class="read" href="https://www.npr.org/2026/11/12/g-s1-153171/up-first-newsletter-scott-colom-trump-democrats-ukraine-russia">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.bbc.co.uk/news/articles/crgqx2qqnwpjo?at_medium=RSS&amp;at_campaign=rss">
+      <div class="card" data-href="https://www.bbc.co.uk/news/articles/crgqx2qqnwpjo?at_medium=RSS&amp;at_campaign=rss">
         <div class="thumb thumb-us"><span class="tag">BBC News</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>One killed, four injured in Washington DC shooting</h3>
+          <h3><a class="card-head" href="https://www.bbc.co.uk/news/articles/crgqx2qqnwpjo?at_medium=RSS&amp;at_campaign=rss">One killed, four injured in Washington DC shooting</a></h3>
           <p>A gunman opened fire Thursday morning inside a gym in a Logan Circle apartment building, killing one person and injuring four, one critically. Interim police chief Jefferey Carroll said the suspect barricaded himself in an apartment, fired through the door at officers at least twice, and was later found dead with what appeared to be a self-inflicted gunshot wound.</p>
           <div class="key">KEY &nbsp; 1 dead &middot; 4 injured, 1 critical &middot; about a mile (1.6km) north of the White House &middot; fired through the door at least twice</div>
-          <div class="meta"><span>BBC News</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>BBC News</span><a class="read" href="https://www.bbc.co.uk/news/articles/crgqx2qqnwpjo?at_medium=RSS&amp;at_campaign=rss">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.npr.org/2026/11/12/nx-s1-6034539/democrats-congress-trump-arch-ballroom-funding-oversight">
+      <div class="card" data-href="https://www.npr.org/2026/11/12/nx-s1-6034539/democrats-congress-trump-arch-ballroom-funding-oversight">
         <div class="thumb thumb-us"><span class="tag">NPR</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>Democrats weigh tools to halt Trump&#x27;s Washington projects</h3>
+          <h3><a class="card-head" href="https://www.npr.org/2026/11/12/nx-s1-6034539/democrats-congress-trump-arch-ballroom-funding-oversight">Democrats weigh tools to halt Trump&#x27;s Washington projects</a></h3>
           <p>Trump has pursued arches, a White House ballroom and other Washington construction largely without Congress, and critics say his administration has skirted federal laws and misled judges to move quickly. Rep. Jared Huffman, incoming chair of the House Natural Resources Committee, says blocking the projects will be a priority; the White House says no president has done more to beautify the nation&#x27;s interior.</p>
           <div class="key">KEY &nbsp; hundreds of trees downed at East Potomac Park &middot; East Wing demolished for ballroom &middot; letters sent to dozens of officials and private companies to preserve records</div>
-          <div class="meta"><span>NPR</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>NPR</span><a class="read" href="https://www.npr.org/2026/11/12/nx-s1-6034539/democrats-congress-trump-arch-ballroom-funding-oversight">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
     </div>
     <div class="progress"><div class="progress-fill"></div></div>
@@ -941,60 +945,60 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://www.dailysabah.com/business/energy/turkiye-canadas-atkinsrealis-ink-deal-for-study-on-nuclear-plant">
+      <div class="card" data-href="https://www.dailysabah.com/business/energy/turkiye-canadas-atkinsrealis-ink-deal-for-study-on-nuclear-plant">
         <div class="thumb thumb-turkey"><span class="tag">Daily Sabah</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>Türkiye signs CANDU feasibility deal for new nuclear plant</h3>
+          <h3><a class="card-head" href="https://www.dailysabah.com/business/energy/turkiye-canadas-atkinsrealis-ink-deal-for-study-on-nuclear-plant">Türkiye signs CANDU feasibility deal for new nuclear plant</a></h3>
           <p>State-owned TÜNAŞ and AtkinsRealis subsidiary Candu Energy signed an agreement at COP31 in Antalya for a feasibility and front-end engineering study on a potential multi-unit nuclear project, to be completed by the end of 2027. AtkinsRealis nuclear president Joe St. Julian told Reuters the parties are currently discussing a six-unit, 4.5-gigawatt plan, with a final investment decision to follow engineering work targeted for 2028.</p>
           <div class="key">KEY &nbsp; study completed by end of 2027 &middot; six units, 4.5 GW discussed &middot; engineering design by 2028 &middot; Akkuyu 4.8 GW under construction &middot; 10 GW nuclear target by 2040 &middot; 11% of electricity demand by 2040</div>
-          <div class="meta"><span>Daily Sabah</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Daily Sabah</span><a class="read" href="https://www.dailysabah.com/business/energy/turkiye-canadas-atkinsrealis-ink-deal-for-study-on-nuclear-plant">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.dailysabah.com/business/defense/turkiye-ready-to-deepen-defense-co-op-with-saudi-arabia-official">
+      <div class="card" data-href="https://www.dailysabah.com/business/defense/turkiye-ready-to-deepen-defense-co-op-with-saudi-arabia-official">
         <div class="thumb thumb-turkey"><span class="tag">Daily Sabah</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>Ankara signals wider defense industry ties with Riyadh</h3>
+          <h3><a class="card-head" href="https://www.dailysabah.com/business/defense/turkiye-ready-to-deepen-defense-co-op-with-saudi-arabia-official">Ankara signals wider defense industry ties with Riyadh</a></h3>
           <p>Defense Industries head Haluk Görgün said at a Türkiye–Saudi Arabia Defense Industry Days event in Istanbul that Ankara is ready to broaden cooperation, citing 75 meetings with Saudi counterparts over the past 3.5 years. Saudi Minister of State Bandar al-Khorayef said the kingdom&#x27;s defense localization rate rose from 4% to 27%, with a Vision 2030 target of 50%.</p>
           <div class="key">KEY &nbsp; ~4,500 defense SMEs &middot; 1,400+ projects &middot; ~$120 billion portfolio &middot; 75 meetings in 3.5 years &middot; Saudi localization 4% to 27%, target 50% &middot; defense and aerospace exports $248 million in 2002 to over $10 billion today &middot; 100,000+ personnel across 4,000+ entities &middot; R&amp;D spending $24.8 billion</div>
-          <div class="meta"><span>Daily Sabah</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Daily Sabah</span><a class="read" href="https://www.dailysabah.com/business/defense/turkiye-ready-to-deepen-defense-co-op-with-saudi-arabia-official">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.turkishminute.com/2026/11/12/turkeys-coal-expansion-undermines-its-climate-summit-role-hrw-says/">
+      <div class="card" data-href="https://www.turkishminute.com/2026/11/12/turkeys-coal-expansion-undermines-its-climate-summit-role-hrw-says/">
         <div class="thumb thumb-turkey"><span class="tag">Turkish Minute</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>Rights group questions Turkey&#x27;s coal plans during COP31</h3>
+          <h3><a class="card-head" href="https://www.turkishminute.com/2026/11/12/turkeys-coal-expansion-undermines-its-climate-summit-role-hrw-says/">Rights group questions Turkey&#x27;s coal plans during COP31</a></h3>
           <p>Human Rights Watch said the government&#x27;s continued backing for coal power expansion undermines its credibility as COP31 host, pointing to an appeal of court rulings against the Afşin-Elbistan A plant and new permitting for a Çanakkale plant. The group said Ankara has set no timetable for ending coal-fired generation, while officials at the Antalya summit have promoted electrification and renewables.</p>
           <div class="key">KEY &nbsp; two proposed units at Afşin-Elbistan A, Kahramanmaraş &middot; two administrative courts ruled against expansion in June across five legal challenges &middot; government appealed in July &middot; Çanakkale permitting began in July</div>
-          <div class="meta"><span>Turkish Minute</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Turkish Minute</span><a class="read" href="https://www.turkishminute.com/2026/11/12/turkeys-coal-expansion-undermines-its-climate-summit-role-hrw-says/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://www.turkishminute.com/2026/11/12/military-helicopter-crash-kills-4-in-eastern-turkey/">
+      <div class="card" data-href="https://www.turkishminute.com/2026/11/12/military-helicopter-crash-kills-4-in-eastern-turkey/">
         <div class="thumb thumb-turkey"><span class="tag">Turkish Minute</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>Four military personnel killed in Malatya helicopter crash</h3>
+          <h3><a class="card-head" href="https://www.turkishminute.com/2026/11/12/military-helicopter-crash-kills-4-in-eastern-turkey/">Four military personnel killed in Malatya helicopter crash</a></h3>
           <p>An S-70 helicopter came down Thursday evening in the Samanköy neighborhood of Malatya&#x27;s Yeşilyurt district, killing four personnel on board, the Defense Ministry said. The cause has not been determined; the crash started a fire that spread to a nearby house before it was put out, according to DHA.</p>
           <div class="key">KEY &nbsp; 4 killed &middot; S-70 helicopter &middot; December 2024 Isparta collision killed 6 &middot; March 2021 Bitlis crash killed 11, injured 2</div>
-          <div class="meta"><span>Turkish Minute</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Turkish Minute</span><a class="read" href="https://www.turkishminute.com/2026/11/12/military-helicopter-crash-kills-4-in-eastern-turkey/">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
-      <a class="card" href="https://bianet.org/haber/lambdaistanbul-office-sealed-over-alleged-unauthorized-venue-operation-325358">
+      <div class="card" data-href="https://bianet.org/haber/lambdaistanbul-office-sealed-over-alleged-unauthorized-venue-operation-325358">
         <div class="thumb thumb-turkey"><span class="tag">Bianet</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>Istanbul governor seals Lambdaistanbul office over venue allegation</h3>
+          <h3><a class="card-head" href="https://bianet.org/haber/lambdaistanbul-office-sealed-over-alleged-unauthorized-venue-operation-325358">Istanbul governor seals Lambdaistanbul office over venue allegation</a></h3>
           <p>The İstanbul Governor&#x27;s Office sealed the office of the Lambdaistanbul LGBTI+ Solidarity Association on Nov. 11 over an allegation that it was operating an &quot;unauthorized venue.&quot; The association, active for 33 years, said the measure continues restrictions on LGBTI+ organizing spaces that followed the Sept. 12 &quot;My Family Is Safe&quot; operations.</p>
           <div class="key">KEY &nbsp; sealed Nov. 11 &middot; 33 years of activity &middot; named Lambda İstanbul in 1993 &middot; association status in 2006 &middot; closure order overturned by Court of Cassation in 2009 &middot; culture center closed in 2016</div>
-          <div class="meta"><span>Bianet</span><span class="read">Read &rarr;</span></div>
+          <div class="meta"><span>Bianet</span><a class="read" href="https://bianet.org/haber/lambdaistanbul-office-sealed-over-alleged-unauthorized-venue-operation-325358">Read &rarr;</a></div>
         </div>
-      </a>
+      </div>
 
     </div>
     <div class="progress"><div class="progress-fill"></div></div>
@@ -1400,6 +1404,18 @@
     a.setAttribute('rel', 'noopener');
   });
 
+  /* a card is a div so its text stays selectable; a plain click still opens
+     the source, a click that ends a selection does not. The rail's own
+     capture-phase handler has already swallowed clicks that ended a drag. */
+  document.querySelectorAll('.card[data-href]').forEach(function (card) {
+    card.addEventListener('click', function (e) {
+      if (e.target.closest('a')) return;
+      var sel = window.getSelection();
+      if (sel && String(sel).trim()) return;
+      window.open(card.getAttribute('data-href'), '_blank', 'noopener');
+    });
+  });
+
   var rails = document.querySelectorAll('.rail');
   rails.forEach(function (rail) {
     var items = rail.querySelectorAll('.card, .fixture');
@@ -1436,6 +1452,9 @@
     var DEAD_ZONE = 10;        /* px of pointer travel ignored before a drag starts */
     var SCROLL_THRESHOLD = 6;  /* px the rail must actually move to count as a drag */
     rail.addEventListener('pointerdown', function (e) {
+      /* a mouse drag that starts on a card's text is someone selecting a
+         sentence, not someone scrolling the rail -- leave it to the browser. */
+      if (e.pointerType === 'mouse' && e.target.closest('.card .body')) return;
       down = true; moved = false;
       startX = e.clientX; startScroll = rail.scrollLeft;
     });
