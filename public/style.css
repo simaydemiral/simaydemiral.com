@@ -1134,8 +1134,13 @@ html { scroll-behavior: smooth; }
      the headline instead of the name under it. */
   .portrait { width: 12rem; height: 12rem; margin-bottom: 1.4rem; }
   .lede { font-size: 0.97rem; }
-  .item-body > p:not(.meta):not(.actions),
-  .item > p:not(.meta):not(.actions) { font-size: 0.94rem; }
+  /* The placeholder label is a label, not prose. It sits in an .item as a
+     <p>, so this rule was catching it and sizing it as body copy --
+     0.94rem against its own 0.72rem, which on a phone meant "More to
+     come" came out at 15px, larger than the Selected work heading above
+     it at 11px. */
+  .item-body > p:not(.meta):not(.actions):not(.placeholder-label),
+  .item > p:not(.meta):not(.actions):not(.placeholder-label) { font-size: 0.94rem; }
   /* These read as one line or they read as nothing: broken across two, a
      dotted list of technologies stops looking like a caption and starts
      looking like a sentence that failed. Tracking comes down with the size,
