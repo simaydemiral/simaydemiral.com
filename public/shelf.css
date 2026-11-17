@@ -118,15 +118,14 @@
   white-space: nowrap;
   font: 500 0.98rem/1 var(--display);
 }
-/* The cover art at the head of the spine: the product's own plate icon,
-   shrunk, not a second line drawing of it. Painted rather than masked —
-   these are full-colour illustrations, and masking flattened them to one
-   flat silhouette, which is what they looked like. Sized to the spine's
-   full inner width, because at 26px the drawing turns to mush. */
+/* The product's own mark, at the head of the spine. Her drawings are
+   three-tone — cream fill, near-black line, peach accent — so they are
+   placed as pictures rather than masked to a single colour, which would
+   flatten them to silhouettes and lose the drawing. */
 .spine-ico {
   flex: 0 0 auto;
-  align-self: stretch;          /* the full width the spine's padding leaves */
-  aspect-ratio: 200 / 160;
+  width: 26px;
+  height: 26px;
   background: var(--ico) center / contain no-repeat;
 }
 
@@ -679,3 +678,16 @@
   opacity: 1;
 }
 
+/* The spine mark, matched to the product plates.
+
+   Masked rather than painted, so one file serves both themes: --ink is
+   near-cream on the dark sheet and near-black on the light one, and a
+   fixed-colour line icon could only ever have suited one of them. The
+   strokes in these files are scaled up for the size; at the drawing's
+   own weight they disappear at 26px. */
+.spine-ico {
+  background-image: none;
+  background-color: color-mix(in srgb, var(--ink) 82%, transparent);
+  -webkit-mask: var(--ico) center / contain no-repeat;
+          mask: var(--ico) center / contain no-repeat;
+}
