@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The Dispatch — Sunday, November 8, 2026</title>
+<title>The Dispatch — Sunday, November 15, 2026</title>
 <link href="https://api.fontshare.com/v2/css?f%5B%5D=switzer@400,500,600&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Abril+Fatface&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -16,15 +16,125 @@
     padding: 32px 16px 64px;
     overflow-x: hidden;
   }
-  .brief { max-width: 760px; margin: 0 auto; }
+  /* position, so the wire badge can be pinned to the column's top left
+     from outside the masthead — that element clips its overflow, which was
+     cutting the pulse ring off the side of the dot. */
+  .brief { max-width: 760px; margin: 0 auto; position: relative; }
+
+  /* ---------- the wire ----------
+
+     A live indicator at the top left, where the masthead's byline used to
+     be. The byline said what the title already says; this says the thing
+     the page could not: that it is written again every morning. */
+  .wire {
+    /* Pinned to the top left corner rather than sitting in the flow: the
+       masthead is centred text, and this is a marker on the page, not a
+       line of the title. Absolute so it costs the masthead no height. */
+    position: absolute;
+    top: 6px;
+    /* Indented a little rather than flush: hard against the column edge it
+       read as falling off the page. */
+    left: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #ef8a68;
+    z-index: 2;
+  }
+  .wire-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #e8503a;
+    box-shadow: 0 0 0 0 rgba(232, 80, 58, 0.55);
+    animation: wire-pulse 2.4s ease-out infinite;
+  }
+  /* A pulse rather than a blink. A hard on/off at the top of a page someone
+     reads every morning is a fire alarm; this breathes. */
+  @keyframes wire-pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(232, 80, 58, 0.5); opacity: 1; }
+    70%  { box-shadow: 0 0 0 7px rgba(232, 80, 58, 0); opacity: 0.72; }
+    100% { box-shadow: 0 0 0 0 rgba(232, 80, 58, 0); opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .wire-dot { animation: none; }
+  }
 
   /* ---------- masthead ---------- */
   .masthead {
+    position: relative;
+    /* The artwork stops at the rule under the dateline. It is taller than
+       this box and was running on behind the edition nav; clipping it here
+       means the line is the end of it rather than something it passes
+       through. The bottom of the image is already fading by that point, so
+       the cut lands in the fade rather than across the picture. */
+    overflow: hidden;
     text-align: center;
     padding: 8px 0 28px;
     border-bottom: 1px solid rgba(245, 235, 221, 0.15);
     margin-bottom: 32px;
   }
+
+  /* The globe, behind the title block only.
+
+     Not behind the page: this is eleven desks of small text that somebody
+     actually reads in the morning, and an image under all of it trades
+     legibility for atmosphere. Here it sets the tone and then stops.
+
+     The artwork is navy and cyan; this page is warm, #171210 with a peach
+     accent. Dropped in as it is, the top of the page would look borrowed
+     from another site. grayscale flattens it to tone, sepia pushes it warm,
+     and the hue and saturation land it in the peach the masthead already
+     uses — a wireframe image takes that well because it is mostly line and
+     glow rather than real colour. */
+  .masthead-art {
+    position: absolute;
+    left: 50%;
+    top: -18px;
+    /* The full width of the column, so it lines up with "The Dispatch"
+       above it rather than sitting in from the edges.
+
+       It was held at 600px before because the artwork is 2000x857: at the
+       column's full 760px it stood 326px tall and ran on down behind the
+       edition nav and into the markets strip. The height is fixed now and
+       the picture crops to it, so widening it shows more of the map either
+       side instead of making the whole thing taller. */
+    width: min(760px, 100%);
+    height: 258px;
+    overflow: hidden;
+    transform: translateX(-50%);
+    z-index: 0;
+    pointer-events: none;
+    user-select: none;
+  }
+  .masthead-art img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    /* Crops to the frame rather than setting it: a wider frame reveals more
+       of the dotted map to the left and right, which is the point. */
+    object-fit: cover;
+    object-position: 50% 46%;
+    opacity: 0.42;
+    filter: grayscale(1) sepia(0.85) saturate(2.1) hue-rotate(-12deg) brightness(0.85);
+    /* fades out at every edge, so it has no border and never ends in a line */
+    -webkit-mask-image:
+      radial-gradient(76% 70% at 50% 44%, #000 30%, transparent 76%),
+      linear-gradient(to bottom, #000 52%, transparent 88%);
+    -webkit-mask-composite: source-in;
+            mask-image:
+      radial-gradient(76% 70% at 50% 44%, #000 30%, transparent 76%),
+      linear-gradient(to bottom, #000 52%, transparent 88%);
+            mask-composite: intersect;
+  }
+  /* The words sit over it. */
+  .masthead .eyebrow, .masthead h1,
+  .masthead .dateline, .masthead .tagline { position: relative; z-index: 1; }
   .masthead .eyebrow {
     font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
     font-weight: 500;
@@ -34,12 +144,19 @@
     color: #e8935a;
   }
   .masthead h1 {
-    font-family: "Switzer", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-    font-weight: 500;
-    letter-spacing: -0.035em;
-    font-size: 52px;
-    line-height: 1.05;
-    margin: 12px 0 8px;
+    /* Abril Fatface for the masthead only. A heavy high-contrast didone:
+       this is a front page, and the title should read as one rather than as
+       another heading in the same sans the rest of the site uses.
+
+       It has one weight and already sits tight, so the -0.035em Switzer
+       needed would crowd it; and its own line box runs taller, hence the
+       smaller size and the pulled-in top margin. */
+    font-family: "Abril Fatface", Georgia, "Times New Roman", serif;
+    font-weight: 400;
+    letter-spacing: -0.012em;
+    font-size: 48px;
+    line-height: 1.08;
+    margin: 8px 0 10px;
   }
   .masthead .dateline { font-size: 14px; color: rgba(245, 235, 221, 0.65); }
   .masthead .tagline {
@@ -48,6 +165,58 @@
     color: rgba(245, 235, 221, 0.75);
     margin-top: 10px;
   }
+
+  /* ---------- US & Turkey, with the two cities behind it ----------
+
+     Behind the heading and the country tabs only, not behind the stories.
+     The artwork is navy and orange; the orange is already close to the
+     accent this page uses, so the duotone here is lighter-handed than the
+     globe's — enough to take the blue out of the sky and the water without
+     flattening the two skylines into one tone. */
+  .section--region { position: relative; }
+  .region-art {
+    position: absolute;
+    left: 50%;
+    top: -22px;
+    width: min(760px, 100%);
+    transform: translateX(-50%);
+    z-index: 0;
+    pointer-events: none;
+    user-select: none;
+    overflow: hidden;
+    /* A band rather than the whole picture: the heading and the tabs are
+       about 120px tall and the artwork is 3:2, so showing all of it would
+       put most of a photograph behind two lines of text. */
+    height: 150px;
+    border-radius: 10px;
+  }
+  .region-art img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Horizontally centred: the sunset between the two cities is the point
+       of the picture, and both bridges sit either side of it.
+
+       Vertically a little above the middle. This artwork is 2000x857 rather
+       than the 1920x1280 it replaced — panoramic instead of tall — so the
+       band no longer has to climb past a lot of water to reach the bridges.
+       It only needs to keep the towers and the skyline out of the crop. */
+    object-position: 50% 46%;
+    opacity: 0.3;
+    filter: grayscale(0.55) sepia(0.55) saturate(1.7) hue-rotate(-10deg) brightness(0.8);
+    -webkit-mask-image:
+      linear-gradient(to bottom, #000 62%, transparent 97%),
+      linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+    -webkit-mask-composite: source-in;
+            mask-image:
+      linear-gradient(to bottom, #000 62%, transparent 97%),
+      linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+            mask-composite: intersect;
+  }
+  /* The words sit over it. */
+  .section--region .section-head,
+  .section--region .region-tabs { position: relative; z-index: 1; }
 
   /* ---------- markets snapshot strip ---------- */
   .markets-strip {
@@ -512,52 +681,53 @@
     color: rgba(245, 235, 221, 0.55);
   }
   @media (max-width: 560px) {
-    .masthead h1 { font-size: 38px; }
+    .masthead h1 { font-size: 34px; }
   }
 </style>
 </head>
 <body>
 <div class="brief">
+  <div class="wire"><span class="wire-dot" aria-hidden="true"></span>The Wire</div>
   <header class="masthead">
-    <div class="eyebrow">Simay&rsquo;s Dispatch</div>
+    <div class="masthead-art" aria-hidden="true"><img src="/img/dispatch-globe.webp" alt="" width="2000" height="857" decoding="async"></div>
     <h1>The Dispatch</h1>
-    <div class="dateline">Sunday, November 8, 2026</div>
+    <div class="dateline">Sunday, November 15, 2026</div>
   </header>
 
   <nav class="edition-nav" aria-label="Earlier editions">
     <a href="/dispatch">Today</a>
-    <a href="/dispatch/2026-11-09">Yesterday</a>
-    <span class="is-current">Sun 8 Nov</span>
+    <span class="is-current">Yesterday</span>
+    <a href="/dispatch/2026-11-13">Fri 13 Nov</a>
   </nav>
 
   <div class="markets-strip" aria-label="Markets snapshot">
     <div class="markets-strip-head">
       <span class="markets-strip-label">Markets Snapshot &middot; KEY</span>
-      <span class="markets-strip-asof">as of 2:04pm pt</span>
+      <span class="markets-strip-asof">as of 9:16pm pt</span>
     </div>
     <div class="markets-tiles">
-      <div class="market-tile up">
+      <div class="market-tile down">
         <div class="market-tile-label">S&amp;P 500</div>
-        <div class="market-tile-value">7,376.86</div>
-        <div class="market-tile-delta up"><span class="arrow">&#9650;</span> +0.31%</div>
+        <div class="market-tile-value">7,561.67</div>
+        <div class="market-tile-delta down"><span class="arrow">&#9660;</span> -0.40%</div>
       </div>
-      <div class="market-tile up">
+      <div class="market-tile down">
         <div class="market-tile-label">NASDAQ</div>
-        <div class="market-tile-value">24,579</div>
-        <div class="market-tile-delta up"><span class="arrow">&#9650;</span> +1.09%</div>
+        <div class="market-tile-value">25,136</div>
+        <div class="market-tile-delta down"><span class="arrow">&#9660;</span> -0.91%</div>
       </div>
       <div class="market-tile down">
         <div class="market-tile-label">USD/TRY</div>
-        <div class="market-tile-value">50.15</div>
-        <div class="market-tile-delta down"><span class="arrow">&#9650;</span> +0.21%</div>
+        <div class="market-tile-value">50.37</div>
+        <div class="market-tile-delta down"><span class="arrow">&#9650;</span> +0.22%</div>
       </div>
       <div class="market-tile down">
         <div class="market-tile-label">BTC</div>
-        <div class="market-tile-value">$74,588</div>
-        <div class="market-tile-delta down"><span class="arrow">&#9660;</span> -1.51%</div>
+        <div class="market-tile-value">$64,621</div>
+        <div class="market-tile-delta down"><span class="arrow">&#9660;</span> -5.28%</div>
       </div>
     </div>
-    <div class="markets-strip-takeaway"><strong>Takeaway:</strong> Both US indices higher: S&amp;P +0.31%, Nasdaq +1.09%.</div>
+    <div class="markets-strip-takeaway"><strong>Takeaway:</strong> Both US indices lower: S&amp;P -0.40%, Nasdaq -0.91%.</div>
   </div>
 
   <section class="section section-ai">
@@ -573,68 +743,57 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://www.theverge.com/ai-artificial-intelligence/1029562/nvidia-investigating-jensen-huang-relationship-chinese-spy">
-        <div class="thumb thumb-ai"><span class="tag">The Verge</span></div>
-        <div class="body">
-          <div class="kicker">Ai</div>
-          <h3>Nvidia board opens independent review of Huang contacts</h3>
-          <p>Nvidia&#x27;s board said it is starting an independent investigation, overseen by a committee of independent directors with outside counsel, after reports that CEO Jensen Huang was the target of a foreign intelligence effort involving Megaspeed executive Alice Huang, who was reportedly recruited by China&#x27;s Ministry of State Security. The board said it has no reason to believe national security or company secrets were compromised, and that Huang supports the review; Megaspeed, an Nvidia customer, is separately the subject of a Commerce Department investigation into alleged AI chip smuggling to China.</p>
-          <div class="key">KEY &nbsp; New York Times reported the &quot;close relationship&quot; last month &middot; Commerce Department must approve individual firms to handle the chips &middot; most powerful Nvidia chips still barred from Chinese firms</div>
-          <div class="meta"><span>The Verge</span><span class="read">Read &rarr;</span></div>
-        </div>
-      </a>
-
-      <a class="card" href="https://techcrunch.com/2026/11/08/techcrunch-mobility-the-cybertruck-experiment-is-over/">
+      <a class="card" href="https://techcrunch.com/2026/11/15/is-bad-news-for-jensen-huang-also-bad-news-for-the-ai-industry/">
         <div class="thumb thumb-ai"><span class="tag">TechCrunch</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Tesla to stop making Cybertruck next year</h3>
-          <p>Musk said Friday that Tesla will end Cybertruck production next year, after reservations Musk put at 1 million never translated into sales — industry experts estimate about 71,000 have been sold since deliveries began in November 2023. TechCrunch attributes the shortfall partly to unmet promises of a 500-mile range and a sub-$40,000 price, while in mobility funding Zipline raised $1.5 billion at a $21.5 billion valuation and expanded its Walmart partnership.</p>
-          <div class="key">KEY &nbsp; ~71,000 sold since Nov 2023 &middot; 1M reservations claimed &middot; promised 500-mile range, under $40,000 &middot; Zipline $1.5B raise, $21.5B valuation, 300 new drone sites &middot; earlier Series H $600M + $200M &middot; Harbinger $240M Series D &middot; Humble Robotics $51M Series A</div>
+          <h3>Huang resignation leaves Nvidia without a succession plan</h3>
+          <p>Jensen Huang resigned as Nvidia CEO on Thursday after reports of an affair with a former executive at Megaspeed, an Nvidia customer alleged to have ties to Chinese intelligence, plus a second reported affair with an Nvidia executive; CFO Collette Kress, a longtime board member, takes over as interim CEO. TechCrunch&#x27;s Equity hosts said they were surprised by how quickly his support eroded, described the Kress appointment as likely a caretaker role, and noted that no succession plan was in place at a company much of the AI economy rests on.</p>
+          <div class="key">KEY &nbsp; Resigned Thursday &middot; 2 reported affairs &middot; concerns about the Megaspeed relationship reportedly circulating a year ago</div>
           <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
-      <a class="card" href="https://www.theverge.com/ai-artificial-intelligence/1029533/elvis-eminem-suno-ai-music-clone-lawsuit">
+      <a class="card" href="https://www.theverge.com/ai-artificial-intelligence/1033984/congress-export-rules-ai-chips-china">
         <div class="thumb thumb-ai"><span class="tag">The Verge</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Elvis and Eminem rights holders sue AI music firm Suno</h3>
-          <p>Rights holders of Elvis Presley&#x27;s music and a publisher of Eminem records filed suits alleging Suno illegally generates music and lyrics mimicking those artists, with the Presley claim brought under Tennessee&#x27;s ELVIS Act barring AI voice cloning. Suno&#x27;s spokesperson said the company exists to help people create original music, prohibits unauthorized use of artists&#x27; work, and blocks prompts naming specific artists and songs.</p>
-          <div class="key">KEY &nbsp; 2 new suits &middot; mirrors a September suit from Jason Isbell and others &middot; adds to claims from Sony, UMG, Reservoir Media and more</div>
+          <h3>Congress moves to tighten AI chip export rules</h3>
+          <p>Lawmakers from both parties are pushing to restrict AI chip exports following the reports about Huang&#x27;s relationship with a suspected Chinese spy, and have asked Huang and other Nvidia leaders to testify. Senate Minority Leader Chuck Schumer said Huang and the Trump administration owe Congress answers, Senate Banking Chairman Tim Scott wrote to Huang and Commerce Secretary Howard Lutnick seeking public testimony, and the stalled Remote Access Security Act is drawing renewed interest.</p>
+          <div class="key">KEY &nbsp; Remote Access Security Act introduced in the House April 2025, stalled in the Senate</div>
           <div class="meta"><span>The Verge</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
-      <a class="card" href="https://www.theverge.com/ai-artificial-intelligence/1029552/apple-siri-ai-agentic">
-        <div class="thumb thumb-ai"><span class="tag">The Verge</span></div>
-        <div class="body">
-          <div class="kicker">Ai</div>
-          <h3>Apple said to be accelerating agentic Siri roadmap</h3>
-          <p>Bloomberg&#x27;s Mark Gurman reports that CEO John Ternus is pressuring AI lead Craig Federighi to speed up Siri&#x27;s roadmap toward an agent competitive with OpenAI&#x27;s Dots and Meta&#x27;s Muse. Fine-grained control of Apple&#x27;s own apps is expected in iOS 27.3, third-party app actions such as Grubhub orders or OpenTable bookings are likely in the spring, and Gurman believes a more agentic Siri could arrive as early as next year.</p>
-          <div class="key">KEY &nbsp; iOS 27.3 for first-party app control &middot; third-party integration expected in the spring &middot; agentic Siri possibly next year</div>
-          <div class="meta"><span>The Verge</span><span class="read">Read &rarr;</span></div>
-        </div>
-      </a>
-
-      <a class="card" href="https://techcrunch.com/2026/11/08/the-ex-secret-service-agent-who-flipped-a-hacker-is-now-raising-a-second-250m-cybersecurity-fund/">
+      <a class="card" href="https://techcrunch.com/2026/11/15/apple-launches-new-app-to-study-how-people-use-ai-for-health/">
         <div class="thumb thumb-ai"><span class="tag">TechCrunch</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Ex-Secret Service agent raising second cybersecurity fund solo</h3>
-          <p>Stephen Ward, who spent four years in the Coast Guard, nine in the Secret Service and served as CISO at TIAA and Home Depot, closed a $250 million debut fund at Brightmind Partners and is now raising a second of roughly the same size. He is doing so as sole general partner after co-founder Gur Talpaz left in April, and says openly that investors &quot;have to sell on the way up&quot; rather than assume every portfolio company reaches an IPO.</p>
-          <div class="key">KEY &nbsp; $250M debut fund closed late last year &middot; SGNL sold to CrowdStrike for $740M, agreed in January, 11 months after Brightmind led its Series A &middot; ~300 résumés mailed in 1998 &middot; informant run for about three years &middot; 18 months clearing his name</div>
+          <h3>Apple opens study of AI health answers</h3>
+          <p>Apple is partnering with OpenEvidence on a US study app that answers everyday health questions using clinical sources including The New England Journal of Medicine, JAMA and Nature, with users rating responses and taking monthly surveys. Apple says participants can optionally share HealthKit data such as resting heart rate, sleep or lab results, that data is anonymized before going to a third-party cloud provider and is not used to train AI models, and that OpenEvidence deletes queries and responses after 24 hours.</p>
+          <div class="key">KEY &nbsp; up to 200,000 participants &middot; more than 12 months &middot; US users 21+ &middot; iPhone 15 or later, iOS 26 or later &middot; query data deleted after 24 hours &middot; OpenAI said earlier this year users ask 300M+ health queries weekly</div>
           <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
-      <a class="card" href="https://arstechnica.com/science/2026/11/physicists-listened-to-electrical-noise-to-crack-a-superconductor-mystery/">
+      <a class="card" href="https://techcrunch.com/2026/11/15/indian-chip-startup-bharat-semi-lands-24m-seed-round-as-it-eyes-global-ai-sensor-market/">
+        <div class="thumb thumb-ai"><span class="tag">TechCrunch</span></div>
+        <div class="body">
+          <div class="kicker">Ai</div>
+          <h3>Indian chip startup raises $24M for AI sensors</h3>
+          <p>New Delhi-based Bharat Semi, pre-revenue and nearly five years old, raised a $24 million all-equity seed round led by Info Edge Group, South Park Commons and Indus Bridge Ventures to build programmable image sensors that combine capture, processing and AI on one chip. Co-founder Vrinda Kapoor said the design could cut system costs by at least 70% versus conventional setups, and the startup says it has design wins with General Atomics and Kaynes Semicon, though its sensors are still in development.</p>
+          <div class="key">KEY &nbsp; $24M seed &middot; founded late 2021 &middot; initial commercial production targeted 2027 &middot; costs cut by at least 70% &middot; ~75 employees, 10–12 in the US &middot; US headcount to ~20 by mid-2027 &middot; second-gen prototypes expected mid-2027</div>
+          <div class="meta"><span>TechCrunch</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="https://arstechnica.com/science/2026/11/how-the-worlds-fires-changed-while-humanity-hit-pause/">
         <div class="thumb thumb-ai"><span class="tag">Ars Technica</span></div>
         <div class="body">
           <div class="kicker">Ai</div>
-          <h3>Electrical noise measurement points to pre-formed electron pairs</h3>
-          <p>A team led by Milan Allan of Ludwig Maximilian University of Munich and Ingmar Swart of Utrecht University used a scanning tunneling microscope to measure shot noise in a cuprate, a method that can show whether current is carried by single electrons or Cooper pairs. The Science study addresses the long-debated &quot;pseudogap&quot; state, where electrons appear to go missing above the superconducting temperature; in cuprates the pairing signal is weaker than in conventional superconductors because single electrons keep flowing alongside pairs.</p>
-          <div class="key">KEY &nbsp; cuprates found to superconduct at higher temperatures in the late 1980s &middot; unexplained for nearly 40 years &middot; conventional superconductors show a clean doubling of noise &middot; about four years of student work to make the instrument sensitive enough</div>
+          <h3>Covid lockdowns lowered global fire activity, study finds</h3>
+          <p>A team led by Jianghao Wang of the Chinese Academy of Sciences used the early-2020 lockdowns as a natural experiment, since human mobility dropped sharply at different times across countries while weather did not shift in the same way. Their study in Cell Reports Sustainability reports that the lower human activity had the net effect of reducing average fire activity, drawing on regional lockdown orders, mobile phone location data and NASA and NOAA Suomi NPP satellite records.</p>
+          <div class="key">KEY &nbsp; 2020 lockdown period &middot; 2019–2020 southeastern Australia bushfires &middot; 2025 Los Angeles wildfires</div>
           <div class="meta"><span>Ars Technica</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
@@ -656,58 +815,58 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://www.cnbc.com/2026/11/08/nvidia-jensen-huang-investigation-china-spy.html">
+      <a class="card" href="https://www.cnbc.com/2026/11/14/180-million-van-gogh-tests-the-art-market-and-collector-confidence-.html">
         <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>Nvidia board investigates Huang ties to alleged Chinese spy</h3>
-          <p>Nvidia&#x27;s board has opened an independent investigation into allegations that CEO Jensen Huang was the target of a foreign intelligence effort involving a businesswoman whom U.S. intelligence agencies say is a Chinese spy, according to reports in The New York Times and the Financial Times. Huang told staff he had an affair with the woman, apologized, and an Nvidia spokesperson said he is committed to continuing as CEO; the board said it has no reason to believe national security or company secrets were compromised.</p>
-          <div class="key">KEY &nbsp; Q3 earnings Nov. 17 &middot; closed-door lawmaker briefing requested for Nov. 18 &middot; 3 House Republican committee chairs signed the letter</div>
+          <h3>New York auctions expected near $2.4 billion</h3>
+          <p>Sotheby&#x27;s, Christie&#x27;s and Phillips head into next week&#x27;s New York sales with estimates of roughly $2.4 billion, led by a Van Gogh landscape and a Cézanne that have not been publicly seen in about fifty years. Auction executives say top-end collectors are taking a long view, and Bank of America data shows first-half sales recovering from the 2023 and 2024 declines.</p>
+          <div class="key">KEY &nbsp; $2.4B expected total &middot; Sotheby&#x27;s over $1.1B &middot; Blaquier-Arrieta Collection est. $450M &middot; Van Gogh est. $180M &middot; Cézanne est. $120M &middot; Kandinsky est. $60M–$80M &middot; H1 sales $6.8B, up 70% &middot; Impressionist &amp; Modern up 133%</div>
           <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
-      <a class="card" href="https://fortune.com/2026/11/08/stock-market-outlook-sp500-ai-capex-gdp-growth-productivity/">
+      <a class="card" href="https://fortune.com/2026/11/15/cyberattack-hack-faa-air-traffic-control-communications-router-fbi-probe-sean-duffy-ground-stop/">
         <div class="thumb thumb-markets"><span class="tag">Fortune</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>Capital Economics expects AI capex decline to hit stocks</h3>
-          <p>Capital Economics&#x27; Vicky Redwood wrote that AI investment should keep rising next year at a slower pace before falling outright in 2028, arguing that external AI revenues would need to grow roughly tenfold by 2030 to justify current spending. She expects equity markets to price the slowdown in earlier, with a modest GDP drag rather than a major downturn.</p>
-          <div class="key">KEY &nbsp; hyperscaler spend ~$800bn this year, double a year ago &middot; estimated $1tn+ in 2027 &middot; 2028 capex fall ~10% &middot; S&amp;P 500 seen 12% below current level by end-2027, 17% off early-October peak &middot; Taiwan GDP growth ~3pp lower next year, South Korea 1pp &middot; AI added 0.3pp to US GDP growth last year &middot; productivity gain ~1% a year</div>
+          <h3>FAA points to router; FBI assists investigation</h3>
+          <p>Transportation Secretary Sean Duffy said the FAA has focused on a copper-to-fiber cable upgrade by contractor L3Harris that reportedly flooded air traffic routers with connection attempts, though he stopped short of fully ruling out a cyberattack. Homeland Security Secretary Markwayne Mullin said a cyberattack &quot;doesn&#x27;t appear&quot; to be involved while adding that &quot;there&#x27;s nothing certain right now.&quot;</p>
+          <div class="key">KEY &nbsp; 1,000+ connection attempts every 4–5 seconds &middot; ground stop lifted after about four hours &middot; Nov. 13 incident &middot; two routers, El Dorado, Arkansas and Amarillo, Texas, now at an L3Harris lab in Florida</div>
           <div class="meta"><span>Fortune</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
-      <a class="card" href="https://www.cnbc.com/investingclub/2026/11/08/here-are-the-2-big-things-were-watching-in-the-stock-market-in-the-week-ahead.html">
+      <a class="card" href="https://www.cnbc.com/2026/11/15/flight-delays-ground-faa-stop.html">
         <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>CoreWeave earnings seen as test of AI trade</h3>
-          <p>CNBC&#x27;s Investing Club says the week&#x27;s central question is where AI stocks go after a difficult week tied to the midterm elections, in which gubernatorial candidates supporting data center restrictions won in states including Texas and Ohio and voters approved local measures that could slow AI construction. Jim Cramer called neocloud CoreWeave&#x27;s Tuesday night report the key read on whether the AI trade regains momentum, and the Club said it may further reduce AI exposure.</p>
-          <div class="key">KEY &nbsp; CoreWeave reports Tuesday night &middot; Nebius reports Thursday morning &middot; four-year-old bull market &middot; Club exited Corning in early September and Broadcom in late October &middot; added Kimberly-Clark and Bank of New York two months ago</div>
+          <h3>Airlines expect near-normal schedules Monday after ground stop</h3>
+          <p>U.S. carriers are set to run close to normal on Monday after the FAA halted departures nationwide for more than four hours on Friday, though cancellations and delays continued through Sunday. Duffy has asked Congress for as much as $50 billion for air traffic control upgrades, and Democratic lawmakers pushed back by citing unspent money from existing funding.</p>
+          <div class="key">KEY &nbsp; Sunday: ~2,000 cancellations, 7,500+ delays &middot; Saturday: 6,697 cancellations, 9,000 delays &middot; Friday: 9,201 cancellations, 7,400+ delays &middot; American 805 (13%) &middot; Delta 360 (7%) &middot; JetBlue near one-third &middot; up to $50B requested &middot; $12.5B approved last year over five years</div>
           <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
-      <a class="card" href="https://fortune.com/2026/11/08/pentagon-fortress-critical-minerals-stockpile-tungsten-rare-earth/">
+      <a class="card" href="https://fortune.com/2026/11/15/ramayana-box-office-india-most-expensive-film/">
         <div class="thumb thumb-markets"><span class="tag">Fortune</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>Pentagon stockpile plan runs into rare-earth shortfall</h3>
-          <p>The Pentagon&#x27;s FORTRESS America initiative aims to hold enough critical minerals, fuel and munitions inside the United States to sustain a major war even if cyberattacks or sabotage disrupt domestic factories and power grids. Hudson Institute&#x27;s Bryan Clark told Fortune the planned scale is &quot;on par with what the DoD pursued during the Cold War,&quot; but domestic rare-earth magnet output remains a fraction of demand.</p>
-          <div class="key">KEY &nbsp; established Sept. 30 &middot; bases told to plan for 90 days without the grid &middot; US produces under 1% of the most common rare-earth magnet it uses &middot; 2025 demand ~48,000 metric tons vs 300 metric tons domestic supply &middot; ~5,000 metric tons US capacity expected by year-end &middot; about $60bn of non-rare-earth critical minerals imported in 2025 &middot; Ford idled its Chicago Explorer plant for a week in May 2025 &middot; Poland attacks hit ~30 renewable sites and a plant serving nearly 500,000 customers on Dec. 29, 2025</div>
+          <h3>India&#x27;s $420 million Ramayana tests global crossover</h3>
+          <p>The two-part Ramayana, with a reported budget of 40 billion rupees, is the most expensive Indian film made and became the first Indian film to top the U.K. box office. Reviews were mixed on pacing and score, and the film&#x27;s use of AI has drawn concerns, making its international run a measure of Indian cinema&#x27;s global reach.</p>
+          <div class="key">KEY &nbsp; Reported budget 40B rupees ($420M) &middot; $100M+ global box office, $67M from India &middot; $55.7M opening weekend (Variety) &middot; 77% critic / 94% audience on Rotten Tomatoes &middot; premiere Oct. 27, global debut Nov. 5, U.S. Nov. 6 &middot; Dangal $190M+ in China &middot; Secret Superstar $117.7M</div>
           <div class="meta"><span>Fortune</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
-      <a class="card" href="https://www.cnbc.com/2026/11/08/trump-iran-strikes-unlikely-talks-hormuz.html">
-        <div class="thumb thumb-markets"><span class="tag">CNBC</span></div>
+      <a class="card" href="https://fortune.com/2026/11/15/professors-faculty-workload-tenure-review-states-55-hour-weeks/">
+        <div class="thumb thumb-markets"><span class="tag">Fortune</span></div>
         <div class="body">
           <div class="kicker">Markets</div>
-          <h3>Trump calls renewed Iran strikes highly unlikely amid talks</h3>
-          <p>In a CNN interview, President Trump said restarting open war with Iran is &quot;highly unlikely&quot; as long as talks on constraining its nuclear program and reopening the Strait of Hormuz progress, while repeating that he could still order strikes on bridges and power plants. He has demanded Iran fully open the strait and commit never to develop a nuclear weapon; an end to the war and the strait&#x27;s reopening would likely ease oil prices.</p>
-          <div class="key">KEY &nbsp; war more than eight months old &middot; three aircraft carriers in position &middot; 38 bridges identified as potential targets &middot; Task Force Iron Gate announced Saturday by Central Command &middot; Democrats won control of the House and Senate at the midterms</div>
-          <div class="meta"><span>CNBC</span><span class="read">Read &rarr;</span></div>
+          <h3>States press public university faculty on workloads</h3>
+          <p>Lawmakers and governing boards in states including Wisconsin, Utah, Ohio and Kansas have imposed minimum teaching loads and tougher post-tenure reviews, while professors interviewed describe 55-hour weeks against nine-month contracts that stipulate 40. The Kansas Board of Regents put the long-standing 40-40-20 split of teaching, research and service into written policy in January.</p>
+          <div class="key">KEY &nbsp; 55-hour weeks described vs. 40-hour contracts &middot; 40-40-20 model &middot; Gallup: 38% confidence in higher education in 2026, down from 57% in 2015 &middot; very little/no confidence up from 10% to 25% &middot; Kansas Board of Regents governs six public universities, three of them research universities</div>
+          <div class="meta"><span>Fortune</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
@@ -715,7 +874,8 @@
     <div class="progress"><div class="progress-fill"></div></div>
   </section>
 
-  <section class="section">
+  <section class="section section--region">
+    <div class="region-art" aria-hidden="true"><img src="/img/dispatch-us-turkey-v2.webp" alt="" width="2000" height="857" loading="lazy" decoding="async"></div>
     <div class="section-head">
       <span class="num">03</span><h2>US &amp; Turkey</h2><hr class="rule">
     </div>
@@ -734,46 +894,46 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://www.bbc.co.uk/news/articles/c3dxw10rjn9no?at_medium=RSS&amp;at_campaign=rss">
+      <a class="card" href="https://www.bbc.co.uk/news/articles/c6m25zg88k45o?at_medium=RSS&amp;at_campaign=rss">
         <div class="thumb thumb-us"><span class="tag">BBC News</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>Nvidia board opens inquiry into Huang&#x27;s reported affair</h3>
-          <p>Nvidia&#x27;s board has launched an independent investigation after reports that CEO Jensen Huang had a relationship with a Chinese businesswoman, Alice Huang, whom US intelligence officials believed was working for China&#x27;s Ministry of State Security, according to the New York Times. Jensen Huang said he was unfaithful to his wife, took full responsibility and would cooperate fully; the board said it has no reason to believe Nvidia secrets or national security were compromised, and China has called the espionage allegations &quot;groundless speculation.&quot;</p>
-          <div class="key">KEY &nbsp; Nvidia worth some $4.5 trillion &middot; board inquiry independent &middot; chips supplied to OpenAI and Meta</div>
+          <h3>Zelensky asks US and Musk to lift Starlink limits</h3>
+          <p>President Volodymyr Zelensky said the military-grade Starshield service, developed by Elon Musk&#x27;s Starlink and supplied to Ukraine by the US government, is still running too slowly, which he said is hindering interception of Russian missiles and drones. Musk has said the US government controls Starshield, while President Donald Trump denied responsibility and said he had told Musk to &quot;put it back&quot;; the BBC has asked the White House and Starlink for comment.</p>
+          <div class="key">KEY &nbsp; speed limits of about 161km/h (100mph) &middot; restrictions first identified in October &middot; two people killed in an attack in Chernihiv region&#x27;s Mena</div>
           <div class="meta"><span>BBC News</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
-      <a class="card" href="https://www.bbc.co.uk/news/articles/cmg476w7wnl2o?at_medium=RSS&amp;at_campaign=rss">
+      <a class="card" href="https://www.bbc.co.uk/sport/ice-hockey/articles/cqkgm0jgv4mdo?at_medium=RSS&amp;at_campaign=rss">
         <div class="thumb thumb-us"><span class="tag">BBC News</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>White House says deportation push continues after midterm losses</h3>
-          <p>The Trump administration told the BBC it will not slow arrests and deportations despite last week&#x27;s midterm defeat, a stance that appeared to harden after Stephen Miller was promoted to White House chief of staff on Friday. Vice-President JD Vance had written that he was open to shifting enforcement toward businesses hiring unauthorized labor, while US officials told CBS the losses were attributed to the economy, affordability and the war with Iran rather than immigration.</p>
-          <div class="key">KEY &nbsp; about 2,700 arrests per day targeted, up from 2,000 &middot; immigration third most important issue in exit polls &middot; two protesters, Renee Good and Alex Pretti, fatally shot by immigration agents</div>
+          <h3>Canada denies visas, barring Russia from junior hockey worlds</h3>
+          <p>The IIHF said Russia&#x27;s under-20 team cannot take part in the World Junior Championship after Canada said it would deny entry to Russian athletes over the war in Ukraine, and the tournament will stay in Edmonton and Red Deer. The Russian Ice Hockey Federation called the decision &quot;unacceptable and unlawful,&quot; said it was made solely for political reasons, and said it would appeal to the IOC.</p>
+          <div class="key">KEY &nbsp; tournament 26 December 2026–5 January 2027 &middot; six European federations had refused to play Russia &middot; suspended since 2022 invasion, ban overturned last month by CAS &middot; Norway, Finland and Estonia also blocking visas</div>
           <div class="meta"><span>BBC News</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
-      <a class="card" href="https://www.bbc.co.uk/news/articles/cj4g1nwx39wno?at_medium=RSS&amp;at_campaign=rss">
+      <a class="card" href="https://www.bbc.co.uk/news/articles/c65y131w1534o?at_medium=RSS&amp;at_campaign=rss">
         <div class="thumb thumb-us"><span class="tag">BBC News</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>Jeffries backs impeachment resolution against Defence Secretary Hegseth</h3>
-          <p>Hakeem Jeffries, the frontrunner for House Speaker, told ABC he is &quot;a hard yes&quot; on impeaching Pete Hegseth, saying he abused his power and engineered a reckless war of choice in Iran. Outgoing Republican Thomas Massie says he plans to introduce the resolution as early as Monday; the Pentagon said it followed the law and Hegseth has called the articles &quot;sham.&quot;</p>
-          <div class="key">KEY &nbsp; eight articles of impeachment &middot; 254-seat Democratic House majority vs 218 needed &middot; two-thirds Senate majority required to remove &middot; War Powers Resolution of 1973 &middot; nearly six-minute Hegseth video</div>
+          <h3>NTSB cites steering failure in New Orleans collision</h3>
+          <p>The NTSB said preliminary findings show the cargo vessel Atlantic Asphalt had a &quot;steering casualty&quot; that left its rudder at a starboard position before it struck the riverboat American Heritage docked in New Orleans, though the exact cause is undetermined. Investigator-in-charge Bart Barnum said the vessel veered toward the east bank, and voyage data recorder audio captured warning signals and orders to deploy anchors minutes before the collision.</p>
+          <div class="key">KEY &nbsp; 32 people hospitalized with non-critical injuries &middot; about 129 passengers plus crew aboard &middot; calls began around 13:30 EST Friday &middot; eight-day cruise &middot; $1m lawsuit filed by the Port of New Orleans</div>
           <div class="meta"><span>BBC News</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
-      <a class="card" href="https://www.npr.org/2026/11/08/nx-s1-6034014/europe-join-us-brokered-ukraine-talks-abu-dhabi-russia">
+      <a class="card" href="https://www.npr.org/2026/11/15/nx-s1-6013327/sydney-sweeney-jeans-american-eagle-garment-industry">
         <div class="thumb thumb-us"><span class="tag">NPR</span></div>
         <div class="body">
           <div class="kicker">United States</div>
-          <h3>France says Europe will attend Abu Dhabi Ukraine talks</h3>
-          <p>French Foreign Minister Jean-Noël Barrot said European officials will attend this week&#x27;s US-mediated Russia-Ukraine talks in Abu Dhabi, days after Kremlin spokesman Dmitry Peskov said the agreed trilateral format left no role for European powers. Trump said after meeting Kremlin envoy Kirill Dmitriev that a coming agreement was &quot;going to involve more than Ukraine,&quot; while Zelenskyy told CNN he had not been given details and compared the situation to the 1945 Yalta conference.</p>
-          <div class="key">KEY &nbsp; talks Tuesday and Wednesday in Abu Dhabi &middot; fourth US-brokered round &middot; first since Geneva in February &middot; Russian delegation led by Vladimir Medinsky</div>
+          <h3>Workers describe conditions behind American Eagle denim</h3>
+          <p>NPR interviewed around 20 garment workers in Karachi, Pakistan, including one identified only as S., who says she works at Artistic Garment Industries on American Eagle production lines and fears being fired if named. Artistic Garment Industries confirmed it makes clothes for American Eagle but says it does not push out workers who complain, citing a complaints system and frequent temperature checks; American Eagle said it takes the concerns raised very seriously.</p>
+          <div class="key">KEY &nbsp; about $144 a month in pay &middot; 1,000–1,600 pieces checked a day &middot; fainted three times this year &middot; 106 F outside the factory &middot; around 20 workers interviewed</div>
           <div class="meta"><span>NPR</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
@@ -792,57 +952,24 @@
     </div>
     <div class="rail">
 
-      <a class="card" href="https://www.turkishminute.com/2026/11/07/foreign-investors-sell-3-65-billion-in-turkish-securities/">
-        <div class="thumb thumb-turkey"><span class="tag">Turkish Minute</span></div>
-        <div class="body">
-          <div class="kicker">Turkey</div>
-          <h3>Foreign investors net sellers of Turkish securities</h3>
-          <p>Foreign investors sold a net $3.65 billion in Turkish stocks and bonds over seven weeks through October 30, mostly in bonds, according to a report by the financial news website Ekonomim. The sales followed an investment fund crisis that began in mid-September, after which the Capital Markets Board ordered the liquidation of 131 funds; prosecutors are investigating allegations that fund managers bought thinly traded shares to inflate their prices, and Ekonomim&#x27;s analysis also pointed to lower domestic interest rates and expectations of tighter US monetary policy.</p>
-          <div class="key">KEY &nbsp; $3.65B net sales over 7 weeks to Oct 30 &middot; $1.67B corporate bonds &middot; $1.53B government bonds &middot; $444.3M stocks &middot; ~$879M in week to Oct 30 &middot; 131 funds at 7 companies liquidated from Sept 17 &middot; 455,758 individual investors &middot; BIST 100 down over 25% Sept 11–Oct 30, then +6.72% last week</div>
-          <div class="meta"><span>Turkish Minute</span><span class="read">Read &rarr;</span></div>
-        </div>
-      </a>
-
-      <a class="card" href="https://www.turkishminute.com/2026/11/07/turkish-fm-says-greece-cyprus-cable-dispute-resolved-after-turkey-challenges-surveys/">
-        <div class="thumb thumb-turkey"><span class="tag">Turkish Minute</span></div>
-        <div class="body">
-          <div class="kicker">Turkey</div>
-          <h3>Fidan says Greece-Cyprus cable survey dispute settled</h3>
-          <p>Turkish Foreign Minister Hakan Fidan told the Greek daily Kathimerini on Saturday that a disagreement over maritime notices for seabed surveys on the Greece-Cyprus electricity cable had been resolved, saying &quot;everything is normal,&quot; though he gave no details. Turkey&#x27;s foreign ministry had argued a day earlier that part of the survey area lies on its continental shelf and that the work was unauthorized, while Greek diplomatic sources told Proto Thema that Greece alone has authority to issue the permits.</p>
-          <div class="key">KEY &nbsp; €1.9B Great Sea Interconnector &middot; survey vessel Abeille Marengo expected to leave Heraklion Monday &middot; Cyprus divided since 1974</div>
-          <div class="meta"><span>Turkish Minute</span><span class="read">Read &rarr;</span></div>
-        </div>
-      </a>
-
-      <a class="card" href="https://www.turkishminute.com/2026/11/07/turkey-plans-to-shorten-undergraduate-degrees-to-three-years-citing-falling-birthrate/">
-        <div class="thumb thumb-turkey"><span class="tag">Turkish Minute</span></div>
-        <div class="body">
-          <div class="kicker">Turkey</div>
-          <h3>Higher education board weighs three-year undergraduate degrees</h3>
-          <p>Council of Higher Education President Erol Özvar said Saturday that Turkey is preparing to cut undergraduate degrees from four years to three, completed with 180 credits on European models, arguing that long study delays young people&#x27;s entry into working life at a time of falling fertility and later marriage. The proposal is in the preparatory stage with no implementation date given, and Özvar also called for fewer courses, more practical training and stronger student skills in artificial intelligence and digital technology.</p>
-          <div class="key">KEY &nbsp; 4 years → 3 years &middot; 180 credits &middot; 12 years of prior schooling &middot; men entering work at 26–27 &middot; fertility rate 1.42 in 2025 vs ~2.1 replacement &middot; below replacement since 2017 &middot; average age at first birth 27.5 &middot; &quot;Decade of Family and Population&quot; 2026–2035</div>
-          <div class="meta"><span>Turkish Minute</span><span class="read">Read &rarr;</span></div>
-        </div>
-      </a>
-
-      <a class="card" href="https://www.dailysabah.com/business/energy/turkiyes-defense-giant-aselsan-turns-to-solar-to-meet-all-energy-needs">
+      <a class="card" href="https://www.dailysabah.com/business/economy/close-to-445000-investors-payed-in-turkish-fund-case-vp-yilmaz">
         <div class="thumb thumb-turkey"><span class="tag">Daily Sabah</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>Aselsan says solar plants now cover its energy use</h3>
-          <p>The Ankara-based defense and electronics company Aselsan has commissioned two solar power plants that it says will supply all the energy used in its production, Anadolu Agency reported Sunday, with the plants deploying its in-house Pulsar inverters for the first time. CEO Ahmet Akyol said the clean power is expected to avoid roughly 121,000 tons of carbon dioxide emissions a year and that the company, which he described as among Europe&#x27;s fastest-growing defense firms over the past three years, has $3 billion in ongoing investments.</p>
-          <div class="key">KEY &nbsp; ~121,000 tons CO2 avoided annually &middot; equivalent to ~4 million trees &middot; 2 new solar plants &middot; average annual growth above 25% &middot; $3B ongoing investments</div>
+          <h3>Türkiye pays TL 161 billion to fund crisis investors</h3>
+          <p>Vice President Cevdet Yılmaz said interim payments have reached almost 445,000 individual investors affected by the September fund crisis, with no money drawn from the central government budget. He said authorities are pursuing judicial and administrative action to recover what he called excessive profits, while the Justice Minister has said the alleged stock manipulation probe now covers over 460 suspects.</p>
+          <div class="key">KEY &nbsp; TL 161 billion (about $3.2 billion) &middot; 444,987 investors paid &middot; 10,771 unpaid &middot; 371,021 recovered full net investment &middot; TL 144.7 billion cash &middot; TL 16.2 billion in-kind &middot; 119 funds &middot; 131 funds ordered liquidated &middot; 97 in ordinary liquidation, 94 completed, 3 remaining &middot; interim payments capped at TL 1 million &middot; 460+ suspects</div>
           <div class="meta"><span>Daily Sabah</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
 
-      <a class="card" href="https://www.dailysabah.com/business/tech/turkcell-to-showcase-green-technology-investments-at-cop31">
+      <a class="card" href="https://www.dailysabah.com/business/defense/turkish-firms-system-neutralizes-51-drones-within-seconds">
         <div class="thumb thumb-turkey"><span class="tag">Daily Sabah</span></div>
         <div class="body">
           <div class="kicker">Turkey</div>
-          <h3>Turkcell to present climate investments at COP31</h3>
-          <p>Turkcell will showcase its renewable energy, energy efficiency and digital transformation investments as a sector partner at the COP31 climate summit, which Turkey is hosting, presenting its progress toward net-zero emissions by 2050. CEO Ali Taha Koç said the company is expanding digital infrastructure under a &quot;more bits, fewer watts&quot; approach and sees the summit as a way to connect climate targets with practical investments.</p>
-          <div class="key">KEY &nbsp; net-zero target by 2050 &middot; 115.45 MW active renewable capacity &middot; solar at over 2,400 base station sites &middot; 300 MW capacity target by end-2026 &middot; energy per unit of data traffic down ~23% in 2025 &middot; total energy consumption down 7.3% &middot; up to 85% energy savings per gigabyte on 5G</div>
+          <h3>Aselsan says electromagnetic system downed 51 drones at once</h3>
+          <p>Aselsan said its Ejderha high-power electromagnetic counter-UAV system neutralized 51 simultaneously launched drones within seconds during a test marking the company&#x27;s 51st anniversary. The company said the system first disabled two tethered drones at roughly 1,000 meters, a target type it says conventional counter-UAV systems cannot address, and that Ejderha has entered mass production as part of Türkiye&#x27;s layered Steel Dome air defense architecture.</p>
+          <div class="key">KEY &nbsp; 51 drones &middot; 51st anniversary &middot; 2 tethered drones &middot; approximately 1,000 meters &middot; 50 years of accumulated experience</div>
           <div class="meta"><span>Daily Sabah</span><span class="read">Read &rarr;</span></div>
         </div>
       </a>
@@ -860,7 +987,8 @@
     <p class="section-note">Upcoming fixtures, all in California time.</p>
     <div class="sport-tabs" role="tablist" aria-label="Filter fixtures by sport">
       <button class="sport-tab active" data-sport="soccer" role="tab">Soccer</button>
-      <button class="sport-tab" data-sport="nba" role="tab">NBA</button>
+      <button class="sport-tab" data-sport="volleyball" role="tab">Volleyball</button>
+      <button class="sport-tab" data-sport="f1" role="tab">Formula 1</button>
     </div>
 
     <div class="sport-panel" data-sport="soccer">
@@ -956,16 +1084,6 @@
         </div>
 
         <div class="fixture">
-          <div class="thumb thumb-soccer"><span class="tag">Champions League</span></div>
-          <div class="teams">Slavia Prague <span>vs</span> Villarreal</div>
-          <div class="when">
-            <b>Wednesday, Nov 25 · 9:45 AM PST</b> &nbsp;(8:45 PM Istanbul)<br>
-            Champions League
-          </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Slavia+Prague+vs+Villarreal+%E2%80%94+Champions+League&amp;dates=20261125T174500Z%2F20261125T194500Z&amp;details=Champions+League" target="_blank" rel="noopener">Add to Calendar</a></div>
-        </div>
-
-        <div class="fixture">
           <div class="thumb thumb-soccer"><span class="tag">Süper Lig</span></div>
           <div class="teams">Besiktas <span>vs</span> Galatasaray</div>
           <div class="when">
@@ -976,11 +1094,22 @@
           <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Besiktas+vs+Galatasaray+%E2%80%94+S%C3%BCper+Lig&amp;dates=20261130T180000Z%2F20261130T200000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
+        <div class="fixture">
+          <div class="thumb thumb-soccer"><span class="tag">Süper Lig</span></div>
+          <div class="teams">Fenerbahce <span>vs</span> Trabzonspor</div>
+          <div class="when">
+            <b>Sunday, Dec 13 · 8:00 AM PST</b> &nbsp;(7:00 PM Istanbul)<br>
+            Süper Lig
+          </div>
+        <div class="note">One of hers</div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Fenerbahce+vs+Trabzonspor+%E2%80%94+S%C3%BCper+Lig&amp;dates=20261213T160000Z%2F20261213T180000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
+        </div>
+
       </div>
       <div class="progress"><div class="progress-fill"></div></div>
     </div>
 
-    <div class="sport-panel" data-sport="nba" hidden>
+    <div class="sport-panel" data-sport="volleyball" hidden>
       <div class="rail-nav">
         <span class="drag-hint">&larr; Drag to explore &rarr;</span>
         <span class="nav-btns">
@@ -991,103 +1120,102 @@
       <div class="rail">
 
         <div class="fixture">
-          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
-          <div class="teams">Detroit Pistons <span>at</span> Los Angeles Lakers</div>
+          <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
+          <div class="teams">Eczacıbaşı Peron İstanbul <span>vs</span> Kuzeyboru</div>
           <div class="when">
-            <b>Sunday, Nov 8 · 3:00 PM PST</b><br>
-            NBA
+            <b>Saturday, Nov 21 · 3:00 AM PST</b> &nbsp;(2:00 PM Istanbul)<br>
+            Sultanlar Ligi
           </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Detroit+Pistons+at+Los+Angeles+Lakers+%E2%80%94+NBA&amp;dates=20261108T230000Z%2F20261109T010000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        <div class="note">One of hers</div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Eczac%C4%B1ba%C5%9F%C4%B1+Peron+%C4%B0stanbul+vs+Kuzeyboru+%E2%80%94+Sultanlar+Ligi&amp;dates=20261121T110000Z%2F20261121T130000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
         <div class="fixture">
-          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
-          <div class="teams">Minnesota Timberwolves <span>at</span> Utah Jazz</div>
+          <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
+          <div class="teams">Aras Kargo <span>vs</span> Fenerbahçe Medicana</div>
           <div class="when">
-            <b>Sunday, Nov 8 · 4:00 PM PST</b><br>
-            NBA
+            <b>Saturday, Nov 21 · 4:00 AM PST</b> &nbsp;(3:00 PM Istanbul)<br>
+            Sultanlar Ligi
           </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Minnesota+Timberwolves+at+Utah+Jazz+%E2%80%94+NBA&amp;dates=20261109T000000Z%2F20261109T020000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        <div class="note">One of hers</div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Aras+Kargo+vs+Fenerbah%C3%A7e+Medicana+%E2%80%94+Sultanlar+Ligi&amp;dates=20261121T120000Z%2F20261121T140000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
         <div class="fixture">
-          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
-          <div class="teams">Dallas Mavericks <span>at</span> Brooklyn Nets</div>
+          <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
+          <div class="teams">Galatasaray Daikin <span>vs</span> Zeren Spor</div>
           <div class="when">
-            <b>Sunday, Nov 8 · 4:30 PM PST</b><br>
-            NBA
+            <b>Sunday, Nov 22 · 2:00 AM PST</b> &nbsp;(1:00 PM Istanbul)<br>
+            Sultanlar Ligi
           </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Dallas+Mavericks+at+Brooklyn+Nets+%E2%80%94+NBA&amp;dates=20261109T003000Z%2F20261109T023000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        <div class="note">One of hers</div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Galatasaray+Daikin+vs+Zeren+Spor+%E2%80%94+Sultanlar+Ligi&amp;dates=20261122T100000Z%2F20261122T120000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
         <div class="fixture">
-          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
-          <div class="teams">Milwaukee Bucks <span>at</span> Boston Celtics</div>
+          <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
+          <div class="teams">İlbank <span>vs</span> VakıfBank</div>
           <div class="when">
-            <b>Sunday, Nov 8 · 5:00 PM PST</b><br>
-            NBA
+            <b>Sunday, Nov 22 · 5:00 AM PST</b> &nbsp;(4:00 PM Istanbul)<br>
+            Sultanlar Ligi
           </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Milwaukee+Bucks+at+Boston+Celtics+%E2%80%94+NBA&amp;dates=20261109T010000Z%2F20261109T030000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        <div class="note">One of hers</div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=%C4%B0lbank+vs+Vak%C4%B1fBank+%E2%80%94+Sultanlar+Ligi&amp;dates=20261122T130000Z%2F20261122T150000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
         <div class="fixture">
-          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
-          <div class="teams">Atlanta Hawks <span>at</span> Los Angeles Lakers</div>
+          <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
+          <div class="teams">Türk Hava Yolları <span>vs</span> Beşiktaş</div>
           <div class="when">
-            <b>Monday, Nov 9 · 4:00 PM PST</b><br>
-            NBA
+            <b>Sunday, Nov 22 · 8:00 AM PST</b> &nbsp;(7:00 PM Istanbul)<br>
+            Sultanlar Ligi
           </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Atlanta+Hawks+at+Los+Angeles+Lakers+%E2%80%94+NBA&amp;dates=20261110T000000Z%2F20261110T020000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+        <div class="note">One of hers</div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=T%C3%BCrk+Hava+Yollar%C4%B1+vs+Be%C5%9Fikta%C5%9F+%E2%80%94+Sultanlar+Ligi&amp;dates=20261122T160000Z%2F20261122T180000Z&amp;details=One+of+hers" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
         <div class="fixture">
-          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
-          <div class="teams">Charlotte Hornets <span>at</span> Cleveland Cavaliers</div>
+          <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
+          <div class="teams">Afyon Bld. <span>vs</span> Göztepe</div>
           <div class="when">
-            <b>Monday, Nov 9 · 4:00 PM PST</b><br>
-            NBA
+            <b>Sunday, Nov 22 · 4:00 AM PST</b> &nbsp;(3:00 PM Istanbul)<br>
+            Sultanlar Ligi
           </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Charlotte+Hornets+at+Cleveland+Cavaliers+%E2%80%94+NBA&amp;dates=20261110T000000Z%2F20261110T020000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Afyon+Bld.+vs+G%C3%B6ztepe+%E2%80%94+Sultanlar+Ligi&amp;dates=20261122T120000Z%2F20261122T140000Z&amp;details=Sultanlar+Ligi" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
         <div class="fixture">
-          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
-          <div class="teams">Detroit Pistons <span>at</span> Washington Wizards</div>
+          <div class="thumb thumb-volley"><span class="tag">Sultanlar Ligi</span></div>
+          <div class="teams">Nilüfer Bld. <span>vs</span> Manisa BB</div>
           <div class="when">
-            <b>Monday, Nov 9 · 4:00 PM PST</b><br>
-            NBA
+            <b>Sunday, Nov 22 · 5:00 AM PST</b> &nbsp;(4:00 PM Istanbul)<br>
+            Sultanlar Ligi
           </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Detroit+Pistons+at+Washington+Wizards+%E2%80%94+NBA&amp;dates=20261110T000000Z%2F20261110T020000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Nil%C3%BCfer+Bld.+vs+Manisa+BB+%E2%80%94+Sultanlar+Ligi&amp;dates=20261122T130000Z%2F20261122T150000Z&amp;details=Sultanlar+Ligi" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
-        <div class="fixture">
-          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
-          <div class="teams">New York Knicks <span>at</span> Milwaukee Bucks</div>
-          <div class="when">
-            <b>Tuesday, Nov 10 · 4:30 PM PST</b><br>
-            NBA
-          </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=New+York+Knicks+at+Milwaukee+Bucks+%E2%80%94+NBA&amp;dates=20261111T003000Z%2F20261111T023000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
-        </div>
+      </div>
+      <div class="progress"><div class="progress-fill"></div></div>
+    </div>
+
+    <div class="sport-panel" data-sport="f1" hidden>
+      <div class="rail-nav">
+        <span class="drag-hint">&larr; Drag to explore &rarr;</span>
+        <span class="nav-btns">
+          <button class="nav-btn" data-dir="-1" aria-label="Previous fixture">&#8249;</button>
+          <button class="nav-btn" data-dir="1" aria-label="Next fixture">&#8250;</button>
+        </span>
+      </div>
+      <div class="rail">
 
         <div class="fixture">
-          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
-          <div class="teams">Philadelphia 76ers <span>at</span> Boston Celtics</div>
+          <div class="thumb thumb-f1"><span class="tag">Formula 1</span></div>
+          <div class="teams">Heineken Las Vegas Grand Prix </div>
           <div class="when">
-            <b>Tuesday, Nov 10 · 5:00 PM PST</b><br>
-            NBA
+            <b>Thursday, Nov 19 · 4:30 PM PST</b><br>
+            Formula 1
           </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Philadelphia+76ers+at+Boston+Celtics+%E2%80%94+NBA&amp;dates=20261111T010000Z%2F20261111T030000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
-        </div>
-
-        <div class="fixture">
-          <div class="thumb thumb-nba"><span class="tag">NBA</span></div>
-          <div class="teams">Phoenix Suns <span>at</span> LA Clippers</div>
-          <div class="when">
-            <b>Tuesday, Nov 10 · 6:00 PM PST</b><br>
-            NBA
-          </div>
-          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Phoenix+Suns+at+LA+Clippers+%E2%80%94+NBA&amp;dates=20261111T020000Z%2F20261111T040000Z&amp;details=NBA" target="_blank" rel="noopener">Add to Calendar</a></div>
+          <div class="actions"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Heineken+Las+Vegas+Grand+Prix+++%E2%80%94+Formula+1&amp;dates=20261120T003000Z%2F20261120T023000Z&amp;details=Formula+1" target="_blank" rel="noopener">Add to Calendar</a></div>
         </div>
 
       </div>
