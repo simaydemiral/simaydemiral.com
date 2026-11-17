@@ -646,3 +646,29 @@
 @media (max-width: 42rem) {
   .fact { font-size: 0.66rem; padding: 0.34rem 0.7rem; }
 }
+
+/* ---------------------------------------------------------------
+   Product plates as artwork rather than silhouettes.
+
+   .plate-art in the base sheet paints a flat block of --ink and
+   punches the art out of it as a mask, which is right for a
+   one-colour line drawing and tints nicely to the accent on hover.
+   These four are full-colour illustrations, and a mask keeps only
+   the alpha -- they would have come out as solid blobs. Painted as
+   real images instead, so the mask and the tint are both turned off.
+   --------------------------------------------------------------- */
+.plate-art--photo {
+  background-color: transparent;
+  background-image: var(--art);
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  -webkit-mask: none;
+          mask: none;
+  opacity: 0.95;
+}
+
+.item--illustrated:hover .plate-art--photo {
+  background-color: transparent;   /* the base rule tints; it must not */
+  opacity: 1;
+}
