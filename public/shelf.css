@@ -691,3 +691,59 @@
   -webkit-mask: var(--ico) center / contain no-repeat;
           mask: var(--ico) center / contain no-repeat;
 }
+
+/* ===============================================================
+   THE SWING — how an opened project arrives.
+
+   The shelf itself does not rotate; the comment at the top of this
+   file still holds for everything that sits still. What moves is
+   only the panel that was just opened, and only while it is
+   arriving: it comes forward out of the row, turning to face the
+   reader, from whichever side its spine was standing on.
+
+   The camera lives inside the transform (`perspective(...)` as the
+   first function) rather than on an ancestor, so nothing on the
+   page gains a 3D context permanently. The last keyframe is
+   `transform: none`, and the animation has no fill-mode, so the
+   moment it ends the panel is an ordinary untransformed box again.
+   That is what keeps the live Ledger demo sharp and clickable --
+   a transformed element inside a 3D context is rasterised, and in
+   Safari that also breaks clicking inside an iframe.
+   =============================================================== */
+
+.slot[data-on][data-swing] .open {
+  animation: shelf-swing 0.78s cubic-bezier(.26, .72, .32, 1);
+}
+/* No `will-change` here on purpose. It would be honest for half a second
+   and wrong afterwards: it promotes the panel to its own compositor layer
+   and keeps it there, which is the same blurring of the live demo that
+   this file's opening comment set out to avoid. The script takes
+   data-swing off once the animation ends, so a settled panel carries no
+   animation, no transform and no layer -- nothing at all. */
+
+@keyframes shelf-swing {
+  from {
+    opacity: 0;
+    transform: perspective(900px)
+               translate3d(calc(var(--from, 1) * 14%), 0, -520px)
+               rotateY(calc(var(--from, 1) * 48deg))
+               scale(0.92);
+  }
+  52% { opacity: 1; }
+  to  { opacity: 1; transform: none; }
+}
+
+/* Narrow screens: the panel sits under the spines rather than beside
+   them, so there is no side for it to come from and far less room to
+   come through. The move becomes a short step forward. */
+@media (max-width: 42rem) {
+  @keyframes shelf-swing {
+    from {
+      opacity: 0;
+      transform: perspective(700px) translate3d(0, 16px, -220px)
+                 rotateX(9deg) scale(0.95);
+    }
+    58% { opacity: 1; }
+    to  { opacity: 1; transform: none; }
+  }
+}

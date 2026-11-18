@@ -25,8 +25,8 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f%5B%5D=switzer@400,500,600&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="/style.css?v=20261117082229">
-  <link rel="stylesheet" href="/shelf.css?v=20261117082229">
+  <link rel="stylesheet" href="/style.css?v=20261117163351">
+  <link rel="stylesheet" href="/shelf.css?v=20261117163351">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="/icon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -463,7 +463,14 @@
   var frame = document.querySelector('.showcase-frame');
   if (!frame) return;
   function fit() {
-    var w = frame.getBoundingClientRect().width;
+    /* offsetWidth again, and for the same reason as sizePanels(): the panel
+       this frame sits in may be mid-swing, turned and scaled, and a bounding
+       rect would report the frame as it is painted at that instant rather
+       than as wide as it is. The scale that came out of that was too small,
+       and nothing put it right afterwards -- a ResizeObserver watches the
+       layout box, which a transform never changes, so it had no reason to
+       fire again and the demo stayed shrunk in its own frame. */
+    var w = frame.offsetWidth;
     var design = parseFloat(getComputedStyle(frame).getPropertyValue('--showcase-design')) || 1340;
     if (w) frame.style.setProperty('--showcase-scale', (w / design).toFixed(4));
   }
@@ -564,10 +571,26 @@
     if (k === current) return;
     var was = current;
     current = k;
+
+    /* Which side is it coming from? A project standing to the right of the
+       one that was open swings in from the right, and the other way round,
+       so the motion agrees with where the reader just saw that spine. The
+       stylesheet reads it as --from; data-swing is what starts the
+       animation, and it is only ever on the panel that is arriving -- so
+       the one open on page load simply sits there, unanimated. */
+    var ord = slots.map(function (s) { return s.getAttribute('data-k'); });
+    var dir = ord.indexOf(k) > ord.indexOf(was) ? 1 : -1;
+
     slots.forEach(function (s) {
       var on = s.getAttribute('data-k') === k;
-      if (on) s.setAttribute('data-on', '');
-      else s.removeAttribute('data-on');
+      if (on) {
+        s.style.setProperty('--from', dir);
+        s.setAttribute('data-on', '');
+        s.setAttribute('data-swing', '');
+      } else {
+        s.removeAttribute('data-on');
+        s.removeAttribute('data-swing');
+      }
       var b = s.querySelector('.spine');
       if (b) b.setAttribute('aria-expanded', on ? 'true' : 'false');
     });
@@ -606,7 +629,14 @@
   function sizePanels() {
     var open = rail.querySelector('.slot[data-on] .open');
     if (!open) return;
-    var w = open.getBoundingClientRect().width;
+    /* offsetWidth, not getBoundingClientRect().width. The open panel is
+       swinging at this moment -- turned and scaled -- and a bounding rect
+       reports the box as painted, which during the swing is far narrower
+       than the box actually is. Measuring the other panels at that width
+       wraps their text two or three times over and hands them a height
+       taller than Ledger's. offsetWidth is the laid-out width and ignores
+       transforms, which is the number this wants. */
+    var w = open.offsetWidth;
     if (!w) return;
     var tallest = 0;
     slots.forEach(function (s) {
@@ -631,6 +661,14 @@
     });
     if (tallest) rail.style.setProperty('--panel-h', Math.ceil(tallest) + 'px');
   }
+
+  /* Once it has landed, take the swing off. The panel is then an ordinary
+     box again, with no animation left declared on it. */
+  rail.addEventListener('animationend', function (e) {
+    if (e.animationName !== 'shelf-swing') return;
+    var slot = e.target.closest ? e.target.closest('.slot') : null;
+    if (slot) slot.removeAttribute('data-swing');
+  });
 
   rail.addEventListener('click', function (e) {
     var b = e.target.closest ? e.target.closest('.spine') : null;
