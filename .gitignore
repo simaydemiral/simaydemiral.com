@@ -13,11 +13,23 @@ Picture1.png
 
 # Work in progress — on this Mac only.
 #
-# Two separate hazards, and this covers the second one:
-#   deploying  — Cloudflare uploads public/ read from disk, not from git, and
-#                scripts/dispatch/run.py ends in `wrangler deploy`. Anything
-#                unfinished in public/ goes live on the next Dispatch edition.
-#                That is why preview/ sits outside public/.
-#   publishing — this repo is public on GitHub, so a commit is a publication
-#                of its own. Unfinished design does not belong there either.
+# The hazard is publishing, not deploying, and it is worth being exact about
+# which: this repo is public on GitHub, so a commit is a publication of its
+# own, and unfinished design does not belong there.
+#
+# The 6:45 Dispatch run does NOT ship whatever happens to be sitting in
+# public/. publish() in scripts/dispatch/run.py deploys from a throwaway
+# worktree of HEAD with only the Dispatch's own files laid over it, precisely
+# so that an unfinished page cannot ride along — which it did, twice, before
+# that was built. So the thing to be careful about is committing to public/,
+# not editing it: a commit is what puts work on the live site the next
+# morning. preview/ sits outside public/ anyway, which keeps both honest.
 preview/
+
+# The Dispatch's own pages are generated every morning and deliberately not
+# kept. prune() holds six mornings on disk and deletes the rest; git is a
+# history rather than a folder, so committing them would keep every edition
+# that prune had already thrown away, for ever, in a public repo. They are
+# deployed from disk by publish(), so nothing here needs them to be tracked.
+public/dispatch.html
+public/dispatch/
