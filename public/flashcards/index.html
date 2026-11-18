@@ -221,6 +221,20 @@
              text-transform:uppercase;color:var(--brand);margin-bottom:5px}
   .rootdef b span{color:var(--faint)}
   .rootdef p{margin:0 0 3px}
+  /* Where the root IS the answer -- "ruthlessly: in a ruthless manner" says
+     nothing, so the card leads with ruthless instead and the dashed box that
+     marks an aside would be marking the definition itself. */
+  .rootdef.lead{margin:12px 0 0;padding:0;border-top:0}
+  .rootdef.lead p{margin:0 0 5px;font-size:15.5px;line-height:1.5}
+  .colloc{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-top:3px}
+  .colloc span{font:500 10px/1 var(--f-mono);letter-spacing:.13em;
+               text-transform:uppercase;color:var(--faint)}
+  .colloc b{font-weight:600;color:var(--accent)}
+  .rels{display:flex;flex-wrap:wrap;gap:6px 22px;margin-top:12px}
+  .relrow{display:flex;align-items:baseline;gap:7px}
+  .relrow span{font:500 10px/1 var(--f-mono);letter-spacing:.13em;
+               text-transform:uppercase;color:var(--faint)}
+  .relrow b{font-weight:600}
   .rootopt{display:flex;align-items:flex-start;gap:7px;margin:0 0 4px}
   .rootopt .pin{flex:0 0 auto;width:19px;height:19px;margin-top:1px;padding:0;
                 border:1px solid var(--line);border-radius:5px;cursor:pointer;
@@ -415,6 +429,10 @@
      storage written by an older build, and an imported file, which is just
      a text file someone could have edited. Drop what is not a word record,
      fill in what is missing, and distrust the source URL. */
+  /* Bumped when something about how the plain-English senses are read
+     changes in a way an already-stored copy cannot be repaired into. */
+  var SIMPLE_FIX = 1;
+
   function normalize(list) {
     if (!Array.isArray(list)) return [];
     var out = [], i, w, src;
@@ -430,6 +448,19 @@
       /* Forms arrive in a file someone could have hand-edited: strings only,
          and not an unbounded number of them. */
       w.plain = Array.isArray(w.plain) ? w.plain : null;
+      w.sv = Number(w.sv) || 0;
+      /* One-off, per card, the first time it is loaded under this build.
+
+         Simple Wiktionary's synonym and antonym lists used to be swallowed
+         into the definition -- "...it might happen. Synonyms: incidental and
+         casual" -- and every card looked up before that was fixed is still
+         holding the version with the list glued on, and knows nothing of the
+         pair that was inside it. Nothing else is touched: the box, the due
+         date, the note, the ticked root meaning and the sentence she caught
+         it in all stay exactly as they are. Only the plain-English senses go,
+         and they are re-read the next time that card comes round rather than
+         for seventy words at once. */
+      if (w.sv < SIMPLE_FIX) { w.plain = null; w.sv = SIMPLE_FIX; }
       w.forms = formsOf(w)
         .filter(function (x) { return typeof x === "string" && x.trim(); })
         .map(function (x) { return x.trim().replace(/\s+/g, " ").slice(0, 80); })
@@ -457,7 +488,10 @@
                   us: !!w.say.us,
                   /* Kept, or a round trip through export and import would
                      look like a card that had never been asked. */
-                  v: typeof w.say.v === "number" ? w.say.v : 0 };
+                  v: typeof w.say.v === "number" ? w.say.v : 0,
+                  /* Kept, or a word whose sources were unreachable gets a
+                     fresh three goes on every single reload. */
+                  miss: typeof w.say.miss === "number" ? w.say.miss : 0 };
       } else { delete w.say; }
       if (w.tr && typeof w.tr === "object") {
         var tb = Array.isArray(w.tr.blocks) ? w.tr.blocks : [];
@@ -500,6 +534,15 @@
           miss: Number(w.rootdef.miss) || 0
         };
       } else { delete w.rootdef; }
+      /* Synonym, antonym, and the preposition the word is usually used with.
+         One word each: a list is a second thing to learn, and she asked for
+         the single closest. */
+      if (w.rel && typeof w.rel === "object") {
+        w.rel = { syn: typeof w.rel.syn === "string" ? w.rel.syn.slice(0, 40) : "",
+                  ant: typeof w.rel.ant === "string" ? w.rel.ant.slice(0, 40) : "",
+                  pat: typeof w.rel.pat === "string" ? w.rel.pat.slice(0, 40) : "",
+                  v: Number(w.rel.v) || 0 };
+      } else { delete w.rel; }
       w.rootpin = (typeof w.rootpin === "number" && w.rootpin >= 0)
                 ? Math.floor(w.rootpin) : -1;
       src = (w.src && typeof w.src === "object") ? w.src : {};
@@ -1292,7 +1335,70 @@
     return best;
   }
 
-  function viaTurkish(term, code, gloss) {
+  /* The words worth trying, best first, rather than the one best word.
+
+     "Unhinged" reads "Mentally ill or unstable; deranged; insane", and
+     glossOf cut that down to "Mentally ill" -- which no dictionary files
+     anything under, so the hop failed and the card said nobody had a Turkish
+     entry for it. Deranged and insane are sitting in the same line, and both
+     carry {{t|tr|deli}} on their own pages. So every single word in the
+     sense is a candidate, tried in turn until one of them answers. */
+  /* The words that turn the rest of a clause into the opposite of what the
+     card is about. */
+  var NEGATED = /\b(without|not|lacking|lack|lacks|free\s+from|devoid|absence|absent|never|no|nor|opposite|un)\b/i;
+
+  function glossList(senses, want, strict) {
+    var list = senses || [], out = [], seen = {}, i, j;
+    function push(t) {
+      t = String(t || "").replace(/\([^)]*\)/g, " ")
+            .replace(/^(to|a|an|the)\s+/i, "")
+            .replace(/[.!?]\s*$/, "").trim();
+      if (!t || !/^[A-Za-z][A-Za-z' -]{1,24}$/.test(t)) return;
+      if (t.split(/\s+/).length > 2) return;
+      var k = t.toLowerCase();
+      if (seen[k]) return;
+      seen[k] = 1;
+      out.push(t);
+    }
+    /* The matching part of speech first, and -- when strict -- only it:
+       vet's only short gloss is the noun "veterinarian", and a card about
+       checking people over should not come back veteriner. */
+    var ordered = [];
+    for (i = 0; i < list.length; i++)
+      if (want && String(list[i].pos || "").toLowerCase() === want) ordered.push(list[i]);
+    if (strict && want) { if (!ordered.length) return []; }
+    else ordered = ordered.concat(list);
+
+    for (i = 0; i < ordered.length && out.length < 6; i++) {
+      var text = String(ordered[i].text || "").replace(/\([^)]*\)/g, " ");
+      /* A clause at a time, because a negation covers everything after it
+         until the clause ends.
+
+         "Ruthless: without pity or compassion; cruel, pitiless." Mining
+         single words out of that whole sentence found "compassion", and the
+         card came back with sefkat -- the Turkish for the opposite of the
+         word it was about. Pity and compassion are what ruthless is the
+         absence of; cruel and pitiless are what it is. So a clause carrying
+         a negation gives up nothing at all, and the clause after the
+         semicolon gives up both of its words. */
+      var clauses = text.split(/[;.]/);
+      for (j = 0; j < clauses.length; j++) {
+        var c = clauses[j];
+        if (NEGATED.test(c)) continue;
+        /* The whole clause first -- it is what glossOf used to return --
+           then each single word in it. */
+        push(c.replace(/,.*$/, "").replace(/\s+or\s+.*$/i, ""));
+        var parts = c.split(/,|\bor\b/i);
+        for (var k = 0; k < parts.length; k++) {
+          var one = parts[k].trim();
+          if (one && one.split(/\s+/).length === 1) push(one);
+        }
+      }
+    }
+    return out.slice(0, 4);
+  }
+
+  function viaTurkish(term, code, glosses) {
     var reached = false;
     code = code || "en";
 
@@ -1328,7 +1434,19 @@
         blocks.forEach(function (b) {
           b.words.forEach(function (x) { said[x.toLowerCase()] = 1; });
         });
-        more = more.filter(function (t) { return !said[t.toLowerCase()]; });
+        /* Word by word, not line by line. The Turkish Wiktionary writes a
+           sense out as one run -- "acimasiz; merhametsiz; amansiz" -- and
+           the English table had already given acimasiz on its own, so
+           "ruthlessly" showed that word twice, once by itself and once
+           inside the list. Dropping the whole line would lose merhametsiz
+           and amansiz with it, so only the words already said come out. */
+        more = more.map(function (t) {
+          if (said[t.toLowerCase()]) return "";
+          var kept = String(t).split(/\s*;\s*/).filter(function (x) {
+            return x && !said[x.toLowerCase()];
+          });
+          return kept.join("; ");
+        }).filter(function (t) { return t; });
 
         if (blocks.length || more.length) {
           return { blocks: blocks, more: more, one: "",
@@ -1342,8 +1460,13 @@
            veteriner and baytar. Either way the card names the word it went
            through, because a translation of a translation has to show its
            working. */
-        if (gloss && gloss.toLowerCase() !== String(term).toLowerCase()) {
-          return getJSON(WIKT_RAW + encodeURIComponent(gloss))
+        var list = Array.isArray(glosses) ? glosses : (glosses ? [glosses] : []);
+        var self = String(term).toLowerCase();
+        function hop(i) {
+          if (i >= list.length) return viaJargon(term, reached);
+          var g = list[i];
+          if (!g || g.toLowerCase() === self) return hop(i + 1);
+          return getJSON(WIKT_RAW + encodeURIComponent(g.toLowerCase()))
             .then(function (j) {
               var wt = j && j.parse && j.parse.wikitext ? j.parse.wikitext["*"] : "";
               var b = trBlocks(wt || "", "en");
@@ -1353,13 +1476,13 @@
                    "Wiktionary, via veterinarian - the Turkish for
                    veterinarian". */
                 return { blocks: b, more: [], one: "",
-                         from: "Wiktionary", via: gloss };
+                         from: "Wiktionary", via: g };
               }
-              return viaJargon(term, reached);
+              return hop(i + 1);
             })
-            .catch(function () { return viaJargon(term, reached); });
+            .catch(function () { return hop(i + 1); });
         }
-        return viaJargon(term, reached);
+        return hop(0);
       });
   }
 
@@ -1419,6 +1542,23 @@
       .trim();
   }
 
+  /* A quotation cut to fit is not a sentence.
+
+     The cap below used to fall wherever it fell, which is how "ruthlessly"
+     ended up carrying a hundred and ninety words about Caerphilly Castle
+     that stopped dead on the headword: "man labours to rebuild the mediaeval
+     whilst he ruthlessly". So the passage is read whole and then cut back to
+     the last sentence inside the cap that actually ends. One with no
+     sentence end in reach is not a sentence, and no example at all is
+     better than half of one. */
+  function toSentence(text, max) {
+    var t = String(text || "").trim();
+    if (t.length <= max && /[.!?]["'\u2019\u201d]?$/.test(t)) return t;
+    var m = /^[\s\S]*[.!?]["'\u2019\u201d]?(?=\s|$)/.exec(t.slice(0, max + 1));
+    var out = m ? m[0].trim() : "";
+    return out.length >= 40 ? out : "";
+  }
+
   function exampleFrom(wikitext, code) {
     code = code || SPACE;
     var sec = section(wikitext, lang(code).wikt);
@@ -1433,7 +1573,7 @@
       if (out.length > 12 && out.length < 220) return { text: out, from: "Wiktionary" };
     }
     /* otherwise something somebody actually wrote */
-    var q = /\|(?:passage|text)=([^|}]{25,240})/g;
+    var q = /\|(?:passage|text)=([^|}]{25,900})/g;
     while ((m = q.exec(wikitext))) {
       out = cleanWiki(m[1]);
       /* cleanWiki only removes templates it can see both ends of. A passage
@@ -1441,7 +1581,8 @@
          covenant put "Wet or Dry, {{" on the card. Half a sentence with a
          brace on the end is not a usage example, so keep looking. */
       if (/[{}\[\]]/.test(out)) continue;
-      if (out.length > 25 && out.length < 240) return { text: out, from: "Wiktionary" };
+      out = toSentence(out, 240);
+      if (out.length > 25) return { text: out, from: "Wiktionary" };
     }
     return null;
   }
@@ -1486,7 +1627,8 @@
     var out = shown.map(function (s, i) {
       if (s.example || !full[i] || !full[i].example) return s;
       any = true;
-      return { pos: s.pos, text: s.text, example: full[i].example };
+      return { pos: s.pos, text: s.text, example: full[i].example,
+               syn: s.syn, ant: s.ant };
     });
     return any ? out : shown;
   }
@@ -1547,18 +1689,67 @@
      under -- or nothing. A long sentence is saying something whatever shape
      it starts in, a three-letter root sends the card off after "bad" or
      "law", and a root that is the word itself helps nobody. */
-  function hollowRoot(text, term) {
-    var t = String(text || "").trim().replace(/^\([^)]*\)\s*/, ""), i, m, r;
-    if (!t || t.length > 72) return null;
-    for (i = 0; i < HOLLOW.length; i++) {
-      m = HOLLOW[i].re.exec(t);
-      if (!m) continue;
-      r = m[1].toLowerCase().replace(/[.,;:]+$/, "");
-      if (r.length < 4) return null;
-      if (r === String(term || "").toLowerCase()) return null;
-      return { root: r, pos: HOLLOW[i].pos };
+  /* The part of speech a derived word's root will be found under, read off
+     the ending. "Ruthlessly" is an adverb built on an adjective, and saying
+     so is what reaches ruthless's own meaning rather than the first thing on
+     its page. */
+  var DERIVED = [
+    [/ly$/i, "adjective"], [/ness$/i, "adjective"], [/ity$/i, "adjective"],
+    [/(ment|tion|sion|ance|ence)$/i, "verb"],
+    [/(er|or|ist|ee)$/i, "verb"]
+  ];
+
+  function derivedPos(term) {
+    for (var i = 0; i < DERIVED.length; i++)
+      if (DERIVED[i][0].test(term)) return DERIVED[i][1];
+    return "";
+  }
+
+  /* A definition that leans on the word it is defining.
+
+     Every shape in HOLLOW anchors at the start of the line, which is how
+     Simple English Wiktionary walked straight past all of them: it writes a
+     derived word as a conditional -- "If something is done ruthlessly, it is
+     done in a ruthless manner" -- and the frame it opens with is different
+     for every part of speech. Rather than add a pattern per house style,
+     this asks what those patterns were asking all along: does the
+     explanation contain the word being explained?
+
+     Five letters of shared beginning, and all but one of the shorter word,
+     so "ruthlessly" finds "ruthless" and "contingent" does not find
+     "continue". The headword itself is skipped, because "A plague is an
+     unusual number of insects" is a definition and not a circle. */
+  function circularRoot(text, term) {
+    var t = String(term || "").toLowerCase();
+    if (t.length < 6) return null;
+    var words = String(text || "").toLowerCase()
+                  .match(/[a-z\u00c0-\u024f'-]{4,}/g) || [];
+    for (var i = 0; i < words.length; i++) {
+      var w = words[i], n = 0;
+      if (w === t) continue;
+      while (n < w.length && n < t.length && w.charAt(n) === t.charAt(n)) n++;
+      if (n >= 5 && n >= Math.min(w.length, t.length) - 1)
+        return { root: w, pos: derivedPos(t) };
     }
     return null;
+  }
+
+  function hollowRoot(text, term) {
+    var t = String(text || "").trim().replace(/^\([^)]*\)\s*/, ""), i, m, r;
+    if (!t) return null;
+    if (t.length <= 72) {
+      for (i = 0; i < HOLLOW.length; i++) {
+        m = HOLLOW[i].re.exec(t);
+        if (!m) continue;
+        r = m[1].toLowerCase().replace(/[.,;:]+$/, "");
+        if (r.length < 4) return null;
+        if (r === String(term || "").toLowerCase()) return null;
+        return { root: r, pos: HOLLOW[i].pos };
+      }
+    }
+    /* Long enough to be saying something is long enough to be left alone:
+       a circle is a frame, and a frame is short. */
+    return t.length <= 130 ? circularRoot(t, term) : null;
   }
 
   /* Hollow only if nothing on the card is better than hollow. One real sense
@@ -1633,7 +1824,10 @@
   /* Bumped when a source is added, so a card told "nobody writes a sentence
      with this word" by the old code asks again, once. 2: the free dictionary
      API is tried when Wiktionary's entry carries no usage example. */
-  var EG_SOURCES = 2;
+  /* 3: a quotation is cut back to the last sentence that ends rather than
+     to the character that happened to be 240th, so every card holding a
+     half-sentence asks once more and gets a whole one or none. */
+  var EG_SOURCES = 3;
 
   function needsEg(w) {
     if (hasExample(w)) return false;
@@ -1705,7 +1899,10 @@
      Wiktionary is read under the right language heading, and a foreign word
      can reach Turkish through its English gloss. Every card that was told
      "nobody knows this" by the old code asks again, once. */
-  var TR_SOURCES = 4;
+  /* 5: a sense is mined for every single word in it, not just the first
+     fragment, so "unhinged" reaches deli through deranged. Every card
+     holding an old "none" asks again, once. */
+  var TR_SOURCES = 5;
 
   function ensureTurkish(w, after) {
     /* `from` is what makes it an answer: Wiktionary, Wikipedia, or none.
@@ -1732,7 +1929,7 @@
     var ask = wl === "en" ? term.toLowerCase() : term;
     /* A word with a gender is a noun, which is the sense to translate. */
     var want = w.gen ? "noun" : (w.want || "");
-    viaTurkish(ask, wl, glossOf(w.senses, want, wl === "en")).then(function (tr) {
+    viaTurkish(ask, wl, glossList(w.senses, want, wl === "en")).then(function (tr) {
       /* Nothing for "acutely": Turkish Wiktionary has no entry, and the
          English one carries no Turkish row, which is usual for an adverb
          built on an adjective. "Acute" has both -- akut, siddetli, keskin.
@@ -1742,7 +1939,7 @@
       var root = w.rootdef && w.rootdef.term;
       if (!root || root.toLowerCase() === String(ask).toLowerCase()) return tr;
       return viaTurkish(wl === "en" ? root.toLowerCase() : root, wl,
-                        glossOf(w.rootdef.senses, "")).then(function (rt) {
+                        glossList(w.rootdef.senses, "")).then(function (rt) {
         if (!rt || rt.unreachable || !rt.from || rt.from === "none") return tr;
         rt.via = root;
         return rt;
@@ -1765,6 +1962,237 @@
       }
       if (after) after();
     });
+  }
+
+  /* ------------------------------------------------------------------
+     The closest word, the opposite word, and the preposition it travels with.
+
+     Three facts a dictionary definition does not give you and a reader needs:
+     one synonym, one antonym, and -- for the words that have one -- the
+     pattern the word is almost always used in. "Coincide" is not used; "
+     coincide with" is.
+
+     Two sources, neither of them invented. Wiktionary keeps hand-written
+     synonym and antonym lists, labelled by sense, which is the better answer
+     where it has one. Datamuse fills in the rest: its lists come from WordNet
+     and its collocations are counted off a real corpus, so a word it knows
+     nothing about returns an empty list rather than a guess -- the same
+     bargain every other source here makes.
+
+     One word each, not a list, because a list of five near-synonyms is five
+     more things to learn and she asked for the closest.
+     ------------------------------------------------------------------ */
+  var DM = "https://api.datamuse.com/words?rel_";
+
+  /* Datamuse sits behind a CDN that caches an answer for a day and varies
+     only on Accept-Encoding -- not on Origin. So a single request made for
+     one of these URLs without an Origin header, by anything, from anywhere,
+     leaves a copy with no CORS header on it, and every browser asking for
+     the next twenty-four hours is told it is not allowed to read a reply
+     that is sitting right there. Nothing is wrong with the request; it is
+     the wrong copy of the answer. Asking again under a different cache key
+     gets a fresh one, and a second failure is a real one. */
+  function dmGet(q) {
+    return getJSON(DM + q + "&max=20")
+      .catch(function () { return getJSON(DM + q + "&max=21"); });
+  }
+
+  /* Bumped when a source is added, so every card asks once more. */
+  var REL_SOURCES = 1;
+
+  var POS_TAG = { noun: "n", verb: "v", adjective: "adj", adverb: "adv" };
+
+  /* How common a word has to be, per million, to be worth offering as the
+     opposite of another one.
+
+     WordNet gives "reentrant" as the antonym of salient, which is right
+     about the geometry and no use at all to a reader who met the word
+     meaning "the salient points" -- and it occurs a quarter of a time in a
+     million words, so she will never meet it either. An antonym she will
+     never see teaches nothing whichever sense it belongs to, and that is the
+     thing frequency can actually measure. The floor sits between reentrant
+     at 0.26 and imprudent at 0.54, which is a word worth knowing.
+
+     Not applied to synonyms: a rare synonym is still a correct one, and
+     "unremittingly" is the only one relentlessly has. */
+  var ANT_FLOOR = 0.4;
+
+  function dmFreq(row) {
+    var tags = (row && row.tags) || [];
+    for (var i = 0; i < tags.length; i++)
+      if (tags[i].indexOf("f:") === 0) return parseFloat(tags[i].slice(2)) || 0;
+    return -1;      /* untagged: unknown, not rare */
+  }
+
+  function dmWords(rel, term, pos, minFreq) {
+    return dmGet(rel + "=" + encodeURIComponent(term) + "&md=pf")
+      .then(function (rows) {
+        if (!Array.isArray(rows)) return [];
+        var want = POS_TAG[String(pos || "").toLowerCase()] || "";
+        var keep = rows.filter(function (r) {
+          if (!r || !r.word) return false;
+          if (r.word.toLowerCase() === String(term).toLowerCase()) return false;
+          if (minFreq) { var f = dmFreq(r); if (f >= 0 && f < minFreq) return false; }
+          if (!want) return true;
+          /* WordNet does not know which sense the card is about, so the part
+             of speech is the one filter available: "vet" as a noun is a
+             veterinarian and as a verb is checking somebody over, and the
+             two have nothing in common. An untagged answer is unlabelled
+             rather than wrong, so it is kept. */
+          var tagged = (r.tags || []).filter(function (t) {
+            return /^(n|v|adj|adv)$/.test(t);
+          });
+          return !tagged.length || tagged.indexOf(want) > -1;
+        });
+        /* One word rather than a phrase: "contingent on" is the pattern,
+           which the line under the headword already says. */
+        var single = keep.filter(function (r) { return /^[a-z][a-z'-]*$/i.test(r.word); });
+        return (single.length ? single : keep).map(function (r) { return r.word; });
+      }).catch(function () { return []; });
+  }
+
+  /* The prepositions and particles a word can be used with. Nothing else
+     counts: "relentlessly pursued" is a thing people write, not a thing the
+     word requires. */
+  var PREP = ("with on upon of to for in into onto from by about at against "
+            + "over under between among as than off out up down after before "
+            + "through toward towards around across").split(" ");
+  /* on/upon and to/into/onto are one pattern written two ways, and splitting
+     the count between them is what made "contingent" look undecided. */
+  var PREP_FAMILY = { upon: "on", into: "to", onto: "to", towards: "toward" };
+
+  /* Three gates, tuned against a basket of twenty-five words rather than
+     guessed at:
+
+       share   how much of the word's prepositional traffic this one family
+               takes. Under 55% nothing is dominant -- "relentlessly" is
+               followed by to, on and in in roughly equal measure.
+       ratio   how far ahead of the next family it is. Under 1.7 the word has
+               two patterns and naming one of them would be a lie.
+       weight  how much of everything that follows the word this family is.
+               Under 30% the preposition is incidental: "mitigate against"
+               clears the first two gates on 4% of the traffic.
+
+     Together they let coincide-with, depend-on/upon, devoid-of, refrain-from,
+     adhere-to and contingent-on/upon through, and keep out "relentlessly to",
+     "almost as", "unhinged by" and "ambiguous in". */
+  function pattern(rows, term) {
+    if (!Array.isArray(rows) || !rows.length) return null;
+    var fams = {}, total = 0, prepmass = 0, i, r, w, f;
+    for (i = 0; i < rows.length; i++) {
+      r = rows[i];
+      if (!r || !r.word || !/^[a-z]+$/i.test(r.word)) continue;
+      total += r.score || 0;
+      w = r.word.toLowerCase();
+      if (PREP.indexOf(w) < 0) continue;
+      f = PREP_FAMILY[w] || w;
+      if (!fams[f]) fams[f] = { score: 0, words: [] };
+      fams[f].score += r.score || 0;
+      fams[f].words.push({ w: w, s: r.score || 0 });
+      prepmass += r.score || 0;
+    }
+    var keys = Object.keys(fams);
+    if (!keys.length || !total || !prepmass) return null;
+    keys.sort(function (a, b) { return fams[b].score - fams[a].score; });
+    var top = fams[keys[0]], next = keys[1] ? fams[keys[1]].score : 0;
+    if (top.score / prepmass < 0.55) return null;
+    if (next && top.score / next < 1.7) return null;
+    if (top.score / total < 0.30) return null;
+    top.words.sort(function (a, b) { return b.s - a.s; });
+    var out = [top.words[0].w];
+    /* The second spelling only when it is genuinely in use too: "contingent
+       upon" is ordinary English and "depend into" is not. */
+    if (top.words[1] && top.words[1].s / top.words[0].s >= 0.4)
+      out.push(top.words[1].w);
+    return out;
+  }
+
+  /* Wiktionary writes these two ways and both are read: inline beneath the
+     sense they belong to, {{syn|en|cruelly|pitilessly}}, and as a list under
+     a Synonyms heading. */
+  function wiktRel(term) {
+    return getJSON(WIKT_RAW + encodeURIComponent(term)).then(function (j) {
+      var wt = j && j.parse && j.parse.wikitext ? j.parse.wikitext["*"] : "";
+      var sec = section(wt || "", "English");
+      if (!sec) return { syn: [], ant: [] };
+      function grab(tpl, head) {
+        var out = [], seen = {}, m;
+        function add(x) {
+          x = cleanWiki(String(x || "")).trim();
+          if (!x || x.length > 28) return;
+          /* A template parameter, not a word: q1=, sense=, id=. */
+          if (/[:=|\[\]{}]/.test(x)) return;
+          if (!/^[a-z][a-z' -]*$/i.test(x)) return;
+          if (x.toLowerCase() === String(term).toLowerCase()) return;
+          if (seen[x.toLowerCase()]) return;
+          seen[x.toLowerCase()] = 1;
+          out.push(x);
+        }
+        var re = new RegExp("\\{\\{" + tpl + "\\|en\\|([^}]*)\\}\\}", "g");
+        while ((m = re.exec(sec))) m[1].split("|").forEach(add);
+        var h = new RegExp("\\n====?\\s*" + head + "\\s*====?\\s*\\n([\\s\\S]*?)(?=\\n=|$)")
+                  .exec("\n" + sec);
+        if (h) {
+          var L = /\{\{l\|en\|([^}|]+)/g, mm;
+          while ((mm = L.exec(h[1]))) add(mm[1]);
+        }
+        return out;
+      }
+      return { syn: grab("(?:syn|synonyms)", "Synonyms"),
+               ant: grab("(?:ant|antonyms)", "Antonyms") };
+    }).catch(function () { return { syn: [], ant: [] }; });
+  }
+
+  var relating = {};
+
+  function ensureRel(w, after) {
+    if (relating[w.id]) return;
+    if (w.rel && (w.rel.v || 0) >= REL_SOURCES) return;
+    /* Both sources are English-only, and neither has anything for a phrase.
+       A settled empty answer, so the card stops asking. */
+    if ((w.lang || "en") !== "en" || /\s/.test(w.term)) {
+      w.rel = { syn: "", ant: "", pat: "", v: REL_SOURCES };
+      save();
+      return;
+    }
+    /* Only once the headword has settled, or the part of speech used to
+       filter the lists is not known yet and "plunged" gets asked about
+       rather than "plunge". */
+    if (!w.looked) return;
+    relating[w.id] = 1;
+    var term = w.term.trim().toLowerCase();
+    var shown = shownSenses(w);
+    var pos = String((shown[0] && shown[0].pos) || w.want || "").toLowerCase();
+
+    Promise.all([
+      dmWords("syn", term, pos),
+      dmWords("ant", term, pos, ANT_FLOOR),
+      dmGet("bga=" + encodeURIComponent(term))
+        .catch(function () { return []; }),
+      wiktRel(term)
+    ]).then(function (got) {
+      delete relating[w.id];
+      var wk = got[3] || { syn: [], ant: [] };
+      /* Synonyms: Wiktionary first, because its lists are written by hand
+         and labelled by sense -- "ruthlessly" gets cruelly and pitilessly
+         there and nothing at all from WordNet.
+
+         Antonyms: WordNet only, and the asymmetry is deliberate. Wiktionary's
+         antonym field is free text that nobody checks, and it is wrong in a
+         way synonyms never are: it offers "unrelentlessly" as the opposite of
+         relentlessly, which is the same word with a prefix and means the same
+         thing, and "hinged" as the opposite of unhinged, which answers a
+         sense about door fittings rather than the one about losing your mind.
+         A loose synonym is still a near-meaning; a wrong antonym teaches the
+         exact opposite of the word. WordNet's are curated pairs, and where it
+         has none the row simply does not appear. */
+      w.rel = { syn: wk.syn[0] || got[0][0] || "",
+                ant: got[1][0] || "",
+                pat: (pattern(got[2], term) || []).join("/"),
+                v: REL_SOURCES };
+      save();
+      if (after) after();
+    }).catch(function () { delete relating[w.id]; });
   }
 
   var saying = {};
@@ -1793,7 +2221,11 @@
   /* Every card outside English already carries a settled "no recording",
      written when there was nowhere to look. Bumping this re-asks those once;
      an English card is untouched, and nothing is fetched twice. */
-  var SAY_SOURCES = 3;
+  /* 5: English stopped relying on one dictionary that has no entry for
+     plenty of ordinary words and whose recordings are all 403 anyway. Every
+     English card settled under an older rule asks again, once, and most of
+     them get a human recording out of it. */
+  var SAY_SOURCES = 5;
 
   function audioFile(name) {
     /* Commons stores a file under the name with spaces as underscores; the
@@ -1801,6 +2233,26 @@
     name = String(name || "").trim().replace(/\s+/g, "_");
     if (!/\.(ogg|oga|wav|mp3|flac)$/i.test(name)) return "";
     return COMMONS + encodeURIComponent(name);
+  }
+
+  /* Several recordings are usually listed and they are not interchangeable.
+     Safari plays wav and mp3 anywhere; Ogg Vorbis only arrived there
+     recently and not at all on an older iPhone, so a file it can certainly
+     play beats the one that happens to be first. After format, accent: an
+     American recording for an English card, which is the one she is
+     listening for and the same preference the synthetic voice makes. */
+  function pickAudio(files, code) {
+    if (!files || !files.length) return "";
+    function rank(n) {
+      var e = (/\.([a-z0-9]+)$/i.exec(n) || ["", ""])[1].toLowerCase();
+      var fmt = (e === "wav" || e === "mp3") ? 0 : (e === "flac" ? 2 : 1);
+      var acc = (code === "en" && /en[-_]us|\bus[-_]/i.test(n)) ? 0 : 1;
+      return fmt * 2 + acc;
+    }
+    var best = files[0], i;
+    for (i = 1; i < files.length; i++)
+      if (rank(files[i]) < rank(best)) best = files[i];
+    return best;
   }
 
   function sayFromWikitext(wikitext, code) {
@@ -1817,8 +2269,9 @@
         if (/latin|america|mexic|colomb|peru|argentin|chile/i.test(all[i].a)) file = all[i].f;
       if (!file && all.length) file = all[0].f;
     } else {
-      m = new RegExp("\\{\\{audio\\|" + code + "\\|([^|}]+)").exec(sec);
-      if (m) file = m[1];
+      var files = [], am = new RegExp("\\{\\{audio\\|" + code + "\\|([^|}]+)", "g");
+      while ((m = am.exec(sec))) files.push(m[1].trim());
+      file = pickAudio(files, code);
     }
     m = new RegExp("\\{\\{IPA\\|" + code + "\\|([^|}]+)").exec(sec);
     if (m) ipa = String(m[1]).trim();
@@ -1833,7 +2286,6 @@
      was stricter than the one inside it and nothing was ever re-asked. */
   function needsSay(w) {
     if (!w.say) return true;
-    if ((w.lang || "en") === "en") return false;
     return (w.say.v || 0) < SAY_SOURCES;
   }
 
@@ -1880,23 +2332,109 @@
       if (after) after();
       return;
     }
+    /* Two sources, asked at the same time, because each is strong exactly
+       where the other is weak.
+
+       The free dictionary was the only one, and it is thin: it has an mp3
+       for "ruthlessly", the phonetic spelling but no recording for
+       "relentlessly", and no entry at all for "unhinged" -- which is why
+       that card showed no phonetics and why the speaker fell back to the
+       browser's synthetic voice, the half of this that iOS keeps refusing.
+       The English Wiktionary page has a human recording and an IPA line for
+       all three, and it is a page this card already fetches for its
+       translations, so the browser usually has it. */
     saying[w.id] = 1;
-    getJSON(DICT + encodeURIComponent(w.term.trim().toLowerCase()))
-      .then(fromPhonetics)
-      .catch(function () { return null; })
-      .then(function (say) {
-        delete saying[w.id];
-        w.say = say || { audio: "", ipa: "", us: false };
-        save();
-        if (after) after();
-      });
+    var en = w.term.trim().toLowerCase();
+    /* "Reached" is the difference between a source that answered with
+       nothing and one that never answered. A 404 is an answer: there is no
+       such entry. Anything else is the request failing, and writing that
+       down as "this word has no recording" is how "salient" ended up silent
+       and with no phonetic spelling for good -- it has both on Wiktionary,
+       and one bad minute of network was enough to settle the question
+       forever. */
+    function asked(p) {
+      return p.then(function (v) { return { ok: true, say: v }; })
+              .catch(function (e) { return { ok: !!(e && e.status === 404), say: null }; });
+    }
+    Promise.all([
+      asked(getJSON(DICT + encodeURIComponent(en)).then(fromPhonetics)),
+      asked(getJSON(WIKT_RAW + encodeURIComponent(en))
+        .then(function (d) {
+          var txt = d && d.parse && d.parse.wikitext ? d.parse.wikitext["*"] : "";
+          return txt ? sayFromWikitext(txt, "en") : null;
+        }))
+    ]).then(function (res) {
+      delete saying[w.id];
+      var both = [res[0].say, res[1].say];
+      var reached = res[0].ok || res[1].ok;
+      var missed = ((w.say && w.say.miss) || 0) + 1;
+      var d = both[0] || {}, k = both[1] || {};
+      /* Wiktionary for the recording, and only Wiktionary.
+
+         The free dictionary still lists an mp3 for a good many words, and
+         every one of those URLs answers 403: the API is up, its media host
+         is not. So the card used to save a dead address, the press would
+         fail a moment later, and the fallback to the browser's own voice
+         happened off the back of the tap rather than inside it -- which is
+         the one thing iOS refuses. That is the whole of "it works on some
+         words and not others": it worked on the words with no mp3 to try.
+
+         Its phonetic spelling is still worth having and still arrives, so
+         the request stays; only the audio is ignored. */
+      w.say = { audio: k.audio || "",
+                ipa: d.ipa || k.ipa || "",
+                us: !!d.us };
+      /* Settled when somebody answered, or after three goes -- the same
+         bargain the headword lookup and the translation both make, so a
+         card cannot ask forever. */
+      if (reached || missed >= LOOK_TRIES) w.say.v = SAY_SOURCES;
+      else w.say.miss = missed;
+      save();
+      if (after) after();
+    });
   }
 
   var player = null;
 
+  /* iOS will not speak at all until it has been asked once from inside a
+     real tap, and a tap it has already spent on something else does not
+     count. So the very first touch anywhere in the app spends a silent
+     utterance buying the permission, and every press after it works. */
+  var voiceReady = false;
+
+  function unlockVoice() {
+    if (voiceReady || !window.speechSynthesis) return;
+    voiceReady = true;
+    try {
+      var u = new SpeechSynthesisUtterance(" ");
+      u.volume = 0;
+      window.speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+  document.addEventListener("pointerdown", unlockVoice, true);
+  document.addEventListener("touchend", unlockVoice, true);
+
+  /* Asked before the recording is attempted rather than after it fails.
+     play() rejects a moment later, off the back of the tap, and by then iOS
+     counts the fallback as speech nobody asked for and refuses it -- which
+     is the other half of why the button worked on some cards and not on
+     others. */
+  function playable(src) {
+    try {
+      var e = (/\.([a-z0-9]+)(?:[?#]|$)/i.exec(src) || ["", ""])[1].toLowerCase();
+      var t = e === "mp3" ? "audio/mpeg" : e === "wav" ? "audio/wav"
+            : (e === "ogg" || e === "oga") ? "audio/ogg"
+            : e === "flac" ? "audio/flac" : "";
+      if (!t) return true;
+      var a = document.createElement("audio");
+      return !(a.canPlayType && a.canPlayType(t) === "");
+    } catch (e) { return true; }
+  }
+
   function speak(w) {
+    unlockVoice();
     var src = w.say && w.say.audio;
-    if (src) {
+    if (src && playable(src)) {
       try {
         if (player) player.pause();
         player = new Audio(src);
@@ -1911,22 +2449,38 @@
      that is the one she is listening for. */
   function voice(term, code) {
     try {
-      if (!window.speechSynthesis) return;
-      window.speechSynthesis.cancel();
+      var synth = window.speechSynthesis;
+      if (!synth) { toast("This browser cannot say words out loud."); return; }
       var want = lang(code).voice;
-      var u = new SpeechSynthesisUtterance(term);
-      u.lang = want;
-      var vs = window.speechSynthesis.getVoices() || [], i;
-      /* An exact match first, then any voice for the same language: a Mac may
-         have es-MX and no es-ES, and Mexican Spanish is a great deal better
-         than reading Spanish aloud in an American accent. */
-      for (i = 0; i < vs.length; i++) if (vs[i].lang === want) { u.voice = vs[i]; break; }
-      if (!u.voice) {
-        for (i = 0; i < vs.length; i++) {
-          if (vs[i].lang && vs[i].lang.slice(0, 2) === want.slice(0, 2)) { u.voice = vs[i]; break; }
+      function go() {
+        var u = new SpeechSynthesisUtterance(term);
+        u.lang = want;
+        var vs = synth.getVoices() || [], i;
+        /* An exact match first, then any voice for the same language: a Mac may
+           have es-MX and no es-ES, and Mexican Spanish is a great deal better
+           than reading Spanish aloud in an American accent. */
+        for (i = 0; i < vs.length; i++) if (vs[i].lang === want) { u.voice = vs[i]; break; }
+        if (!u.voice) {
+          for (i = 0; i < vs.length; i++) {
+            if (vs[i].lang && vs[i].lang.slice(0, 2) === want.slice(0, 2)) { u.voice = vs[i]; break; }
+          }
         }
+        /* Silence used to be indistinguishable from a word with no recording.
+           "interrupted" and "canceled" are this code stopping the last one on
+           purpose, so they are not failures and are not reported. */
+        u.onerror = function (e) {
+          var why = (e && e.error) || "";
+          if (why === "interrupted" || why === "canceled") return;
+          toast("This browser would not say it out loud.");
+        };
+        synth.speak(u);
       }
-      window.speechSynthesis.speak(u);
+      /* cancel() and speak() in the same breath is the documented way to get
+         silence out of Safari: the cancel lands on the new utterance. So it
+         only runs when there is something playing, and the new one waits a
+         tick for it to finish landing. */
+      if (synth.speaking || synth.pending) { synth.cancel(); setTimeout(go, 130); }
+      else go();
     } catch (e) {}
   }
 
@@ -1987,6 +2541,35 @@
   var FRAME = /^(if |when |you use )/i;
   var ASIDE = /^(synonyms?|antonyms?|related words?|usage|other words?|notes?)\s*:/i;
 
+  /* Simple Wiktionary runs its synonym and antonym lists onto the end of the
+     definition rather than onto a line of their own, so "contingent" arrived
+     as "...it is possible that it might happen. Synonyms: incidental and
+     casual Antonyms: certain and inevitable" -- a meaning with a reference
+     list glued to it, which is how it was reading on the card.
+
+     Split off, they stop cluttering the definition and start being the two
+     rows underneath it. These are the best pair there is: written by hand,
+     for a learner, and attached to the sense they belong to rather than to
+     the spelling, which is what no thesaurus can do. */
+  function splitAside(text) {
+    var out = { text: String(text || "").trim(), syn: [], ant: [] };
+    var re = /(?:^|\s+)(Synonyms?|Antonyms?)\s*:\s*/g, m, marks = [];
+    while ((m = re.exec(out.text)))
+      marks.push({ at: m.index, end: re.lastIndex, syn: /^s/i.test(m[1]) });
+    if (!marks.length) return out;
+    for (var i = 0; i < marks.length; i++) {
+      var stop = (i + 1 < marks.length) ? marks[i + 1].at : out.text.length;
+      var list = out.text.slice(marks[i].end, stop)
+        .split(/\s*(?:,|;|\band\b|\bor\b)\s*/)
+        .map(function (x) { return x.replace(/[.\s]+$/, "").trim(); })
+        .filter(function (x) { return /^[a-z][a-z' -]{2,27}$/i.test(x); });
+      var into = marks[i].syn ? out.syn : out.ant;
+      into.push.apply(into, list);
+    }
+    out.text = out.text.slice(0, marks[0].at).trim();
+    return out;
+  }
+
   function fromSimple(extract, term) {
     var lines = String(extract || "").split("\n"), out = [], pos = "", last = null, i, t, m;
     /* Simple Wiktionary writes a definition as a sentence about the word --
@@ -2005,9 +2588,20 @@
       if (m) { pos = m[1]; last = null; continue; }
       /* any other heading -- Pronunciation, Etymology -- ends the section */
       if (t.charAt(0) === "=") { pos = ""; last = null; continue; }
-      if (!pos || ASIDE.test(t)) continue;
+      if (!pos) continue;
+      /* A list on a line of its own belongs to the sense above it. */
+      if (ASIDE.test(t)) {
+        if (last) {
+          var side = splitAside(t);
+          last.syn = (last.syn || []).concat(side.syn);
+          last.ant = (last.ant || []).concat(side.ant);
+        }
+        continue;
+      }
       if (!last || t.charAt(0) === "(" || FRAME.test(t) || (SELF && SELF.test(t))) {
-        last = { pos: pos, text: t, example: "" };
+        var cut = splitAside(t);
+        last = { pos: pos, text: cut.text, example: "",
+                 syn: cut.syn, ant: cut.ant };
         out.push(last);
       } else if (!last.example) {
         last.example = t;
@@ -2880,6 +3474,7 @@
             + sayBtn(w)
             + '</div>'
             + seenAsLine(w)
+            + patLine(w)
             + '<div class="tap">Tap, or press space, to see the meaning</div></div>';
     } else {
       html += '<div class="face back" id="back" tabindex="0" role="button" '
@@ -2892,6 +3487,7 @@
                headword is what the dictionary files it under; this is the
                form she will actually meet again on a page. */
             + seenAsLine(w)
+            + patLine(w)
             + '<div class="pill" style="align-self:flex-start;margin-top:2px">'
             + esc(w.deck || "Inbox") + '</div>';
       if (!w.looked && !w.senses.length) {
@@ -2915,7 +3511,14 @@
         /* Plain English when there is any, the precise senses when she asks
            for them or when Simple Wiktionary has never heard of the word. */
         var shown = shownSenses(w);
-        for (var i = 0; i < shown.length; i++) {
+        /* Where every sense on the card is a circle -- "ruthlessly: in a
+           ruthless manner" -- the root is not a footnote, it is the answer,
+           so it takes the place of the circle rather than sitting under it.
+           Only once it has actually arrived: until then the circular line is
+           still the only thing there is, and a blank card is worse. */
+        var leaning = !!(needsRoot(w) && w.rootdef && w.rootdef.senses
+                         && w.rootdef.senses.length);
+        for (var i = 0; !leaning && i < shown.length; i++) {
           var s = shown[i];
           html += '<div class="sense">'
                 + (s.pos ? '<div class="pos">' + esc(s.pos) + '</div>' : '')
@@ -2934,9 +3537,18 @@
              one and it is the only one shown from then on; a tap on it
              gives the others back. */
           var rs = w.rootdef.senses, pin = rootPin(w);
-          html += '<div class="rootdef"><b>' + esc(w.rootdef.term)
-                + (rs[0].pos ? ' <span>' + esc(rs[0].pos) + '</span>' : '')
-                + '</b>';
+          var ownPos = (shown[0] && shown[0].pos) || "";
+          html += '<div class="rootdef' + (leaning ? ' lead' : '') + '">';
+          /* Leading: the card's own part of speech, then the word the meaning
+             belongs to -- "ADVERB . from ruthless". Underneath: the root
+             named for itself, because the line above it is still the answer
+             and this one is an aside. */
+          html += leaning
+            ? '<div class="pos">' + esc(ownPos) + (ownPos ? ' \u00b7 ' : '')
+              + 'from ' + esc(w.rootdef.term) + '</div>'
+            : '<b>' + esc(w.rootdef.term)
+              + (rs[0].pos ? ' <span>' + esc(rs[0].pos) + '</span>' : '')
+              + '</b>';
           if (pin >= 0) {
             html += '<p class="rootpinned" data-rootall="1" role="button" '
                   + 'tabindex="0" title="Show the other meanings">'
@@ -2963,6 +3575,8 @@
                 + esc(needsRootLook(w).root) + '</b>\u2026</p></div>';
         }
       }
+      html += relRows(w);
+
       if (trOpen) {
         html += '<div class="yournote tr"><b>T\u00fcrk\u00e7e</b>';
         /* The failure is checked first. A lookup that could not reach its
@@ -3111,6 +3725,8 @@
       }
       /* Quietly, while she is still trying to remember it. */
       if (needsEg(w)) ensureExample(w);
+      /* The pattern is on this face too, so it is asked for on this face. */
+      ensureRel(w, function () { if (session[0] === w) renderDue(); });
     } else {
       $("gNo").addEventListener("click", function () { answer("no"); });
       $("gMid").addEventListener("click", function () { answer("mid"); });
@@ -3148,6 +3764,7 @@
       if (w.looked && w.plain) {
         ensureRoot(w, function () { if (flipped) renderDue(); });
       }
+      ensureRel(w, function () { if (flipped) renderDue(); });
       if ($("fullBtn")) {
         $("fullBtn").addEventListener("click", function () {
           fullOpen = !fullOpen; renderDue();
@@ -3293,6 +3910,53 @@
   /* Offered on every card. The gate used to be English-only, which made the
      Turkish a feature of one space out of four -- and Turkish is the first
      language, so it is wanted most on the ones that are not English. */
+  /* Under the headword on both faces, because it is a fact about the word
+     she is looking at rather than part of the answer she is trying to
+     remember. The headword itself stays the lemma: it is what the bookmarklet
+     saved, what the decks are keyed to, and what stops the same word being
+     added twice -- and a word with two patterns, "contingent on" and
+     "contingent upon", has no single headword to become. */
+  function patLine(w) {
+    if (!(w.rel && w.rel.pat)) return "";
+    var ps = w.rel.pat.split("/");
+    return '<div class="colloc"><span>Often used with</span>'
+         + '<b>' + esc(headword(w)) + " " + esc(ps[0]) + '</b>'
+         + (ps[1] ? ' <span style="text-transform:none;letter-spacing:0;'
+                  + 'font-family:inherit;font-size:13px">or ' + esc(ps[1])
+                  + '</span>' : '')
+         + '</div>';
+  }
+
+  /* Nothing at all where there is nothing: WordNet carries an antonym for
+     about a third of words and Wiktionary for rather fewer, and an empty row
+     saying so would be on most cards. */
+  function relRows(w) {
+    /* Chosen here rather than when the lists were fetched, because the best
+       answer arrives last. The collocation is wanted on the front of the
+       card, so the thesaurus is asked for while she is still looking at the
+       word -- and at that point the plain-English senses have not loaded, so
+       the pair written for the sense on the card is not there to prefer yet.
+       Deciding at render time means it is used the moment it arrives.
+
+       "Contingent" is the case: it leads with the military quota, and a
+       thesaurus asked about a noun answers "contingency". The adjective
+       sense underneath carries incidental and casual, written for it. */
+    var shown = shownSenses(w), own = { syn: [], ant: [] }, i;
+    for (i = 0; i < shown.length; i++) {
+      if (shown[i].syn) own.syn = own.syn.concat(shown[i].syn);
+      if (shown[i].ant) own.ant = own.ant.concat(shown[i].ant);
+    }
+    var syn = own.syn[0] || (w.rel && w.rel.syn) || "";
+    var ant = own.ant[0] || (w.rel && w.rel.ant) || "";
+    if (!syn && !ant) return "";
+    function row(label, word) {
+      return word ? '<div class="relrow"><span>' + label + '</span>'
+                  + '<b>' + esc(word) + '</b></div>' : '';
+    }
+    return '<div class="rels">' + row("Synonym", syn)
+         + row("Antonym", ant) + '</div>';
+  }
+
   function trButton(w) {
     return '<button class="btn-q' + (trOpen ? ' is-on' : '') + '" id="trBtn">'
          + (trOpen ? 'Hide T\u00fcrk\u00e7e' : 'T\u00fcrk\u00e7e') + '</button>';
