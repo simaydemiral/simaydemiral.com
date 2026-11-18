@@ -782,9 +782,11 @@
           mask-repeat: repeat;
 }
 
-/* Starts a beat into the panel's swing rather than with it, so the two
-   read as one movement settling instead of two things happening at once. */
-.slot[data-on] .plate-art--photo {
+/* Only once the reader has actually moved between products -- data-live is
+   set by the first click or arrow key, never by the page loading or by a
+   deep link. Starts a beat into the panel's swing rather than with it, so
+   the two read as one movement settling rather than two at once. */
+.shelf-rail[data-live] .slot[data-on] .plate-art--photo {
   animation: plate-assemble 2.05s cubic-bezier(.3, .7, .3, 1) 0.22s both;
 }
 

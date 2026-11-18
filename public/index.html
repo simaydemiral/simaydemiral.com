@@ -25,8 +25,8 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f%5B%5D=switzer@400,500,600&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="/style.css?v=20261118130317">
-  <link rel="stylesheet" href="/shelf.css?v=20261118130317">
+  <link rel="stylesheet" href="/style.css?v=20261118131238">
+  <link rel="stylesheet" href="/shelf.css?v=20261118131238">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="/icon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -571,6 +571,18 @@
     if (k === current) return;
     var was = current;
     current = k;
+
+    /* The plates sit still while the page loads and only assemble once the
+       reader moves between products.
+
+       moveFocus is what tells the two apart: a click or an arrow key passes
+       true, the deep-link restore that runs on load passes false. The flag
+       goes on once and stays on, so every switch after the first animates,
+       including coming back to whichever one was open when the page loaded.
+
+       Set before the loop below touches data-on. The rule has to be matching
+       at the moment the panel is displayed, or the animation never starts. */
+    if (moveFocus) rail.setAttribute('data-live', '');
 
     /* Which side is it coming from? A project standing to the right of the
        one that was open swings in from the right, and the other way round,
