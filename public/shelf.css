@@ -747,3 +747,49 @@
     to  { opacity: 1; transform: none; }
   }
 }
+
+/* ---------------------------------------------------------------
+   The plate arrives.
+
+   These drawings are background images, not masks -- .plate-art--photo
+   turns the mask off so the artwork keeps its own colours -- which
+   leaves the mask layer free to do something else entirely. So a grid
+   of dots goes there, and growing them until they overlap makes the
+   illustration assemble itself out of the grid rather than simply
+   being switched on.
+
+   Keyed to [data-on] rather than [data-swing]: the swing attribute is
+   taken off the slot the moment the panel's own 0.78s animation ends,
+   and this one is still running at that point -- it would be cut off
+   halfway through. [data-on] stays for as long as the panel is open
+   and is re-applied every time one is, which is exactly when this
+   should play.
+
+   --dot's initial value is the finished state, so a browser with no
+   @property support, or a reader who has asked for no motion, gets the
+   drawing rather than an empty square.
+   --------------------------------------------------------------- */
+@property --dot { syntax: "<percentage>"; inherits: false; initial-value: 150%; }
+
+.plate-art--photo {
+  --dot: 150%;
+  --cell: 7px;
+  -webkit-mask-image: radial-gradient(circle closest-side, #000 var(--dot), transparent calc(var(--dot) + 1%));
+          mask-image: radial-gradient(circle closest-side, #000 var(--dot), transparent calc(var(--dot) + 1%));
+  -webkit-mask-size: var(--cell) var(--cell);
+          mask-size: var(--cell) var(--cell);
+  -webkit-mask-repeat: repeat;
+          mask-repeat: repeat;
+}
+
+/* Starts a beat into the panel's swing rather than with it, so the two
+   read as one movement settling instead of two things happening at once. */
+.slot[data-on] .plate-art--photo {
+  animation: plate-assemble 2.05s cubic-bezier(.3, .7, .3, 1) 0.22s both;
+}
+
+@keyframes plate-assemble {
+  0%   { --dot: 0%;   opacity: 0; }
+  20%  {              opacity: 0.95; }
+  100% { --dot: 150%; opacity: 0.95; }
+}
