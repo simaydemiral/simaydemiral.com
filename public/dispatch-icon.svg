@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- The Dispatch's own mark: the masthead globe reduced to what survives
+       at 16 pixels, which is a tab's real size.
+
+       A first version kept the full wireframe — two parallels, two
+       meridians, the orbit — and it read beautifully at 128 and turned to
+       mush at 16: at that size this viewBox scales by a quarter, so a
+       stroke under 4 is thinner than one pixel and six of them inside a
+       19px circle merge into a smudge. What is left is the fewest lines
+       that still say sphere rather than circle — outline, equator, one
+       meridian — plus the orbit, which is what keeps the silhouette from
+       being any other globe icon. Palette is the site's star: the page's
+       own background, copper lines, one bone-white node. -->
+  <rect width="64" height="64" rx="14" fill="#171210"/>
+
+  <g fill="none" stroke="#e8935a" stroke-linecap="round">
+    <!-- the orbit, tilted and drawn first so the sphere sits in front -->
+    <ellipse cx="32" cy="32" rx="27" ry="9.5" opacity=".58"
+             stroke-width="3" transform="rotate(-24 32 32)"/>
+
+    <!-- the sphere, and the two lines that turn it from a disc into one -->
+    <circle cx="32" cy="32" r="19" stroke-width="4"/>
+    <ellipse cx="32" cy="32" rx="19" ry="6.8" stroke-width="3.1" opacity=".92"/>
+    <ellipse cx="32" cy="32" rx="7.6" ry="19" stroke-width="3.1" opacity=".92"/>
+  </g>
+
+  <!-- one lit node on the orbit, the way the masthead carries a few -->
+  <circle cx="51.5" cy="20.5" r="3.6" fill="#f5ebdd"/>
+</svg>
