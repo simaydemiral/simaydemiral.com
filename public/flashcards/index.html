@@ -581,7 +581,7 @@
      card asks again the next time it is turned over. Nothing else is
      touched: the box, the dates, the note and the sentence stay as they
      are. */
-  var TR_RETRY = 1;
+  var TR_RETRY = 2;
 
   function normalize(list) {
     if (!Array.isArray(list)) return [];
@@ -615,7 +615,14 @@
       w.tv = Number(w.tv) || 0;
       if (w.tv < TR_RETRY) {
         w.tv = TR_RETRY;
-        if (w.tr && (!w.tr.from || w.tr.from === "none")) delete w.tr;
+        /* Any record holding no translation goes, whatever it says it
+           asked: the ones naming no source, and the ones naming one and
+           coming back empty. Both are asked again the next time the card
+           is turned over. */
+        if (w.tr && !(((w.tr.blocks || []).length) || ((w.tr.more || []).length)
+                      || w.tr.one)) {
+          delete w.tr;
+        }
       }
       w.forms = formsOf(w)
         .filter(function (x) { return typeof x === "string" && x.trim(); })
@@ -2391,6 +2398,11 @@
      holding an old "none" asks again, once. */
   var TR_SOURCES = 5;
 
+  function hasTurkish(w) {
+    return !!(w.tr && (((w.tr.blocks || []).length) || ((w.tr.more || []).length)
+                       || w.tr.one));
+  }
+
   function ensureTurkish(w, after) {
     /* `from` is what makes it an answer: Wiktionary, Wikipedia, or none.
        A record saved by the older build has from:"" — that was a failure
@@ -2399,8 +2411,17 @@
        reaches it too, and the two are indistinguishable from here. So a
        "none" is tried three times across three viewings before it is
        believed, the same way a failed definition is. */
+    /* An answer is a translation, not a source's name. A record can carry
+       "T\u00fcrk\u00e7e Vikis\u00f6zl\u00fck" and nothing else -- the page was reachable and had
+       no Turkish in it, or had one when it was asked and the sense did not
+       match -- and that read as settled for ever because `from` was not
+       "none". A card like that shows "neither Wiktionary nor Wikipedia has
+       a Turkish entry for this one" and never asks again, which is what an
+       empty record looks like from the outside: Turkish that stopped
+       working. Empty is empty, whoever said it, and gets the same three
+       goes as a "none" before it is believed. */
     var ok = w.tr && w.tr.from && (w.tr.v || 0) >= TR_SOURCES;
-    var settled = ok && (w.tr.from !== "none" || (w.tr.miss || 0) >= LOOK_TRIES);
+    var settled = ok && (hasTurkish(w) || (w.tr.miss || 0) >= LOOK_TRIES);
     if (settled || translating[w.id]) return;
     translating[w.id] = 1;
     /* The word the dictionary actually settled on: "Evals" resolves through
@@ -2440,10 +2461,11 @@
         trFailed = false;
         tr.v = TR_SOURCES;
         /* Carried across the retries, so three goes means three and not
-           three every time the card comes round. */
-        if (tr.from === "none") {
-          tr.miss = ((w.tr && w.tr.from === "none" && w.tr.miss) || 0) + 1;
-        }
+           three every time the card comes round. Counted for any empty
+           answer, not only one that names no source: a source that was
+           reached and had nothing is the same nothing. */
+        var empty = !(((tr.blocks || []).length) || ((tr.more || []).length) || tr.one);
+        if (empty) tr.miss = ((w.tr && !hasTurkish(w) && w.tr.miss) || 0) + 1;
         w.tr = tr;
         save();
       }
@@ -4208,7 +4230,9 @@
         } else {
           html += '<span class="notetext" style="color:var(--warn)">'
                 + 'Neither Wiktionary nor Wikipedia has a Turkish entry for this '
-                + 'one. Nothing invented \u2014 write your own below.</span>';
+                + 'one. Nothing invented \u2014 write your own below.</span>'
+                + ' <button class="btn-q" id="trAgain" '
+                + 'title="Ask the sources again">Ask again</button>';
         }
         html += '</div>';
       }
@@ -5313,6 +5337,22 @@
     if (get("data-rootall") !== null && session[0]) {
       session[0].rootpin = -1;
       mark(session[0].id); save(); renderDue();
+      return;
+    }
+
+    /* The same escape hatch the definition has: three goes is a ceiling,
+       not a verdict, and a word that came back empty once -- a source
+       briefly down, a sense that did not match -- should be askable again
+       without waiting for a migration to clear it. */
+    if (e.target && e.target.id === "trAgain") {
+      var tw = session[0];
+      if (tw) {
+        delete tw.tr;
+        trFailed = false;
+        save();
+        renderDue();
+        ensureTurkish(tw, function () { if (flipped && trOpen) renderDue(); });
+      }
       return;
     }
 
