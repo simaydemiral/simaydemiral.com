@@ -229,6 +229,21 @@ const KNOWS = {
   src: (w) => !!(w.src && w.src.sentence)
 };
 
+/* The word with its stamp taken off, keys in order, so two copies can be
+   compared without the stamp -- which is the only thing that differs when a
+   device re-sends a word it has not actually changed. Comparing the stored
+   JSON directly, stamp and all, meant every such push looked like a change
+   and cost a row. */
+function same(a, b) {
+  const flat = (o) => {
+    if (o === null || typeof o !== "object") return JSON.stringify(o);
+    if (Array.isArray(o)) return "[" + o.map(flat).join(",") + "]";
+    return "{" + Object.keys(o).filter((k) => k !== "updated").sort()
+      .map((k) => JSON.stringify(k) + ":" + flat(o[k])).join(",") + "}";
+  };
+  return flat(a) === flat(b);
+}
+
 function mergeWords(mine, theirs) {
   const base = (Number(theirs.updated) || 0) > (Number(mine.updated) || 0) ? theirs : mine;
   const other = base === theirs ? mine : theirs;
@@ -324,7 +339,15 @@ async function sync(req, env) {
     }
 
     const body = JSON.stringify(merged);
-    if (was && body === was.body && updated === Number(was.updated)) continue;
+    /* The stamp alone is not worth a row. If the word itself is unchanged,
+       whatever the two sides say about when it was last touched, there is
+       nothing here the other device needs and writing it costs a row on a
+       database that counts them. */
+    if (was) {
+      let old = null;
+      try { old = JSON.parse(was.body); } catch { old = null; }
+      if (old && same(old, merged)) continue;
+    }
 
     writes.push(env.vocab.prepare(
       `INSERT INTO words (user_id, word_id, body, updated, deleted)

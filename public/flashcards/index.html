@@ -801,11 +801,46 @@
   /* dirty: something here has not reached the server yet. tries: how many
      times in a row the attempt has failed, which sets how long to wait. */
   var dirty = false, tries = 0, retryTimer = null, sayingSync = null;
+  /* What the server was last given, per word. Everything used to go up on
+     every sync -- a hundred-odd words, whether or not any of them had
+     changed -- and the server writes a row for each one it has to take.
+     One answer is one changed word; sending the other ninety-nine with it
+     is a hundred times the writes for nothing. Empty means "it has nothing
+     of ours", which is true at the start of a session and after a signed-in
+     device has been away, so the first sync of a session still sends
+     everything. */
+  var sent = null;
+
+  function toSend() {
+    var out = [], i, w;
+    if (!sent) {
+      for (i = 0; i < db.words.length; i++) out.push(db.words[i]);
+    } else {
+      for (i = 0; i < db.words.length; i++) {
+        w = db.words[i];
+        if (sent[w.id] !== bodyOf(w)) out.push(w);
+      }
+    }
+    /* Tombstones and decks are small and the server needs them to settle
+       what it holds, so they go every time. */
+    return out.concat(db.gone || []).concat(deckRecords());
+  }
+
+  function markSent() {
+    sent = {};
+    for (var i = 0; i < db.words.length; i++) sent[db.words[i].id] = bodyOf(db.words[i]);
+  }
+
+  /* No two syncs closer together than this, whatever asks for them. A
+     sync is cheap for the page and not cheap for the database behind it,
+     and anything that can ask twice can ask a thousand times. */
+  var FLOOR = 8000;
 
   function syncSoon() {
     if (DEMO || !me || !me.signedIn) return;
     clearTimeout(syncTimer);
-    syncTimer = setTimeout(syncNow, 1200);   /* settle after a burst of edits */
+    var since = Date.now() - lastSync;
+    syncTimer = setTimeout(syncNow, Math.max(1200, FLOOR - since));
   }
 
   /* A deck crosses to the other device as one more record in the same list,
@@ -904,6 +939,10 @@
 
   function syncNow() {
     if (DEMO || syncing || !me || !me.signedIn) return;
+    /* Asked again too soon -- a burst of answers, a tab coming back twice,
+       a merge that wants to push what it just merged -- waits its turn
+       rather than being refused, so nothing is lost by the floor. */
+    if (lastSync && Date.now() - lastSync < FLOOR && !tries) { syncSoon(); return; }
     syncing = true;
     /* "syncing..." is only worth saying if it lasts long enough to read. A
        sync over a decent connection is done in under a second, and saying
@@ -912,7 +951,7 @@
        reads as something going wrong rather than something working. */
     clearTimeout(sayingSync);
     sayingSync = setTimeout(function () { if (syncing) renderAccount(); }, 900);
-    var payload = db.words.concat(db.gone || []).concat(deckRecords());
+    var payload = toSend();
     fetch("/api/sync", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -930,6 +969,10 @@
         dirty = false;
         tries = 0;
         absorb(out.words);
+        /* After the merge, not before: what the server has is what this
+           device holds now, so the next sync sends only what changes from
+           here. */
+        markSent();
         lastSync = Date.now();
         renderAccount();
       })
@@ -953,9 +996,9 @@
   window.addEventListener("online", function () { tries = 0; syncNow(); });
 
   setInterval(function () {
-    if (!document.hidden && me && me.signedIn && (dirty || Date.now() - lastSync > 300000))
+    if (!document.hidden && me && me.signedIn && (dirty || Date.now() - lastSync > 900000))
       syncNow();
-  }, 60000);
+  }, 300000);
 
   /* Closing the app with an answer still in hand was the whole of this
      morning's trouble. A beacon is delivered by the browser after the page
@@ -963,9 +1006,12 @@
   window.addEventListener("pagehide", function () {
     if (DEMO || !dirty || !me || !me.signedIn || !navigator.sendBeacon) return;
     try {
-      var payload = db.words.concat(db.gone || []).concat(deckRecords());
+      /* The same short list a sync would send, not the whole collection:
+         a beacon fires on every close, and the page has no way to hear
+         what came back, so sending more than has changed is a write per
+         word for nothing. */
       navigator.sendBeacon("/api/sync",
-        new Blob([JSON.stringify({ words: payload })], { type: "application/json" }));
+        new Blob([JSON.stringify({ words: toSend() })], { type: "application/json" }));
     } catch (e) {}
   });
 
