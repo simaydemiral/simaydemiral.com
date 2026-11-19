@@ -81,7 +81,11 @@
 
   .btn,.btn-q{font:inherit;font-size:13px;border-radius:8px;cursor:pointer;
     padding:7px 13px;border:1px solid var(--line);background:var(--surface);
-    color:var(--ink);transition:border-color .15s,background .15s,color .15s}
+    color:var(--ink);transition:border-color .15s,background .15s,color .15s;
+    /* Sync now and Sign out were being squeezed by the flex row they sit in
+       until each label broke over two lines. A button is a label with a box
+       around it: the box gives way, never the label. */
+    white-space:nowrap;flex:none}
   .btn{background:var(--ink);color:var(--surface);border-color:var(--ink);font-weight:600}
   .btn:hover{opacity:.9}
   .btn-q:hover{border-color:var(--brand);color:var(--brand)}
@@ -209,10 +213,13 @@
   .space:hover{color:var(--ink)}
   .space.on{background:var(--brand-wash);border-color:var(--brand);color:var(--brand)}
   .space-n{font:500 11px/1 var(--f-mono);margin-left:7px;opacity:.75}
-  #account{display:inline-flex;align-items:center;gap:8px;margin-left:4px}
+  #account{display:inline-flex;align-items:center;gap:8px;margin-left:4px;
+    flex-wrap:wrap}
   #account a{text-decoration:none}
+  /* The address gives way before the buttons do, and it is allowed to
+     shrink to nothing rather than holding the row open. */
   .who{font-size:12.5px;color:var(--muted);max-width:230px;overflow:hidden;
-       text-overflow:ellipsis;white-space:nowrap}
+       text-overflow:ellipsis;white-space:nowrap;flex:1 1 auto;min-width:0}
   .howto{margin:0;padding-left:20px;color:var(--muted);font-size:14px}
   .howto li{margin:3px 0}
   .rootdef{margin:8px 0 0 0;padding:8px 0 0;border-top:1px dashed var(--line);
@@ -296,6 +303,10 @@
 
   @media (max-width:560px){
     .shell{padding:18px 14px 60px}
+    /* Four buttons, an email and two more buttons do not belong on one
+       line at this width. The account keeps its own row. */
+    #account{width:100%;margin-left:0;margin-top:2px}
+    #account .who{max-width:none}
     h1{font-size:26px}
     .term{font-size:28px}
     .face{min-height:190px;padding:22px 18px}
