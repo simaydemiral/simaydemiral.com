@@ -3847,6 +3847,15 @@
   var almost = {};   /* answered "Almost" this sitting; each gets one encore */
   var renaming = null;   /* the deck whose name is being edited, if any */
   var CAP = 30;
+
+  /* How many of a sitting are words never answered before. A backlog of
+     sixty is a month of reviews, and a sitting made only of the most
+     overdue would mean nothing new was ever reached while it lasted; a
+     sitting made of whatever is nearest the top of the list -- which is
+     what it used to be -- means the oldest due words are never reached at
+     all. So: the most overdue first, with a handful of new ones threaded
+     through, and both ends of the list move every day. */
+  var FRESH = 8;
   /* Whether the note editor is open — on the card, and on a row of the list.
      A word neither dictionary knows was always kept and marked, but until now
      there was nowhere to write what it actually means. */
@@ -3953,11 +3962,53 @@
     return typeof all.last[SPACE] === "string" ? resumeSession(all.last[SPACE]) : false;
   }
 
+  /* Which cards this sitting is, and in what order.
+
+     Due date first, oldest due at the front, so a backlog drains from the
+     bottom instead of being buried by whatever was saved most recently.
+     The list this reads from is in the order words were added, newest
+     first, and taking the first thirty of it was the whole of the old
+     rule: with sixty due, the thirty oldest could wait for ever. */
+  function sittingPlan() {
+    var pool = dueNow(), fresh = [], seen = [], i, w;
+    for (i = 0; i < pool.length; i++) {
+      w = pool[i];
+      if (answers(w).length || (w.seen || 0) > 0) seen.push(w); else fresh.push(w);
+    }
+    function byDue(a, b) {
+      var x = a.due || "", y = b.due || "";
+      if (x !== y) return x < y ? -1 : 1;
+      var p = a.added || "", q = b.added || "";
+      return p < q ? -1 : p > q ? 1 : 0;      /* the longer it has waited */
+    }
+    seen.sort(byDue);
+    fresh.sort(function (a, b) {
+      var p = a.added || "", q = b.added || "";
+      return p < q ? -1 : p > q ? 1 : 0;      /* oldest saved first */
+    });
+
+    var nNew = Math.min(fresh.length, FRESH);
+    var nOld = Math.min(seen.length, CAP - nNew);
+    /* Whichever side runs short, the other fills the sitting. */
+    if (nOld + nNew < CAP) nNew = Math.min(fresh.length, CAP - nOld);
+
+    /* Threaded through rather than appended, so a sitting is not a wall of
+       review followed by a wall of new. */
+    var out = [], oi = 0, fi = 0, total = nOld + nNew;
+    var gap = nNew ? Math.max(1, Math.floor(total / nNew)) : 0;
+    for (i = 0; i < total; i++) {
+      var wantNew = nNew && gap && ((i + 1) % gap === 0) && fi < nNew;
+      if ((wantNew || oi >= nOld) && fi < nNew) out.push(fresh[fi++]);
+      else out.push(seen[oi++]);
+    }
+    return { list: out, fresh: nNew, due: pool.length };
+  }
+
   function startSession() {
     /* A word renamed to its lemma may now ask the same question as one
        already here, and this is the one moment with no card on screen. */
     if (foldDuplicates()) save();
-    session = dueNow().slice(0, CAP);
+    session = sittingPlan().list;
     total = session.length;
     done = 0;
     flipped = false;
@@ -4064,8 +4115,15 @@
         label = "";
       } else if (nd) {
         head = "Ready when you are";
+        var plan = sittingPlan();
         body = nd + ' word' + (nd === 1 ? '' : 's') + ' waiting'
-             + (nd > CAP ? ' \u2014 ' + CAP + ' in this sitting.' : '.');
+             + (nd > CAP
+                 ? ' \u2014 ' + plan.list.length + ' in this sitting, longest '
+                   + 'overdue first'
+                 : '')
+             + (plan.fresh
+                 ? (nd > CAP ? ', ' : ' \u2014 ') + plan.fresh + ' of them new.'
+                 : '.');
         label = "Start";
       } else if (onlyDeck) {
         var inD = here().filter(function (w) {
