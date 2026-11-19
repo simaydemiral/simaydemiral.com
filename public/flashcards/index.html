@@ -431,6 +431,13 @@
      fill in what is missing, and distrust the source URL. */
   /* Bumped when something about how the plain-English senses are read
      changes in a way an already-stored copy cannot be repaired into. */
+  /* Which build this page is. Read back off the server when the app comes
+     back to the foreground: an app opened from the Home Screen is usually
+     resumed rather than reloaded, so without this a phone can go on running
+     a version from days ago, syncing by rules that have since been fixed,
+     with nothing on screen to say so. */
+  var BUILD = "2026-11-19";
+
   var SIMPLE_FIX = 1;
 
   function normalize(list) {
@@ -661,6 +668,43 @@
     }
     return out.slice(0, 400);
   }
+
+  /* Coming back to the app is not the same as opening it.
+
+     A phone resumes the page it had, so the only sync that had ever run was
+     the one from whenever it was first opened -- a sitting done on the sofa
+     could sit on the device for days with nothing asking it to go up. And
+     the code doing the asking was equally old, which is how a fix could be
+     live on the server and still not be running on the device that needed
+     it. So: sync whenever the app comes back to the front, and, if it has
+     been away for a while, check whether the build it is running is still
+     the one being served. */
+  var hiddenAt = 0;
+
+  function freshen() {
+    fetch(location.pathname + "?build=" + Date.now(),
+          { cache: "no-store", credentials: "same-origin" })
+      .then(function (r) { return r.ok ? r.text() : ""; })
+      .then(function (t) {
+        var m = /var BUILD = "([^"]+)"/.exec(t);
+        if (!m || m[1] === BUILD) return;
+        /* Once only. If the reload somehow comes back on the same build --
+           a cache that will not let go -- a second attempt would be a loop,
+           and a page that reloads for ever is worse than a stale one. */
+        var tried = null;
+        try { tried = sessionStorage.getItem("fc.reloaded"); } catch (e) {}
+        if (tried === m[1]) return;
+        try { sessionStorage.setItem("fc.reloaded", m[1]); } catch (e) {}
+        location.reload();
+      })
+      .catch(function () {});
+  }
+
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) { hiddenAt = Date.now(); return; }
+    if (me && me.signedIn) syncNow();
+    if (!hiddenAt || Date.now() - hiddenAt > 60000) freshen();
+  });
 
   function syncNow() {
     if (DEMO || syncing || !me || !me.signedIn) return;
@@ -4215,6 +4259,17 @@
     if (b) setSpace(b.getAttribute("data-space"));
   });
 
+  function ago(t) {
+    var s = Math.max(0, Math.round((Date.now() - t) / 1000));
+    if (s < 10) return "just now";
+    if (s < 90) return s + "s ago";
+    var m = Math.round(s / 60);
+    if (m < 90) return m + " min ago";
+    var h = Math.round(m / 60);
+    if (h < 36) return h + "h ago";
+    return Math.round(h / 24) + "d ago";
+  }
+
   function renderAccount() {
     var el = $("account");
     if (!el || DEMO) return;
@@ -4223,12 +4278,26 @@
       el.innerHTML = '<a class="btn-q" href="/auth/start">Sign in to sync</a>';
       return;
     }
+    /* "synced" with nothing behind it was true of a page that had synced
+       once, three days ago, and of one that had synced a second ago. When
+       the two devices disagree, the first question is when each of them
+       last spoke to the server, and the app could not answer it. */
     var when = syncing ? "syncing\u2026"
-             : lastSync ? "synced" : "not synced yet";
+             : lastSync ? "synced " + ago(lastSync) : "not synced yet";
     el.innerHTML = '<span class="who" title="' + esc(me.email || "") + '">'
                  + esc(me.email || "signed in") + ' \u00b7 ' + when + '</span>'
+                 + ' <button type="button" class="btn-q" id="syncGo">Sync now</button>'
                  + ' <a class="btn-q" href="/auth/signout">Sign out</a>';
   }
+
+  /* The button exists so a sync is something she can ask for and watch,
+     rather than something she has to trust happened. */
+  $("account").addEventListener("click", function (e) {
+    if (!e.target || e.target.id !== "syncGo") return;
+    if (!me || !me.signedIn) return;
+    syncNow();
+    renderAccount();
+  });
 
   function renderDecks() {
     var list = decks();
@@ -4785,30 +4854,49 @@
           deckList().push(fileDecks[fd]);
       }
 
-      var have = {}, i, ff, k;
+      var mineById = {}, isForm = {}, i, ff, k;
       for (i = 0; i < db.words.length; i++) {
-        have[db.words[i].id] = 1;
+        mineById[db.words[i].id] = db.words[i];
         /* an imported "plunged" is already here as a form of "plunge" */
         ff = formsOf(db.words[i]);
-        for (k = 0; k < ff.length; k++) have[idOf(ff[k])] = 1;
+        for (k = 0; k < ff.length; k++) isForm[idOf(ff[k])] = 1;
       }
 
-      var added = 0, skipped = 0;
+      /* A word already here used to be skipped outright, which made an
+         export the one thing that could not rescue a device whose progress
+         had not travelled: the file held the answers and the import threw
+         them away for being a word it already had. It merges now, by the
+         same rule the sync uses -- the later answer, and the higher count of
+         them -- so importing a phone's export onto a laptop carries the
+         studying across, and sends it up. */
+      var added = 0, merged = 0, skipped = 0;
       for (i = 0; i < list.length; i++) {
-        if (have[list[i].id]) { skipped++; continue; }
-        have[list[i].id] = 1;
-        db.words.unshift(list[i]);
+        var inc = list[i], cur = mineById[inc.id];
+        if (cur) {
+          var m = mergeWord(cur, inc);
+          if (bodyOf(m) !== bodyOf(cur)) {
+            for (var mk in m) cur[mk] = m[mk];
+            mark(cur.id);
+            merged++;
+          }
+          continue;
+        }
+        if (isForm[inc.id]) { skipped++; continue; }
+        mineById[inc.id] = inc;
+        db.words.unshift(inc);
         added++;
       }
 
-      if (!added) {
-        toast("Nothing new \u2014 all " + skipped + " of those are already here.");
+      if (!added && !merged) {
+        toast("Nothing new \u2014 all " + (skipped + list.length) + " of those are already here.");
         return;
       }
       save();
       counts(); fillFilter(); renderAll(); renderDecks(); renderDue();
-      toast(added + " word" + (added === 1 ? "" : "s") + " imported"
-          + (skipped ? ", " + skipped + " already here and left alone" : "") + ".");
+      var said = [];
+      if (added) said.push(added + " word" + (added === 1 ? "" : "s") + " imported");
+      if (merged) said.push(merged + " brought up to date");
+      toast(said.join(", ") + ".");
     };
     r.readAsText(f);
   });
