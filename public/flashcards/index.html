@@ -572,6 +572,17 @@
 
   var SIMPLE_FIX = 1;
 
+  /* One-off, per card. A word whose Turkish came back empty is written down
+     as "none" so the card does not ask three sources again every time it
+     comes round -- and once the lookups started travelling between devices,
+     one device's empty answer could settle the word everywhere, including
+     over a translation another device already had. The guard against that
+     is in the merge now; this clears the ones already settled, so every
+     card asks again the next time it is turned over. Nothing else is
+     touched: the box, the dates, the note and the sentence stay as they
+     are. */
+  var TR_RETRY = 1;
+
   function normalize(list) {
     if (!Array.isArray(list)) return [];
     var out = [], i, w, src;
@@ -600,6 +611,12 @@
          and they are re-read the next time that card comes round rather than
          for seventy words at once. */
       if (w.sv < SIMPLE_FIX) { w.plain = null; w.sv = SIMPLE_FIX; }
+      /* Its own marker: pv already carries a different one-off. */
+      w.tv = Number(w.tv) || 0;
+      if (w.tv < TR_RETRY) {
+        w.tv = TR_RETRY;
+        if (w.tr && (!w.tr.from || w.tr.from === "none")) delete w.tr;
+      }
       w.forms = formsOf(w)
         .filter(function (x) { return typeof x === "string" && x.trim(); })
         .map(function (x) { return x.trim().replace(/\s+/g, " ").slice(0, 80); })
@@ -971,10 +988,38 @@
     return out;
   }
 
+  /* Does this copy actually know the thing, or is it only carrying the
+     record of having asked? A lookup that failed is written down -- "no
+     Turkish for this word", "no recording" -- so that it is not asked
+     again every time the card comes round, and that record is a newer
+     change to the word than the answer another device already had. Which
+     meant one device's failure could travel out and erase the real thing
+     everywhere. Knowledge wins over the absence of it, whatever the
+     stamps say; between two copies that both know, the later one wins as
+     before. */
+  var KNOWS = {
+    tr: function (w) {
+      return !!(w.tr && w.tr.from && w.tr.from !== "none"
+                && (((w.tr.blocks || []).length) || (w.tr.more || []).length || w.tr.one));
+    },
+    say: function (w) { return !!(w.say && (w.say.audio || w.say.ipa)); },
+    senses: function (w) { return !!(w.senses && w.senses.length); },
+    plain: function (w) { return !!(w.plain && w.plain.length); },
+    rootdef: function (w) { return !!(w.rootdef && w.rootdef.term); },
+    rel: function (w) { return !!(w.rel && (w.rel.syn || w.rel.ant || w.rel.pat)); },
+    eg: function (w) { return !!w.eg; },
+    note: function (w) { return !!(w.note && w.note.trim()); },
+    src: function (w) { return !!(w.src && w.src.sentence); }
+  };
+
   function mergeWord(mine, theirs) {
     var base = (theirs.updated || 0) > (mine.updated || 0) ? theirs : mine;
+    var other = base === theirs ? mine : theirs;
     var out = {}, k;
     for (k in base) out[k] = base[k];
+    for (k in KNOWS) {
+      if (!KNOWS[k](base) && KNOWS[k](other)) out[k] = other[k];
+    }
 
     var full = mergeLogs(answers(mine), answers(theirs));
     var log = full.slice(-LOGMAX);
@@ -1035,6 +1080,9 @@
 
   function absorb(remote) {
     var byId = {}, i, w, changed = false, repaired = false;
+    /* What she is looking at, before the merge. */
+    var cardId = session.length ? session[0].id : null;
+    var cardWas = cardId ? bodyOf(session[0]) : null;
     /* What the list looked like before this merge, and what it was worth.
        A merge should never subtract -- the answers are a union and the
        count only climbs -- so if it does, something is wrong with code I
@@ -1146,7 +1194,19 @@
     /* renderSpaces too: the merge can bring in words in any language, and
        leaving it out is why the pill above the tabs could say 82 while the
        All words tab, counting the same list, said 117. */
-    if (changed) { renderSpaces(); counts(); fillFilter(); renderAll(); renderDecks(); renderDue(); }
+    if (changed) {
+      renderSpaces(); counts(); fillFilter(); renderAll(); renderDecks();
+      /* The card in front of her is redrawn only if the merge actually
+         changed that word. Rebuilding it to show the same thing costs a
+         tap and shows nothing new. */
+      var cardNow = null;
+      if (cardId) {
+        for (i = 0; i < db.words.length; i++) {
+          if (db.words[i].id === cardId) { cardNow = bodyOf(db.words[i]); break; }
+        }
+      }
+      if (!cardId || cardNow !== cardWas) renderDue();
+    }
   }
 
   var touched = {};
@@ -3860,7 +3920,32 @@
          + ' <button class="btn-q" id="allDecks">Study everything</button></p>';
   }
 
+  /* A press that lands on a card being rebuilt is a press that never
+     happens: the button the finger went down on is gone before it comes
+     up, so the browser has nothing to fire a click on. The page redraws
+     the card whenever anything arrives for it -- a definition, a
+     recording, a merge coming back from the other device -- and with the
+     sync now running after every answer, that arrival often landed in the
+     middle of the next tap. So a redraw asked for while a press is in
+     flight waits for the finger to come up. */
+  var pressing = 0, dueWaiting = false;
+
+  document.addEventListener("pointerdown", function () {
+    pressing = Date.now();
+  }, true);
+
+  function released() {
+    pressing = 0;
+    if (dueWaiting) { dueWaiting = false; renderDue(); }
+  }
+  document.addEventListener("pointerup", released, true);
+  document.addEventListener("pointercancel", released, true);
+
   function renderDue() {
+    /* A pointerdown with no up -- a drag that left the window, a gesture
+       the browser took over -- must not freeze the page for ever. */
+    if (pressing && Date.now() - pressing < 1500) { dueWaiting = true; return; }
+    pressing = 0;
     var el = $("p-due");
     checkDeck();
 

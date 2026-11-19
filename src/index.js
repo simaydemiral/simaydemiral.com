@@ -212,9 +212,30 @@ function mergeLogs(a, b) {
   return out;
 }
 
+/* The same rule as the page: a lookup that failed is written down so it is
+   not asked again, and that record is a newer change to the word than the
+   answer another device already had. Knowledge wins over the absence of it;
+   between two copies that both know, the later one wins as before. */
+const KNOWS = {
+  tr: (w) => !!(w.tr && w.tr.from && w.tr.from !== "none"
+                && (((w.tr.blocks || []).length) || (w.tr.more || []).length || w.tr.one)),
+  say: (w) => !!(w.say && (w.say.audio || w.say.ipa)),
+  senses: (w) => !!(w.senses && w.senses.length),
+  plain: (w) => !!(w.plain && w.plain.length),
+  rootdef: (w) => !!(w.rootdef && w.rootdef.term),
+  rel: (w) => !!(w.rel && (w.rel.syn || w.rel.ant || w.rel.pat)),
+  eg: (w) => !!w.eg,
+  note: (w) => !!(w.note && String(w.note).trim()),
+  src: (w) => !!(w.src && w.src.sentence)
+};
+
 function mergeWords(mine, theirs) {
   const base = (Number(theirs.updated) || 0) > (Number(mine.updated) || 0) ? theirs : mine;
+  const other = base === theirs ? mine : theirs;
   const out = { ...base };
+  for (const k of Object.keys(KNOWS)) {
+    if (!KNOWS[k](base) && KNOWS[k](other)) out[k] = other[k];
+  }
 
   const full = mergeLogs(answersOf(mine), answersOf(theirs));
   const log = full.slice(-LOGMAX);
