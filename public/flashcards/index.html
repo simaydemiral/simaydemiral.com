@@ -573,6 +573,7 @@
            again -- harmless, but it leaves the file disagreeing with what is
            on screen. */
         if (foldDuplicates()) save();
+        else snapshot();
       }
     } catch (e) {
       /* corrupt or blocked storage — start empty rather than break */
@@ -685,9 +686,45 @@
       .catch(function () { syncing = false; renderAccount(); });
   }
 
+  /* ------------------------------------------------------------------
+     One word, two copies, nothing thrown away.
+
+     A word carries two different kinds of thing, changed by different
+     events at different moments: what it says (the senses, the recording,
+     the note, which deck it is in) and how well she knows it (the box, the
+     date it is next due, how many times she has answered it). Settling the
+     whole record by one stamp means the loser's half of both is discarded --
+     so a definition arriving on the laptop could overwrite a sitting done on
+     the phone, and did.
+
+     So they are settled separately. Content goes with the later `updated`.
+     Progress goes with the later answer, and the answer count only ever
+     climbs: whatever either device knows about how often this word has come
+     round, the merged copy knows it too.
+     ------------------------------------------------------------------ */
+  function mergeWord(mine, theirs) {
+    var base = (theirs.updated || 0) > (mine.updated || 0) ? theirs : mine;
+    var pa = mine.at || 0, pb = theirs.at || 0, prog;
+    if (pa !== pb) prog = pb > pa ? theirs : mine;
+    /* Neither copy has an answer time: both were last answered before this
+       existed, which is the state the old stamping bug left behind. The one
+       with more answers in it is the later one -- the count only goes up. */
+    else if ((theirs.seen || 0) !== (mine.seen || 0))
+      prog = (theirs.seen || 0) > (mine.seen || 0) ? theirs : mine;
+    else prog = base;
+
+    var out = {}, k;
+    for (k in base) out[k] = base[k];
+    out.box = prog.box || 1;
+    out.due = prog.due;
+    if (prog.at) out.at = prog.at; else delete out.at;
+    out.seen = Math.max(mine.seen || 0, theirs.seen || 0);
+    return out;
+  }
+
   /* What came back replaces what is here only where it is newer. */
   function absorb(remote) {
-    var byId = {}, i, w, changed = false;
+    var byId = {}, i, w, changed = false, repaired = false;
 
     /* Decks first, and taken out of the list: fed through the word merge
        they would land in db.words and be rendered as cards. */
@@ -727,7 +764,14 @@
       }
       if (gone[w.id] && gone[w.id] >= (w.updated || 0)) continue;   /* deleted here, later */
       var here = byId[w.id];
-      if (!here || (w.updated || 0) > (here.updated || 0)) { byId[w.id] = w; changed = true; }
+      if (!here) { byId[w.id] = w; changed = true; continue; }
+      var merged = mergeWord(here, w), mb = bodyOf(merged);
+      byId[w.id] = merged;
+      if (mb !== bodyOf(here)) changed = true;
+      /* The merged copy is not what the server holds, so it has to go back:
+         marked, which gives it a fresh stamp on the save below, and that
+         stamp is what gets it past the server's "is this newer" test. */
+      if (mb !== bodyOf(w)) { mark(w.id); repaired = true; }
     }
     for (var k in byId) keep.push(byId[k]);
     keep.sort(function (a, b) {
@@ -757,22 +801,66 @@
       saveSession();
     }
 
-    try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {}
-    if (changed) { counts(); fillFilter(); renderAll(); renderDecks(); renderDue(); }
+    /* save() rather than a bare write when the merge healed a split: the
+       repaired words need the fresh stamp save() gives them, and the sync it
+       schedules is what carries them to the other device. It cannot loop --
+       by the next round the stamps differ, so there is nothing left to
+       repair. */
+    if (repaired) { save(); }
+    else {
+      snapshot();
+      try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {}
+    }
+    /* renderSpaces too: the merge can bring in words in any language, and
+       leaving it out is why the pill above the tabs could say 82 while the
+       All words tab, counting the same list, said 117. */
+    if (changed) { renderSpaces(); counts(); fillFilter(); renderAll(); renderDecks(); renderDue(); }
   }
 
   var touched = {};
 
   function mark(id) { if (id) touched[id] = 1; }
 
+  /* What a word looks like with its stamp taken off, so two copies can be
+     compared without the stamp itself being part of the answer. Keys in
+     sorted order because the local copy and the one that came back from the
+     server need not have them in the same order. */
+  function bodyOf(w) {
+    var keys = [], k, o = {}, i;
+    for (k in w) { if (k !== "updated") keys.push(k); }
+    keys.sort();
+    for (i = 0; i < keys.length; i++) o[keys[i]] = w[keys[i]];
+    return JSON.stringify(o);
+  }
+
+  /* The state of every word as of the last save, to compare the next one
+     against. */
+  var lastBody = {};
+
+  function snapshot() {
+    lastBody = {};
+    for (var i = 0; i < db.words.length; i++) {
+      lastBody[db.words[i].id] = bodyOf(db.words[i]);
+    }
+  }
+
   function save() {
     if (DEMO) return;
-    var now = Date.now(), i, w;
+    var now = Date.now(), i, w, body;
     for (i = 0; i < db.words.length; i++) {
       w = db.words[i];
-      if (touched[w.id] || !w.updated) w.updated = now;
+      body = bodyOf(w);
+      /* Stamped when the word actually changed, rather than only when the
+         code that changed it remembered to say so. mark() had to be called
+         by hand at every site that touches a word, and grading -- the one
+         that matters most -- never called it, so a whole sitting's answers
+         went up to the server carrying stamps older than the rows already
+         there and were dropped on arrival. Comparing the word with its own
+         last saved state cannot be forgotten. */
+      if (touched[w.id] || !w.updated || lastBody[w.id] !== body) w.updated = now;
     }
     touched = {};
+    snapshot();
     try { localStorage.setItem(KEY, JSON.stringify(db)); }
     catch (e) { toast("Could not save — browser storage is full or blocked."); }
     syncSoon();
@@ -2952,6 +3040,14 @@
     else                    w.box = 1;
     w.due = plus(GAP[how] === undefined ? 0 : GAP[how]);
     w.seen = (w.seen || 0) + 1;
+    /* Two clocks, not one. `updated` says when the record last changed --
+       a note, a deck, a definition that arrived from Wiktionary. `at` says
+       when the word was last answered. Merging needs both: without `at`,
+       looking a word up on the laptop is a newer change than answering it on
+       the phone, and the lookup would carry the laptop's older box back over
+       the answer. */
+    w.at = Date.now();
+    mark(w.id);
     save();
   }
 
