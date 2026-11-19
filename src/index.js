@@ -207,15 +207,20 @@ function mergeLogs(a, b) {
     out.push(e);
   }
   out.sort((x, y) => x.t - y.t);
-  return out.slice(-LOGMAX);
+  /* The whole union; trimming is the caller's, because what is trimmed has
+     to be counted somewhere else first. */
+  return out;
 }
 
 function mergeWords(mine, theirs) {
   const base = (Number(theirs.updated) || 0) > (Number(mine.updated) || 0) ? theirs : mine;
   const out = { ...base };
 
-  const log = mergeLogs(answersOf(mine), answersOf(theirs));
-  const sb = Math.max(beforeOf(mine), beforeOf(theirs));
+  const full = mergeLogs(answersOf(mine), answersOf(theirs));
+  const log = full.slice(-LOGMAX);
+  /* Answers trimmed off the end are added to the carried number, so a
+     union longer than the list can hold still totals correctly. */
+  const sb = Math.max(beforeOf(mine), beforeOf(theirs)) + (full.length - log.length);
 
   let best = log.length
     ? { at: log[log.length - 1].t, box: log[log.length - 1].b, due: log[log.length - 1].d }

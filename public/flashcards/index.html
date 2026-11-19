@@ -850,9 +850,9 @@
       out.push(e);
     }
     out.sort(function (x, y) { return x.t - y.t; });
-    /* Only the tail is kept, and only the last line is ever read for the
-       word's state, so a trimmed history costs nothing but history. */
-    return out.slice(-LOGMAX);
+    /* The whole union. Trimming is the caller's business, because whatever
+       is trimmed has to be counted somewhere else first. */
+    return out;
   }
 
   function mergeWord(mine, theirs) {
@@ -860,8 +860,14 @@
     var out = {}, k;
     for (k in base) out[k] = base[k];
 
-    var log = mergeLogs(answers(mine), answers(theirs));
-    var sb = Math.max(before(mine), before(theirs));
+    var full = mergeLogs(answers(mine), answers(theirs));
+    var log = full.slice(-LOGMAX);
+    /* Two devices with long histories of one word can union to more lines
+       than are kept. The ones that fall off are added to the carried
+       number, so the total survives the trim -- otherwise two devices with
+       forty answers each would merge to forty, and a merge that loses
+       answers is exactly what the undo below exists to catch. */
+    var sb = Math.max(before(mine), before(theirs)) + (full.length - log.length);
 
     /* Where the word stands is whatever the latest answer anywhere says --
        from the merged list if it is in there, or from a copy whose answer
@@ -3277,8 +3283,12 @@
        running an older build of those rules would otherwise land on a date
        that build chose. */
     w.at = Date.now();
-    w.log = answers(w).concat([{ t: w.at, h: how, b: w.box, d: w.due }]).slice(-LOGMAX);
-    w.sb = Math.max(0, Number(w.sb) || 0);
+    var kept = answers(w).concat([{ t: w.at, h: how, b: w.box, d: w.due }]);
+    w.log = kept.slice(-LOGMAX);
+    /* An answer that falls off the end of the list is still an answer she
+       gave: it goes into the number carried alongside, or the count would
+       stop at forty and then start going down. */
+    w.sb = Math.max(0, Number(w.sb) || 0) + (kept.length - w.log.length);
     w.seen = w.sb + w.log.length;
     mark(w.id);
     save();
