@@ -113,7 +113,18 @@
 
   /* ---------- the flashcard ---------- */
   .study{display:flex;flex-direction:column;align-items:center;gap:14px}
-  .face{width:100%;min-height:230px;background:var(--surface);
+  /* The bin, bottom right of the card. Quiet until the pointer is near
+     it: it is next to three answer buttons, and the one that empties the
+     card should not compete with them for attention. */
+  .cardkill{position:absolute;right:8px;bottom:8px;width:34px;height:34px;
+    display:flex;align-items:center;justify-content:center;border-radius:9px;
+    border:1px solid transparent;background:none;color:var(--faint);
+    cursor:pointer;opacity:.62;transition:opacity .15s,color .15s,border-color .15s}
+  .cardkill:hover,.cardkill:focus-visible{opacity:1;color:var(--brand);
+    border-color:var(--line)}
+  .cardkill svg{width:15px;height:15px;display:block}
+
+  .face{position:relative;width:100%;min-height:230px;background:var(--surface);
         border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);
         padding:28px 24px;display:flex;flex-direction:column;
         align-items:center;justify-content:center;text-align:center;
@@ -225,7 +236,10 @@
   /* Plain text that happens to be tappable: it reports, it does not ask. */
   .syncstate{font:inherit;font-size:12.5px;color:var(--faint);background:none;
     border:0;padding:0 2px;cursor:pointer;white-space:nowrap;
-    text-decoration:underline dotted;text-underline-offset:3px}
+    text-decoration:underline dotted;text-underline-offset:3px;
+    /* Held wide enough for the longest thing it says, so the buttons
+       beside it do not shuffle sideways every time it changes. */
+    min-width:7.5em;text-align:left}
   .syncstate:hover{color:var(--brand)}
   #account a{text-decoration:none}
   /* The address gives way before the buttons do, and it is allowed to
@@ -786,7 +800,7 @@
   var syncing = false, syncTimer = null, lastSync = 0;
   /* dirty: something here has not reached the server yet. tries: how many
      times in a row the attempt has failed, which sets how long to wait. */
-  var dirty = false, tries = 0, retryTimer = null;
+  var dirty = false, tries = 0, retryTimer = null, sayingSync = null;
 
   function syncSoon() {
     if (DEMO || !me || !me.signedIn) return;
@@ -891,7 +905,13 @@
   function syncNow() {
     if (DEMO || syncing || !me || !me.signedIn) return;
     syncing = true;
-    renderAccount();
+    /* "syncing..." is only worth saying if it lasts long enough to read. A
+       sync over a decent connection is done in under a second, and saying
+       it anyway made the line flick between two words on every answer, on
+       every return to the app, and on every tick of the timer -- which
+       reads as something going wrong rather than something working. */
+    clearTimeout(sayingSync);
+    sayingSync = setTimeout(function () { if (syncing) renderAccount(); }, 900);
     var payload = db.words.concat(db.gone || []).concat(deckRecords());
     fetch("/api/sync", {
       method: "POST",
@@ -905,6 +925,7 @@
       })
       .then(function (out) {
         syncing = false;
+        clearTimeout(sayingSync);
         if (!out || !Array.isArray(out.words)) return;
         dirty = false;
         tries = 0;
@@ -918,6 +939,7 @@
          and giving up only when the page does. */
       .catch(function () {
         syncing = false;
+        clearTimeout(sayingSync);
         tries++;
         clearTimeout(retryTimer);
         retryTimer = setTimeout(syncNow, Math.min(60000, 5000 * tries));
@@ -3985,6 +4007,26 @@
   document.addEventListener("pointerup", released, true);
   document.addEventListener("pointercancel", released, true);
 
+  /* A word with nothing on it -- no sense, no plain English, no Turkish --
+     is a card that has never told her anything, and binning it needs no
+     ceremony. One that has is worth a question first: it carries the
+     sentence she met it in, and that is not recoverable. */
+  function cardTold(w) {
+    return !!((w.senses && w.senses.length) || (w.plain && w.plain.length)
+              || hasTurkish(w) || (w.rootdef && w.rootdef.senses
+                                   && w.rootdef.senses.length));
+  }
+
+  function killBtn(w) {
+    return '<button class="cardkill" data-kill="' + esc(w.id) + '" '
+         + 'title="Remove this word" aria-label="Remove ' + esc(w.term) + '">'
+         + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+         + 'stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" '
+         + 'aria-hidden="true">'
+         + '<path d="M4 7h16M10 11v6M14 11v6M5 7l1 13h12l1-13M9 7V4h6v3"/>'
+         + '</svg></button>';
+  }
+
   function renderDue() {
     /* A pointerdown with no up -- a drag that left the window, a gesture
        the browser took over -- must not freeze the page for ever. */
@@ -4079,7 +4121,8 @@
             + '</div>'
             + seenAsLine(w)
             + patLine(w)
-            + '<div class="tap">Tap, or press space, to see the meaning</div></div>';
+            + '<div class="tap">Tap, or press space, to see the meaning</div>'
+            + killBtn(w) + '</div>';
     } else {
       html += '<div class="face back" id="back" tabindex="0" role="button" '
             + 'aria-label="Turn the card back to the word">'
@@ -4288,7 +4331,8 @@
                       + esc(w.src.title || link).slice(0, 70) + ' &rarr;</a>' : '')
               + '</div>';
       }
-      html += '</div>'
+      html += killBtn(w)
+            + '</div>'
             + '<div class="grade">'
             + '<button class="no" id="gNo">Not yet</button>'
             + '<button class="mid" id="gMid">Almost</button>'
@@ -4966,6 +5010,28 @@
   /* "synced 2 min ago" stops being true a minute later. */
   setInterval(function () { if (!document.hidden) renderAccount(); }, 30000);
 
+  function removeWord(id) {
+    /* A tombstone, not a disappearance: a row that simply vanishes here is
+       handed straight back by whichever device has not synced yet. */
+    for (var dz = 0; dz < db.words.length; dz++) {
+      if (db.words[dz].id === id) {
+        db.gone = db.gone || [];
+        db.gone.push({ id: id, deleted: true, updated: Date.now() });
+        break;
+      }
+    }
+    db.words = db.words.filter(function (w) { return w.id !== id; });
+    session = session.filter(function (w) { return w.id !== id; });
+    saveSession();
+    if (editingNote === id) editingNote = null;
+    /* Turn the study card back over. Leaving it flipped showed the next
+       word's back, and the lookup only fires from the front, so that card
+       sat on "Looking it up..." for good. */
+    flipped = false;
+    save(); counts(); fillFilter(); renderAll(); renderDecks(); renderDue();
+    toast("Removed.");
+  }
+
   function renderDecks() {
     var list = decks(), t = today(), i;
     var h = '<div class="card">'
@@ -5283,26 +5349,22 @@
     if (get("data-note-cancel")) { editingNote = null; renderAll(); return; }
 
     var del = get("data-del");
-    if (del) {
-      /* A tombstone, not a disappearance: a row that simply vanishes here is
-         handed straight back by whichever device has not synced yet. */
-      for (var dz = 0; dz < db.words.length; dz++) {
-        if (db.words[dz].id === del) {
-          db.gone = db.gone || [];
-          db.gone.push({ id: del, deleted: true, updated: Date.now() });
-          break;
-        }
+    if (del) { removeWord(del); return; }
+
+    /* The bin on the card. A word that has told her nothing goes without a
+       question; one that has is asked about first, because the sentence she
+       met it in goes with it. */
+    var kill = get("data-kill");
+    if (kill) {
+      var kw = null, ki;
+      for (ki = 0; ki < db.words.length; ki++) {
+        if (db.words[ki].id === kill) { kw = db.words[ki]; break; }
       }
-      db.words = db.words.filter(function (w) { return w.id !== del; });
-      session = session.filter(function (w) { return w.id !== del; });
-      saveSession();
-      if (editingNote === del) editingNote = null;
-      /* Turn the study card back over. Leaving it flipped showed the next
-         word's back, and the lookup only fires from the front, so that
-         card sat on "Looking it up..." for good. */
-      flipped = false;
-      save(); counts(); fillFilter(); renderAll(); renderDecks(); renderDue();
-      toast("Removed.");
+      if (!kw) return;
+      if (cardTold(kw)
+          && !confirm("Remove \u201c" + kw.term + "\u201d?\n\nIt goes from every "
+                      + "device, with the sentence you saved it from.")) return;
+      removeWord(kill);
       return;
     }
     /* An inline field rather than prompt(). Chrome suppresses page dialogs
