@@ -3416,7 +3416,28 @@
      in it, and they keep waiting until you answer one of the other two. The
      ladder that used to stretch 1/3/7/16/35 is gone; the answer decides the
      gap, not how many times the word has survived. */
-  var GAP = { no: 0, mid: 2, yes: 16 };
+  /* The ladder, restored, and shortened to the days she asked for.
+
+     Every "Knew it" used to send a word sixteen days out whatever it knew,
+     which meant four correct answers -- and forty-eight days -- before a
+     word could count as learned. The number of mastered words on the front
+     of the app was therefore dead for the first seven weeks of using it,
+     which is exactly how long she had been using it.
+
+     The gap now comes from the box the answer lands in, so a word she has
+     just met comes back tomorrow and the intervals open out from there:
+
+       box 2  +1 day     first time right   -> day 1
+       box 3  +2 days    second             -> day 3
+       box 4  +4 days    third              -> day 7
+       box 5  +16 days   fourth: mastered
+       box 6  +35 days   fifth
+
+     Four correct answers still make a word mastered; they now fall on days
+     0, 1, 3 and 7 rather than across two months. "Almost" holds the box and
+     comes back in two days; "Not yet" puts it back to the start, today. */
+  var LADDER = [0, 0, 1, 2, 4, 16, 35];   /* indexed by the box landed in */
+  var GAP = { no: 0, mid: 2 };
 
   var BOXES = 6;
 
@@ -3442,7 +3463,8 @@
     if (how === "yes")      w.box = Math.min(BOXES, box + 1);
     else if (how === "mid") w.box = Math.max(2, box);
     else                    w.box = 1;
-    w.due = plus(GAP[how] === undefined ? 0 : GAP[how]);
+    w.due = plus(how === "yes" ? (LADDER[w.box] || 1)
+                               : (GAP[how] === undefined ? 0 : GAP[how]));
 
     /* The answer is written down, not just its effect.
 
@@ -3628,10 +3650,10 @@
 
      Three bands rather than one percentage, because "30% done" hides whether
      the other 70% is untouched or nearly there. Box 5 and 6 are words she
-     has answered "Knew it" four times or more without a miss in between,
-     which is the point at which the gap between sittings is long enough to
-     call the word learned. Box 1 is new, or just missed. Everything between
-     is in motion.
+     has answered "Knew it" four times without a miss in between -- on days
+     0, 1, 3 and 7 under the ladder above -- which is the point at which the
+     gap opens to a fortnight and the word can be called learned. Box 1 is
+     new, or just missed. Everything between is in motion.
      ------------------------------------------------------------------ */
   var MASTER = 5;
 
