@@ -303,16 +303,16 @@
     border-top:2px solid var(--line)}
   .deck.going{border-top-color:var(--warn)}
   .deck.done{border-top-color:var(--go)}
-  .deck-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-  .deck-mark{width:32px;height:32px;border-radius:9px;flex:none;
-    background:color-mix(in srgb, var(--ink) 7%, transparent);
-    border:1px solid var(--line);
-    display:flex;align-items:center;justify-content:center;
-    font:600 14px/1 var(--f-display);color:var(--ink-2)}
-  .deck-fig{text-align:right;font-size:12.5px;color:var(--muted);line-height:1.45}
+  /* The name gets the line to itself when it needs it, and the figures
+     drop underneath, rather than a deck called BusinessComms being cut in
+     half across two lines. */
+  .deck-top{display:flex;align-items:baseline;justify-content:space-between;gap:4px 12px;
+    flex-wrap:wrap}
+  .deck-fig{text-align:right;font-size:12.5px;color:var(--muted);line-height:1.45;
+    flex:none;margin-left:auto}
   .deck-fig s{display:block;text-decoration:none;color:var(--faint);font-size:12px}
   .deck-name{font:600 19px/1.25 var(--f-display);letter-spacing:-.02em;color:var(--ink);
-    margin:12px 0 0}
+    margin:0;min-width:0;overflow-wrap:break-word}
   .deck .prog{margin-top:10px}
   .deck .prog-key{gap:10px;font-size:12px}
   .deck-empty{font-size:13px;color:var(--faint);margin:10px 0 0}
@@ -322,7 +322,7 @@
   .deck-acts{display:flex;gap:7px;flex-wrap:wrap;margin-top:auto;padding-top:13px;
     border-top:1px solid var(--line-soft)}
   .deck .deck-acts{margin-top:auto}
-  .deck input.deckname{width:100%;margin-top:12px}
+  .deck input.deckname{width:100%}
 
   /* ---- Progress ----------------------------------------------------
      An eyebrow in mono above a headline, the way the rest of her pages
@@ -4865,16 +4865,14 @@
       var tone = !b.n || (!b.top && !b.mid) ? "" : (b.top * 100 / b.n >= 60 ? " done" : " going");
 
       h += '<article class="deck' + tone + '">'
-         + '<div class="deck-top">'
-         + '<span class="deck-mark" aria-hidden="true">'
-         + esc(d.name.charAt(0).toUpperCase()) + '</span>'
-         + '<span class="deck-fig">' + d.n + ' word' + (d.n === 1 ? '' : 's')
-         + (b.n ? '<s>' + pctDone(b) + '% mastered</s>' : '') + '</span>'
-         + '</div>'
          + (editing
              ? '<input class="deckname" id="deckName" type="text" value="'
                + esc(d.name) + '" aria-label="Deck name" maxlength="40">'
-             : '<h3 class="deck-name">' + esc(d.name) + '</h3>')
+             : '<div class="deck-top">'
+               + '<h3 class="deck-name">' + esc(d.name) + '</h3>'
+               + '<span class="deck-fig">' + d.n + ' word' + (d.n === 1 ? '' : 's')
+               + (b.n ? '<s>' + pctDone(b) + '% mastered</s>' : '') + '</span>'
+               + '</div>')
          + (b.n ? barHtml(b, "", true) : '<p class="deck-empty">No words in it yet.</p>')
          + (due ? '<p class="deck-due on">' + due + ' due today</p>' : '')
          + '<div class="deck-acts">'
