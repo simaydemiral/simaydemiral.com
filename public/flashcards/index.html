@@ -40,6 +40,11 @@
     --brand:#c05a2a; --brand-wash:#f7e9e0;
     --go:#4f7a52; --go-wash:#e6efe4;
     --warn:#b07a28; --warn-wash:#f8eeda;
+    /* Only the Progress chart uses this. A word being added is not a step
+       along the green-amber-grey run the bars show -- it is a word
+       arriving, a different kind of event, and it wants a colour from
+       outside that family, the way her sketch had it. */
+    --sky:#5d7f94;
     --f-body:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
     /* Headings, matching the homepage. The serif above stays, for the word
        on the card itself. */
@@ -56,6 +61,7 @@
       --brand:#e08b52; --brand-wash:#33230f;
       --go:#7fb384; --go-wash:#15251a;
       --warn:#dba85a; --warn-wash:#33260f;
+      --sky:#89a8bb;
       --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3);
     }
   }
@@ -66,6 +72,7 @@
     --brand:#e08b52; --brand-wash:#33230f;
     --go:#7fb384; --go-wash:#15251a;
     --warn:#dba85a; --warn-wash:#33260f;
+    --sky:#89a8bb;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--ground);color:var(--ink);
@@ -273,41 +280,67 @@
   /* New is drawn rather than left as track, so the three bands and the
      three dots beneath them are the same three things. */
   .prog-bar .p-raw{background:color-mix(in srgb, var(--ink) 20%, transparent)}
-  .prog-key{display:flex;gap:18px;flex-wrap:wrap;list-style:none;margin:8px 0 0;padding:0}
-  .prog-key li{display:flex;align-items:center;gap:6px;
-    font:500 10.5px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;
-    color:var(--muted)}
-  .prog-key b{font:600 15px/1 var(--f-display);letter-spacing:0;color:var(--ink);
-    margin-left:2px}
+  .prog-key{display:flex;gap:18px;flex-wrap:wrap;list-style:none;margin:9px 0 0;padding:0}
+  .prog-key li{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+  .prog-key b{font-weight:600;color:var(--ink)}
   .k-dot{width:8px;height:8px;border-radius:99px;flex:none}
   .k-dot.k-top{background:var(--go)}
   .k-dot.k-mid{background:var(--warn)}
   .k-dot.k-raw{background:color-mix(in srgb, var(--ink) 20%, transparent)}
+  .k-dot.k-seen{background:color-mix(in srgb, var(--ink) 34%, transparent)}
+  .k-dot.k-add{background:var(--sky)}
 
-  /* ---- Progress: what a day of it looked like ---- */
-  .statgrid{display:grid;gap:10px;grid-template-columns:repeat(4,1fr);margin:0 0 16px}
-  @media (max-width:560px){.statgrid{grid-template-columns:repeat(2,1fr)}}
-  .stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;
-    padding:12px 13px}
-  .stat i{display:block;font:500 10px/1.3 var(--f-mono);letter-spacing:.13em;
-    text-transform:uppercase;color:var(--faint);font-style:normal}
-  .stat b{display:block;font:600 24px/1.25 var(--f-display);color:var(--ink);margin-top:5px}
-  .stat s{display:block;text-decoration:none;font-size:12px;color:var(--muted);margin-top:2px}
-  .chart{display:flex;align-items:flex-end;gap:3px;height:132px;margin:4px 0 0}
-  .chart .day{flex:1 1 0;display:flex;flex-direction:column;justify-content:flex-end;
+  /* ---- Progress ----------------------------------------------------
+     An eyebrow in mono above a headline, the way the rest of her pages
+     introduce a section, and the figures given room: a percentage read
+     from across the table, and four counts for the day.
+     ------------------------------------------------------------------ */
+  .eyebrow{font:500 10.5px/1 var(--f-mono);letter-spacing:.16em;text-transform:uppercase;
+    color:var(--faint);margin:0 0 14px}
+  .cardtitle{font:600 21px/1.2 var(--f-display);letter-spacing:-.02em;margin:0 0 3px;
+    color:var(--ink)}
+  .cardsub{font-size:13px;color:var(--muted);margin:0 0 16px}
+
+  .big{display:flex;align-items:baseline;gap:12px;margin:0 0 18px}
+  .big em{font:600 58px/.86 var(--f-display);letter-spacing:-.045em;color:var(--ink);
+    font-style:normal}
+  .big em i{font-style:normal;font-size:.42em;color:var(--brand);margin-left:2px;
+    letter-spacing:0}
+  .big span{font:600 15px/1 var(--f-display);color:var(--ink-2)}
+  .big span.of{font-weight:400;font-size:13px;color:var(--faint);margin-left:auto}
+
+  .statrow{display:grid;gap:14px;grid-template-columns:1.4fr 1fr;margin-top:14px;
+    align-items:start}
+  @media (max-width:860px){.statrow{grid-template-columns:1fr}}
+  .statgrid{display:grid;gap:10px;grid-template-columns:repeat(2,1fr)}
+  .stat{background:color-mix(in srgb, var(--ink) 4%, transparent);
+    border:1px solid var(--line);border-radius:12px;padding:13px 14px}
+  .stat i{display:flex;align-items:center;gap:6px;font-size:12.5px;
+    color:var(--muted);font-style:normal}
+  .stat b{display:block;font:600 30px/1.1 var(--f-display);letter-spacing:-.03em;
+    color:var(--ink);margin-top:9px}
+  .stat s{display:block;text-decoration:none;font-size:12px;color:var(--faint);margin-top:3px}
+
+  /* Four counts a day, side by side rather than stacked: a stack answers
+     "how much altogether", and the question here is which of the four. */
+  .chart{display:flex;align-items:flex-end;gap:2px;height:150px;margin:2px 0 0}
+  .chart .day{flex:1 1 0;display:flex;align-items:flex-end;justify-content:center;
     gap:2px;height:100%;min-width:0}
-  .chart .col{border-radius:3px 3px 0 0;background:var(--brand);min-height:2px}
-  .chart .col.none{background:color-mix(in srgb, var(--ink) 10%, transparent);min-height:2px}
-  .chart .col.added{background:color-mix(in srgb, var(--go) 60%, transparent);
-    border-radius:0 0 3px 3px}
-  .chart .day.today .col{outline:1px solid var(--brand);outline-offset:1px}
-  .axis{display:flex;gap:3px;margin-top:6px}
-  .axis span{flex:1 1 0;text-align:center;font:500 9.5px/1 var(--f-mono);
+  .chart .bar{flex:1 1 0;max-width:9px;border-radius:2px 2px 0 0;min-height:2px}
+  .chart .b-seen{background:color-mix(in srgb, var(--ink) 34%, transparent)}
+  .chart .b-top{background:var(--go)}
+  .chart .b-mid{background:var(--warn)}
+  .chart .b-add{background:var(--sky)}
+  .chart .day.today{background:color-mix(in srgb, var(--ink) 5%, transparent);
+    border-radius:6px 6px 0 0}
+  .axis{display:flex;gap:2px;margin-top:8px;
+    border-top:1px solid var(--line);padding-top:7px}
+  .axis span{flex:1 1 0;text-align:center;font:500 10.5px/1 var(--f-mono);
     color:var(--faint);overflow:hidden;white-space:nowrap}
-  .chart-key{display:flex;gap:16px;margin:12px 0 0;padding:0;list-style:none}
-  .chart-key li{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
-  .chart-key .k-dot.k-ans{background:var(--brand)}
-  .chart-key .k-dot.k-add{background:color-mix(in srgb, var(--go) 60%, transparent)}
+  .axis span.on{color:var(--ink-2)}
+  .chart-key{display:flex;gap:16px;flex-wrap:wrap;margin:14px 0 0;padding:0;list-style:none}
+  .chart-key li{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted)}
+
   .study .prog{margin:0 0 10px;max-width:420px}
   .deckacts{text-align:right;white-space:nowrap}
   .prog-wrap{display:flex;justify-content:center;padding:0 20px 16px}
@@ -3535,7 +3568,7 @@
     return p > 0 && p < 1 ? 1 : (p < 100 && Math.round(p) === 100 ? 99 : Math.round(p));
   }
 
-  function barHtml(b, label) {
+  function barHtml(b, label, noNum) {
     if (!b.n) return "";
     var full = b.top + " mastered \u00b7 " + b.mid + " learning \u00b7 "
              + b.raw + " new or missed";
@@ -3551,23 +3584,23 @@
        to hold three numbers in her head to see which colour was which. */
     function key(cls, name, n) {
       return '<li><span class="k-dot ' + cls + '"></span>'
-           + '<span class="k-name">' + name + '</span>'
-           + '<b>' + n + '</b></li>';
+           + '<b>' + n + '</b> ' + name + '</li>';
     }
     return '<div class="prog" title="' + esc(full) + '">'
-         + '<div class="prog-num">'
-         + (label ? esc(label) + ' \u00b7 ' : '')
-         + pctDone(b) + '% mastered \u00b7 ' + b.n + ' word' + (b.n === 1 ? '' : 's')
-         + '</div>'
+         + (noNum ? '' :
+            '<div class="prog-num">'
+            + (label ? esc(label) + ' \u00b7 ' : '')
+            + pctDone(b) + '% mastered \u00b7 ' + b.n + ' word' + (b.n === 1 ? '' : 's')
+            + '</div>')
          + '<div class="prog-bar" role="img" aria-label="' + esc(full) + '">'
          + '<span class="p-top" style="width:' + w(b.top) + '"></span>'
          + '<span class="p-mid" style="width:' + w(b.mid) + '"></span>'
          + '<span class="p-raw" style="width:' + w(b.raw) + '"></span>'
          + '</div>'
          + '<ul class="prog-key">'
-         + key("k-top", "Mastered", b.top)
-         + key("k-mid", "Learning", b.mid)
-         + key("k-raw", "New", b.raw)
+         + key("k-top", "mastered", b.top)
+         + key("k-mid", "learning", b.mid)
+         + key("k-raw", "new", b.raw)
          + '</ul></div>';
   }
 
@@ -4622,15 +4655,33 @@
      day that shipped and fills forwards -- the only thing here with a past
      is when a word was added, which has always been stored.
      ------------------------------------------------------------------ */
-  var CHART_DAYS = 21;
+  var CHART_DAYS = 7;
+
+  var WEEKDAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   function dayOf(ms) { return ymd(new Date(ms)); }
 
+  /* Four things can happen to a word in a day, and they are not the same
+     thing counted four ways:
+
+       seen      she was asked it
+       mastered  it crossed into the long gaps that day
+       learned   it moved up a box without reaching that
+       added     it arrived, and has not been asked yet
+
+     Counted per word rather than per answer: a word drilled four times in
+     one sitting was seen once. */
   function statsBy(list) {
     var by = {}, i, j, w, log, e, prev, k, d;
     function slot(key) {
-      if (!by[key]) by[key] = { answers: 0, words: {}, seen: 0, mastered: 0, added: 0 };
+      if (!by[key]) by[key] = { seen: {}, top: {}, mid: {}, added: 0,
+                                nSeen: 0, nTop: 0, nMid: 0, answers: 0 };
       return by[key];
+    }
+    function hit(d, which, id) {
+      if (d[which][id]) return;
+      d[which][id] = 1;
+      d["n" + which.charAt(0).toUpperCase() + which.slice(1)]++;
     }
     for (i = 0; i < list.length; i++) {
       w = list[i];
@@ -4640,16 +4691,15 @@
         e = log[j];
         k = dayOf(e.t); d = slot(k);
         d.answers++;
-        if (!d.words[w.id]) { d.words[w.id] = 1; d.seen++; }
-        /* Counted on the day it crossed, not every day it stays there. A
-           word that falls back and climbs again counts twice, which is
-           honest: it was learned twice. */
-        if ((e.b || 1) >= MASTER && (!prev || (prev.b || 1) < MASTER)) d.mastered++;
+        hit(d, "seen", w.id);
+        var was = prev ? (prev.b || 1) : 1;
+        var now = e.b || 1;
+        if (now >= MASTER && was < MASTER) hit(d, "top", w.id);
+        else if (now > was) hit(d, "mid", w.id);
         prev = e;
       }
-      /* The added date is stored as the moment it was saved; the day is
-         read off it in UTC rather than here, so a word caught late at
-         night can sit on the next day's column. */
+      /* The added date is the moment it was saved, read in UTC rather than
+         here, so a word caught late at night can sit on the next column. */
       k = String(w.added || "").slice(0, 10);
       if (/^\d{4}-\d{2}-\d{2}$/.test(k)) slot(k).added++;
     }
@@ -4658,76 +4708,87 @@
 
   function renderStats() {
     var list = here(), b = bands(list), by = statsBy(list), t = today();
-    var tod = by[t] || { answers: 0, seen: 0, mastered: 0, added: 0 };
+    var tod = by[t] || { nSeen: 0, nTop: 0, nMid: 0, added: 0, answers: 0 };
 
-    /* The last three weeks, including the empty ones: a gap is a fact
-       about the studying too. */
+    /* The last seven days, including the empty ones: a day she did nothing
+       is a fact about the week too. */
     var days = [], i, d = new Date();
     d.setDate(d.getDate() - (CHART_DAYS - 1));
     for (i = 0; i < CHART_DAYS; i++) {
       var key = ymd(d);
-      days.push({ key: key, s: by[key] || { answers: 0, seen: 0, mastered: 0, added: 0 },
-                  dd: d.getDate(), mon: d.getMonth() });
+      days.push({ key: key, dow: WEEKDAY[d.getDay()],
+                  s: by[key] || { nSeen: 0, nTop: 0, nMid: 0, added: 0, answers: 0 } });
       d.setDate(d.getDate() + 1);
     }
     var top = 1;
     for (i = 0; i < days.length; i++) {
-      top = Math.max(top, days[i].s.answers + days[i].s.added);
+      top = Math.max(top, days[i].s.nSeen, days[i].s.nTop, days[i].s.nMid, days[i].s.added);
     }
 
-    function tile(label, value, note) {
-      return '<div class="stat"><i>' + label + '</i><b>' + value + '</b>'
-           + (note ? '<s>' + esc(note) + '</s>' : '') + '</div>';
-    }
-
+    /* ---- how far through, in one number ---- */
     var h = '<div class="card">'
-      + '<div class="statgrid">'
-      + tile("Mastered", pctDone(b) + "%", b.top + " of " + b.n + " words")
-      + tile("Answered today", tod.answers, tod.seen + (tod.seen === 1 ? " word" : " words"))
-      + tile("Learned today", tod.mastered, tod.mastered ? "reached mastered" : "none yet")
-      + tile("Added today", tod.added, "waiting to be studied")
-      + '</div>'
-      + barHtml(b, langLabel())
+      + '<p class="eyebrow">Your vocabulary journey</p>'
+      + '<div class="big"><em>' + pctDone(b) + '<i>%</i></em><span>mastered</span>'
+      + '<span class="of">of ' + b.n + ' word' + (b.n === 1 ? '' : 's') + '</span></div>'
+      + barHtml(b, "", true)
       + '</div>';
 
-    h += '<div class="card" style="margin-top:14px">'
-      + '<h2 style="margin:0 0 2px;font:500 19px/1.2 var(--f-display)">The last three weeks</h2>'
-      + '<p class="step" style="font-size:13px;color:var(--muted);margin:0 0 14px">'
-      + 'Answers given each day, and words added that day beneath them.</p>'
+    /* ---- the week, and the day ---- */
+    h += '<div class="statrow">'
+      + '<div class="card">'
+      + '<p class="eyebrow">Last seven days</p>'
+      + '<h2 class="cardtitle">Words in motion</h2>'
+      + '<p class="cardsub">Asked, moved up, mastered, and added \u2014 counted by word, '
+      + 'not by answer.</p>'
       + '<div class="chart">';
+    function bar(cls, n) {
+      return '<span class="bar ' + cls + '" style="height:'
+           + (n ? Math.max(3, Math.round(n * 100 / top)) : 0) + '%"></span>';
+    }
     for (i = 0; i < days.length; i++) {
       var s2 = days[i].s;
-      var ha = Math.round(s2.answers * 100 / top), hb = Math.round(s2.added * 100 / top);
-      var when = days[i].key;
-      h += '<div class="day' + (when === t ? ' today' : '') + '" title="'
-         + esc(when + " \u2014 " + s2.answers + " answers, " + s2.seen
-               + " words, " + s2.added + " added") + '">'
-         + (s2.answers
-              ? '<span class="col" style="height:' + Math.max(ha, 3) + '%"></span>'
-              : (s2.added ? '' : '<span class="col none" style="height:2px"></span>'))
-         + (s2.added ? '<span class="col added" style="height:' + Math.max(hb, 3) + '%"></span>' : '')
+      h += '<div class="day' + (days[i].key === t ? ' today' : '') + '" title="'
+         + esc(days[i].key + " \u2014 " + s2.nSeen + " seen, " + s2.nTop + " mastered, "
+               + s2.nMid + " learned, " + s2.added + " added") + '">'
+         + bar("b-seen", s2.nSeen) + bar("b-top", s2.nTop)
+         + bar("b-mid", s2.nMid) + bar("b-add", s2.added)
          + '</div>';
     }
     h += '</div><div class="axis">';
     for (i = 0; i < days.length; i++) {
-      /* Every third day carries its number; the rest would collide. */
-      h += '<span>' + (i % 3 === 0 || i === days.length - 1 ? days[i].dd : "") + '</span>';
+      h += '<span' + (days[i].key === t ? ' class="on"' : '') + '>'
+         + days[i].dow + '</span>';
     }
     h += '</div>'
       + '<ul class="chart-key">'
-      + '<li><span class="k-dot k-ans"></span>Answers</li>'
+      + '<li><span class="k-dot k-seen"></span>Seen</li>'
+      + '<li><span class="k-dot k-top"></span>Mastered</li>'
+      + '<li><span class="k-dot k-mid"></span>Learned</li>'
       + '<li><span class="k-dot k-add"></span>Added</li>'
       + '</ul>';
 
     var anyLog = false;
     for (i = 0; i < list.length; i++) { if (answers(list[i]).length) { anyLog = true; break; } }
     if (!anyLog) {
-      h += '<p class="step" style="font-size:13px;color:var(--faint);margin:14px 0 0">'
+      h += '<p class="cardsub" style="margin:14px 0 0;color:var(--faint)">'
          + 'No answers recorded yet. Every answer from now on is kept with the day it '
          + 'was given, so this fills in as you study \u2014 there is no history before '
          + 'today to draw.</p>';
     }
     h += '</div>';
+
+    function tile(cls, label, value, note) {
+      return '<div class="stat"><i><span class="k-dot ' + cls + '"></span>' + label + '</i>'
+           + '<b>' + value + '</b><s>' + esc(note) + '</s></div>';
+    }
+    h += '<div class="card">'
+      + '<p class="eyebrow">Today at a glance</p>'
+      + '<div class="statgrid">'
+      + tile("k-seen", "Seen", tod.nSeen, tod.answers + (tod.answers === 1 ? " answer" : " answers"))
+      + tile("k-top", "Mastered", tod.nTop, tod.nTop ? "into the long gaps" : "none yet")
+      + tile("k-mid", "Learned", tod.nMid, tod.nMid ? "moved up a box" : "none yet")
+      + tile("k-add", "Added", tod.added, "waiting to be studied")
+      + '</div></div></div>';
 
     $("p-stats").innerHTML = h;
   }
