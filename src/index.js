@@ -166,6 +166,85 @@ async function whoami(req, env) {
   return json({ signedIn: true, email: (row && row.email) || "" });
 }
 
+/* ------------------------------------------------------------------
+   Merging two copies of a word.
+
+   This is the same rule the page uses, and it has to live here as well,
+   because here is the only place both copies are ever in the same room.
+   A device pushes its whole list and reads the answer; if the server
+   simply took the newer row, the first device's answers would be gone
+   before the second device ever saw them -- which is exactly what
+   happened in testing: two phones answering the same word offline, and
+   whichever synced second erased the other.
+
+   A word holds two different kinds of thing. What it says -- the senses,
+   the recording, the note, the deck -- is settled by whichever copy was
+   edited later. What she has done with it is a list of answers, and two
+   lists are put together rather than chosen between: every answer either
+   device gave is in the result, the word stands where the last of them
+   left it, and the count is the length of the list.
+
+   Kept deliberately small and dependency-free. If the rule changes on
+   the page, it changes here too; the test for it is two browsers on
+   different origins answering the same word while offline.
+   ------------------------------------------------------------------ */
+const LOGMAX = 40;
+
+function answersOf(w) { return Array.isArray(w.log) ? w.log : []; }
+
+/* Answers given before the log existed, kept as a number. */
+function beforeOf(w) {
+  return Math.max(Number(w.sb) || 0, (Number(w.seen) || 0) - answersOf(w).length);
+}
+
+function mergeLogs(a, b) {
+  const seen = new Set(), out = [];
+  for (const e of a.concat(b)) {
+    if (!e || typeof e.t !== "number") continue;
+    const k = e.t + ":" + (e.h || "");
+    if (seen.has(k)) continue;
+    seen.add(k);
+    out.push(e);
+  }
+  out.sort((x, y) => x.t - y.t);
+  return out.slice(-LOGMAX);
+}
+
+function mergeWords(mine, theirs) {
+  const base = (Number(theirs.updated) || 0) > (Number(mine.updated) || 0) ? theirs : mine;
+  const out = { ...base };
+
+  const log = mergeLogs(answersOf(mine), answersOf(theirs));
+  const sb = Math.max(beforeOf(mine), beforeOf(theirs));
+
+  let best = log.length
+    ? { at: log[log.length - 1].t, box: log[log.length - 1].b, due: log[log.length - 1].d }
+    : null;
+  for (const w of [mine, theirs]) {
+    if ((Number(w.at) || 0) > (best ? best.at : 0)) best = { at: w.at, box: w.box, due: w.due };
+  }
+
+  if (best) {
+    out.box = best.box || 1;
+    out.due = best.due;
+    out.at = best.at;
+  } else if ((Number(theirs.seen) || 0) !== (Number(mine.seen) || 0)) {
+    /* Neither carries a time: both were answered before any of this
+       existed, and the one with more answers is the later one. */
+    const prog = (Number(theirs.seen) || 0) > (Number(mine.seen) || 0) ? theirs : mine;
+    out.box = prog.box || 1;
+    out.due = prog.due;
+    delete out.at;
+  }
+
+  if (log.length) out.log = log; else delete out.log;
+  out.sb = sb;
+  out.seen = sb + log.length;
+  out.updated = Math.max(Number(mine.updated) || 0, Number(theirs.updated) || 0);
+  if (!out.at) delete out.at;
+  return out;
+}
+
 /* The whole list goes up, the merged whole list comes back. A few hundred
    words is a few tens of kilobytes; being clever about deltas would buy
    nothing and would be one more thing to get wrong. */
@@ -188,17 +267,46 @@ async function sync(req, env) {
   const writes = [];
   for (const w of mine) {
     if (!w || typeof w.id !== "string" || !w.id) continue;
-    const updated = Number(w.updated) || 0;
+    const incoming = Number(w.updated) || 0;
     const was = server.get(w.id);
-    if (was && Number(was.updated) >= updated) continue;   /* server is newer */
-    const deleted = w.deleted ? 1 : 0;
+
+    /* A deletion, or a row that is currently a tombstone, is still settled
+       by the stamp alone: there is nothing in a tombstone to merge. */
+    if (w.deleted || (was && was.deleted)) {
+      if (was && Number(was.updated) >= incoming) continue;
+      const body = JSON.stringify(w);
+      writes.push(env.vocab.prepare(
+        `INSERT INTO words (user_id, word_id, body, updated, deleted)
+         VALUES (?, ?, ?, ?, ?)
+         ON CONFLICT (user_id, word_id) DO UPDATE SET
+           body = excluded.body, updated = excluded.updated, deleted = excluded.deleted`)
+        .bind(userId, w.id, body, incoming, w.deleted ? 1 : 0));
+      server.set(w.id, { word_id: w.id, body, updated: incoming, deleted: w.deleted ? 1 : 0 });
+      continue;
+    }
+
+    let merged = w, updated = incoming;
+    if (was) {
+      let old = null;
+      try { old = JSON.parse(was.body); } catch { old = null; }
+      if (old) {
+        merged = mergeWords(old, w);
+        updated = Number(merged.updated) || Math.max(incoming, Number(was.updated) || 0);
+      } else if (Number(was.updated) >= incoming) {
+        continue;                       /* a row we cannot read, and older */
+      }
+    }
+
+    const body = JSON.stringify(merged);
+    if (was && body === was.body && updated === Number(was.updated)) continue;
+
     writes.push(env.vocab.prepare(
       `INSERT INTO words (user_id, word_id, body, updated, deleted)
-       VALUES (?, ?, ?, ?, ?)
+       VALUES (?, ?, ?, ?, 0)
        ON CONFLICT (user_id, word_id) DO UPDATE SET
          body = excluded.body, updated = excluded.updated, deleted = excluded.deleted`)
-      .bind(userId, w.id, JSON.stringify(w), updated, deleted));
-    server.set(w.id, { word_id: w.id, body: JSON.stringify(w), updated, deleted });
+      .bind(userId, w.id, body, updated));
+    server.set(w.id, { word_id: w.id, body, updated, deleted: 0 });
   }
   if (writes.length) await env.vocab.batch(writes);
 

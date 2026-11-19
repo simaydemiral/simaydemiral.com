@@ -215,6 +215,11 @@
   .space-n{font:500 11px/1 var(--f-mono);margin-left:7px;opacity:.75}
   #account{display:inline-flex;align-items:center;gap:8px;margin-left:4px;
     flex-wrap:wrap}
+  /* Plain text that happens to be tappable: it reports, it does not ask. */
+  .syncstate{font:inherit;font-size:12.5px;color:var(--faint);background:none;
+    border:0;padding:0 2px;cursor:pointer;white-space:nowrap;
+    text-decoration:underline dotted;text-underline-offset:3px}
+  .syncstate:hover{color:var(--brand)}
   #account a{text-decoration:none}
   /* The address gives way before the buttons do, and it is allowed to
      shrink to nothing rather than holding the row open. */
@@ -499,6 +504,29 @@
       w.root = typeof w.root === "string" ? w.root.slice(0, 60) : "";
       w.miss = typeof w.miss === "number" ? w.miss : 0;
       w.pv = Number(w.pv) || 0;
+      /* The answers themselves. Sanitised like everything else that can
+         arrive from a file or from another device: a time, one of the three
+         buttons, the box and date that answer produced, and a bounded
+         number of them. */
+      w.log = (Array.isArray(w.log) ? w.log : [])
+        .filter(function (e) { return e && typeof e.t === "number"; })
+        .map(function (e) {
+          return { t: e.t,
+                   h: (e.h === "yes" || e.h === "mid" || e.h === "no") ? e.h : "yes",
+                   b: Math.min(BOXES, Math.max(1, Number(e.b) || 1)),
+                   d: /^\d{4}-\d{2}-\d{2}$/.test(e.d) ? e.d : "" };
+        })
+        .sort(function (x, y) { return x.t - y.t; })
+        .slice(-LOGMAX);
+      /* How many answers this word had been given before it started keeping
+         them. Every card in the deck right now has a count and no list, and
+         this is where that count goes to live, so nothing she has already
+         done stops being counted. */
+      w.sb = Math.max(Number(w.sb) || 0,
+                      Math.max(0, (Number(w.seen) || 0) - w.log.length));
+      w.seen = w.sb + w.log.length;
+      if (w.log.length) w.at = w.log[w.log.length - 1].t;
+      else { delete w.log; if (typeof w.at !== "number") delete w.at; }
       /* An audio URL from a file is a URL like any other: http(s) only. */
       if (w.say && typeof w.say === "object") {
         w.say = { audio: safeUrl(w.say.audio).slice(0, 400),
@@ -616,6 +644,9 @@
      ------------------------------------------------------------------ */
   var me = null;            /* { signedIn, email } once /auth/me has answered */
   var syncing = false, syncTimer = null, lastSync = 0;
+  /* dirty: something here has not reached the server yet. tries: how many
+     times in a row the attempt has failed, which sets how long to wait. */
+  var dirty = false, tries = 0, retryTimer = null;
 
   function syncSoon() {
     if (DEMO || !me || !me.signedIn) return;
@@ -720,6 +751,7 @@
   function syncNow() {
     if (DEMO || syncing || !me || !me.signedIn) return;
     syncing = true;
+    renderAccount();
     var payload = db.words.concat(db.gone || []).concat(deckRecords());
     fetch("/api/sync", {
       method: "POST",
@@ -734,12 +766,46 @@
       .then(function (out) {
         syncing = false;
         if (!out || !Array.isArray(out.words)) return;
+        dirty = false;
+        tries = 0;
         absorb(out.words);
         lastSync = Date.now();
         renderAccount();
       })
-      .catch(function () { syncing = false; renderAccount(); });
+      /* A failed sync used to be the end of it: the answers sat here until
+         something else happened to ask again. The network comes back on its
+         own, so the asking should too -- backing off rather than hammering,
+         and giving up only when the page does. */
+      .catch(function () {
+        syncing = false;
+        tries++;
+        clearTimeout(retryTimer);
+        retryTimer = setTimeout(syncNow, Math.min(60000, 5000 * tries));
+        renderAccount();
+      });
   }
+
+  /* Four things ask for a sync, so that nothing has to: a change, coming
+     back to the app, the network returning, and a quiet timer for a page
+     left open all day. */
+  window.addEventListener("online", function () { tries = 0; syncNow(); });
+
+  setInterval(function () {
+    if (!document.hidden && me && me.signedIn && (dirty || Date.now() - lastSync > 300000))
+      syncNow();
+  }, 60000);
+
+  /* Closing the app with an answer still in hand was the whole of this
+     morning's trouble. A beacon is delivered by the browser after the page
+     is gone, which is the only kind of request that survives being closed. */
+  window.addEventListener("pagehide", function () {
+    if (DEMO || !dirty || !me || !me.signedIn || !navigator.sendBeacon) return;
+    try {
+      var payload = db.words.concat(db.gone || []).concat(deckRecords());
+      navigator.sendBeacon("/api/sync",
+        new Blob([JSON.stringify({ words: payload })], { type: "application/json" }));
+    } catch (e) {}
+  });
 
   /* ------------------------------------------------------------------
      One word, two copies, nothing thrown away.
@@ -757,29 +823,104 @@
      climbs: whatever either device knows about how often this word has come
      round, the merged copy knows it too.
      ------------------------------------------------------------------ */
+  function keyOf(w) {
+    return (w && typeof w.term === "string" && w.term) ? idOf(w.term) : (w && w.id);
+  }
+
+  function answers(w) { return Array.isArray(w.log) ? w.log : []; }
+
+  /* Answers given before there was a log to write them in. Kept as a number
+     so the count stays honest across the change: a word with eleven answers
+     behind it and three since reads fourteen, not three. */
+  function before(w) {
+    return Math.max(Number(w.sb) || 0, (Number(w.seen) || 0) - answers(w).length);
+  }
+
+  /* Two lists of answers become one. Nothing is dropped: the same answer
+     arriving from both sides is recognised by when it happened, and anything
+     either side knows about that the other does not is kept. */
+  function mergeLogs(a, b) {
+    var all = a.concat(b), out = [], seen = {}, i, e, k;
+    for (i = 0; i < all.length; i++) {
+      e = all[i];
+      if (!e || typeof e.t !== "number") continue;
+      k = e.t + ":" + (e.h || "");
+      if (seen[k]) continue;
+      seen[k] = 1;
+      out.push(e);
+    }
+    out.sort(function (x, y) { return x.t - y.t; });
+    /* Only the tail is kept, and only the last line is ever read for the
+       word's state, so a trimmed history costs nothing but history. */
+    return out.slice(-LOGMAX);
+  }
+
   function mergeWord(mine, theirs) {
     var base = (theirs.updated || 0) > (mine.updated || 0) ? theirs : mine;
-    var pa = mine.at || 0, pb = theirs.at || 0, prog;
-    if (pa !== pb) prog = pb > pa ? theirs : mine;
-    /* Neither copy has an answer time: both were last answered before this
-       existed, which is the state the old stamping bug left behind. The one
-       with more answers in it is the later one -- the count only goes up. */
-    else if ((theirs.seen || 0) !== (mine.seen || 0))
-      prog = (theirs.seen || 0) > (mine.seen || 0) ? theirs : mine;
-    else prog = base;
-
     var out = {}, k;
     for (k in base) out[k] = base[k];
-    out.box = prog.box || 1;
-    out.due = prog.due;
-    if (prog.at) out.at = prog.at; else delete out.at;
-    out.seen = Math.max(mine.seen || 0, theirs.seen || 0);
+
+    var log = mergeLogs(answers(mine), answers(theirs));
+    var sb = Math.max(before(mine), before(theirs));
+
+    /* Where the word stands is whatever the latest answer anywhere says --
+       from the merged list if it is in there, or from a copy whose answer
+       was given before this build and survives only as a timestamp. */
+    var best = log.length
+      ? { at: log[log.length - 1].t, box: log[log.length - 1].b, due: log[log.length - 1].d }
+      : null;
+    var sides = [mine, theirs], i, w;
+    for (i = 0; i < 2; i++) {
+      w = sides[i];
+      if ((w.at || 0) > (best ? best.at : 0)) best = { at: w.at, box: w.box, due: w.due };
+    }
+
+    if (best) {
+      out.box = best.box || 1;
+      out.due = best.due;
+      out.at = best.at;
+    } else if ((theirs.seen || 0) !== (mine.seen || 0)) {
+      /* Neither copy carries a time: both were answered before any of this
+         existed. The one with more answers in it is the later one, since
+         that count only ever goes up. */
+      var prog = (theirs.seen || 0) > (mine.seen || 0) ? theirs : mine;
+      out.box = prog.box || 1;
+      out.due = prog.due;
+      delete out.at;
+    }
+
+    if (log.length) out.log = log; else delete out.log;
+    out.sb = sb;
+    out.seen = sb + log.length;
+    if (!out.at) delete out.at;
     return out;
   }
 
   /* What came back replaces what is here only where it is newer. */
+  /* Every answer this list knows about, counted. The box is not in here on
+     purpose: answering "Not yet" lowers a box, legitimately, and counting
+     that as a loss would cry wolf on an ordinary sitting. The number of
+     answers is the one thing that cannot honestly go down -- the logs are a
+     union and the carried-over count is a maximum -- so if it does, the
+     merge is wrong and the list it ate is worth keeping. */
+  function progressTotal(list) {
+    var t = 0, i;
+    for (i = 0; i < list.length; i++) t += (list[i].seen || 0);
+    return t;
+  }
+
+  var PREV = KEY + ".prev";
+
   function absorb(remote) {
     var byId = {}, i, w, changed = false, repaired = false;
+    /* What the list looked like before this merge, and what it was worth.
+       A merge should never subtract -- the answers are a union and the
+       count only climbs -- so if it does, something is wrong with code I
+       wrote, and this morning showed what that costs when it cannot be
+       undone. The copy is only kept in that case, so in ordinary use this
+       is a subtraction and nothing else. */
+    var wasWorth = progressTotal(db.words), wasRaw = null;
+    try { wasRaw = localStorage.getItem(KEY); } catch (e) {}
 
     /* Decks first, and taken out of the list: fed through the word merge
        they would land in db.words and be rendered as cards. */
@@ -799,7 +940,12 @@
     for (var dk in deckByKey) db.decks.push(deckByKey[dk]);
     db.decks = normalizeDecks(db.decks);
     remote = incoming;
-    for (i = 0; i < db.words.length; i++) byId[db.words[i].id] = db.words[i];
+    /* Keyed by what the id will be once normalize has had it, not by what
+       the record happens to say. The id is a hash of the term, so a row
+       written by an older build under a different id would otherwise come
+       in as a second copy of a word already here -- two entries, the same
+       word, the answers split between them. */
+    for (i = 0; i < db.words.length; i++) byId[keyOf(db.words[i])] = db.words[i];
     var gone = {};
     for (i = 0; i < (db.gone || []).length; i++) gone[db.gone[i].id] = db.gone[i].updated || 0;
 
@@ -818,10 +964,11 @@
         continue;
       }
       if (gone[w.id] && gone[w.id] >= (w.updated || 0)) continue;   /* deleted here, later */
-      var here = byId[w.id];
-      if (!here) { byId[w.id] = w; changed = true; continue; }
+      var key = keyOf(w);
+      var here = byId[key];
+      if (!here) { byId[key] = w; changed = true; continue; }
       var merged = mergeWord(here, w), mb = bodyOf(merged);
-      byId[w.id] = merged;
+      byId[key] = merged;
       if (mb !== bodyOf(here)) changed = true;
       /* The merged copy is not what the server holds, so it has to go back:
          marked, which gives it a fresh stamp on the save below, and that
@@ -854,6 +1001,14 @@
       if (s2.length !== session.length) changed = true;
       session = s2;
       saveSession();
+    }
+
+    if (wasRaw && progressTotal(db.words) < wasWorth) {
+      try {
+        localStorage.setItem(PREV, JSON.stringify({
+          at: Date.now(), lost: wasWorth - progressTotal(db.words), db: wasRaw
+        }));
+      } catch (e) {}
     }
 
     /* save() rather than a bare write when the merge healed a split: the
@@ -916,6 +1071,7 @@
     }
     touched = {};
     snapshot();
+    dirty = true;
     try { localStorage.setItem(KEY, JSON.stringify(db)); }
     catch (e) { toast("Could not save — browser storage is full or blocked."); }
     syncSoon();
@@ -1033,6 +1189,12 @@
       w = db.words[i];
       o = seen[w.id];
       if (!o) { seen[w.id] = w; keep.unshift(w); continue; }
+      /* Two copies of one word, whatever brought them about: put their
+         answers together rather than keeping whichever came first. Folding
+         used to take the first copy's box and count and drop the other's,
+         which is a quiet way to lose a sitting. */
+      var fm = mergeWord(o, w), fk;
+      for (fk in fm) o[fk] = fm[fk];
       f = formsOf(w);
       for (k = 0; k < f.length; k++) addForm(o, f[k]);
       addForm(o, w.term);
@@ -3076,6 +3238,11 @@
 
   var BOXES = 6;
 
+  /* How many answers a word keeps. Only the last one is ever read for where
+     the word stands, so this is a cap on history, not on correctness -- and
+     forty answers to one word is already more than any card here will see. */
+  var LOGMAX = 40;
+
   /* Box 1 is "new or just missed". Boxes 2..6 carry the five intervals, so
      the first word you know comes back in a day and the ladder is actually
      1, 3, 7, 16, 35 rather than starting at 3.
@@ -3094,14 +3261,25 @@
     else if (how === "mid") w.box = Math.max(2, box);
     else                    w.box = 1;
     w.due = plus(GAP[how] === undefined ? 0 : GAP[how]);
-    w.seen = (w.seen || 0) + 1;
-    /* Two clocks, not one. `updated` says when the record last changed --
-       a note, a deck, a definition that arrived from Wiktionary. `at` says
-       when the word was last answered. Merging needs both: without `at`,
-       looking a word up on the laptop is a newer change than answering it on
-       the phone, and the lookup would carry the laptop's older box back over
-       the answer. */
+
+    /* The answer is written down, not just its effect.
+
+       A box is a conclusion, and two devices holding different conclusions
+       about the same word can only be settled by throwing one away. A list
+       of answers is a fact each device observed, and two lists can simply be
+       put together: every answer either device has ever given is in the
+       merged word, in the order they were given, and the box is whatever the
+       last of them produced. The count stops being a number each device
+       keeps for itself and becomes the length of the list.
+
+       The resulting box and date are stored with each answer so the merge
+       never has to replay the scheduling rules -- a word merged on a device
+       running an older build of those rules would otherwise land on a date
+       that build chose. */
     w.at = Date.now();
+    w.log = answers(w).concat([{ t: w.at, h: how, b: w.box, d: w.due }]).slice(-LOGMAX);
+    w.sb = Math.max(0, Number(w.sb) || 0);
+    w.seen = w.sb + w.log.length;
     mark(w.id);
     save();
   }
@@ -4270,6 +4448,44 @@
     if (b) setSpace(b.getAttribute("data-space"));
   });
 
+  /* A merge that took something away leaves the list as it was behind it,
+     for a day. After that the chance to undo has passed and the copy goes,
+     rather than sitting in storage for ever. */
+  function undoable() {
+    try {
+      var raw = localStorage.getItem(PREV);
+      if (!raw) return null;
+      var p = JSON.parse(raw);
+      if (!p || !p.db || Date.now() - (p.at || 0) > 86400000) {
+        localStorage.removeItem(PREV);
+        return null;
+      }
+      return p;
+    } catch (e) { return null; }
+  }
+
+  function undoSync() {
+    var p = undoable();
+    if (!p) return;
+    var old;
+    try { old = JSON.parse(p.db); } catch (e) { return; }
+    if (!old || !Array.isArray(old.words)) return;
+    db.words = normalize(old.words);
+    db.decks = normalizeDecks(old.decks);
+    db.gone = Array.isArray(old.gone) ? old.gone : [];
+    /* Marked, every one, so the restored list goes up with stamps newer
+       than whatever replaced it -- an undo that only held on this device
+       would be undone again by the next sync. */
+    for (var i = 0; i < db.words.length; i++) mark(db.words[i].id);
+    try { localStorage.removeItem(PREV); } catch (e) {}
+    session = []; done = 0; misses = {}; almost = {};
+    saveSession();
+    save();
+    renderSpaces(); counts(); fillFilter(); renderAll(); renderDecks(); renderDue();
+    renderAccount();
+    toast("Put back as it was before that sync.");
+  }
+
   function ago(t) {
     var s = Math.max(0, Math.round((Date.now() - t) / 1000));
     if (s < 10) return "just now";
@@ -4289,26 +4505,37 @@
       el.innerHTML = '<a class="btn-q" href="/auth/start">Sign in to sync</a>';
       return;
     }
-    /* "synced" with nothing behind it was true of a page that had synced
-       once, three days ago, and of one that had synced a second ago. When
-       the two devices disagree, the first question is when each of them
-       last spoke to the server, and the app could not answer it. */
+    /* A Sync now button is an admission that the app does not do it by
+       itself. It does: on every change, on coming back, on the network
+       returning, and on a timer. So this is a state, not a chore -- what it
+       says is true at the moment it says it, and tapping it is for the
+       impatient rather than the careful. */
     var when = syncing ? "syncing\u2026"
-             : lastSync ? "synced " + ago(lastSync) : "not synced yet";
+             : tries ? "will retry"
+             : lastSync ? "synced " + ago(lastSync)
+             : dirty ? "not synced yet" : "synced";
     el.innerHTML = '<span class="who" title="' + esc(me.email || "") + '">'
-                 + esc(me.email || "signed in") + ' \u00b7 ' + when + '</span>'
-                 + ' <button type="button" class="btn-q" id="syncGo">Sync now</button>'
+                 + esc(me.email || "signed in") + '</span>'
+                 + '<button type="button" class="syncstate" id="syncGo" '
+                 + 'title="Sync now">' + esc(when) + '</button>'
+                 + (undoable() ? ' <button type="button" class="btn-q" id="undoSync">'
+                                 + 'Undo last sync</button>' : '')
                  + ' <a class="btn-q" href="/auth/signout">Sign out</a>';
   }
 
   /* The button exists so a sync is something she can ask for and watch,
      rather than something she has to trust happened. */
   $("account").addEventListener("click", function (e) {
-    if (!e.target || e.target.id !== "syncGo") return;
+    if (!e.target) return;
+    if (e.target.id === "undoSync") { undoSync(); return; }
+    if (e.target.id !== "syncGo") return;
     if (!me || !me.signedIn) return;
+    tries = 0;
     syncNow();
-    renderAccount();
   });
+
+  /* "synced 2 min ago" stops being true a minute later. */
+  setInterval(function () { if (!document.hidden) renderAccount(); }, 30000);
 
   function renderDecks() {
     var list = decks();
