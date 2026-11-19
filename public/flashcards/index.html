@@ -3894,6 +3894,11 @@
   var renaming = null;   /* the deck whose name is being edited, if any */
   var CAP = 30;
 
+  /* How many other words must come between a word and itself inside one
+     sitting. Fewer than this left in the queue and the card is let go
+     rather than shown again immediately. */
+  var SPACER = 5;
+
   /* How many of a sitting are words never answered before. A backlog of
      sixty is a month of reviews, and a sitting made only of the most
      overdue would mean nothing new was ever reached while it lasted; a
@@ -4740,16 +4745,24 @@
     } else if (how === "mid") {
       /* Once more before the sitting ends, rather than straight away: you
          had it, so drilling it immediately proves nothing. */
-      if (!almost[w.id]) { almost[w.id] = 1; session.push(w); }
-      else done++;
+      if (!almost[w.id] && session.length >= SPACER) {
+        almost[w.id] = 1; session.push(w);
+      } else done++;
     } else {
       misses[w.id] = (misses[w.id] || 0) + 1;
-      /* Three times round is enough. It is already scheduled for tomorrow,
-         and a card that cannot be escaped is a trap rather than a drill.
-         Put back a few cards ahead, not at the very end, so a word you could
-         not produce comes round while you still remember being stuck. */
-      if (misses[w.id] < 3) session.splice(Math.min(3, session.length), 0, w);
-      else done++;
+      /* Three times round is enough. It is already due again today, and a
+         card that cannot be escaped is a trap rather than a drill.
+
+         It comes back while being stuck on it is still fresh, but never
+         straight away: at least five other words go in front of it. Three
+         used to be the gap, and at the end of a sitting -- with two cards
+         left, or one -- the arithmetic put it back at the front, so the
+         word she had just failed was the next thing she saw. With nothing
+         to put between it and itself, the round ends instead: it is due
+         today, so Go again brings it round in a fresh sitting. */
+      if (misses[w.id] < 3 && session.length >= SPACER) {
+        session.splice(SPACER, 0, w);
+      } else done++;
     }
     flipped = false;
     noteOpen = false;
