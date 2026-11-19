@@ -95,10 +95,9 @@
     </p>
     <p>
       <strong>Three answers, not two.</strong> Not yet, Almost, Knew it. A card
-      you did not get stays due today. Almost brings it back in two days, and
-      Knew it opens the gap out a rung at a time &mdash; tomorrow, then two days,
-      four, a fortnight. Four right answers in a row, falling on days 0, 1, 3
-      and 7, and the word is learned.
+      you did not get stays due today. Almost brings it back in two days; Knew
+      it steps the interval out &mdash; 1, 2, 4, then 16 days. Four right in a
+      row, on days 0, 1, 3 and 7, and the word is mastered.
     </p>
     <p>
       <strong>German and French nouns carry their article.</strong> The card
@@ -116,32 +115,26 @@
       phone; stay signed out and they never leave the browser you saved them in.
     </p>
     <p>
-      <strong>What travels between devices is the answers, not the box.</strong>
-      A box is a conclusion, and two devices that reach different conclusions
-      about the same word can only be reconciled by throwing one of them away.
-      So every answer is written down as its own line &mdash; when it was given,
-      and which of the three buttons &mdash; and two copies of a word merge by
-      putting their lines together. Nothing has to be chosen between: a sitting
-      on the phone and a sitting on the laptop both count, including on the same
-      word while both were offline. The rule exists twice, once in the page and
-      once in the Worker, because there is no build step to share code between
-      them, and a test runs both over the same situations to check they still
-      agree before anything goes live.
+      <strong>What syncs is the answers, not the box.</strong> A box is a
+      conclusion, and two devices can hold different ones with nothing to
+      separate them. So each answer is appended as a line &mdash; timestamp,
+      which button, the box and date it produced &mdash; and merging two copies
+      is the union of their lines. Nothing is discarded: two sittings on the
+      same word, both offline, both count. The rule is written twice, in the
+      page and in the Worker, since there is no build step to share code
+      between them; a test runs both over the same cases before any deploy.
     </p>
     <p>
-      <strong>And it syncs itself.</strong> After every answer, on coming back
-      to the app, when the network returns, and once more as the app closes
-      &mdash; a beacon the browser delivers after the page is already gone, for
-      the answer given a second before you put the phone away. The line under
-      your email says when it last went up, which is the only thing a sync
-      button was ever really for.
+      <strong>And it syncs itself.</strong> After every answer, on
+      <code>visibilitychange</code>, on <code>online</code>, on a timer, and
+      once more through <code>sendBeacon</code> as the page unloads &mdash; for
+      the answer given a second before the phone goes in a pocket. The line
+      under your email reports when, which is all a sync button ever did.
     </p>
     <p>
-      <strong>A page of days.</strong> Keeping the answers with their dates
-      means the app can say what a week actually looked like: words seen, words
-      that moved up a box, words that reached learned, and words added, four
-      counts a day. A box could always say where a word had got to. It could
-      never say when.
+      <strong>A page of days.</strong> With a timestamp on every answer the app
+      can report a week: words seen, moved up a box, mastered, and added, four
+      counts a day. A box says where a word got to, never when.
     </p>
 
     <h2 id="stack">Stack</h2>

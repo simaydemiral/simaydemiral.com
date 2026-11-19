@@ -623,6 +623,13 @@ html { scroll-behavior: smooth; }
 /* The opening line stays a little larger than the rest. */
 .case-body > .case-lede { font-size: 1rem; }
 
+/* An identifier named in the prose. No tinted plate behind it: these pages
+   are sentences, and a box in the middle of one reads as a button. */
+.case-body code {
+  font: 400 0.9em/1.5 var(--mono);
+  color: var(--ink-2);
+}
+
 .case-body ul {
   margin: 0;
   padding-left: 1.1rem;
