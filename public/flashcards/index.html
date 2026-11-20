@@ -6607,6 +6607,11 @@
     }
     session.unshift(w);
     renderDue();
+    /* And it opens on Progress. The week is the thing worth seeing first --
+       it is the part of this tool nobody expects -- and the word just
+       caught is already counted in it, under Added. Study is one click
+       away and the demo takes it. */
+    if (demoTab("stats")) demoTab("stats").click();
   }
 
   /* And then the window goes, with the app behind it already finished. */
@@ -6690,43 +6695,43 @@
     demoMove(word, 60);                       /* arrives from below the line */
 
     /* 1 -- the sentence, and the word in it */
-    demoAt(600,  function () { demoMove(word); });
-    demoAt(1500, function () { if (word) word.classList.add("is-sel"); });
+    demoAt(500,  function () { demoMove(word); });
+    demoAt(1200, function () { if (word) word.classList.add("is-sel"); });
 
     /* 2 -- the bookmarklet on the bar */
-    demoTap(2300, function () { return mark; }, function () {
+    demoTap(1900, function () { return mark; }, function () {
       if (mark) mark.classList.add("is-hit");
       if (said) said.classList.add("is-on");
     });
-    demoAt(3700, function () { if (mark) mark.classList.remove("is-hit"); });
+    demoAt(3200, function () { if (mark) mark.classList.remove("is-hit"); });
 
     /* 3 -- over to the tab the app is open in. The app used to arrive on
        its own, which is the one moment in the demo nobody had asked for:
        a page gives way to another page because somebody clicked something,
        and here nobody had. */
-    demoTap(4200, function () { return $("catchTabApp"); }, function () {
+    demoTap(3500, function () { return $("catchTabApp"); }, function () {
       demoSwitch();
       demoLand();                 /* behind the window, which is still opaque */
     });
-    demoAt(5900, demoCaught);
+    demoAt(5100, demoCaught);
 
-    /* 4 -- the card, and the meaning on the back of it */
-    demoTap(7400, function () { return $("face"); });
+    /* 4 -- the week, which is what the app opened on, and then Study */
+    demoTap(6300, function () { return demoTab("due"); });
 
-    /* 5 -- the answer. Almost: she nearly had it. */
-    demoTap(11600, function () { return $("gMid"); });
+    /* 5 -- the card that was just caught, and the meaning on the back.
+       The longest pause in the demo sits on the back of this card, because
+       it is the screen with the most on it: the senses, the example, and
+       the sentence she met the word in. */
+    demoTap(8200, function () { return $("face"); });
 
-    /* 6 -- the other space. A German noun is filed with its article, which
-       is the reason the languages are kept apart at all. */
-    /* German is on screen for about two seconds, not four. It is one
-       card making one point -- a noun is filed with its article -- and
-       the point is made the moment the card is drawn. */
-    demoSwapSpace(13800, "de", DEMO_DE_LEAD);
-    demoSwapSpace(15900, "en");
+    /* 6 -- the answer. Almost: she nearly had it. */
+    demoTap(11400, function () { return $("gMid"); });
 
-    /* 7 -- the week */
-    demoTap(17900, function () { return demoTab("stats"); });
-    demoAt(19900, function () { if (demoCur) demoCur.classList.remove("is-on"); });
+    /* 7 -- and out on the other space. A German noun is filed with its
+       article, which is the reason the languages are kept apart at all,
+       and it is the last thing the demo says. */
+    demoSwapSpace(13400, "de", DEMO_DE_LEAD);
+    demoAt(15400, function () { if (demoCur) demoCur.classList.remove("is-on"); });
   }
 
   function demoReset() {
