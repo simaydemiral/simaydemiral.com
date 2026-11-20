@@ -6585,13 +6585,13 @@
     });
   }
 
-  /* The handover: the page gives way, and the word it was on is in the app. */
-  function demoCaught() {
-    var o = $("catch"), i, w = demoWord(DEMO_CATCH);
-    if (o) {
-      o.classList.add("is-gone");
-      demoAt(700, function () { if (o.parentNode) o.parentNode.removeChild(o); });
-    }
+  /* The app, made ready while the window is still over it and still
+     opaque. It used to be built in the same tick as the window began to
+     fade, so what the reader got was two interfaces at half strength
+     drawing over each other -- the app assembling itself through the page
+     it was replacing. Prepare first, uncover second. */
+  function demoLand() {
+    var i, w = demoWord(DEMO_CATCH);
     db.words.push(w);
     counts(); fillFilter(); renderSpaces();
     startSession();
@@ -6602,6 +6602,14 @@
     }
     session.unshift(w);
     renderDue();
+  }
+
+  /* And then the window goes, with the app behind it already finished. */
+  function demoCaught() {
+    var o = $("catch");
+    if (!o) return;
+    o.classList.add("is-gone");
+    demoAt(700, function () { if (o.parentNode) o.parentNode.removeChild(o); });
   }
 
   /* Which German word the demo opens on. Left to the schedule it was
@@ -6644,16 +6652,21 @@
      and the other language in its place. */
   function demoSwapSpace(t, code, lead) {
     var panel = $("p-due");
-    demoAt(t + 560, function () { if (panel) panel.classList.add("is-swap"); });
     demoTap(t, function () { return demoSpace(code); }, function () {
+      /* The fade starts on the click and not a moment before it. Started
+         early -- while the cursor was still crossing the screen -- the
+         language appeared to change on its own and the press arrived
+         afterwards to explain it. */
+      if (panel) panel.classList.add("is-swap");
       /* setSpace leaves the Start screen up; the demo has no patience for a
-         screen whose only content is a button it is about to press. */
-      demoAt(40, function () {
+         screen whose only content is a button it is about to press. It is
+         redrawn behind the fade, so neither is ever seen. */
+      demoAt(260, function () {
         startSession();
         if (lead) demoFirst(idOf(lead));
         renderDue();
       });
-      demoAt(320, function () { if (panel) panel.classList.remove("is-swap"); });
+      demoAt(310, function () { if (panel) panel.classList.remove("is-swap"); });
     });
   }
   function demoTab(k) {
@@ -6683,23 +6696,26 @@
        its own, which is the one moment in the demo nobody had asked for:
        a page gives way to another page because somebody clicked something,
        and here nobody had. */
-    demoTap(4200, function () { return $("catchTabApp"); }, demoSwitch);
+    demoTap(4200, function () { return $("catchTabApp"); }, function () {
+      demoSwitch();
+      demoLand();                 /* behind the window, which is still opaque */
+    });
     demoAt(5900, demoCaught);
 
     /* 4 -- the card, and the meaning on the back of it */
-    demoTap(7000, function () { return $("face"); });
+    demoTap(7400, function () { return $("face"); });
 
     /* 5 -- the answer. Almost: she nearly had it. */
-    demoTap(11400, function () { return $("gMid"); });
+    demoTap(11600, function () { return $("gMid"); });
 
     /* 6 -- the other space. A German noun is filed with its article, which
        is the reason the languages are kept apart at all. */
-    demoSwapSpace(13600, "de", DEMO_DE_LEAD);
-    demoSwapSpace(17800, "en");
+    demoSwapSpace(13800, "de", DEMO_DE_LEAD);
+    demoSwapSpace(18000, "en");
 
     /* 7 -- the week */
-    demoTap(19800, function () { return demoTab("stats"); });
-    demoAt(21800, function () { if (demoCur) demoCur.classList.remove("is-on"); });
+    demoTap(20000, function () { return demoTab("stats"); });
+    demoAt(22000, function () { if (demoCur) demoCur.classList.remove("is-on"); });
   }
 
   function demoReset() {
