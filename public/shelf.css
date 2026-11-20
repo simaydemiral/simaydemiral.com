@@ -187,13 +187,22 @@
   max-height: none;
 }
 
+/* FlashCards is laid out shorter -- see .showcase--short in the base sheet.
+   The rule above is specific enough to beat that one, so it has to be said
+   again here or the frame keeps the Ledger's shape and the demo gets a band
+   of empty surface under it. */
+.slot[data-on] .showcase--short .showcase-frame {
+  aspect-ratio: 1340 / 790;
+}
+
 /* Below 42rem the base sheet lays the demo out at phone width -- 420x680 --
    and gives the frame a matching portrait ratio. The rule above is more
    specific than that one, so it kept forcing the landscape ratio on a
    phone: the frame came out 285x191 while the scaled page inside needed
    461px, and two thirds of the demo was cut off. Hand it back. */
 @media (max-width: 42rem) {
-  .slot[data-on] .showcase-frame {
+  .slot[data-on] .showcase-frame,
+  .slot[data-on] .showcase--short .showcase-frame {
     aspect-ratio: 420 / 680;
   }
 }

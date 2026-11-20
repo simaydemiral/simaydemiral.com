@@ -1165,6 +1165,13 @@ html { scroll-behavior: smooth; }
     aspect-ratio: 420 / 680;
     max-height: none;
   }
+  /* And hand the short frame back: .showcase--short is the desktop shape,
+     and it is specific enough to beat the rule above, which on a phone put
+     a portrait layout in a landscape frame. */
+  .showcase--short .showcase-frame {
+    --showcase-tall: 680px;
+    aspect-ratio: 420 / 680;
+  }
 }
 
 /* In a write-up the frame is sized by script from the box it lands in, since
@@ -1172,6 +1179,15 @@ html { scroll-behavior: smooth; }
    full width on a narrower one. */
 .showcase--case { margin: 1.5rem 0 0; }
 .showcase--case .showcase-frame { max-height: none; }
+
+/* FlashCards runs shorter than Ledger. Its app is a card and a column of
+   tabs, so a 3:2 window left a hand's width of empty surface under the card
+   on every beat but the last. 790 is the floor: the Progress chart, the
+   tallest thing the demo shows, ends at 775. */
+.showcase--short .showcase-frame {
+  --showcase-tall: 790px;
+  aspect-ratio: 1340 / 790;
+}
 
 /* Text on the left, drawing on the right; stacks on narrow screens. */
 .item--illustrated {
