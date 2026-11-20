@@ -204,8 +204,6 @@
   #toast.on{opacity:1;transform:translate(-50%,0)}
 
   .tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  .keys{text-align:center;font:500 11px/1 var(--f-mono);letter-spacing:.1em;
-        text-transform:uppercase;color:var(--faint);padding:2px 0 14px}
   .lbl-tiny{display:none}
   .termrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .say{display:flex;align-items:center;gap:8px}
@@ -542,6 +540,8 @@
   .catch-fav--a{background:var(--brand)}
   .catch-fav--b{background:#4b8fd5}
   .catch-fav--c{background:#5aa472}
+  .catch-fav--white{background:#fff;display:flex;align-items:center;
+                    justify-content:center;overflow:hidden}
   .catch-new{font:300 16px/1 var(--f-body);color:var(--faint);
              padding:0 9px 10px;flex:none}
   .catch-bar{display:flex;align-items:center;gap:11px;padding:8px 12px;
@@ -570,7 +570,13 @@
               transition:background .18s ease,transform .18s ease}
   .catch-mark--go{color:var(--brand);font-weight:500}
   .catch-mark.is-hit{background:var(--brand-wash);transform:scale(.94)}
-  .catch-page{flex:1;padding:36px 40px 40px;overflow:hidden}
+  .catch-page{flex:1;padding:36px 40px 40px;overflow:hidden;
+              transition:opacity .28s ease}
+  /* The article goes first and the window follows it a beat later, so the
+     tab that was just clicked is still on screen while the page it points
+     at is not -- which is what a tab you have switched to looks like for
+     the moment before it paints. */
+  .catch-page.is-gone{opacity:0}
   .catch-page .kick{margin:0 0 10px;font:500 10px/1 var(--f-mono);
                     letter-spacing:.14em;text-transform:uppercase;
                     color:var(--faint)}
@@ -620,6 +626,13 @@
      short it can go is the Progress chart, the tallest thing the demo ever
      shows. */
   .is-demo .shell{padding-bottom:14px}
+
+  /* Changing space redraws the sitting underneath the chips: another
+     language, another word, another card, in the same frame and in one
+     tick. Taking the panel down before the press and bringing it back
+     after turns that cut into a change of subject. */
+  .is-demo #p-due{transition:opacity .24s ease,transform .24s ease}
+  .is-demo #p-due.is-swap{opacity:0;transform:translateY(6px)}
 
   @media (max-width:640px){
     /* A phone-width window keeps the chrome and loses what a phone would
@@ -4632,8 +4645,12 @@
             + '<button class="no" id="gNo">Not yet</button>'
             + '<button class="mid" id="gMid">Almost</button>'
             + '<button class="yes" id="gYes">Knew it</button>'
-            + '</div>'
-            + '<div class="keys">1 not yet \u00b7 2 almost \u00b7 3 knew it</div>';
+            + '</div>';
+            /* The row of shortcuts that used to sit under the buttons is
+               gone. 1, 2, 3 and the arrows still answer -- the keydown
+               handler below never needed the line to work -- but a legend
+               under three buttons that already say what they do was a
+               fourth thing to read at the moment of deciding. */
     }
     html += '</div>';
     el.innerHTML = html;
@@ -6103,6 +6120,20 @@
          + 'stroke-linecap="round" stroke-linejoin="round" '
          + 'aria-hidden="true">' + d + '</svg>';
   }
+  /* A couple of real favicons, drawn here rather than borrowed: at twelve
+     pixels an envelope in that red is Gmail to anyone who has ever had a
+     tab of it open, and nobody's logotype has been copied to get there. */
+  var FAV = {
+    mail: '<span class="catch-fav catch-fav--white"><svg viewBox="0 0 24 24" '
+        + 'width="12" height="12" aria-hidden="true">'
+        + '<path d="M2.5 6.5 12 13.6l9.5-7.1" fill="none" stroke="#ea4335" '
+        + 'stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'
+        + '<path d="M2.5 6.5v11M21.5 6.5v11" stroke="#c5221f" '
+        + 'stroke-width="2.4" stroke-linecap="round"/></svg></span>',
+    fc:   '<span class="catch-fav catch-fav--a"></span>',
+    page: '<span class="catch-fav catch-fav--b"></span>'
+  };
+
   var ICO = {
     back: ico('<path d="M15 5l-7 7 7 7"/>'),
     fwd:  ico('<path d="M9 5l7 7-7 7"/>'),
@@ -6449,17 +6480,21 @@
       +   '<div class="catch-tabs">'
       +     '<span class="catch-dots"><i class="r"></i><i class="y"></i>'
       +       '<i class="g"></i></span>'
-      +     '<span class="catch-tab is-on"><span class="catch-fav catch-fav--b">'
-      +       '</span><b>' + esc(DEMO_SRC.title) + '</b></span>'
-      +     '<span class="catch-tab"><span class="catch-fav catch-fav--c">'
-      +       '</span><b>bCourses</b></span>'
-      +     '<span class="catch-tab"><span class="catch-fav"></span>'
-      +       '<b>Inbox</b></span>'
+      +     '<span class="catch-tab is-on" id="catchTabPage">' + FAV.page
+      +       '<b>' + esc(DEMO_SRC.title) + '</b></span>'
+      /* The app is already open in the next tab along, which is where the
+         reader goes after saving. It has to be a tab that was there before
+         the bookmarklet was pressed: one that appears at the moment it is
+         needed is a magic trick, and the point of this scene is that
+         nothing here is. */
+      +     '<span class="catch-tab" id="catchTabApp">' + FAV.fc
+      +       '<b>FlashCards</b></span>'
+      +     '<span class="catch-tab">' + FAV.mail + '<b>Inbox (3)</b></span>'
       +     '<span class="catch-new">+</span>'
       +   '</div>'
       +   '<div class="catch-bar">'
       +     '<span class="catch-nav">' + ICO.back + ICO.fwd + ICO.load + '</span>'
-      +     '<span class="catch-url"><i>' + ICO.lock + '</i><span>'
+      +     '<span class="catch-url"><i>' + ICO.lock + '</i><span id="catchUrl">'
       +       '<b>' + esc(DEMO_HOST) + '</b>' + esc(DEMO_PATH) + '</span></span>'
       +     '<span class="catch-ico">' + ICO.star + '</span>'
       +     '<span class="catch-me">SD</span>'
@@ -6574,6 +6609,41 @@
   function demoSpace(code) {
     return document.querySelector('.space[data-space="' + code + '"]');
   }
+
+  /* The switch to the next tab. Everything a browser does when you click
+     one: the tab lights, the old one goes dark, the address changes, and
+     the page you were reading is gone before the one you asked for has
+     arrived. */
+  function demoSwitch() {
+    var a = $("catchTabPage"), b = $("catchTabApp"), u = $("catchUrl"),
+        pg = document.querySelector(".catch-page");
+    if (a) a.classList.remove("is-on");
+    if (b) b.classList.add("is-on");
+    if (u) u.innerHTML = '<b>simaydemiral.com</b>/flashcards';
+    if (pg) pg.classList.add("is-gone");
+    /* The confirmation belonged to the page that has just been left. */
+    var said = $("catchSaid");
+    if (said) said.classList.remove("is-on");
+  }
+
+  /* A space chip, with the panel taken down over the press and brought
+     back once the new sitting is drawn. The fade starts before the click,
+     so what the reader sees is the cursor arriving, the screen clearing,
+     and the other language in its place. */
+  function demoSwapSpace(t, code, lead) {
+    var panel = $("p-due");
+    demoAt(t + 560, function () { if (panel) panel.classList.add("is-swap"); });
+    demoTap(t, function () { return demoSpace(code); }, function () {
+      /* setSpace leaves the Start screen up; the demo has no patience for a
+         screen whose only content is a button it is about to press. */
+      demoAt(40, function () {
+        startSession();
+        if (lead) demoFirst(idOf(lead));
+        renderDue();
+      });
+      demoAt(320, function () { if (panel) panel.classList.remove("is-swap"); });
+    });
+  }
   function demoTab(k) {
     return document.querySelector('.tab[data-tab="' + k + '"]');
   }
@@ -6597,29 +6667,27 @@
     });
     demoAt(3700, function () { if (mark) mark.classList.remove("is-hit"); });
 
-    /* 3 -- the card, and the meaning on the back of it */
-    demoAt(4700, demoCaught);
-    demoTap(6000, function () { return $("face"); });
+    /* 3 -- over to the tab the app is open in. The app used to arrive on
+       its own, which is the one moment in the demo nobody had asked for:
+       a page gives way to another page because somebody clicked something,
+       and here nobody had. */
+    demoTap(4200, function () { return $("catchTabApp"); }, demoSwitch);
+    demoAt(5900, demoCaught);
 
-    /* 4 -- the answer. Almost: she nearly had it. */
-    demoTap(10400, function () { return $("gMid"); });
+    /* 4 -- the card, and the meaning on the back of it */
+    demoTap(7000, function () { return $("face"); });
 
-    /* 5 -- the other space. A German noun is filed with its article, which
+    /* 5 -- the answer. Almost: she nearly had it. */
+    demoTap(11400, function () { return $("gMid"); });
+
+    /* 6 -- the other space. A German noun is filed with its article, which
        is the reason the languages are kept apart at all. */
-    demoTap(12600, function () { return demoSpace("de"); }, function () {
-      /* setSpace leaves the Start screen up; the demo has no patience for a
-         screen whose only content is a button it is about to press. */
-      demoAt(60, function () {
-        startSession();
-        demoFirst(idOf(DEMO_DE_LEAD));
-        renderDue();
-      });
-    });
-    demoTap(16800, function () { return demoSpace("en"); });
+    demoSwapSpace(13600, "de", DEMO_DE_LEAD);
+    demoSwapSpace(17800, "en");
 
-    /* 6 -- the week */
-    demoTap(18600, function () { return demoTab("stats"); });
-    demoAt(20600, function () { if (demoCur) demoCur.classList.remove("is-on"); });
+    /* 7 -- the week */
+    demoTap(19800, function () { return demoTab("stats"); });
+    demoAt(21800, function () { if (demoCur) demoCur.classList.remove("is-on"); });
   }
 
   function demoReset() {
