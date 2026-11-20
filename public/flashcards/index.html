@@ -487,6 +487,92 @@
     #p-decks .prog{max-width:260px}
     #p-decks input.deckname{max-width:100%}
   }
+  /* ------------------------------------------------------------------
+     The demo's first scene.
+
+     Only ever on screen under ?demo=1, and the markup is built by the demo
+     script -- the app itself ships none of it. A mock window rather than a
+     screenshot, so it takes the page's own tokens and is right in both
+     themes without a second set of colours.
+     ------------------------------------------------------------------ */
+  /* The scene fills the frame rather than floating a little window in the
+     middle of it: an embed 679px wide is already a picture of a screen, and
+     a picture of a screen inside it leaves the text too small to read. */
+  #catch{position:fixed;inset:0;z-index:60;background:var(--ground);
+         transition:opacity .6s ease}
+  #catch.is-gone{opacity:0;pointer-events:none}
+  .catch-win{position:relative;width:100%;height:100%;
+             background:var(--surface);overflow:hidden;
+             display:flex;flex-direction:column}
+  .catch-bar{display:flex;align-items:center;gap:11px;padding:9px 12px;
+             background:var(--sunken);border-bottom:1px solid var(--line-soft)}
+  .catch-dots{display:flex;gap:5px;flex:none}
+  .catch-dots i{width:9px;height:9px;border-radius:50%;background:var(--line);
+                display:block}
+  .catch-url{flex:1;min-width:0;font:400 12px/1.5 var(--f-mono);
+             color:var(--muted);background:var(--surface);
+             border:1px solid var(--line-soft);border-radius:5px;padding:4px 9px;
+             overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .catch-marks{display:flex;gap:8px;align-items:center;padding:7px 12px;
+               background:var(--surface);border-bottom:1px solid var(--line-soft)}
+  .catch-mark{font:500 12px/1 var(--f-mono);color:var(--brand);
+              border:1px solid var(--brand);border-radius:5px;padding:5px 9px;
+              white-space:nowrap;
+              transition:background .18s ease,transform .18s ease}
+  .catch-mark.is-hit{background:var(--brand-wash);transform:scale(.94)}
+  .catch-mark--dim{color:var(--faint);border-color:var(--line-soft)}
+  .catch-page{flex:1;padding:46px 40px 40px;overflow:hidden}
+  .catch-page .kick{margin:0 0 10px;font:500 10px/1 var(--f-mono);
+                    letter-spacing:.14em;text-transform:uppercase;
+                    color:var(--faint)}
+  .catch-page h2{margin:0 0 18px;font:500 32px/1.2 var(--f-display);
+                 color:var(--ink);letter-spacing:-.02em}
+  .catch-page p{margin:0 0 16px;
+                font:400 17px/1.78 var(--f-body);color:var(--ink-2)}
+  /* One centred column, the way the page it is pretending to be would set
+     itself -- not 1340px of line length. After the three rules above, each
+     of which writes a margin shorthand and would otherwise undo this --
+     and named element by element, because ".catch-page>*" scores below
+     ".catch-page p" and lost the margin it was setting. */
+  .catch-page>p,.catch-page>h2,.catch-page>.kick{
+    max-width:42rem;margin-left:auto;margin-right:auto}
+  /* A real selection, which is one of the few things on the page that is
+     the same colour whichever theme it is in. */
+  .catch-page mark{background:transparent;color:inherit;padding:1px 0;
+                   border-radius:2px;
+                   transition:background .3s ease,color .3s ease}
+  .catch-page mark.is-sel{background:#3b82f6;color:#fff}
+  .catch-said{position:absolute;right:18px;top:92px;
+              background:var(--ink);color:var(--surface);border-radius:7px;
+              padding:9px 13px;font:500 13px/1.3 var(--f-mono);
+              box-shadow:0 8px 22px rgba(0,0,0,.22);
+              opacity:0;transform:translateY(-6px);
+              transition:opacity .3s ease,transform .3s ease}
+  .catch-said.is-on{opacity:1;transform:none}
+
+  /* The pointer. Left and top carry the travel so the transform is free to
+     carry the press -- one property animating two things is how a demo
+     ends up jumping back to the top left on every click. */
+  .fc-cur{position:fixed;left:50%;top:50%;width:22px;height:22px;z-index:70;
+          border-radius:50%;pointer-events:none;opacity:0;
+          background:color-mix(in srgb,var(--brand) 45%,transparent);
+          border:1.5px solid var(--brand);
+          transform:translate(-50%,-50%);
+          transition:left .72s cubic-bezier(.33,.72,.3,1),
+                     top .72s cubic-bezier(.33,.72,.3,1),
+                     opacity .35s ease,transform .18s ease}
+  .fc-cur.is-on{opacity:1}
+  .fc-cur.is-press{transform:translate(-50%,-50%) scale(.62);
+                   background:color-mix(in srgb,var(--brand) 85%,transparent)}
+
+  @media (max-width:640px){
+    .catch-page{padding:18px 18px 22px}
+    .catch-page h2{font-size:20px}
+    .catch-page p{font-size:14px;line-height:1.65}
+    .catch-page p:first-of-type{display:none}
+    .catch-said{top:auto;bottom:14px;right:14px}
+  }
+
 </style>
 </head>
 <body>
@@ -2366,6 +2452,10 @@
   var rooting = {};
 
   function ensureRoot(w, after) {
+    /* Not even the callback: every one of these asks for a redraw, and a
+       redraw asks again -- which with nothing to wait for is a loop with
+       no await in it. In the demo there is nothing to arrive. */
+    if (DEMO) return;
     if (rooting[w.id]) return;
     var r = needsRootLook(w);
     if (!r) return;
@@ -2397,6 +2487,10 @@
   }
 
   function ensureExample(w, after) {
+    /* Not even the callback: every one of these asks for a redraw, and a
+       redraw asks again -- which with nothing to wait for is a loop with
+       no await in it. In the demo there is nothing to arrive. */
+    if (DEMO) return;
     if (exampling[w.id] || !needsEg(w)) return;
     exampling[w.id] = 1;
     var term = w.term;
@@ -2472,6 +2566,10 @@
   }
 
   function ensureTurkish(w, after) {
+    /* Not even the callback: every one of these asks for a redraw, and a
+       redraw asks again -- which with nothing to wait for is a loop with
+       no await in it. In the demo there is nothing to arrive. */
+    if (DEMO) return;
     /* `from` is what makes it an answer: Wiktionary, Wikipedia, or none.
        A record saved by the older build has from:"" — that was a failure
        wearing an answer's clothes, so it is retried rather than believed. */
@@ -2723,6 +2821,10 @@
   var relating = {};
 
   function ensureRel(w, after) {
+    /* Not even the callback: every one of these asks for a redraw, and a
+       redraw asks again -- which with nothing to wait for is a loop with
+       no await in it. In the demo there is nothing to arrive. */
+    if (DEMO) return;
     if (relating[w.id]) return;
     if (w.rel && (w.rel.v || 0) >= REL_SOURCES) return;
     /* Both sources are English-only, and neither has anything for a phrase.
@@ -2867,6 +2969,10 @@
   }
 
   function ensureSay(w, after) {
+    /* Not even the callback: every one of these asks for a redraw, and a
+       redraw asks again -- which with nothing to wait for is a loop with
+       no await in it. In the demo there is nothing to arrive. */
+    if (DEMO) return;
     /* Settled already, or still in flight: nothing changed, so do not call
        back. The callback redraws, the redraw asks again, and an answer that
        arrives instantly turns that into a loop with no end. */
@@ -3210,6 +3316,10 @@
      guard tests for the property rather than its length. */
   var plaining = {};
   function ensurePlain(w, after) {
+    /* Not even the callback: every one of these asks for a redraw, and a
+       redraw asks again -- which with nothing to wait for is a loop with
+       no await in it. In the demo there is nothing to arrive. */
+    if (DEMO) return;
     if (w.plain || plaining[w.id]) return;
     plaining[w.id] = 1;
     viaSimple(w.term).then(function (senses) {
@@ -3440,6 +3550,10 @@
   }
 
   function ensureLooked(w, after) {
+    /* Not even the callback: every one of these asks for a redraw, and a
+       redraw asks again -- which with nothing to wait for is a loop with
+       no await in it. In the demo there is nothing to arrive. */
+    if (DEMO) return;
     if (!needsLook(w) || looking[w.id]) { if (after) after(); return; }
     /* A card being re-read also had its plain-English senses fetched by the
        old reader, in the old order. They are the ones the card actually
@@ -3614,6 +3728,10 @@
       if (LANGS[li].code === savedSpace) SPACE = savedSpace;
     }
   } catch (e) {}
+  /* The embed is same-origin with the real app, so without this it opens in
+     whichever space the reader last used here -- and the homepage would show
+     a stranger a demo that began in French. */
+  if (DEMO) SPACE = "en";
 
   /* ------------------------------------------------------------------
      German articles.
@@ -3713,7 +3831,10 @@
     saveSession();
     SPACE = code;
     onlyDeck = "";                 /* a deck belongs to one language */
-    try { localStorage.setItem("vocab.space", code); } catch (e) {}
+    /* Not from the embed: it is same-origin with the real app, so the demo
+       switching to German would move the reader's own FlashCards to German
+       the next time they opened it. */
+    if (!DEMO) { try { localStorage.setItem("vocab.space", code); } catch (e) {} }
     session = []; done = 0; misses = {}; almost = {};
     flipped = false; noteOpen = false; trOpen = false;
     /* A sitting belongs to the language it started in -- and is still there
@@ -5678,7 +5799,10 @@
     var sysDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
     var next = now ? (now === "dark" ? "light" : "dark") : (sysDark ? "light" : "dark");
     r.setAttribute("data-theme", next);
-    try { localStorage.setItem("vocab.theme", next); } catch (e) {}
+    /* The demo writes nothing, this included: it is same-origin with the
+       real app, and a visitor playing with the embed should not come back
+       to a FlashCards that changed colour. */
+    if (!DEMO) { try { localStorage.setItem("vocab.theme", next); } catch (e) {} }
   });
 
   $("export").addEventListener("click", function () {
@@ -5791,35 +5915,450 @@
      Demo: invented words so the homepage card shows the real thing
      working. Writes nothing.
      ------------------------------------------------------------------ */
-  function demoData() {
-    var w = [
-      ["salient", "Reading", "The report is not exhaustive, but it covers the salient points.",
-       "https://example.com", "A note on strategy"],
-      ["due diligence", "Finance", "The buyer walked away after due diligence turned up the lawsuit.",
-       "https://example.com", "Deal memo"],
-      ["ubiquitous", "Reading", "Screens are now ubiquitous in classrooms.",
-       "https://example.com", "An essay on attention"],
-      ["hedge", "Finance", "The fund used options to hedge against a fall in the lira.",
-       "https://example.com", "Markets weekly"]
-    ];
-    var out = { v: 1, words: [] };
-    for (var i = 0; i < w.length; i++) {
-      out.words.push({
-        id: idOf(w[i][0]), term: w[i][0],
-        added: new Date(Date.now() - i * 86400000).toISOString(),
-        deck: w[i][1], box: 1, due: today(),
-        src: { sentence: w[i][2], url: w[i][3], title: w[i][4] },
-        senses: [], looked: false, note: ""
-      });
+  /* ------------------------------------------------------------------
+     The demo.
+
+     ?demo=1 is the copy embedded on the homepage and in the case study. It
+     runs on invented words, writes nothing anywhere, and never asks the
+     network: every meaning, example and pronunciation is written out below,
+     so the embed cannot be slow, cannot be rate-limited, and cannot show a
+     stranger a card that says "Looking it up...".
+
+     A word's past is written as the answers it was given, so many days ago,
+     and replayed through the same ladder the app grades by. Writing the box
+     down by hand instead would let the card and the chart disagree about
+     the same word -- which is the one thing a demo of a progress page must
+     not do.
+     ------------------------------------------------------------------ */
+  var DEMO_DAY = 86400000;
+
+  /* Noon, not now. The added date is stored as an instant and read back as
+     a UTC calendar day, so a word "added today" at four in the afternoon in
+     California is already tomorrow's column -- and the demo ends on a
+     Progress page reporting that it added nothing. Noon local lands on the
+     intended day either side of the line. */
+  function demoAdded(daysAgo) {
+    var d = new Date();
+    d.setHours(12, 0, 0, 0);
+    d.setDate(d.getDate() - daysAgo);
+    return d.toISOString();
+  }
+
+  function demoWord(s) {
+    var now = Date.now(), i, h, t, gap, box = 1;
+    var w = {
+      id: idOf(s.term), term: s.term, lang: s.lang || "en", gen: s.gen || "",
+      deck: s.deck || "Inbox",
+      added: demoAdded(s.added || 0),
+      src: s.src || { url: "", title: "", sentence: "" },
+      senses: s.senses || [], plain: null, root: "", rootpin: -1,
+      forms: [], note: "", want: "",
+      /* Looked up already, as far as every ensure is concerned. */
+      looked: true, lv: 9, pv: 9, sv: 9, tv: 9, miss: 0,
+      box: 1, due: today(), log: [], sb: 0, seen: 0
+    };
+    if (s.ipa) w.say = { audio: "", ipa: s.ipa, us: false, v: 9, miss: 0 };
+    var ans = s.answers || [];
+    for (i = 0; i < ans.length; i++) {
+      t = now - ans[i][0] * DEMO_DAY;
+      h = ans[i][1];
+      if (h === "yes") box = Math.min(BOXES, box + 1);
+      else if (h === "mid") box = Math.max(2, box);
+      else box = 1;
+      gap = h === "yes" ? (LADDER[box] || 1) : (GAP[h] === undefined ? 0 : GAP[h]);
+      w.log.push({ t: t, h: h, b: box, d: ymd(new Date(t + gap * DEMO_DAY)) });
     }
+    w.box = box;
+    if (w.log.length) {
+      w.due = w.log[w.log.length - 1].d;
+      w.at = w.log[w.log.length - 1].t;
+      w.seen = w.log.length;
+    } else {
+      delete w.log;
+    }
+    return w;
+  }
+
+  /* The sentence the demo's reader is watching when the bookmarklet fires.
+     The publication is invented and the address is under example.com, which
+     is reserved for exactly this -- nothing here borrows a real masthead. */
+  var DEMO_SRC = {
+    url: "https://quarterly-notebook.example.com/the-cost-of-a-second-opinion",
+    title: "The cost of a second opinion",
+    sentence: "Every extra approval is sold as prudence, but most of them "
+            + "exist to obviate a decision nobody wants to own."
+  };
+
+  /* The word the bookmarklet catches. Held back out of the list: the demo
+     adds it in front of the reader, which is the whole first scene. */
+  var DEMO_CATCH = {
+    term: "obviate", deck: "Reading", added: 0, ipa: "/ˈɒb.vi.eɪt/",
+    src: DEMO_SRC,
+    senses: [
+      { pos: "verb",
+        text: "To do away with the need for something by dealing with it in "
+            + "advance.",
+        eg: "One shared file obviates the need for three people to keep their "
+          + "own copy." },
+      { pos: "verb",
+        text: "To head off a difficulty before it has a chance to arise.",
+        eg: "The clause was written to obviate any argument about who pays." }
+    ]
+  };
+
+  var DEMO_WORDS = [
+    /* ---- English ---- */
+    { term: "salient", deck: "Reading", added: 24, ipa: "/ˈseɪ.li.ənt/",
+      answers: [[21, "yes"], [20, "yes"], [17, "yes"], [10, "yes"]],
+      src: { url: "", title: "A note on strategy",
+             sentence: "The report is not exhaustive, but it covers the "
+                     + "salient points." },
+      senses: [{ pos: "adjective",
+                 text: "Standing out from everything around it; the part that "
+                     + "matters most.",
+                 eg: "The salient fact is that nobody read the contract." }] },
+
+    { term: "ubiquitous", deck: "Reading", added: 18,
+      ipa: "/juːˈbɪk.wɪ.təs/",
+      answers: [[15, "yes"], [14, "yes"], [11, "yes"], [3, "yes"]],
+      src: { url: "", title: "An essay on attention",
+             sentence: "Screens are now ubiquitous in classrooms." },
+      senses: [{ pos: "adjective", text: "Found everywhere at once.",
+                 eg: "The logo became ubiquitous within a season." }] },
+
+    { term: "due diligence", deck: "Finance", added: 12,
+      answers: [[9, "yes"], [8, "yes"], [5, "yes"]],
+      src: { url: "", title: "Deal memo",
+             sentence: "The buyer walked away after due diligence turned up "
+                     + "the lawsuit." },
+      senses: [{ pos: "noun",
+                 text: "The investigation a buyer runs on a business before "
+                     + "committing to buy it.",
+                 eg: "Six weeks of due diligence, and the numbers held up." }] },
+
+    { term: "hedge", deck: "Finance", added: 9, ipa: "/hɛdʒ/",
+      answers: [[6, "yes"], [5, "no"], [2, "yes"]],
+      src: { url: "", title: "Markets weekly",
+             sentence: "The fund used options to hedge against a fall in the "
+                     + "lira." },
+      senses: [{ pos: "verb",
+                 text: "To take a second position that limits the loss if the "
+                     + "first one goes wrong.",
+                 eg: "They hedged the exposure rather than close it." }] },
+
+    { term: "countervailing", deck: "Finance", added: 6,
+      answers: [[4, "mid"], [2, "mid"]],
+      src: { url: "", title: "Cost note",
+             sentence: "Cheaper freight was a countervailing force against "
+                     + "the rise in raw materials." },
+      senses: [{ pos: "adjective",
+                 text: "Acting against something else with equal force, so "
+                     + "the two offset.",
+                 eg: "There was no countervailing pressure on the price." }] },
+
+    { term: "idiosyncratic", deck: "Reading", added: 5,
+      ipa: "/ˌɪd.i.ə.sɪŋˈkræt.ɪk/",
+      answers: [[2, "no"]],
+      src: { url: "", title: "A profile",
+             sentence: "Her filing system was idiosyncratic, but she could "
+                     + "find anything in it." },
+      senses: [{ pos: "adjective",
+                 text: "Peculiar to one person or one thing, and to nothing "
+                     + "else.",
+                 eg: "An idiosyncratic way of numbering the chapters." }] },
+
+    { term: "perfunctory", deck: "Reading", added: 2,
+      ipa: "/pəˈfʌŋk.tər.i/",
+      src: { url: "", title: "Minutes",
+             sentence: "He gave the draft a perfunctory read and signed it." },
+      senses: [{ pos: "adjective",
+                 text: "Done only because it has to be done, with no care in "
+                     + "it.",
+                 eg: "A perfunctory nod, and he was gone." }] },
+
+    /* ---- German. The noun carries its article, which is the point of the
+       space being separate. ---- */
+    { term: "Vorhaben", lang: "de", gen: "n", deck: "Arbeit", added: 11,
+      answers: [[8, "yes"], [7, "yes"], [4, "yes"]],
+      src: { url: "", title: "Projektnotiz",
+             sentence: "Das Vorhaben wurde auf das nächste Quartal "
+                     + "verschoben." },
+      senses: [{ pos: "noun",
+                 text: "A plan or undertaking — the thing someone intends "
+                     + "to do.",
+                 eg: "Ein ehrgeiziges Vorhaben." }] },
+
+    { term: "Auswirkung", lang: "de", gen: "f", deck: "Arbeit", added: 9,
+      answers: [[6, "yes"], [5, "yes"]],
+      src: { url: "", title: "Quartalsbericht",
+             sentence: "Die Auswirkungen der Entscheidung waren sofort zu "
+                     + "spüren." },
+      senses: [{ pos: "noun",
+                 text: "An effect or consequence that one thing has on "
+                     + "another.",
+                 eg: "Die Auswirkung auf den Preis war gering." }] },
+
+    { term: "verhandeln", lang: "de", deck: "Arbeit", added: 7,
+      answers: [[3, "no"]],
+      src: { url: "", title: "E-Mail",
+             sentence: "Wir verhandeln noch über den Preis." },
+      senses: [{ pos: "verb",
+                 text: "To negotiate; to talk terms in order to reach an "
+                     + "agreement.",
+                 eg: "Sie verhandeln seit Wochen." }] },
+
+    { term: "Zeitrahmen", lang: "de", gen: "m", deck: "Arbeit", added: 3,
+      src: { url: "", title: "Projektnotiz",
+             sentence: "Der Zeitrahmen für das Projekt ist sehr eng." },
+      senses: [{ pos: "noun",
+                 text: "The span of time something is meant to happen within.",
+                 eg: "Der Zeitrahmen lässt sich nicht dehnen." }] }
+  ];
+
+  function demoData() {
+    var out = { v: 1, words: [] }, i;
+    for (i = 0; i < DEMO_WORDS.length; i++) out.words.push(demoWord(DEMO_WORDS[i]));
     return out;
+  }
+
+  /* ------------------------------------------------------------------
+     The demo, played.
+
+     Five beats: the page she is reading, the bookmarklet firing, the card,
+     an answer, and the week. Every click below lands on a real control and
+     goes through the same handler a finger would, so the embed is the app
+     working rather than a recording of it -- which is also why the demo is
+     worth keeping: it cannot drift away from the thing it is showing.
+
+     Nothing starts until the parent says the frame is on screen. A demo
+     that plays to a folded-away panel and then refuses to replay is worse
+     than one that starts late.
+     ------------------------------------------------------------------ */
+  var demoTimers = [], demoRunning = false, demoCur = null;
+
+  function demoAt(ms, fn) { demoTimers.push(setTimeout(fn, ms)); }
+  function demoStop() {
+    for (var i = 0; i < demoTimers.length; i++) clearTimeout(demoTimers[i]);
+    demoTimers = [];
+  }
+
+  /* The page the word is caught on. Invented, and under example.com, which
+     is reserved for exactly this -- nothing here wears a real masthead. */
+  function demoBuild() {
+    var o = document.createElement("div");
+    o.id = "catch";
+    o.setAttribute("aria-hidden", "true");
+    o.innerHTML =
+        '<div class="catch-win">'
+      +   '<div class="catch-bar">'
+      +     '<span class="catch-dots"><i></i><i></i><i></i></span>'
+      +     '<span class="catch-url">' + esc(DEMO_SRC.url) + '</span>'
+      +   '</div>'
+      +   '<div class="catch-marks">'
+      +     '<span class="catch-mark" id="catchMark">+ Save to FlashCards</span>'
+      +     '<span class="catch-mark catch-mark--dim">Course reader</span>'
+      +     '<span class="catch-mark catch-mark--dim">Syllabus</span>'
+      +   '</div>'
+      +   '<div class="catch-page">'
+      +     '<p class="kick">' + esc(DEMO_SRC.title) + '</p>'
+      +     '<h2>Why the second opinion costs more than the first</h2>'
+      +     '<p>Nobody defends the extra review on its merits. They defend it '
+      +     'as insurance, which is a different argument and a much harder one '
+      +     'to refuse.</p>'
+      +     '<p>Every extra approval is sold as prudence, but most of them '
+      +     'exist to <mark id="catchWord">obviate</mark> a decision nobody '
+      +     'wants to own. The cost is never the meeting itself; it is the '
+      +     'fortnight the decision spends in the queue behind it.</p>'
+      +     '<p>Which is the part nobody puts in the business case, because '
+      +     'it does not arrive as a line item. It arrives as a quarter that '
+      +     'went slowly and nobody can say why.</p>'
+      +     '<p>The firms that are quick about this are not braver than the '
+      +     'rest. They have simply written down who decides what, and they '
+      +     'hold to it on the days it is inconvenient.</p>'
+      +     '<p>That document is dull, it is three pages long, and it is '
+      +     'worth more than the committee it replaces.</p>'
+      +   '</div>'
+      +   '<div class="catch-said" id="catchSaid">Saved — <b>obviate</b></div>'
+      + '</div>';
+    document.body.appendChild(o);
+
+    demoCur = document.createElement("div");
+    demoCur.className = "fc-cur";
+    document.body.appendChild(demoCur);
+    return o;
+  }
+
+  function demoMove(el, dy) {
+    if (!demoCur || !el) return;
+    var r = el.getBoundingClientRect();
+    demoCur.style.left = (r.left + r.width / 2) + "px";
+    demoCur.style.top  = (r.top + r.height / 2 + (dy || 0)) + "px";
+  }
+
+  /* Move, press, click -- in that order, so the reader sees the cause
+     before the effect. The element is looked up at the moment of the tap
+     rather than held: half of these screens are redrawn by the tap before
+     it. */
+  function demoTap(t, find, after) {
+    demoAt(t, function () { demoMove(find()); });
+    demoAt(t + 820, function () {
+      var el = find();
+      if (demoCur) demoCur.classList.add("is-press");
+      if (el) el.click();
+      if (after) after();
+    });
+    demoAt(t + 1010, function () {
+      if (demoCur) demoCur.classList.remove("is-press");
+    });
+  }
+
+  /* The handover: the page gives way, and the word it was on is in the app. */
+  function demoCaught() {
+    var o = $("catch"), i, w = demoWord(DEMO_CATCH);
+    if (o) {
+      o.classList.add("is-gone");
+      demoAt(700, function () { if (o.parentNode) o.parentNode.removeChild(o); });
+    }
+    db.words.push(w);
+    counts(); fillFilter(); renderSpaces();
+    startSession();
+    /* It leads the sitting: it is the word the reader just watched arrive,
+       and the next beat is about to study it. */
+    for (i = 0; i < session.length; i++) {
+      if (session[i].id === w.id) { session.splice(i, 1); break; }
+    }
+    session.unshift(w);
+    renderDue();
+  }
+
+  function demoSpace(code) {
+    return document.querySelector('.space[data-space="' + code + '"]');
+  }
+  function demoTab(k) {
+    return document.querySelector('.tab[data-tab="' + k + '"]');
+  }
+
+  function demoPlay() {
+    if (demoRunning) return;
+    demoRunning = true;
+    var word = $("catchWord"), mark = $("catchMark"), said = $("catchSaid");
+
+    if (demoCur) demoCur.classList.add("is-on");
+    demoMove(word, 60);                       /* arrives from below the line */
+
+    /* 1 -- the sentence, and the word in it */
+    demoAt(600,  function () { demoMove(word); });
+    demoAt(1500, function () { if (word) word.classList.add("is-sel"); });
+
+    /* 2 -- the bookmarklet on the bar */
+    demoTap(2300, function () { return mark; }, function () {
+      if (mark) mark.classList.add("is-hit");
+      if (said) said.classList.add("is-on");
+    });
+    demoAt(3700, function () { if (mark) mark.classList.remove("is-hit"); });
+
+    /* 3 -- the card, and the meaning on the back of it */
+    demoAt(4700, demoCaught);
+    demoTap(6000, function () { return $("face"); });
+
+    /* 4 -- the answer. Almost: she nearly had it. */
+    demoTap(10400, function () { return $("gMid"); });
+
+    /* 5 -- the other space. A German noun is filed with its article, which
+       is the reason the languages are kept apart at all. */
+    demoTap(12600, function () { return demoSpace("de"); }, function () {
+      /* setSpace leaves the Start screen up; the demo has no patience for a
+         screen whose only content is a button it is about to press. */
+      demoAt(60, function () { startSession(); });
+    });
+    demoTap(16800, function () { return demoSpace("en"); });
+
+    /* 6 -- the week */
+    demoTap(18600, function () { return demoTab("stats"); });
+    demoAt(20600, function () { if (demoCur) demoCur.classList.remove("is-on"); });
+  }
+
+  function demoReset() {
+    demoStop();
+    demoRunning = false;
+    var o = $("catch");
+    if (o && o.parentNode) o.parentNode.removeChild(o);
+    if (demoCur && demoCur.parentNode) demoCur.parentNode.removeChild(demoCur);
+    demoCur = null;
+    SPACE = "en";
+    onlyDeck = "";
+    session = []; done = 0; flipped = false; misses = {}; almost = {};
+    db = demoData();
+    demoBuild();
+    renderSpaces(); counts(); fillFilter();
+    if (demoTab("due")) demoTab("due").click();
+  }
+
+  /* Still, for anyone who has asked not to be moved: the word is already
+     caught and the week is already on screen, which is what the moving
+     version spends twenty seconds arriving at. */
+  function demoStill() {
+    var w = demoWord(DEMO_CATCH), o = $("catch");
+    if (o && o.parentNode) o.parentNode.removeChild(o);
+    if (demoCur && demoCur.parentNode) demoCur.parentNode.removeChild(demoCur);
+    db.words.push(w);
+    counts(); fillFilter(); renderSpaces();
+    if (demoTab("stats")) demoTab("stats").click();
+  }
+
+  function demoStage() {
+    demoBuild();
+    if (window.matchMedia
+        && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      demoStill();
+      return;
+    }
+    /* The parent drives it: it knows whether its panel is open and whether
+       the reader has got down to it. Embedded and told nothing, the frame
+       measures its own place in the page rather than guessing on a timer --
+       a blind timer plays the demo to an empty room. */
+    var driven = false, watch = 0;
+    function onScreenInParent() {
+      try {
+        var el = window.frameElement;
+        if (!el) return true;
+        var r = el.getBoundingClientRect();
+        var vh = window.parent.innerHeight
+               || window.parent.document.documentElement.clientHeight;
+        if (!vh) return true;
+        return r.height > 0 && r.top < vh * 0.92 && r.bottom > vh * 0.08;
+      } catch (e) { return true; }     /* cross-origin one day: trust the cue */
+    }
+    if (window.parent !== window) {
+      window.addEventListener("message", function (e) {
+        if (!e || typeof e.data !== "string") return;
+        if (e.data === "fc:rail") { driven = true; if (watch) clearInterval(watch); }
+        else if (e.data === "fc:play") { driven = true; demoPlay(); }
+        else if (e.data === "fc:reset") { demoReset(); }
+      });
+      /* Say so rather than wait to be found: the parent often decides the
+         frame is visible before this script exists, and its one cue lands
+         on nothing. */
+      try { window.parent.postMessage("fc:ready", "*"); } catch (e) {}
+      watch = setInterval(function () {
+        if (demoRunning || driven) { clearInterval(watch); return; }
+        if (onScreenInParent()) { clearInterval(watch); demoPlay(); }
+      }, 400);
+      demoAt(90000, function () { if (watch) clearInterval(watch); demoPlay(); });
+    } else {
+      demoAt(500, demoPlay);
+    }
   }
 
   /* ------------------------------------------------------------------
      Boot
      ------------------------------------------------------------------ */
+  /* The embed takes the site's theme, not this app's. It is same-origin
+     with the page holding it, so it can simply read the token the rest of
+     simaydemiral.com stores -- otherwise a reader who turned the site to
+     light gets a dark rectangle sitting in the middle of a light page. */
   try {
-    var saved = localStorage.getItem("vocab.theme");
+    var saved = localStorage.getItem(DEMO ? "sd-theme" : "vocab.theme");
     if (saved === "dark" || saved === "light") {
       document.documentElement.setAttribute("data-theme", saved);
     }
@@ -5837,7 +6376,7 @@
      the same situation with two different screens. The demo still opens on
      a card, because that is what the homepage is showing off. */
   renderSpaces();
-  if (DEMO) startSession(); else renderDue();
+  if (DEMO) demoStage(); else renderDue();
 
   /* Offline. Registered last and failing silently: a browser without service
      workers, or one that refuses, simply has a page that needs the network. */

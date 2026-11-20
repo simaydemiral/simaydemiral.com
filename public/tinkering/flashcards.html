@@ -150,12 +150,85 @@
       in is optional.
     </p>
 
+    <figure class="showcase showcase--case">
+      <div class="showcase-frame">
+        <!-- The tool itself rather than a picture of it. A screenshot of a
+             thing you are still changing is wrong within a month; this one
+             cannot be. ?demo=1 keeps it away from the browser storage a real
+             visitor's words live in, and off the network entirely. -->
+        <iframe src="/flashcards/?demo=1" title="FlashCards, running on sample words"></iframe>
+      </div>
+      <figcaption>
+        A word caught off a page with the bookmarklet, turned over, answered,
+        and the week it lands in. Every word, sentence and source here is
+        invented &mdash; this is demo data, not mine.
+      </figcaption>
+    </figure>
+
     </div>
 
     <p class="case-back"><a href="/">&larr; Back to the homepage</a></p>
   </article>
 
 </div>
+
+<script>
+/* The embed is laid out at a width that suits the box it lands in, not the
+   width of the window: in a wide window this sits in a 27rem column, where a
+   desktop page scaled to a third is a picture of a page rather than one you
+   can read. The same arithmetic as Ledger's case study, because it is the
+   same frame in the same column. */
+(function () {
+  var frame = document.querySelector('.showcase--case .showcase-frame');
+  if (!frame) return;
+  function fit() {
+    var w = frame.getBoundingClientRect().width;
+    if (!w) return;
+    var narrow = w < 560;
+    var design, tall;
+    if (narrow) {
+      /* Laid out at 420 the embed lands at 1:1 in the 27rem column, so its
+         text sits at full size beside prose set at 14px and reads as the
+         loudest thing on the page. Laying it out wider than the box scales
+         it down. It stays under 560 so the tool still uses its narrow
+         layout, and never below 420, which keeps a real phone at the size
+         it already was. */
+      design = Math.min(560, Math.max(420, Math.round(w / 0.78)));
+      tall = Math.round(design * 680 / 420);
+    } else {
+      design = 1340; tall = 900;
+    }
+    frame.style.setProperty('--showcase-design', design + 'px');
+    frame.style.setProperty('--showcase-tall', tall + 'px');
+    frame.style.aspectRatio = design + ' / ' + tall;
+    frame.style.setProperty('--showcase-scale', (w / design).toFixed(4));
+    maybePlay();
+  }
+  var iframe = frame.querySelector('iframe'), ready = false, sent = false;
+  function onScreen() {
+    var r = frame.getBoundingClientRect();
+    var vh = window.innerHeight || document.documentElement.clientHeight;
+    return r.height > 0 && r.top < vh * 0.92 && r.bottom > vh * 0.08;
+  }
+  function maybePlay() {
+    if (sent || !ready || !iframe.contentWindow || !onScreen()) return;
+    sent = true;
+    iframe.contentWindow.postMessage('fc:play', window.location.origin);
+  }
+  window.addEventListener('message', function (e) {
+    if (e.source === iframe.contentWindow && e.data === 'fc:ready') {
+      ready = true; maybePlay();
+    }
+  });
+  iframe.addEventListener('load', function () { ready = true; maybePlay(); });
+  window.addEventListener('scroll', maybePlay, { passive: true });
+  window.addEventListener('resize', fit);
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(frame);
+  if (window.IntersectionObserver)
+    new IntersectionObserver(maybePlay, { threshold: [0, 0.3, 0.6] }).observe(frame);
+  fit();
+})();
+</script>
 
 <!-- Cloudflare Web Analytics. Deliberately absent from /ledger/, whose case
      study invites the reader to open the network tab and find it empty. -->

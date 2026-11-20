@@ -154,11 +154,15 @@
     inset 3px 0 0 var(--spine),
     0 12px 26px rgba(0, 0, 0, 0.4);
 }
-/* The three without a live demo share one height, set by the tallest of them,
+/* The ones without a live demo share one height, set by the tallest of them,
    so switching between them does not make the section grow and shrink. The
    number is measured in the page and written onto the rail; see sizePanels.
-   Ledger is deliberately not in this set: it holds the running tool. */
-.slot[data-on]:not([data-k="ledger"]) .item { min-height: var(--panel-h, auto); }
+   Ledger and FlashCards are deliberately not in this set: they hold running
+   tools, and forcing the text-only panels up to their height would leave
+   those mostly empty. */
+.slot[data-on]:not([data-k="ledger"]):not([data-k="flashcards"]) .item {
+  min-height: var(--panel-h, auto);
+}
 
 /* The card lifts on hover site-wide. On a panel this size that reads as the
    whole section twitching, so it stops here. */
@@ -249,13 +253,13 @@
   }
   .slot[data-on] .open { grid-row: 2; grid-column: 1 / -1; }
   /* This has to match the specificity of the rule that sets the shared
-     height -- .slot[data-on]:not([data-k="ledger"]) .item, which scores
-     0-4-0, and a media query adds nothing of its own. Written only as
+     height -- the :not([data-k=...]) pair above, which scores 0-5-0, and
+     a media query adds nothing of its own. Written only as
      .slot[data-on] .item it lost at 0-3-0, so every panel except Ledger
      kept its desktop height on a phone; align-items:center then centred
      the contents inside it, and the drawing and the title sat up to 116px
      further down depending on which tab you were looking at. */
-  .slot[data-on]:not([data-k="ledger"]) .item,
+  .slot[data-on]:not([data-k="ledger"]):not([data-k="flashcards"]) .item,
   .slot[data-on] .item {
     min-height: 0;
     border-radius: 0 0 12px 12px;
