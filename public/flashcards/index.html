@@ -633,10 +633,15 @@
 
   /* Changing space redraws the sitting underneath the chips: another
      language, another word, another card, in the same frame and in one
-     tick. Taking the panel down before the press and bringing it back
-     after turns that cut into a change of subject. */
-  .is-demo #p-due{transition:opacity .24s ease,transform .24s ease}
-  .is-demo #p-due.is-swap{opacity:0;transform:translateY(6px)}
+     tick. The new sitting arrives hidden and eases in.
+
+     Hidden with no transition of its own, deliberately. Fading the old
+     panel out instead meant watching setSpace's "Ready when you are" --
+     the Start screen it leaves behind on the way to a new sitting -- ghost
+     away over a quarter of a second, which is a scene the demo has no
+     business showing. Now nothing paints between the press and the card. */
+  .is-demo #p-due{transition:opacity .26s ease,transform .26s ease}
+  .is-demo #p-due.is-swap{opacity:0;transform:translateY(6px);transition:none}
 
   @media (max-width:640px){
     /* A phone-width window keeps the chrome and loses what a phone would
@@ -6653,20 +6658,23 @@
   function demoSwapSpace(t, code, lead) {
     var panel = $("p-due");
     demoTap(t, function () { return demoSpace(code); }, function () {
-      /* The fade starts on the click and not a moment before it. Started
-         early -- while the cursor was still crossing the screen -- the
-         language appeared to change on its own and the press arrived
-         afterwards to explain it. */
+      /* All of this in the tick of the click, before the browser has had a
+         chance to paint any of it: hide the panel, throw away the Start
+         screen setSpace just put there, draw the new sitting in its place.
+         Nothing in between is ever on screen.
+
+         The press is the only thing that happens early, and it is supposed
+         to -- it is the cause. Taking the panel down ahead of the click, as
+         this did a version ago, made the language change on its own and the
+         cursor turn up afterwards to explain it. */
       if (panel) panel.classList.add("is-swap");
-      /* setSpace leaves the Start screen up; the demo has no patience for a
-         screen whose only content is a button it is about to press. It is
-         redrawn behind the fade, so neither is ever seen. */
-      demoAt(260, function () {
-        startSession();
-        if (lead) demoFirst(idOf(lead));
-        renderDue();
-      });
-      demoAt(310, function () { if (panel) panel.classList.remove("is-swap"); });
+      startSession();
+      if (lead) demoFirst(idOf(lead));
+      renderDue();
+      /* And now let it in. A frame's grace so the hidden state is painted
+         once; without it the two styles collapse into one and the card
+         simply appears, which is the thing being fixed. */
+      demoAt(60, function () { if (panel) panel.classList.remove("is-swap"); });
     });
   }
   function demoTab(k) {
