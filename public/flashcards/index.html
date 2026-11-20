@@ -357,14 +357,27 @@
   .big span{font:600 15px/1 var(--f-display);color:var(--ink-2)}
   .big span.of{font-weight:400;font-size:13px;color:var(--faint);margin-left:auto}
 
+  /* The week and the day are one row, so they are one height: aligned to
+     the start, the day's card floated above its own floor and left a band
+     of empty page beside the chart. The slack goes into the four tiles
+     rather than into padding under them, which is why the grid stretches
+     and its rows share what is going. */
   .statrow{display:grid;gap:14px;grid-template-columns:1.4fr 1fr;margin-top:14px;
-    align-items:start}
+    align-items:stretch}
   @media (max-width:860px){.statrow{grid-template-columns:1fr}}
-  .statgrid{display:grid;gap:10px;grid-template-columns:repeat(2,1fr)}
+  .statrow>.card{display:flex;flex-direction:column}
+  .statgrid{display:grid;gap:10px;grid-template-columns:repeat(2,1fr);
+    grid-auto-rows:1fr;flex:1}
   .stat{background:color-mix(in srgb, var(--ink) 4%, transparent);
-    border:1px solid var(--line);border-radius:12px;padding:13px 14px}
+    border:1px solid var(--line);border-radius:12px;padding:13px 14px;
+    display:flex;flex-direction:column}
+  /* Whatever height the tile is handed over its content goes here, between
+     the label and the number, so a stretched tile reads as a label at the
+     top and a figure at the foot rather than a figure with a drop of empty
+     under it. At its natural height the auto margin is nothing and the
+     tile is exactly what it was. */
   .stat i{display:flex;align-items:center;gap:6px;font-size:12.5px;
-    color:var(--muted);font-style:normal}
+    color:var(--muted);font-style:normal;margin-bottom:auto}
   .stat b{display:block;font:600 30px/1.1 var(--f-display);letter-spacing:-.03em;
     color:var(--ink);margin-top:9px}
   .stat s{display:block;text-decoration:none;font-size:12px;color:var(--faint);margin-top:3px}
