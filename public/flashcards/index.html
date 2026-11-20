@@ -638,6 +638,17 @@
   .fc-hint span{display:block;margin-top:4px;font-size:12.5px;
                 color:var(--muted)}
 
+  /* And the way back in, which stays: the panel above says its piece and
+     goes, but an offer to watch it again is only any use standing still. */
+  .fc-replay{position:fixed;right:16px;bottom:14px;z-index:71;
+             pointer-events:auto;font:500 11.5px/1 var(--f-body);
+             color:var(--muted);background:var(--surface);
+             border:1px solid var(--line);border-radius:999px;
+             padding:7px 12px;cursor:pointer;opacity:0;
+             transition:opacity .4s ease,color .15s ease,border-color .15s ease}
+  .fc-replay.is-on{opacity:1}
+  .fc-replay:hover{color:var(--ink);border-color:var(--ink-2)}
+
   /* The embed is a window, not a page: nobody scrolls it, so the run-out at
      the foot of the real app is just empty surface under the card. The frame
      it sits in is cut to match (.showcase--short), and what decides how
@@ -6484,7 +6495,8 @@
      that plays to a folded-away panel and then refuses to replay is worse
      than one that starts late.
      ------------------------------------------------------------------ */
-  var demoTimers = [], demoRunning = false, demoCur = null, demoHint = null;
+  var demoTimers = [], demoRunning = false, demoCur = null, demoHint = null,
+      demoReplay = null;
 
   function demoAt(ms, fn) { demoTimers.push(setTimeout(fn, ms)); }
   function demoStop() {
@@ -6583,6 +6595,20 @@
     demoHint.innerHTML = '<b>Your turn</b><span>Answer it, switch language, '
                        + 'open Progress</span>';
     document.body.appendChild(demoHint);
+
+    demoReplay = document.createElement("button");
+    demoReplay.type = "button";
+    demoReplay.className = "fc-replay";
+    demoReplay.textContent = "Play again";
+    demoReplay.addEventListener("click", function () {
+      /* Reset tears all of this down and builds it again, so by the time
+         play starts the button under the finger is a different one. That
+         is fine: a handler running on a node that has left the document
+         finishes what it was doing. */
+      demoReset();
+      demoPlay();
+    });
+    document.body.appendChild(demoReplay);
     return o;
   }
 
@@ -6764,6 +6790,11 @@
          stopped. */
       if (demoHint) demoHint.classList.add("is-on");
     });
+    /* Half a second behind the panel, as the Ledger's is: two things
+       arriving together is one thing too many to read. */
+    demoAt(17900, function () {
+      if (demoReplay) demoReplay.classList.add("is-on");
+    });
     demoAt(20400, function () {
       if (demoHint) demoHint.classList.remove("is-on");
     });
@@ -6778,6 +6809,10 @@
     demoCur = null;
     if (demoHint && demoHint.parentNode) demoHint.parentNode.removeChild(demoHint);
     demoHint = null;
+    if (demoReplay && demoReplay.parentNode) {
+      demoReplay.parentNode.removeChild(demoReplay);
+    }
+    demoReplay = null;
     SPACE = "en";
     onlyDeck = "";
     session = []; done = 0; flipped = false; misses = {}; almost = {};
@@ -6794,8 +6829,11 @@
     var w = demoWord(DEMO_CATCH), o = $("catch");
     if (o && o.parentNode) o.parentNode.removeChild(o);
     if (demoCur && demoCur.parentNode) demoCur.parentNode.removeChild(demoCur);
-    /* No "Your turn" here: nothing took a turn. */
+    /* No "Your turn" here, and nothing to play again: nothing played. */
     if (demoHint && demoHint.parentNode) demoHint.parentNode.removeChild(demoHint);
+    if (demoReplay && demoReplay.parentNode) {
+      demoReplay.parentNode.removeChild(demoReplay);
+    }
     db.words.push(w);
     counts(); fillFilter(); renderSpaces();
     if (demoTab("stats")) demoTab("stats").click();
