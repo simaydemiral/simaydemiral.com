@@ -6718,12 +6718,15 @@
 
     /* 6 -- the other space. A German noun is filed with its article, which
        is the reason the languages are kept apart at all. */
+    /* German is on screen for about two seconds, not four. It is one
+       card making one point -- a noun is filed with its article -- and
+       the point is made the moment the card is drawn. */
     demoSwapSpace(13800, "de", DEMO_DE_LEAD);
-    demoSwapSpace(18000, "en");
+    demoSwapSpace(15900, "en");
 
     /* 7 -- the week */
-    demoTap(20000, function () { return demoTab("stats"); });
-    demoAt(22000, function () { if (demoCur) demoCur.classList.remove("is-on"); });
+    demoTap(17900, function () { return demoTab("stats"); });
+    demoAt(19900, function () { if (demoCur) demoCur.classList.remove("is-on"); });
   }
 
   function demoReset() {
