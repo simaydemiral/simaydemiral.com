@@ -605,20 +605,24 @@
               transition:opacity .3s ease,transform .3s ease}
   .catch-said.is-on{opacity:1;transform:none}
 
-  /* The pointer. Left and top carry the travel so the transform is free to
-     carry the press -- one property animating two things is how a demo
-     ends up jumping back to the top left on every click. */
+  /* The pointer: the same arrow the Ledger demo uses. A ring reads as a
+     fingertip, and nothing in this scene is being touched -- it is a
+     browser on a desktop.
+
+     Left and top carry the travel so the transform is free to carry the
+     press; one property animating two things is how a demo ends up jumping
+     back to the top left on every click. The tip is the hot spot, so there
+     is no centring translate -- left and top are where the arrow points. */
   .fc-cur{position:fixed;left:50%;top:50%;width:22px;height:22px;z-index:70;
-          border-radius:50%;pointer-events:none;opacity:0;
-          background:color-mix(in srgb,var(--brand) 45%,transparent);
-          border:1.5px solid var(--brand);
-          transform:translate(-50%,-50%);
+          margin:-2px 0 0 -2px;pointer-events:none;opacity:0;
           transition:left .72s cubic-bezier(.33,.72,.3,1),
                      top .72s cubic-bezier(.33,.72,.3,1),
-                     opacity .35s ease,transform .18s ease}
+                     opacity .35s ease}
+  .fc-cur svg{display:block;transform-origin:5px 3px;
+              filter:drop-shadow(0 2px 4px rgba(0,0,0,.45));
+              transition:transform .1s ease}
   .fc-cur.is-on{opacity:1}
-  .fc-cur.is-press{transform:translate(-50%,-50%) scale(.62);
-                   background:color-mix(in srgb,var(--brand) 85%,transparent)}
+  .fc-cur.is-press svg{transform:scale(.86)}
 
   /* The embed is a window, not a page: nobody scrolls it, so the run-out at
      the foot of the real app is just empty surface under the card. The frame
@@ -6545,6 +6549,14 @@
 
     demoCur = document.createElement("div");
     demoCur.className = "fc-cur";
+    /* White rather than the Ledger's cream: this page has a light theme as
+       well as a dark one, and a cream arrow on a cream page is a shadow
+       with nothing casting it. */
+    demoCur.innerHTML =
+        '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">'
+      + '<path d="M5 2 L5 19 L9.5 14.8 L12.3 21 L15 19.7 L12.2 13.7 L18.4 13.4 Z" '
+      + 'fill="#fff" stroke="#171210" stroke-width="1.2" '
+      + 'stroke-linejoin="round"/></svg>';
     document.body.appendChild(demoCur);
     return o;
   }
