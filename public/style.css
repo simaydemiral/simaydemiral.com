@@ -120,6 +120,23 @@ nav ul a {
 }
 nav ul a:hover { color: var(--ink); border-bottom-color: var(--accent); }
 
+/* The Dispatch is the only thing in this nav that is somewhere to go rather
+   than somewhere further down this page, and the one she wants read. So it
+   wears the accent, and the underline the others only get under a cursor --
+   borrowed rather than invented, because the nav already means "this one"
+   by drawing that line. No pill: the theme switch is a pill and sits right
+   beside it, and two of them in a row would make a destination look like a
+   control. */
+nav ul a.nav-live {
+  color: var(--accent);
+  font-weight: 500;
+  border-bottom-color: color-mix(in srgb, var(--accent) 50%, transparent);
+}
+nav ul a.nav-live:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
 /* ---------- Eyebrow / section labels --------------------------- */
 
 .eyebrow, .section-label {
