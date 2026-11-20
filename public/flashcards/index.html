@@ -6731,7 +6731,12 @@
        article, which is the reason the languages are kept apart at all,
        and it is the last thing the demo says. */
     demoSwapSpace(13400, "de", DEMO_DE_LEAD);
-    demoAt(15400, function () { if (demoCur) demoCur.classList.remove("is-on"); });
+    /* And turned over, so the last thing on screen is a German card with
+       everything on it: the article in front of the noun, the gender, the
+       meaning, and the sentence it was met in. The demo stops here and
+       leaves that showing. */
+    demoTap(15300, function () { return $("face"); });
+    demoAt(17400, function () { if (demoCur) demoCur.classList.remove("is-on"); });
   }
 
   function demoReset() {
