@@ -204,6 +204,8 @@
   #toast.on{opacity:1;transform:translate(-50%,0)}
 
   .tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .anywaynote{max-width:30rem;margin:10px auto 0;font-size:12px;line-height:1.55;
+              color:var(--faint);text-align:center}
   .lbl-tiny{display:none}
   .termrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .say{display:flex;align-items:center;gap:8px}
@@ -3774,13 +3776,20 @@
      away a gap you had already earned punishes honesty about being shaky. */
   function grade(w, how) {
     var box = w.box || 1;
+    /* See `anyway`. The answer is still logged below, with the box it did
+       not change, so the week's chart counts it as practice -- Seen -- and
+       not as a word that moved. */
+    var free = anyway && how !== "no";
     /* The box no longer sets the gap — it is kept as a record of how well
        she knows the word, which the list sorts and shows. */
-    if (how === "yes")      w.box = Math.min(BOXES, box + 1);
+    if (free)               w.box = box;
+    else if (how === "yes") w.box = Math.min(BOXES, box + 1);
     else if (how === "mid") w.box = Math.max(2, box);
     else                    w.box = 1;
-    w.due = plus(how === "yes" ? (LADDER[w.box] || 1)
-                               : (GAP[how] === undefined ? 0 : GAP[how]));
+    if (!free) {
+      w.due = plus(how === "yes" ? (LADDER[w.box] || 1)
+                                 : (GAP[how] === undefined ? 0 : GAP[how]));
+    }
 
     /* The answer is written down, not just its effect.
 
@@ -3947,7 +3956,7 @@
        switching to German would move the reader's own FlashCards to German
        the next time they opened it. */
     if (!DEMO) { try { localStorage.setItem("vocab.space", code); } catch (e) {} }
-    session = []; done = 0; misses = {}; almost = {};
+    session = []; done = 0; misses = {}; almost = {}; anyway = false;
     flipped = false; noteOpen = false; trOpen = false;
     /* A sitting belongs to the language it started in -- and is still there
        when she comes back to that language. */
@@ -4124,6 +4133,15 @@
      rather than on them, so it never reaches storage or an export. */
   var misses = {};
   var almost = {};   /* answered "Almost" this sitting; each gets one encore */
+
+  /* An extra round, asked for when nothing was due. A word answered early
+     has not been remembered across a gap -- it has been remembered since a
+     minute ago -- so "Almost" and "Knew it" are written down and nothing
+     else: the box stays, the due date stays, and four keen answers in one
+     evening cannot carry a word to Mastered. "Not yet" counts in full,
+     because forgetting a word you were not due to see is the most useful
+     thing this tool can learn about it. */
+  var anyway = false;
   var renaming = null;   /* the deck whose name is being edited, if any */
   var CAP = 30;
 
@@ -4200,7 +4218,10 @@
       all.rounds[k] = {
         done: done, total: total,
         ids: session.map(function (w) { return w.id; }),
-        misses: misses, almost: almost
+        misses: misses, almost: almost,
+        /* Or a reload in the middle of an extra round would quietly start
+           grading it as a real one. */
+        anyway: anyway ? 1 : 0
       };
       all.last[SPACE] = onlyDeck || "";
     }
@@ -4232,6 +4253,7 @@
     total = Math.max(q.length, Number(rec.total) || q.length);
     misses = (rec.misses && typeof rec.misses === "object") ? rec.misses : {};
     almost = (rec.almost && typeof rec.almost === "object") ? rec.almost : {};
+    anyway = !!rec.anyway;
     /* Face up, whatever she was looking at when the tab went away: the
        answer she had not given yet is the one being resumed, and showing
        the meaning first would give it to her. */
@@ -4288,7 +4310,31 @@
     return { list: out, fresh: nNew, due: pool.length };
   }
 
+  /* Nothing is due, and she wants to study anyway. The pool is whatever is
+     in scope -- there is nothing due in it by definition -- taken nearest
+     first, because the word coming back soonest is the shakiest one she
+     has. No threading of new words here: a word never answered has no due
+     date and is therefore already due, so it cannot be in this list. */
+  function startAnyway() {
+    anyway = true;
+    session = here().filter(inDeck).sort(function (a, b) {
+      var x = a.due || "", y = b.due || "";
+      if (x !== y) return x < y ? -1 : 1;
+      var p = a.added || "", q = b.added || "";
+      return p < q ? -1 : p > q ? 1 : 0;
+    }).slice(0, CAP);
+    total = session.length;
+    done = 0;
+    flipped = false;
+    misses = {};
+    almost = {};
+    saveSession();
+    counts();
+    renderDue();
+  }
+
   function startSession() {
+    anyway = false;
     /* A word renamed to its lemma may now ask the same question as one
        already here, and this is the one moment with no card on screen. */
     if (foldDuplicates()) save();
@@ -4424,6 +4470,18 @@
         body = 'You have studied everything that came up. ' + scopeCount() + '.';
         label = "";
       }
+      /* Nothing due is not the same as nothing to do. Offered wherever the
+         screen would otherwise be a dead end -- but never instead of
+         Start, which is the round that actually counts. */
+      var extra = !label && here().filter(inDeck).length
+                ? '<div style="text-align:center;padding-bottom:18px">'
+                  + '<button class="btn" id="goAnyway">Study anyway \uD83E\uDD13'
+                  + '</button>'
+                  + '<p class="anywaynote">An extra round. Answers are kept, '
+                  + 'but only <b style="display:inline">Not yet</b> changes '
+                  + 'when a word comes back \u2014 you cannot earn a longer '
+                  + 'gap by studying early.</p></div>'
+                : '';
       el.innerHTML = deckBanner()
         + '<div class="card"><p class="empty"><b>' + head + '</b>'
         + body + '</p>'
@@ -4435,8 +4493,10 @@
         + '</div>'
         + (label ? '<div style="text-align:center;padding-bottom:18px">'
                  + '<button class="btn" id="go">' + label + '</button></div>' : '')
+        + extra
         + '</div>';
       if ($("go")) $("go").addEventListener("click", startSession);
+      if ($("goAnyway")) $("goAnyway").addEventListener("click", startAnyway);
       return;
     }
 
@@ -4447,7 +4507,10 @@
        because a card coming round again makes that arithmetic a lie. */
     /* Scoped to whatever the sitting is scoped to, so it answers the same
        question the banner above it asks. */
-    var html = deckBanner() + '<div class="study">'
+    var html = deckBanner()
+      + (anyway ? '<p class="deckonly">Extra round \u2014 nothing here was '
+                + 'due, so only <b>Not yet</b> moves a word</p>' : '')
+      + '<div class="study">'
       + barHtml(bands(onlyDeck ? inDeckNamed(onlyDeck) : here()),
                 onlyDeck || lang().label)
       + '<div class="progress">' + done + ' done \u00b7 ' + session.length + ' left'
@@ -6816,6 +6879,7 @@
     SPACE = "en";
     onlyDeck = "";
     session = []; done = 0; flipped = false; misses = {}; almost = {};
+    anyway = false;
     db = demoData();
     demoBuild();
     renderSpaces(); counts(); fillFilter();
