@@ -244,12 +244,20 @@ function same(a, b) {
   return flat(a) === flat(b);
 }
 
+/* Two copies that both have Turkish are not settled by the clock alone: a
+   device still holding an older parse would put the old translation back.
+   Complete beats partial, then the newer parser, then the later edit. */
+const trRank = (t) => (t.soft ? 0 : 1000) + (Number(t.v) || 0);
+
 function mergeWords(mine, theirs) {
   const base = (Number(theirs.updated) || 0) > (Number(mine.updated) || 0) ? theirs : mine;
   const other = base === theirs ? mine : theirs;
   const out = { ...base };
   for (const k of Object.keys(KNOWS)) {
     if (!KNOWS[k](base) && KNOWS[k](other)) out[k] = other[k];
+  }
+  if (KNOWS.tr(base) && KNOWS.tr(other) && trRank(other.tr) > trRank(base.tr)) {
+    out.tr = other.tr;
   }
 
   const full = mergeLogs(answersOf(mine), answersOf(theirs));

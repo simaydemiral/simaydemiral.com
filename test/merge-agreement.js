@@ -109,6 +109,14 @@ const CASES = [
     word({ updated: 1000, tr: { from: "Vikisözlük", more: ["eski"], blocks: [], v: 5 } }),
     word({ updated: 9000, tr: { from: "Vikisözlük", more: ["yeni"], blocks: [], v: 5 } })],
 
+  ["an older parse edited later, against a newer parse",
+    word({ updated: 1000, tr: { from: "Wiktionary", blocks: [{ sense: "", words: ["banka"] }], more: [], v: 6 } }),
+    word({ updated: 9000, tr: { from: "Wiktionary", blocks: [{ sense: "", words: ["kıran"] }], more: [], v: 5 } })],
+
+  ["a complete answer against a newer partial one",
+    word({ updated: 1000, tr: { from: "Wiktionary", blocks: [{ sense: "", words: ["ihtiyatlı"] }], more: [], v: 5 } }),
+    word({ updated: 9000, tr: { from: "Vikisözlük", more: ["tedbirli"], blocks: [], v: 6, soft: 1 } })],
+
   ["a note on one side only",
     word({ updated: 9000, note: "" }), word({ updated: 1000, note: "my own words" })],
 
