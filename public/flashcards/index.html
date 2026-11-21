@@ -3753,9 +3753,14 @@
 
      Four correct answers still make a word mastered; they now fall on days
      0, 1, 3 and 7 rather than across two months. "Almost" holds the box and
-     comes back in two days; "Not yet" puts it back to the start, today. */
+     comes back tomorrow; "Not yet" puts it back to the start, today.
+
+     Tomorrow rather than the two days it used to be: "Almost" is the answer
+     you give when it was on the tip of your tongue, and a word in that
+     state is worth seeing again while the near-miss is still yours. Two
+     days was long enough to forget having nearly had it. */
   var LADDER = [0, 0, 1, 2, 4, 16, 35];   /* indexed by the box landed in */
-  var GAP = { no: 0, mid: 2 };
+  var GAP = { no: 0, mid: 1 };
 
   var BOXES = 6;
 
@@ -3769,7 +3774,7 @@
      1, 3, 7, 16, 35 rather than starting at 3.
 
        "no"   you did not have it        -> back to the start, tomorrow
-       "mid"  you had it, but barely     -> holds the gap it already earned
+       "mid"  you had it, but barely     -> keeps its box, back tomorrow
        "yes"  you had it                 -> the next gap up
 
      Holding rather than demoting on "mid": the answer was right, and taking
