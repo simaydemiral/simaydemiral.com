@@ -117,6 +117,18 @@ const CASES = [
     word({ updated: 1000, tr: { from: "Wiktionary", blocks: [{ sense: "", words: ["ihtiyatlı"] }], more: [], v: 5 } }),
     word({ updated: 9000, tr: { from: "Vikisözlük", more: ["tedbirli"], blocks: [], v: 6, soft: 1 } })],
 
+  ["a picked Turkish, against a copy answered later that never saw it",
+    word({ updated: 1000, trMine: { text: "banka", sense: "institution", own: 0, t: 1000 } }),
+    word({ updated: 9000, box: 3, seen: 1, at: 9000, log: log(1, 9000) })],
+
+  ["two different picks, the later choice wins whatever the word's stamp",
+    word({ updated: 9000, trMine: { text: "eski", sense: "", own: 1, t: 2000 } }),
+    word({ updated: 1000, trMine: { text: "yeni", sense: "", own: 1, t: 5000 } })],
+
+  ["a pick removed later, against an older copy still holding it",
+    word({ updated: 9000, trMine: { text: "banka", sense: "", own: 0, t: 2000 } }),
+    word({ updated: 1000, trMine: { text: "", sense: "", own: 0, t: 5000 } })],
+
   ["a note on one side only",
     word({ updated: 9000, note: "" }), word({ updated: 1000, note: "my own words" })],
 

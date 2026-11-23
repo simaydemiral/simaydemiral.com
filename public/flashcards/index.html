@@ -428,6 +428,21 @@
   .trline + .trline{border-top:1px solid var(--line-soft);margin-top:2px}
   .trwords{display:block;font-size:15.5px;font-weight:600}
   .trsense{display:block;font-size:12.5px;color:var(--muted);margin-top:1px}
+  /* A whole row to tap rather than a small box beside it: this is mostly
+     used on a phone, standing up. */
+  .tropt{display:flex;gap:9px;align-items:flex-start;width:100%;padding:7px 2px;
+         border:0;background:none;color:inherit;font:inherit;text-align:left;
+         cursor:pointer}
+  .trtext{display:block;flex:1;min-width:0}
+  .trtick{flex:0 0 auto;width:19px;height:19px;margin-top:2px;
+          border:1px solid var(--line);border-radius:5px;background:var(--surface);
+          /* Empty until pointed at: a tick in every box reads as all chosen. */
+          color:transparent;font:600 11px/17px var(--f-mono);text-align:center}
+  .tropt:hover .trtick,.tropt:focus-visible .trtick{border-color:var(--brand);
+                                                    color:var(--brand)}
+  .trmine .trwords::after{content:" \2713";color:var(--go);font-family:var(--f-mono)}
+  .trhint{font-size:12px;color:var(--faint);margin:7px 0 0}
+  #trBox{min-height:48px}
   .trfrom{margin-top:7px;font:500 10.5px/1 var(--f-mono);letter-spacing:.12em;
           text-transform:uppercase;color:var(--faint)}
   .w-note{display:block;margin-top:3px;font-size:12.5px;color:var(--muted);
@@ -778,7 +793,7 @@
      resumed rather than reloaded, so without this a phone can go on running
      a version from days ago, syncing by rules that have since been fixed,
      with nothing on screen to say so. */
-  var BUILD = "2026-11-20";
+  var BUILD = "2026-11-23";
 
   var SIMPLE_FIX = 1;
 
@@ -915,6 +930,17 @@
            and every word is not re-sent on the next sync. */
         if (trSoft) w.tr.soft = 1;
       } else { delete w.tr; }
+      /* The Turkish chosen or written by hand. Its own field, so no lookup
+         can overwrite it. An empty text is kept on purpose: it records that
+         the choice was removed, so an older copy cannot bring it back. */
+      if (w.trMine && typeof w.trMine === "object" && typeof w.trMine.text === "string") {
+        var mineText = w.trMine.text.trim().replace(/\s+/g, " ").slice(0, 160);
+        w.trMine = { text: mineText,
+                     sense: mineText && typeof w.trMine.sense === "string"
+                            ? w.trMine.sense.slice(0, 160) : "",
+                     own: mineText && w.trMine.own ? 1 : 0,
+                     t: Number(w.trMine.t) || 0 };
+      } else { delete w.trMine; }
       if (w.eg && typeof w.eg === "object") {
         w.eg = { text: typeof w.eg.text === "string" ? w.eg.text.slice(0, 300) : "",
                  from: typeof w.eg.from === "string" ? w.eg.from.slice(0, 24) : "",
@@ -1297,6 +1323,11 @@
      beats partial, then the newer parser wins, then the later edit as usual. */
   function trRank(t) { return (t.soft ? 0 : 1000) + (Number(t.v) || 0); }
 
+  /* A hand-picked Turkish carries its own time, because answering a card on
+     another device makes that copy newer without saying anything about this
+     choice. The latest choice wins, and removing one counts as a choice. */
+  function trMineAt(w) { return (w.trMine && Number(w.trMine.t)) || 0; }
+
   function mergeWord(mine, theirs) {
     var base = (theirs.updated || 0) > (mine.updated || 0) ? theirs : mine;
     var other = base === theirs ? mine : theirs;
@@ -1308,6 +1339,7 @@
     if (KNOWS.tr(base) && KNOWS.tr(other) && trRank(other.tr) > trRank(base.tr)) {
       out.tr = other.tr;
     }
+    if (trMineAt(other) > trMineAt(base)) out.trMine = other.trMine;
 
     var full = mergeLogs(answers(mine), answers(theirs));
     var log = full.slice(-LOGMAX);
@@ -2801,6 +2833,50 @@
     return /^(noun|verb|adjective|adverb)$/.test(pos) ? pos : "";
   }
 
+  /* The Turkish chosen for this card by hand, if any. */
+  function pickedTr(w) {
+    return w.trMine && w.trMine.text ? w.trMine : null;
+  }
+
+  /* What the dictionaries offered, one row per meaning. */
+  function trRows(w) {
+    var tr = w.tr || {}, out = [];
+    (tr.blocks || []).forEach(function (b) {
+      out.push({ text: b.words.join(", "), sense: b.sense || "" });
+    });
+    (tr.more || []).forEach(function (m) { out.push({ text: m, sense: "" }); });
+    if (!out.length && tr.one) {
+      out.push({ text: tr.one,
+                 sense: tr.oneNote
+                        || (tr.from === "Wikidata"
+                              ? "the Turkish name for this, not a dictionary sense"
+                              : "the Turkish article for the same thing") });
+    }
+    return out;
+  }
+
+  /* The stamp always moves forward, even on a device whose clock is behind
+     the one that made the last choice, or the new choice would lose. */
+  function setTrMine(w, text, sense, own) {
+    var clean = String(text || "").trim().replace(/\s+/g, " ").slice(0, 160);
+    var was = (w.trMine && Number(w.trMine.t)) || 0;
+    w.trMine = { text: clean,
+                 sense: clean ? String(sense || "").slice(0, 160) : "",
+                 own: clean && own ? 1 : 0,
+                 t: Math.max(Date.now(), was + 1) };
+    mark(w.id);
+    save();
+  }
+
+  function saveTrDraft(w) {
+    var text = String(trDraft || "").trim().replace(/\s+/g, " ");
+    var picked = pickedTr(w);
+    trDraft = null;
+    /* Nothing changed: an untouched pick stays a pick, with its sense. */
+    if (picked ? text !== picked.text : text) setTrMine(w, text, "", true);
+    renderDue();
+  }
+
   function ensureTurkish(w, after) {
     /* Not even the callback: every one of these asks for a redraw, and a
        redraw asks again -- which with nothing to wait for is a loop with
@@ -4102,7 +4178,7 @@
        the next time they opened it. */
     if (!DEMO) { try { localStorage.setItem("vocab.space", code); } catch (e) {} }
     session = []; done = 0; misses = {}; almost = {}; anyway = false;
-    flipped = false; noteOpen = false; trOpen = false;
+    flipped = false; noteOpen = false; trOpen = false; trDraft = null;
     /* A sitting belongs to the language it started in -- and is still there
        when she comes back to that language. */
     resumeLast();
@@ -4309,6 +4385,9 @@
   var noteOpen = false;
   var editingNote = null;
   var trOpen = false;        /* is the Turkish showing on this card? */
+  /* The text being typed as this card's Turkish, or null when not editing.
+     Held here because a lookup landing mid-sentence redraws the card. */
+  var trDraft = null;
   var trFailed = false;      /* the last lookup could not reach its sources */
   var fullOpen = false;      /* the precise senses instead of the plain ones */
 
@@ -4539,7 +4618,7 @@
      sentence she met it in, and that is not recoverable. */
   function cardTold(w) {
     return !!((w.senses && w.senses.length) || (w.plain && w.plain.length)
-              || hasTurkish(w) || (w.rootdef && w.rootdef.senses
+              || hasTurkish(w) || pickedTr(w) || (w.rootdef && w.rootdef.senses
                                    && w.rootdef.senses.length));
   }
 
@@ -4774,13 +4853,36 @@
       }
       html += relRows(w);
 
-      if (trOpen) {
+      /* A meaning chosen by hand is part of the answer, so it shows without
+         pressing anything. The button opens the choices behind it. */
+      var picked = pickedTr(w);
+      if (trOpen || picked) {
         html += '<div class="yournote tr"><b>T\u00fcrk\u00e7e</b>';
-        /* The failure is checked first. A lookup that could not reach its
+        /* Failure before "looking it up". A lookup that could not reach its
            sources writes nothing down, so there is no record to carry the
            news — asking "is there a record?" first left the card saying
            "looking it up" for ever. */
-        if (trFailed && !hasTurkish(w)) {
+        if (trDraft !== null) {
+          html += '<textarea id="trBox" rows="2" maxlength="160" '
+                + 'aria-label="Your Turkish for ' + esc(w.term) + '" '
+                + 'placeholder="The Turkish you want on this card">'
+                + esc(trDraft) + '</textarea>'
+                + '<div class="noteacts">'
+                + '<button class="btn-q" id="trSave">Save</button>'
+                + '<button class="btn-q" id="trCancel">Cancel</button></div>';
+        } else if (picked) {
+          html += '<div class="trline trmine"><span class="trwords">'
+                + esc(picked.text) + '</span>'
+                + (picked.sense ? '<span class="trsense">' + esc(picked.sense) + '</span>'
+                   : picked.own ? '<span class="trsense">your own</span>' : '')
+                + '</div>';
+          if (trOpen) {
+            html += '<div class="noteacts">'
+                  + '<button class="btn-q" id="trChange">'
+                  + (picked.own ? 'Remove' : 'Change') + '</button>'
+                  + '<button class="btn-q" id="trEdit">Edit</button></div>';
+          }
+        } else if (trFailed && !hasTurkish(w)) {
           html += '<span class="notetext" style="color:var(--stop)">'
                 + 'Could not reach Wiktionary or Wikipedia. Nothing is wrong '
                 + 'with the word \u2014 press T\u00fcrk\u00e7e again to retry. If it keeps '
@@ -4792,42 +4894,41 @@
              lookup keeps its current answer on screen meanwhile. */
           html += '<span class="notetext" style="color:var(--muted)">'
                 + 'Bak\u0131l\u0131yor\u2026</span>';
-        } else if ((w.tr.blocks && w.tr.blocks.length) || (w.tr.more && w.tr.more.length)) {
+        } else if (trRows(w).length) {
           /* Every sense it has, each on its own line: a word that means three
-             things should say all three rather than pick one. */
-          var ti, tb;
-          for (ti = 0; ti < (w.tr.blocks || []).length; ti++) {
-            tb = w.tr.blocks[ti];
-            html += '<div class="trline"><span class="trwords">'
-                  + esc(tb.words.join(", ")) + '</span>'
-                  + (tb.sense ? '<span class="trsense">' + esc(tb.sense) + '</span>' : '')
-                  + '</div>';
+             things should say all three until told which one was meant. */
+          var trList = trRows(w), ti;
+          for (ti = 0; ti < trList.length; ti++) {
+            html += '<button class="trline tropt" data-trpin="' + ti + '" '
+                  + 'title="This is the meaning I met" '
+                  + 'aria-label="Keep ' + esc(trList[ti].text) + ' as the Turkish for '
+                  + esc(w.term) + '">'
+                  + '<span class="trtick" aria-hidden="true">\u2713</span>'
+                  + '<span class="trtext"><span class="trwords">'
+                  + esc(trList[ti].text) + '</span>'
+                  + (trList[ti].sense
+                       ? '<span class="trsense">' + esc(trList[ti].sense) + '</span>' : '')
+                  + '</span></button>';
           }
-          for (ti = 0; ti < (w.tr.more || []).length; ti++) {
-            html += '<div class="trline"><span class="trwords">'
-                  + esc(w.tr.more[ti]) + '</span></div>';
-          }
-          html += '<div class="trfrom">' + esc(w.tr.from || "Wiktionary")
+          html += '<div class="trfrom">'
+                + esc(w.tr.from || (w.tr.one ? "Wikipedia" : "Wiktionary"))
                 /* Said plainly, because akut is the Turkish for acute and
                    not for acutely, and the card should not pretend it is. */
                 + (w.tr.via ? ' \u00b7 the Turkish for <b style="display:inline">'
                               + esc(w.tr.via) + '</b>' : '')
-                + '</div>';
-        } else if (w.tr.one) {
-          html += '<div class="trline"><span class="trwords">' + esc(w.tr.one) + '</span>'
-                + '<span class="trsense">'
-                + esc(w.tr.oneNote
-                      || (w.tr.from === "Wikidata"
-                            ? "the Turkish name for this, not a dictionary sense"
-                            : "the Turkish article for the same thing"))
-                + '</span></div>'
-                + '<div class="trfrom">' + esc(w.tr.from || "Wikipedia") + '</div>';
+                + '</div>'
+                + '<p class="trhint">Tap the one you actually met \u2014 the card '
+                + 'keeps it.</p>';
         } else {
           html += '<span class="notetext" style="color:var(--warn)">'
                 + 'Neither Wiktionary nor Wikipedia has a Turkish entry for this '
                 + 'one. Nothing invented \u2014 write your own below.</span>'
                 + ' <button class="btn-q" id="trAgain" '
                 + 'title="Ask the sources again">Ask again</button>';
+        }
+        if (trOpen && trDraft === null && !picked) {
+          html += '<div class="noteacts">'
+                + '<button class="btn-q" id="trWrite">Write your own</button></div>';
         }
         html += '</div>';
       }
@@ -4983,6 +5084,7 @@
         $("trBtn").addEventListener("click", function () {
           trOpen = !trOpen;
           if (trOpen) trFailed = false;   /* this press gets its own verdict */
+          else trDraft = null;
           renderDue();
           /* Fetched on the press, not on every flip: most cards are turned
              over without ever wanting it. Cached afterwards, so the second
@@ -4994,6 +5096,43 @@
             ensureTurkish(w, function () { if (flipped && trOpen) renderDue(); });
           }
         });
+      }
+      Array.prototype.forEach.call($("back").querySelectorAll("[data-trpin]"), function (b) {
+        b.addEventListener("click", function () {
+          var row = trRows(w)[Number(b.getAttribute("data-trpin"))];
+          if (!row) return;
+          setTrMine(w, row.text, row.sense, false);
+          renderDue();
+        });
+      });
+      if ($("trWrite")) {
+        $("trWrite").addEventListener("click", function () { trDraft = ""; renderDue(); });
+      }
+      if ($("trEdit")) {
+        $("trEdit").addEventListener("click", function () {
+          trDraft = pickedTr(w) ? pickedTr(w).text : "";
+          renderDue();
+        });
+      }
+      if ($("trChange")) {
+        $("trChange").addEventListener("click", function () {
+          setTrMine(w, "", "", false);
+          renderDue();
+        });
+      }
+      if ($("trBox")) {
+        var trBox = $("trBox");
+        trBox.addEventListener("input", function () { trDraft = trBox.value; });
+        trBox.addEventListener("keydown", function (e) {
+          /* The card's own keys (space, 1, 2, 3) are not meant while typing. */
+          e.stopPropagation();
+          if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); saveTrDraft(w); }
+          else if (e.key === "Escape") { trDraft = null; renderDue(); }
+        });
+        $("trSave").addEventListener("click", function () { saveTrDraft(w); });
+        $("trCancel").addEventListener("click", function () { trDraft = null; renderDue(); });
+        trBox.focus();
+        trBox.setSelectionRange(trBox.value.length, trBox.value.length);
       }
       if ($("noteSave")) {
         $("noteSave").addEventListener("click", function () {
@@ -5007,7 +5146,7 @@
         $("noteBox").focus();
       }
       /* Do not pull focus out of the note she is typing. */
-      if (keyboarding && !noteOpen) $("gYes").focus();
+      if (keyboarding && !noteOpen && trDraft === null) $("gYes").focus();
     }
   }
 
@@ -5015,6 +5154,7 @@
     flipped = true;
     noteOpen = false;
     trOpen = false;
+    trDraft = null;
     fullOpen = false;
     renderDue();
   }
@@ -5023,6 +5163,7 @@
     flipped = false;
     noteOpen = false;
     trOpen = false;
+    trDraft = null;
     fullOpen = false;
     renderDue();
   }
@@ -5217,6 +5358,7 @@
     flipped = false;
     noteOpen = false;
     trOpen = false;
+    trDraft = null;
     fullOpen = false;
     saveSession();
     counts();

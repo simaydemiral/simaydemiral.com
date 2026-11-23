@@ -249,6 +249,11 @@ function same(a, b) {
    Complete beats partial, then the newer parser, then the later edit. */
 const trRank = (t) => (t.soft ? 0 : 1000) + (Number(t.v) || 0);
 
+/* A hand-picked Turkish carries its own time, because answering a card on
+   another device makes that copy newer without saying anything about this
+   choice. The latest choice wins, and removing one counts as a choice. */
+const trMineAt = (w) => (w.trMine && Number(w.trMine.t)) || 0;
+
 function mergeWords(mine, theirs) {
   const base = (Number(theirs.updated) || 0) > (Number(mine.updated) || 0) ? theirs : mine;
   const other = base === theirs ? mine : theirs;
@@ -259,6 +264,7 @@ function mergeWords(mine, theirs) {
   if (KNOWS.tr(base) && KNOWS.tr(other) && trRank(other.tr) > trRank(base.tr)) {
     out.tr = other.tr;
   }
+  if (trMineAt(other) > trMineAt(base)) out.trMine = other.trMine;
 
   const full = mergeLogs(answersOf(mine), answersOf(theirs));
   const log = full.slice(-LOGMAX);
