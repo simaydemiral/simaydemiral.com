@@ -1,0 +1,32 @@
+# A push to main is how the site goes live. This runs the test, then asks the
+# publish job in the private repo to deploy, so the site and the Dispatch share
+# one queue and Cloudflare's credentials never sit in this public repo.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Run the site's test
+        run: node test/merge-agreement.js
+
+      - name: Start the deploy
+        env:
+          GH_TOKEN: ${{ secrets.PUBLISH_TRIGGER_TOKEN }}
+        run: gh workflow run dispatch.yml -R simaydemiral/mba-hub-scripts --ref main -f mode=site

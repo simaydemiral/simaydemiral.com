@@ -5,6 +5,7 @@
   "name": "simaydemiral",
   "main": "src/index.js",
   "compatibility_date": "2026-09-01",
+  "build": { "command": "sh scripts/deploy-guard.sh" },
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",

@@ -49,7 +49,7 @@ The generator is not in this repo.
 
 ```sh
 npx wrangler dev        # http://localhost:8787
-npx wrangler deploy     # live in a few seconds
+git push origin main    # tests, then deploys through GitHub
 ```
 
 Or just open any of the HTML files above in a browser — the tools need no
