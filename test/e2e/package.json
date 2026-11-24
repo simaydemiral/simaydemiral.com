@@ -1,0 +1,15 @@
+{
+  "name": "flashcards-e2e",
+  "private": true,
+  "description": "FlashCards, used in a real browser the way a person uses it. Never touches the live site or a real deck.",
+  "scripts": {
+    "test": "playwright test",
+    "test:desktop": "playwright test --project=desktop",
+    "test:phone": "playwright test --project=phone",
+    "test:listen": "playwright test listen --project=desktop",
+    "report": "playwright show-report .output/html"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.0"
+  }
+}

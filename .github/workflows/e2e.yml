@@ -1,0 +1,60 @@
+# FlashCards, used the way a person uses it, once a week on GitHub's machines.
+# Chrome at desktop and phone size, and Safari's engine at iPhone size, against
+# a private local copy of the site with a throwaway database. It never reaches
+# simaydemiral.com, holds no secrets, and changes nothing.
+#
+# The dictionary cache starts empty here, so Wiktionary is asked as it is today:
+# a change in its format shows up as failures, not as a quietly broken card.
+# GitHub emails the repo owner when a scheduled run fails.
+name: FlashCards tests
+
+on:
+  schedule:
+    - cron: "30 15 * * 1"   # Mondays, 7:30 Pacific in winter, 8:30 in summer
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: flashcards-e2e
+  cancel-in-progress: false
+
+jobs:
+  e2e:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: test/e2e
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: test/e2e/package-lock.json
+
+      - name: Install the test tools
+        run: npm ci --ignore-scripts
+
+      - name: Install the browsers
+        run: |
+          google-chrome --version || npx playwright install --with-deps chrome
+          npx playwright install --with-deps webkit
+
+      # The live Listen timings measure the network they run on, and a data
+      # centre's network says nothing about a phone's.
+      - name: Use FlashCards
+        run: npx playwright test --grep-invert "plays quickly"
+
+      - name: Keep the evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flashcards-e2e-output
+          path: test/e2e/.output
+          retention-days: 14
