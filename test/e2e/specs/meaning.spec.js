@@ -104,9 +104,9 @@ test.describe("Several Turkish choices", () => {
     await rows(page).nth(1).click();
     expect((await app.word("upbringing")).trMine.text).toBe("yetiştirme, terbiye, eğitim");
 
-    /* closed, the card shows the whole choice */
+    /* the next time round, the card shows the whole choice by itself */
     await page.locator("#trBtn").click();
-    await expect(app.panel.locator(".trmine")).toContainText("yetiştirme, terbiye, eğitim");
+    await expect(app.panel).toHaveCount(0);
     await page.reload();
     await app.flip();
     await expect(app.panel.locator(".trmine")).toContainText("yetiştirme, terbiye, eğitim");

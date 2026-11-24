@@ -234,8 +234,12 @@ class App {
   async grade(how) {
     await this.page.locator({ no: "#gNo", mid: "#gMid", yes: "#gYes" }[how]).click();
   }
+  /* Opens the choices. A kept Turkish already shows by itself, with Change
+     to open it; anywhere else it is the Türkçe button. */
   async openTurkish() {
-    await this.page.locator("#trBtn").click();
+    const change = this.page.locator("#trMore");
+    if (await change.count()) await change.click();
+    else await this.page.locator("#trBtn").click();
     await expect(this.panel).toBeVisible();
   }
   async studyToBack(term) {

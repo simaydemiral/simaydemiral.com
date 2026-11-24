@@ -803,7 +803,7 @@
      resumed rather than reloaded, so without this a phone can go on running
      a version from days ago, syncing by rules that have since been fixed,
      with nothing on screen to say so. */
-  var BUILD = "2026-11-24";
+  var BUILD = "2026-11-24.2";
 
   var SIMPLE_FIX = 1;
 
@@ -4335,7 +4335,7 @@
        the next time they opened it. */
     if (!DEMO) { try { localStorage.setItem("vocab.space", code); } catch (e) {} }
     session = []; done = 0; misses = {}; almost = {}; anyway = false;
-    flipped = false; noteOpen = false; trOpen = false; trDraft = null;
+    flipped = false; noteOpen = false; trOpen = false; trHidden = false; trDraft = null;
     meanDraft = null; dictOpen = false;
     /* A sitting belongs to the language it started in -- and is still there
        when she comes back to that language. */
@@ -4542,7 +4542,11 @@
      there was nowhere to write what it actually means. */
   var noteOpen = false;
   var editingNote = null;
-  var trOpen = false;        /* is the Turkish showing on this card? */
+  var trOpen = false;        /* are the Turkish choices open on this card? */
+  /* A kept Turkish shows by itself; Hide Türkçe puts it away until the card
+     is next turned over. */
+  var trHidden = false;
+  function trShown(w) { return trOpen || (!!pickedTr(w) && !trHidden); }
   /* The text being typed as this card's Turkish, or null when not editing.
      Held here because a lookup landing mid-sentence redraws the card. */
   var trDraft = null;
@@ -5076,9 +5080,10 @@
       html += relRows(w);
 
       /* A meaning chosen by hand is part of the answer, so it shows without
-         pressing anything. The button opens the choices behind it. */
+         pressing anything, with Change to open the choices behind it. Hide
+         Türkçe hides it, whether or not the choices are open. */
       var picked = pickedTr(w);
-      if (trOpen || picked) {
+      if (trShown(w)) {
         html += '<div class="yournote tr"><b>T\u00fcrk\u00e7e</b>';
         /* Failure before "looking it up". A lookup that could not reach its
            sources writes nothing down, so there is no record to carry the
@@ -5103,6 +5108,9 @@
                   + '<button class="btn-q" id="trChange">'
                   + (picked.own ? 'Remove' : 'Clear') + '</button>'
                   + '<button class="btn-q" id="trEdit">Edit</button></div>';
+          } else {
+            html += '<div class="noteacts">'
+                  + '<button class="btn-q" id="trMore">Change</button></div>';
           }
         } else if (trFailed && !hasTurkish(w)) {
           html += '<span class="notetext" style="color:var(--stop)">'
@@ -5320,9 +5328,10 @@
       }
       if ($("trBtn")) {
         $("trBtn").addEventListener("click", function () {
-          trOpen = !trOpen;
-          if (trOpen) trFailed = false;   /* this press gets its own verdict */
-          else trDraft = null;
+          /* The button says what it will do to what is on screen: a kept
+             Turkish showing by itself is "showing", and Hide hides it. */
+          if (trShown(w)) { trOpen = false; trHidden = true; trDraft = null; }
+          else { trOpen = true; trHidden = false; trFailed = false; }
           renderDue();
           /* Fetched on the press, not on every flip: most cards are turned
              over without ever wanting it. Cached afterwards, so the second
@@ -5343,6 +5352,13 @@
           renderDue();
         });
       });
+      if ($("trMore")) {
+        $("trMore").addEventListener("click", function () {
+          trOpen = true; trHidden = false; trFailed = false;
+          renderDue();
+          ensureTurkish(w, function () { if (flipped && trOpen) renderDue(); });
+        });
+      }
       if ($("trWrite")) {
         $("trWrite").addEventListener("click", function () { trDraft = ""; renderDue(); });
       }
@@ -5425,6 +5441,7 @@
     flipped = true;
     noteOpen = false;
     trOpen = false;
+    trHidden = false;
     trDraft = null;
     meanDraft = null;
     dictOpen = false;
@@ -5437,6 +5454,7 @@
     flipped = false;
     noteOpen = false;
     trOpen = false;
+    trHidden = false;
     trDraft = null;
     meanDraft = null;
     dictOpen = false;
@@ -5584,8 +5602,9 @@
   }
 
   function trButton(w) {
-    return '<button class="btn-q' + (trOpen ? ' is-on' : '') + '" id="trBtn">'
-         + (trOpen ? 'Hide T\u00fcrk\u00e7e' : 'T\u00fcrk\u00e7e') + '</button>';
+    var on = trShown(w);
+    return '<button class="btn-q' + (on ? ' is-on' : '') + '" id="trBtn">'
+         + (on ? 'Hide T\u00fcrk\u00e7e' : 'T\u00fcrk\u00e7e') + '</button>';
   }
 
   /* Edit meaning, and beside it whichever view of the dictionary makes
@@ -5649,6 +5668,7 @@
     flipped = false;
     noteOpen = false;
     trOpen = false;
+    trHidden = false;
     trDraft = null;
     meanDraft = null;
     dictOpen = false;

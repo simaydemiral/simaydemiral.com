@@ -111,8 +111,34 @@ test.describe("choosing the Turkish", () => {
     const mine = (await app.word("bank")).trMine;
     expect([mine.text, mine.sense, mine.own]).toEqual(["kıyı, yaka", "edge of a river", 0]);
     await page.locator("#trBtn").click();
+    await expect(app.panel, "Hide Türkçe hides it").toHaveCount(0);
+    await page.reload();
+    await app.flip();
     await expect(app.panel).toContainText("kıyı, yaka");
     await expect(app.panel).not.toContainText("institution");
+  });
+
+  /* Reported by the owner: with her own Turkish on the card, Hide Türkçe
+     changed the button's name and left the Turkish on screen. */
+  test("Hide Türkçe hides a kept Turkish, and Türkçe brings it back", async ({ app, page }) => {
+    await app.seed([card("perpetuate", { tr: rows(),
+      trMine: { text: "süreklilik, ebediyet", sense: "", own: 1, t: 5 } })]);
+    await app.studyToBack("perpetuate");
+    const button = page.locator("#trBtn");
+    await expect(app.panel).toContainText("süreklilik, ebediyet");
+    await expect(button).toHaveText("Hide Türkçe");
+    await button.click();
+    await expect(app.panel).toHaveCount(0);
+    await expect(button).toHaveText("Türkçe");
+    await button.click();
+    await expect(app.panel).toContainText("süreklilik, ebediyet");
+    await expect(button).toHaveText("Hide Türkçe");
+    /* hidden, opened fully with Remove and Edit, and hidden again */
+    await button.click();
+    await button.click();
+    await page.locator("#trChange").waitFor({ state: "visible" });
+    await button.click();
+    await expect(app.panel).toHaveCount(0);
   });
 
   test("a kept meaning shows on the back without pressing anything", async ({ app, page }) => {
@@ -192,7 +218,7 @@ test.describe("choosing the Turkish", () => {
     await app.seed([card("bank", { tr: turkish([[["kıran"], "old"]], { v: 5 }),
                                    trMine: { text: "my bank", sense: "", own: 1, t: 5 } })]);
     await app.studyToBack("bank");
-    await page.locator("#trBtn").click();
+    await app.openTurkish();
     await expect.poll(async () => (await app.word("bank")).tr.v, { timeout: 40_000 }).toBe(6);
     await expect(app.panel).toContainText("my bank");
     expect((await app.word("bank")).trMine.text).toBe("my bank");
