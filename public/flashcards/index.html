@@ -128,7 +128,8 @@
         border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);
         padding:28px 24px;display:flex;flex-direction:column;
         align-items:center;justify-content:center;text-align:center;
-        cursor:pointer;user-select:none}
+        cursor:pointer}
+  .face button{user-select:none}
   .face:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
   .term{font:500 34px/1.15 var(--f-display);letter-spacing:-.03em;
         word-break:break-word}
@@ -793,7 +794,7 @@
      resumed rather than reloaded, so without this a phone can go on running
      a version from days ago, syncing by rules that have since been fixed,
      with nothing on screen to say so. */
-  var BUILD = "2026-11-23.2";
+  var BUILD = "2026-11-23.3";
 
   var SIMPLE_FIX = 1;
 
@@ -4669,18 +4670,46 @@
      sync now running after every answer, that arrival often landed in the
      middle of the next tap. So a redraw asked for while a press is in
      flight waits for the finger to come up. */
-  var pressing = 0, dueWaiting = false;
+  var pressing = 0, dueWaiting = false, heldFrom = 0, heldMs = 0;
 
   document.addEventListener("pointerdown", function () {
-    pressing = Date.now();
+    pressing = heldFrom = Date.now();
   }, true);
 
   function released() {
     pressing = 0;
+    heldMs = heldFrom ? Date.now() - heldFrom : 0;
     if (dueWaiting) { dueWaiting = false; renderDue(); }
   }
   document.addEventListener("pointerup", released, true);
   document.addEventListener("pointercancel", released, true);
+
+  /* Text she has picked out on the card: a word to copy, look up, or just
+     hold on to. A redraw would wipe it, and a click that ends a drag is
+     not a request to turn the card. */
+  function pickedIn(el) {
+    var s = window.getSelection && window.getSelection();
+    if (!el || !s || s.isCollapsed || !String(s).trim()) return false;
+    return el.contains(s.anchorNode) || el.contains(s.focusNode);
+  }
+  function letGo() {
+    var s = window.getSelection && window.getSelection();
+    if (s && !s.isCollapsed) s.removeAllRanges();
+  }
+  /* Picking text, or a press held long enough to be meant as one. */
+  function choosing(el) { return pickedIn(el) || heldMs > 500; }
+
+  document.addEventListener("selectionchange", function () {
+    if (dueWaiting && !pressing && !pickedIn($("p-due"))) {
+      dueWaiting = false; renderDue();
+    }
+  });
+  /* A button on the card is a decision; the text picked before it is done with. */
+  document.addEventListener("click", function (e) {
+    var due = $("p-due");
+    if (due && e.target.closest && e.target.closest("button, a")
+        && due.contains(e.target)) letGo();
+  }, true);
 
   /* A word with nothing on it -- no sense, no plain English, no Turkish --
      is a card that has never told her anything, and binning it needs no
@@ -4716,6 +4745,7 @@
     if (pressing && Date.now() - pressing < 1500) { dueWaiting = true; return; }
     pressing = 0;
     var el = $("p-due");
+    if (pickedIn(el)) { dueWaiting = true; return; }
     checkDeck();
 
     if (!here().length) {
@@ -5084,6 +5114,7 @@
         /* the speaker is on this face too now, and pressing it is not an
            answer — hearing a word is part of trying to remember it */
         if (e.target.closest && e.target.closest("button")) return;
+        if (choosing(this)) return;
         flip();
       });
       f.addEventListener("keydown", function (e) {
@@ -5121,6 +5152,7 @@
          those are things she came to the back of the card to use. */
       $("back").addEventListener("click", function (e) {
         if (e.target.closest("button, a, textarea, select, input")) return;
+        if (choosing(this)) return;
         unflip();
       });
       $("back").addEventListener("keydown", function (e) {
@@ -5229,6 +5261,7 @@
   }
 
   function flip() {
+    letGo();
     flipped = true;
     noteOpen = false;
     trOpen = false;
@@ -5238,6 +5271,7 @@
   }
 
   function unflip() {
+    letGo();
     flipped = false;
     noteOpen = false;
     trOpen = false;
@@ -5407,6 +5441,7 @@
   }
 
   function answer(how) {
+    letGo();
     hush();
     var w = session.shift();
     grade(w, how);
