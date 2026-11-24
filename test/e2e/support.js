@@ -31,6 +31,9 @@ function tone(seconds = 5) {
    The live site is never reachable. */
 let queue = Promise.resolve();
 let lastFetch = 0;
+/* Every refusal, server error or timeout from a dictionary, so a test can
+   tell "the app failed" from "the dictionary would not answer in time". */
+let trouble = 0;
 
 async function fetchPolitely(url) {
   /* Every request has a deadline. One source that never answers would
@@ -43,6 +46,8 @@ async function fetchPolitely(url) {
       const r = await fetch(url, { headers: { "User-Agent": "flashcards-e2e/1.0" },
                                    signal: AbortSignal.timeout(10_000) });
       if (r.status === 429 || r.status >= 500) {
+        trouble++;
+        console.warn(`dictionary answered ${r.status}: ${url.slice(0, 120)}`);
         const after = Math.min(Number(r.headers.get("retry-after")) || 2, 10);
         await new Promise((g) => setTimeout(g, (after + 2 * (attempt + 1)) * 1000));
         continue;
@@ -50,6 +55,8 @@ async function fetchPolitely(url) {
       return { status: r.status, type: r.headers.get("content-type") || "application/octet-stream",
                body: Buffer.from(await r.arrayBuffer()).toString("base64") };
     } catch (e) {
+      trouble++;
+      console.warn(`dictionary did not answer (${e.name}): ${url.slice(0, 120)}`);
       await new Promise((g) => setTimeout(g, 1000));
     }
   }
@@ -93,7 +100,11 @@ class Lab {
     this.calls = [];
     this.forbidden = [];
     this.upstreamLimited = [];
+    this.troubleAtStart = trouble;
   }
+  /* The dictionaries refused, failed or stalled during this test. A verdict
+     reached then is about them, not the app: inconclusive. */
+  rocky() { return this.upstreamLimited.length > 0 || trouble > this.troubleAtStart; }
   real() { this.mode = "replay"; return this; }
   fail(pattern, how = 429) { this.faults.push({ pattern, how }); return this; }
   heal() { this.faults = []; return this; }

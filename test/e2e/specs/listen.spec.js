@@ -110,7 +110,7 @@ async function openCard(app, page, lang, term) {
     await expect.poll(async () => (await app.word(term)).say?.audio || "", { timeout: 45_000 }).toMatch(/^https:/);
   } catch (e) {
     /* A dictionary that would not answer says nothing about the app. */
-    test.skip(app.lab.upstreamLimited.length > 0, "dictionary unavailable: inconclusive");
+    test.skip(app.lab.rocky(), "dictionary unavailable: inconclusive");
     throw e;
   }
 }
