@@ -253,6 +253,8 @@ const trRank = (t) => (t.soft ? 0 : 1000) + (Number(t.v) || 0);
    another device makes that copy newer without saying anything about this
    choice. The latest choice wins, and removing one counts as a choice. */
 const trMineAt = (w) => (w.trMine && Number(w.trMine.t)) || 0;
+/* Her own English meaning, settled the same way. */
+const enMineAt = (w) => (w.enMine && Number(w.enMine.t)) || 0;
 
 function mergeWords(mine, theirs) {
   const base = (Number(theirs.updated) || 0) > (Number(mine.updated) || 0) ? theirs : mine;
@@ -265,6 +267,7 @@ function mergeWords(mine, theirs) {
     out.tr = other.tr;
   }
   if (trMineAt(other) > trMineAt(base)) out.trMine = other.trMine;
+  if (enMineAt(other) > enMineAt(base)) out.enMine = other.enMine;
 
   const full = mergeLogs(answersOf(mine), answersOf(theirs));
   const log = full.slice(-LOGMAX);

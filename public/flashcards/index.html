@@ -442,7 +442,13 @@
   .tropt:hover .trtick,.tropt:focus-visible .trtick{border-color:var(--brand);
                                                     color:var(--brand)}
   .trmine .trwords::after{content:" \2713";color:var(--go);font-family:var(--f-mono)}
+  /* Ticked: several can be, so the tick stays on rather than showing on hover. */
+  .tropt[aria-pressed="true"] .trtick{border-color:var(--go);background:var(--go);
+                                      color:var(--surface)}
+  .tropt[aria-pressed="true"] .trwords{color:var(--ink)}
   .trhint{font-size:12px;color:var(--faint);margin:7px 0 0}
+  .sense.mine .pos{color:var(--brand)}
+  #meanBox{min-height:64px}
   #trBox{min-height:48px}
   .trfrom{margin-top:7px;font:500 10.5px/1 var(--f-mono);letter-spacing:.12em;
           text-transform:uppercase;color:var(--faint)}
@@ -456,7 +462,10 @@
   .yournote textarea,tr.noterow textarea{width:100%;min-height:70px;font:inherit;
             font-size:14px;padding:9px;border:1px solid var(--line);border-radius:8px;
             background:var(--surface);color:var(--ink);resize:vertical}
-  .noteacts{display:flex;gap:6px;margin-top:8px}
+  /* Wraps: four buttons do not fit across a phone, and the last one ran off
+     the card under the bin. The right margin keeps the bin's corner clear. */
+  .noteacts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .back > .noteacts{padding-right:30px}
   tr.noterow td{background:var(--sunken)}
 
   @media (max-width:560px){
@@ -794,7 +803,7 @@
      resumed rather than reloaded, so without this a phone can go on running
      a version from days ago, syncing by rules that have since been fixed,
      with nothing on screen to say so. */
-  var BUILD = "2026-11-23.3";
+  var BUILD = "2026-11-24";
 
   var SIMPLE_FIX = 1;
 
@@ -935,13 +944,21 @@
          can overwrite it. An empty text is kept on purpose: it records that
          the choice was removed, so an older copy cannot bring it back. */
       if (w.trMine && typeof w.trMine === "object" && typeof w.trMine.text === "string") {
-        var mineText = w.trMine.text.trim().replace(/\s+/g, " ").slice(0, 160);
+        var mineText = w.trMine.text.trim().replace(/\s+/g, " ").slice(0, 300);
+        var minePicks = mineText && !w.trMine.own ? trPickList(w.trMine.picks) : [];
         w.trMine = { text: mineText,
                      sense: mineText && typeof w.trMine.sense === "string"
-                            ? w.trMine.sense.slice(0, 160) : "",
+                            ? w.trMine.sense.slice(0, 300) : "",
                      own: mineText && w.trMine.own ? 1 : 0,
                      t: Number(w.trMine.t) || 0 };
+        /* Only when there are some, so a single older pick keeps its shape. */
+        if (minePicks.length) w.trMine.picks = minePicks;
       } else { delete w.trMine; }
+      /* Her own English meaning, in place of the dictionary's. Same rules as
+         her Turkish: its own time, and an empty text records a removal. */
+      if (w.enMine && typeof w.enMine === "object" && typeof w.enMine.text === "string") {
+        w.enMine = { text: cleanMeaning(w.enMine.text), t: Number(w.enMine.t) || 0 };
+      } else { delete w.enMine; }
       if (w.eg && typeof w.eg === "object") {
         w.eg = { text: typeof w.eg.text === "string" ? w.eg.text.slice(0, 300) : "",
                  from: typeof w.eg.from === "string" ? w.eg.from.slice(0, 24) : "",
@@ -1328,6 +1345,8 @@
      another device makes that copy newer without saying anything about this
      choice. The latest choice wins, and removing one counts as a choice. */
   function trMineAt(w) { return (w.trMine && Number(w.trMine.t)) || 0; }
+  /* Her own English meaning, settled the same way. */
+  function enMineAt(w) { return (w.enMine && Number(w.enMine.t)) || 0; }
 
   function mergeWord(mine, theirs) {
     var base = (theirs.updated || 0) > (mine.updated || 0) ? theirs : mine;
@@ -1341,6 +1360,7 @@
       out.tr = other.tr;
     }
     if (trMineAt(other) > trMineAt(base)) out.trMine = other.trMine;
+    if (enMineAt(other) > enMineAt(base)) out.enMine = other.enMine;
 
     var full = mergeLogs(answers(mine), answers(theirs));
     var log = full.slice(-LOGMAX);
@@ -2878,15 +2898,81 @@
 
   /* The stamp always moves forward, even on a device whose clock is behind
      the one that made the last choice, or the new choice would lose. */
-  function setTrMine(w, text, sense, own) {
-    var clean = String(text || "").trim().replace(/\s+/g, " ").slice(0, 160);
+  function setTrMine(w, text, sense, own, picks) {
+    var clean = String(text || "").trim().replace(/\s+/g, " ").slice(0, 300);
     var was = (w.trMine && Number(w.trMine.t)) || 0;
+    var list = clean && !own ? trPickList(picks) : [];
     w.trMine = { text: clean,
-                 sense: clean ? String(sense || "").slice(0, 160) : "",
+                 sense: clean ? String(sense || "").slice(0, 300) : "",
                  own: clean && own ? 1 : 0,
                  t: Math.max(Date.now(), was + 1) };
+    if (list.length) w.trMine.picks = list;
     mark(w.id);
     save();
+  }
+
+  /* The rows she ticked, each as the dictionary wrote it. */
+  function trPickList(a) {
+    if (!Array.isArray(a)) return [];
+    return a.filter(function (p) { return typeof p === "string" && p.trim(); })
+            .map(function (p) { return p.slice(0, 160); }).slice(0, 12);
+  }
+
+  /* Which rows are ticked now. A pick saved before several were allowed is
+     the one row whose text it is. Her own writing is not a row. */
+  function trPicked(w) {
+    var p = pickedTr(w);
+    if (!p || p.own) return [];
+    return p.picks && p.picks.length ? p.picks.slice() : [p.text];
+  }
+
+  /* Tick or untick one row. Every ticked row goes on the card, in the
+     dictionary's order, as one comma-separated line with no word twice. */
+  function toggleTrPick(w, row) {
+    var rows = trRows(w), cur = trPicked(w), at = cur.indexOf(row.text);
+    if (at >= 0) cur.splice(at, 1); else cur.push(row.text);
+    var order = function (t) {
+      for (var i = 0; i < rows.length; i++) if (rows[i].text === t) return i;
+      return rows.length;          /* from an older lookup: kept, at the end */
+    };
+    cur.sort(function (a, b) { return order(a) - order(b); });
+    if (!cur.length) { setTrMine(w, "", "", false); return; }
+    var words = [], senses = [];
+    cur.forEach(function (t) {
+      t.split(/\s*,\s*/).forEach(function (x) {
+        if (x && words.indexOf(x) < 0) words.push(x);
+      });
+      var r = rows[order(t)];
+      if (r && r.sense && senses.indexOf(r.sense) < 0) senses.push(r.sense);
+    });
+    setTrMine(w, words.join(", "), senses.join(" · "), false, cur);
+  }
+
+  /* ------------------------------------------------- her own English meaning */
+  function cleanMeaning(s) {
+    return String(s || "").trim().replace(/\s+/g, " ").slice(0, 600);
+  }
+  function myMeaning(w) { return w.enMine && w.enMine.text ? w.enMine.text : ""; }
+
+  /* Saved as a choice with its own time, like her Turkish; "" puts the
+     dictionary back and is kept, so an older copy cannot undo that. */
+  function setEnMine(w, text) {
+    w.enMine = { text: cleanMeaning(text), t: Math.max(Date.now(), enMineAt(w) + 1) };
+    mark(w.id);
+    save();
+  }
+
+  function saveMeanDraft(w) {
+    var text = cleanMeaning(meanDraft), was = myMeaning(w);
+    meanDraft = null;
+    /* An untouched dictionary line is not hers; an emptied box of hers is
+       a removal. */
+    if (was ? text !== was : (text && text !== cleanMeaning(meanFrom))) {
+      setEnMine(w, text);
+      toast(text ? "Your meaning is on the card." : "Back to the dictionary meaning.");
+    }
+    renderDue();
+    renderAll();
   }
 
   function saveTrDraft(w) {
@@ -4201,7 +4287,7 @@
      word, or a single sense, or a gloss so hollow it had to go and look up
      the root. These are the ones worth writing her own meaning on. */
   function thinCard(w) {
-    if (w.note) return false;
+    if (w.note || myMeaning(w)) return false;
     var shown = shownSenses(w);
     if (!shown.length) return false;
     if (w.rootdef && w.rootdef.senses && w.rootdef.senses.length) return true;
@@ -4250,6 +4336,7 @@
     if (!DEMO) { try { localStorage.setItem("vocab.space", code); } catch (e) {} }
     session = []; done = 0; misses = {}; almost = {}; anyway = false;
     flipped = false; noteOpen = false; trOpen = false; trDraft = null;
+    meanDraft = null; dictOpen = false;
     /* A sitting belongs to the language it started in -- and is still there
        when she comes back to that language. */
     resumeLast();
@@ -4461,6 +4548,10 @@
   var trDraft = null;
   var trFailed = false;      /* the last lookup could not reach its sources */
   var fullOpen = false;      /* the precise senses instead of the plain ones */
+  /* Her own English meaning being typed, or null; and what the box started
+     with, so saving an untouched dictionary line does not make it hers. */
+  var meanDraft = null, meanFrom = "";
+  var dictOpen = false;      /* the dictionary's meanings under her own */
 
   /* ------------------------------------------------------------------
      A sitting survives a reload.
@@ -4690,6 +4781,9 @@
   function pickedIn(el) {
     var s = window.getSelection && window.getSelection();
     if (!el || !s || s.isCollapsed || !String(s).trim()) return false;
+    /* Text marked inside a box she is typing in is editing, not picking. */
+    var a = document.activeElement;
+    if (a && (a.tagName === "TEXTAREA" || a.tagName === "INPUT")) return false;
     return el.contains(s.anchorNode) || el.contains(s.focusNode);
   }
   function letGo() {
@@ -4717,7 +4811,7 @@
      sentence she met it in, and that is not recoverable. */
   function cardTold(w) {
     return !!((w.senses && w.senses.length) || (w.plain && w.plain.length)
-              || hasTurkish(w) || pickedTr(w)
+              || hasTurkish(w) || pickedTr(w) || myMeaning(w)
               || (w.note && String(w.note).trim()) || (w.src && w.src.sentence)
               || (w.rootdef && w.rootdef.senses && w.rootdef.senses.length));
   }
@@ -4874,7 +4968,27 @@
             + patLine(w)
             + '<div class="pill" style="align-self:flex-start;margin-top:2px">'
             + esc(w.deck || "Inbox") + '</div>';
-      if (!w.looked && !w.senses.length) {
+      /* Her own meaning, when she has written one, is the meaning: it takes
+         the dictionary's place, which is one press away underneath. */
+      var mine = myMeaning(w);
+      if (meanDraft !== null) {
+        html += '<div class="yournote mean"><b>Your meaning</b>'
+              + '<textarea id="meanBox" rows="3" maxlength="600" '
+              + 'aria-label="Your meaning of ' + esc(w.term) + '" '
+              + 'placeholder="What it means, in your words">'
+              + esc(meanDraft) + '</textarea>'
+              + '<div class="noteacts">'
+              + '<button class="btn-q" id="meanSave">Save</button>'
+              + '<button class="btn-q" id="meanCancel">Cancel</button>'
+              + (mine ? '<button class="btn-q" id="meanDrop">Use the dictionary’s</button>' : '')
+              + '</div></div>';
+      } else if (mine) {
+        html += '<div class="sense mine"><div class="pos">Your meaning</div>'
+              + '<p class="def">' + esc(mine) + '</p></div>';
+      }
+      if (mine && !dictOpen) {
+        /* the dictionary's meanings stay put, one press away */
+      } else if (!w.looked && !w.senses.length) {
         html += '<p class="def" style="margin-top:12px;color:var(--muted)">Looking it up&hellip;</p>';
       } else if (!w.senses.length) {
         html += '<p class="def" style="margin-top:12px;color:var(--warn)">'
@@ -4971,14 +5085,14 @@
            news — asking "is there a record?" first left the card saying
            "looking it up" for ever. */
         if (trDraft !== null) {
-          html += '<textarea id="trBox" rows="2" maxlength="160" '
+          html += '<textarea id="trBox" rows="2" maxlength="300" '
                 + 'aria-label="Your Turkish for ' + esc(w.term) + '" '
                 + 'placeholder="The Turkish you want on this card">'
                 + esc(trDraft) + '</textarea>'
                 + '<div class="noteacts">'
                 + '<button class="btn-q" id="trSave">Save</button>'
                 + '<button class="btn-q" id="trCancel">Cancel</button></div>';
-        } else if (picked) {
+        } else if (picked && (picked.own || !trOpen || !trRows(w).length)) {
           html += '<div class="trline trmine"><span class="trwords">'
                 + esc(picked.text) + '</span>'
                 + (picked.sense ? '<span class="trsense">' + esc(picked.sense) + '</span>'
@@ -4987,7 +5101,7 @@
           if (trOpen) {
             html += '<div class="noteacts">'
                   + '<button class="btn-q" id="trChange">'
-                  + (picked.own ? 'Remove' : 'Change') + '</button>'
+                  + (picked.own ? 'Remove' : 'Clear') + '</button>'
                   + '<button class="btn-q" id="trEdit">Edit</button></div>';
           }
         } else if (trFailed && !hasTurkish(w)) {
@@ -5005,12 +5119,20 @@
         } else if (trRows(w).length) {
           /* Every sense it has, each on its own line: a word that means three
              things should say all three until told which one was meant. */
-          var trList = trRows(w), ti;
+          /* Rows are ticks, and any number can be on: a word met in two
+             senses keeps both, joined on the card with commas. */
+          var trList = trRows(w), ticked = trPicked(w), ti, on;
+          if (picked) {
+            html += '<div class="trline trmine"><span class="trwords">'
+                  + esc(picked.text) + '</span></div>';
+          }
           for (ti = 0; ti < trList.length; ti++) {
+            on = ticked.indexOf(trList[ti].text) >= 0;
             html += '<button class="trline tropt" data-trpin="' + ti + '" '
-                  + 'title="This is the meaning I met" '
-                  + 'aria-label="Keep ' + esc(trList[ti].text) + ' as the Turkish for '
-                  + esc(w.term) + '">'
+                  + 'aria-pressed="' + on + '" '
+                  + 'title="' + (on ? 'Take this off the card' : 'This is a meaning I met') + '" '
+                  + 'aria-label="' + (on ? 'Take ' : 'Keep ') + esc(trList[ti].text)
+                  + (on ? ' off the card for ' : ' as Turkish for ') + esc(w.term) + '">'
                   + '<span class="trtick" aria-hidden="true">\u2713</span>'
                   + '<span class="trtext"><span class="trwords">'
                   + esc(trList[ti].text) + '</span>'
@@ -5025,8 +5147,15 @@
                 + (w.tr.via ? ' \u00b7 the Turkish for <b style="display:inline">'
                               + esc(w.tr.via) + '</b>' : '')
                 + '</div>'
-                + '<p class="trhint">Tap the one you actually met \u2014 the card '
-                + 'keeps it.</p>';
+                + '<p class="trhint">' + (trList.length > 1
+                    ? 'Tap each one you met \u2014 the card keeps them together, '
+                      + 'separated by commas.'
+                    : 'Tap it to keep it on the card.') + '</p>';
+          if (picked) {
+            html += '<div class="noteacts">'
+                  + '<button class="btn-q" id="trChange">Clear</button>'
+                  + '<button class="btn-q" id="trEdit">Edit</button></div>';
+          }
         } else {
           html += '<span class="notetext" style="color:var(--warn)">'
                 + 'Neither Wiktionary nor Wikipedia has a Turkish entry for this '
@@ -5053,7 +5182,7 @@
         html += '<div class="yournote"><b>Your note</b>'
               + '<span class="notetext">' + esc(w.note) + '</span>'
               + '<div class="noteacts"><button class="btn-q" id="noteBtn">Edit note</button>'
-              + trButton(w) + fullButton(w) + '</div>'
+              + trButton(w) + meaningButtons(w, false) + '</div>'
               + '</div>';
       } else {
         /* Where the dictionary has not actually answered, say so and point
@@ -5064,13 +5193,12 @@
         var thin = thinCard(w);
         if (thin) {
           html += '<p class="ownit">Not the meaning you met? '
-                + '<b style="display:inline">Write your own</b> \u2014 it goes '
-                + 'on the card and is what you see from then on.</p>';
+                + '<b style="display:inline">Edit meaning</b> \u2014 your words '
+                + 'take the dictionary\u2019s place on this card.</p>';
         }
         html += '<div class="noteacts" style="margin-top:12px">'
-              + '<button class="btn-q' + (thin ? ' is-on' : '')
-              + '" id="noteBtn">Add a note</button>'
-              + trButton(w) + fullButton(w) + '</div>';
+              + '<button class="btn-q" id="noteBtn">Add a note</button>'
+              + trButton(w) + meaningButtons(w, thin) + '</div>';
       }
       /* Only when nothing above carried one, so a word never shows two. */
       if (!hasExample(w)) {
@@ -5211,7 +5339,7 @@
         b.addEventListener("click", function () {
           var row = trRows(w)[Number(b.getAttribute("data-trpin"))];
           if (!row) return;
-          setTrMine(w, row.text, row.sense, false);
+          toggleTrPick(w, row);
           renderDue();
         });
       });
@@ -5255,8 +5383,40 @@
         });
         $("noteBox").focus();
       }
+      if ($("meanBtn")) {
+        $("meanBtn").addEventListener("click", function () {
+          var shown = shownSenses(w);
+          meanFrom = shown[0] ? shown[0].text : "";
+          meanDraft = myMeaning(w) || meanFrom;
+          renderDue();
+        });
+      }
+      if ($("dictBtn")) {
+        $("dictBtn").addEventListener("click", function () { dictOpen = !dictOpen; renderDue(); });
+      }
+      if ($("meanBox")) {
+        var meanBox = $("meanBox");
+        meanBox.addEventListener("input", function () { meanDraft = meanBox.value; });
+        meanBox.addEventListener("keydown", function (e) {
+          e.stopPropagation();
+          if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); saveMeanDraft(w); }
+          else if (e.key === "Escape") { meanDraft = null; renderDue(); }
+        });
+        $("meanSave").addEventListener("click", function () { saveMeanDraft(w); });
+        $("meanCancel").addEventListener("click", function () { meanDraft = null; renderDue(); });
+        if ($("meanDrop")) {
+          $("meanDrop").addEventListener("click", function () {
+            meanDraft = null;
+            setEnMine(w, "");
+            toast("Back to the dictionary meaning.");
+            renderDue(); renderAll();
+          });
+        }
+        meanBox.focus();
+        meanBox.select();
+      }
       /* Do not pull focus out of the note she is typing. */
-      if (keyboarding && !noteOpen && trDraft === null) $("gYes").focus();
+      if (keyboarding && !noteOpen && trDraft === null && meanDraft === null) $("gYes").focus();
     }
   }
 
@@ -5266,6 +5426,8 @@
     noteOpen = false;
     trOpen = false;
     trDraft = null;
+    meanDraft = null;
+    dictOpen = false;
     fullOpen = false;
     renderDue();
   }
@@ -5276,6 +5438,8 @@
     noteOpen = false;
     trOpen = false;
     trDraft = null;
+    meanDraft = null;
+    dictOpen = false;
     fullOpen = false;
     renderDue();
   }
@@ -5424,6 +5588,19 @@
          + (trOpen ? 'Hide T\u00fcrk\u00e7e' : 'T\u00fcrk\u00e7e') + '</button>';
   }
 
+  /* Edit meaning, and beside it whichever view of the dictionary makes
+     sense: with her own meaning on the card, the dictionary is the extra. */
+  function meaningButtons(w, lit) {
+    if (meanDraft !== null) return '';
+    var mine = !!myMeaning(w);
+    return '<button class="btn-q' + (lit ? ' is-on' : '') + '" id="meanBtn">Edit meaning</button>'
+         + (mine
+              ? '<button class="btn-q' + (dictOpen ? ' is-on' : '') + '" id="dictBtn">'
+                + (dictOpen ? 'Hide dictionary' : 'Dictionary') + '</button>'
+                + (dictOpen ? fullButton(w) : '')
+              : fullButton(w));
+  }
+
   /* Only offered when there is a choice to make: no plain entry means the
      precise senses are already what is on the card. */
   function fullButton(w) {
@@ -5473,6 +5650,8 @@
     noteOpen = false;
     trOpen = false;
     trDraft = null;
+    meanDraft = null;
+    dictOpen = false;
     fullOpen = false;
     saveSession();
     counts();
@@ -5519,7 +5698,7 @@
           + '<th></th></tr></thead><tbody>';
     for (var i = 0; i < rows.length; i++) {
       var w = rows[i];
-      var first = w.senses && w.senses.length ? w.senses[0].text : "";
+      var first = myMeaning(w) || (w.senses && w.senses.length ? w.senses[0].text : "");
       h += '<tr>'
          + '<td><span class="w-term">' + esc(headword(w)) + '</span>'
          + ' <button class="speak sm" data-say="' + esc(w.id) + '" '

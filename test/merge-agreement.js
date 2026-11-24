@@ -129,6 +129,19 @@ const CASES = [
     word({ updated: 9000, trMine: { text: "banka", sense: "", own: 0, t: 2000 } }),
     word({ updated: 1000, trMine: { text: "", sense: "", own: 0, t: 5000 } })],
 
+  ["several Turkish rows ticked, against a single older pick",
+    word({ updated: 9000, trMine: { text: "banka", sense: "", own: 0, t: 2000 } }),
+    word({ updated: 1000, trMine: { text: "banka, kıyı", sense: "bank · shore", own: 0, t: 5000,
+                                    picks: ["banka", "kıyı"] } })],
+
+  ["her own English meaning, against a copy answered later that never saw it",
+    word({ updated: 1000, enMine: { text: "the way a child is raised", t: 1000 } }),
+    word({ updated: 9000, box: 3, seen: 1, at: 9000, log: log(1, 9000) })],
+
+  ["her meaning removed later, against an older copy still holding it",
+    word({ updated: 9000, enMine: { text: "my words", t: 2000 } }),
+    word({ updated: 1000, enMine: { text: "", t: 5000 } })],
+
   ["a note on one side only",
     word({ updated: 9000, note: "" }), word({ updated: 1000, note: "my own words" })],
 
